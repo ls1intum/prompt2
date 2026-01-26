@@ -1038,6 +1038,13 @@ definitions:
       uploadedByUserId:
         type: string
     type: object
+  storage.PresignUploadResponse:
+    properties:
+      storageKey:
+        type: string
+      uploadUrl:
+        type: string
+    type: object
   studentDTO.CreateStudent:
     properties:
       currentSemester:
@@ -2867,6 +2874,33 @@ paths:
       summary: Manually trigger status mail for a course phase
       tags:
       - mailing
+  /storage/complete-upload:
+    post:
+      consumes:
+      - application/json
+      description: Registers an uploaded file after a presigned upload completes
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/storage.FileResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/gin.H'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/gin.H'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/gin.H'
+      summary: Complete a presigned upload
+      tags:
+      - storage
   /storage/course-phases/{coursePhaseId}/files:
     get:
       description: Get all files associated with a course phase
@@ -2951,72 +2985,31 @@ paths:
       summary: Get file metadata
       tags:
       - storage
-  /storage/files/{fileId}/download:
-    get:
-      description: Download the actual file content
-      parameters:
-      - description: File ID
-        in: path
-        name: fileId
-        required: true
-        type: string
+  /storage/presign-upload:
+    post:
+      consumes:
+      - application/json
+      description: Returns a presigned URL for uploading a file directly to storage
       produces:
-      - application/octet-stream
+      - application/json
       responses:
         "200":
           description: OK
           schema:
-            type: file
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/gin.H'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/gin.H'
-      summary: Download a file
-      tags:
-      - storage
-  /storage/upload:
-    post:
-      consumes:
-      - multipart/form-data
-      description: Upload a file to the storage backend
-      parameters:
-      - description: File to upload
-        in: formData
-        name: file
-        required: true
-        type: file
-      - description: Course Phase ID to associate with the file
-        in: formData
-        name: coursePhaseId
-        type: string
-      - description: File description
-        in: formData
-        name: description
-        type: string
-      - description: Comma-separated tags
-        in: formData
-        name: tags
-        type: string
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: Created
-          schema:
-            $ref: '#/definitions/storage.FileResponse'
+            $ref: '#/definitions/storage.PresignUploadResponse'
         "400":
           description: Bad Request
           schema:
             $ref: '#/definitions/gin.H'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/gin.H'
         "500":
           description: Internal Server Error
           schema:
             $ref: '#/definitions/gin.H'
-      summary: Upload a file
+      summary: Create a presigned upload URL
       tags:
       - storage
   /students/:

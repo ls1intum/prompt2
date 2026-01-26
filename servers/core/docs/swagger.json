@@ -2657,6 +2657,47 @@
                 }
             }
         },
+        "/storage/complete-upload": {
+            "post": {
+                "description": "Registers an uploaded file after a presigned upload completes",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "storage"
+                ],
+                "summary": "Complete a presigned upload",
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/storage.FileResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/gin.H"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/gin.H"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/gin.H"
+                        }
+                    }
+                }
+            }
+        },
         "/storage/course-phases/{coursePhaseId}/files": {
             "get": {
                 "description": "Get all files associated with a course phase",
@@ -2784,52 +2825,11 @@
                 }
             }
         },
-        "/storage/files/{fileId}/download": {
-            "get": {
-                "description": "Download the actual file content",
-                "produces": [
-                    "application/octet-stream"
-                ],
-                "tags": [
-                    "storage"
-                ],
-                "summary": "Download a file",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "File ID",
-                        "name": "fileId",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "file"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/gin.H"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/gin.H"
-                        }
-                    }
-                }
-            }
-        },
-        "/storage/upload": {
+        "/storage/presign-upload": {
             "post": {
-                "description": "Upload a file to the storage backend",
+                "description": "Returns a presigned URL for uploading a file directly to storage",
                 "consumes": [
-                    "multipart/form-data"
+                    "application/json"
                 ],
                 "produces": [
                     "application/json"
@@ -2837,43 +2837,22 @@
                 "tags": [
                     "storage"
                 ],
-                "summary": "Upload a file",
-                "parameters": [
-                    {
-                        "type": "file",
-                        "description": "File to upload",
-                        "name": "file",
-                        "in": "formData",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Course Phase ID to associate with the file",
-                        "name": "coursePhaseId",
-                        "in": "formData"
-                    },
-                    {
-                        "type": "string",
-                        "description": "File description",
-                        "name": "description",
-                        "in": "formData"
-                    },
-                    {
-                        "type": "string",
-                        "description": "Comma-separated tags",
-                        "name": "tags",
-                        "in": "formData"
-                    }
-                ],
+                "summary": "Create a presigned upload URL",
                 "responses": {
-                    "201": {
-                        "description": "Created",
+                    "200": {
+                        "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/storage.FileResponse"
+                            "$ref": "#/definitions/storage.PresignUploadResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/gin.H"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
                         "schema": {
                             "$ref": "#/definitions/gin.H"
                         }
@@ -4669,6 +4648,17 @@
                     "type": "string"
                 },
                 "uploadedByUserId": {
+                    "type": "string"
+                }
+            }
+        },
+        "storage.PresignUploadResponse": {
+            "type": "object",
+            "properties": {
+                "storageKey": {
+                    "type": "string"
+                },
+                "uploadUrl": {
                     "type": "string"
                 }
             }

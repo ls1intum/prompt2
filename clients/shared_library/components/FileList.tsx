@@ -4,6 +4,7 @@ import { useFileDownload, useFileDelete } from '@/hooks/useFile'
 import { FileResponse } from '@/network/mutations/uploadFile'
 import { Button, Card, CardContent } from '@tumaet/prompt-ui-components'
 import { cn } from '../utils/cn'
+import { formatFileSize } from '@/lib/formatFileSize'
 
 export interface FileListProps {
   files: FileResponse[]
@@ -50,14 +51,6 @@ export const FileList: React.FC<FileListProps> = ({
     } catch (error) {
       console.error('Delete failed:', error)
     }
-  }
-
-  const formatFileSize = (bytes: number): string => {
-    if (bytes === 0) return '0 Bytes'
-    const k = 1024
-    const sizes = ['Bytes', 'KB', 'MB', 'GB']
-    const i = Math.floor(Math.log(bytes) / Math.log(k))
-    return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + ' ' + sizes[i]
   }
 
   const formatDate = (dateString: string): string => {

@@ -1,3 +1,4 @@
+import axios from 'axios'
 import { axiosInstance } from '@/network/configService'
 
 export interface FileUploadParams {
@@ -28,33 +29,36 @@ export interface FileResponse {
 }
 
 export const uploadFile = async (params: FileUploadParams): Promise<FileResponse> => {
-  const formData = new FormData()
-  formData.append('file', params.file)
-
-  if (params.applicationId) {
-    formData.append('applicationId', params.applicationId)
-  }
-
-  if (params.coursePhaseId) {
-    formData.append('coursePhaseId', params.coursePhaseId)
-  }
-
-  if (params.description) {
-    formData.append('description', params.description)
-  }
-
-  if (params.tags) {
-    formData.append('tags', params.tags)
-  }
+  const contentType = params.file.type || 'application/octet-stream'
 
   try {
-    const response = await axiosInstance.post('/api/storage/upload', formData, {
+    const presignResponse = await axiosInstance.post('/api/storage/presign-upload', {
+      filename: params.file.name,
+      contentType,
+      coursePhaseId: params.coursePhaseId,
+      description: params.description,
+      tags: params.tags,
+    })
+
+    const { uploadUrl, storageKey } = presignResponse.data
+
+    await axios.put(uploadUrl, params.file, {
       headers: {
-        'Content-Type': 'multipart/form-data',
+        'Content-Type': contentType,
       },
       onUploadProgress: params.onUploadProgress,
     })
-    return response.data
+
+    const completeResponse = await axiosInstance.post('/api/storage/complete-upload', {
+      storageKey,
+      originalFilename: params.file.name,
+      contentType,
+      coursePhaseId: params.coursePhaseId,
+      description: params.description,
+      tags: params.tags,
+    })
+
+    return completeResponse.data
   } catch (err) {
     console.error('File upload failed:', err)
     throw err

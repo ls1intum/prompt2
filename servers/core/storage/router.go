@@ -2,6 +2,7 @@ package storage
 
 import (
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -17,120 +18,155 @@ import (
 func setupStorageRouter(router *gin.RouterGroup, authMiddleware func() gin.HandlerFunc, permissionRoleMiddleware func(allowedRoles ...string) gin.HandlerFunc) {
 	storage := router.Group("/storage", authMiddleware())
 
-	// File operations
-	storage.POST("/upload", permissionRoleMiddleware(permissionValidation.PromptAdmin, permissionValidation.CourseLecturer, permissionValidation.CourseEditor, permissionValidation.CourseStudent), uploadFile)
+	storage.POST("/presign-upload", permissionRoleMiddleware(permissionValidation.PromptAdmin, permissionValidation.CourseLecturer, permissionValidation.CourseEditor, permissionValidation.CourseStudent), presignUpload)
+	storage.POST("/complete-upload", permissionRoleMiddleware(permissionValidation.PromptAdmin, permissionValidation.CourseLecturer, permissionValidation.CourseEditor, permissionValidation.CourseStudent), completeUpload)
 	storage.GET("/files/:fileId", permissionRoleMiddleware(permissionValidation.PromptAdmin, permissionValidation.CourseLecturer, permissionValidation.CourseEditor, permissionValidation.CourseStudent), getFile)
-	storage.GET("/files/:fileId/download", permissionRoleMiddleware(permissionValidation.PromptAdmin, permissionValidation.CourseLecturer, permissionValidation.CourseEditor, permissionValidation.CourseStudent), downloadFile)
 	storage.DELETE("/files/:fileId", permissionRoleMiddleware(permissionValidation.PromptAdmin, permissionValidation.CourseLecturer, permissionValidation.CourseEditor), deleteFile)
 
-	// List files by association
 	storage.GET("/course-phases/:coursePhaseId/files", permissionRoleMiddleware(permissionValidation.PromptAdmin, permissionValidation.CourseLecturer, permissionValidation.CourseEditor), getFilesByCoursePhase)
 }
 
-// uploadFile godoc
-// @Summary Upload a file
-// @Description Upload a file to the storage backend
+type presignUploadRequest struct {
+	Filename      string `json:"filename"`
+	ContentType   string `json:"contentType"`
+	CoursePhaseID string `json:"coursePhaseId"`
+	Description   string `json:"description"`
+	Tags          string `json:"tags"`
+}
+
+type completeUploadRequest struct {
+	StorageKey       string `json:"storageKey"`
+	OriginalFilename string `json:"originalFilename"`
+	ContentType      string `json:"contentType"`
+	CoursePhaseID    string `json:"coursePhaseId"`
+	Description      string `json:"description"`
+	Tags             string `json:"tags"`
+}
+
+// presignUpload godoc
+// @Summary Create a presigned upload URL
+// @Description Returns a presigned URL for uploading a file directly to storage
 // @Tags storage
-// @Accept multipart/form-data
+// @Accept json
 // @Produce json
-// @Param file formData file true "File to upload"
-// @Param coursePhaseId formData string false "Course Phase ID to associate with the file"
-// @Param description formData string false "File description"
-// @Param tags formData string false "Comma-separated tags"
-// @Success 201 {object} FileResponse
+// @Success 200 {object} PresignUploadResponse
 // @Failure 400 {object} gin.H
+// @Failure 403 {object} gin.H
 // @Failure 500 {object} gin.H
-// @Router /storage/upload [post]
-func uploadFile(c *gin.Context) {
-	// Get the uploaded file
-	fileHeader, err := c.FormFile("file")
-	if err != nil {
-		log.WithFields(log.Fields{
-			"path":      c.Request.URL.Path,
-			"method":    c.Request.Method,
-			"clientIP":  c.ClientIP(),
-			"userAgent": c.Request.UserAgent(),
-		}).WithError(err).Warn("Upload failed: file is required")
-		c.JSON(http.StatusBadRequest, gin.H{"error": "file is required"})
+// @Router /storage/presign-upload [post]
+func presignUpload(c *gin.Context) {
+	var body presignUploadRequest
+	if err := c.ShouldBindJSON(&body); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid request body"})
 		return
 	}
 
-	// Get user information from context
-	userID, exists := c.Get("userID")
-	if !exists {
-		log.WithFields(log.Fields{
-			"path":                  c.Request.URL.Path,
-			"method":                c.Request.Method,
-			"clientIP":              c.ClientIP(),
-			"userAgent":             c.Request.UserAgent(),
-			"hasAuthorizationHeader": c.GetHeader("Authorization") != "",
-			"hasUserID":             exists,
-		}).Warn("Upload unauthorized: user id missing in context")
+	if _, ok := getUserID(c); !ok {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "user not authenticated"})
 		return
 	}
 
-	email, _ := c.Get("userEmail")
-
-	// Parse optional parameters
 	var coursePhaseID *uuid.UUID
-	if phaseIDStr := c.PostForm("coursePhaseId"); phaseIDStr != "" {
-		phaseID, err := uuid.Parse(phaseIDStr)
+	if body.CoursePhaseID != "" {
+		phaseID, err := uuid.Parse(body.CoursePhaseID)
 		if err != nil {
-			log.WithFields(log.Fields{
-				"path":         c.Request.URL.Path,
-				"method":       c.Request.Method,
-				"clientIP":     c.ClientIP(),
-				"userAgent":    c.Request.UserAgent(),
-				"coursePhaseId": phaseIDStr,
-			}).WithError(err).Warn("Upload failed: invalid course phase ID")
 			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid course phase ID"})
 			return
 		}
 		coursePhaseID = &phaseID
+
+		if !ensureCoursePhaseAccess(c, phaseID, permissionValidation.PromptAdmin, permissionValidation.CourseLecturer, permissionValidation.CourseEditor, permissionValidation.CourseStudent) {
+			return
+		}
+	} else {
+		if !hasRole(c, permissionValidation.PromptAdmin) {
+			c.JSON(http.StatusForbidden, gin.H{"error": "course phase ID required"})
+			return
+		}
 	}
 
-	description := c.PostForm("description")
-	
-	// Parse tags (comma-separated)
-	var tags []string
-	if tagsStr := c.PostForm("tags"); tagsStr != "" {
-		// Simple split by comma - could be enhanced with proper CSV parsing
-		tags = []string{tagsStr}
+	tags := parseTags(body.Tags)
+	req := PresignUploadRequest{
+		Filename:      body.Filename,
+		ContentType:   body.ContentType,
+		CoursePhaseID: coursePhaseID,
+		Description:   body.Description,
+		Tags:          tags,
 	}
 
-	// Create upload request
-	req := FileUploadRequest{
-		File:           fileHeader,
-		UploaderUserID: userID.(string),
-		CoursePhaseID:  coursePhaseID,
-		Description:    description,
-		Tags:           tags,
-	}
-
-	if emailStr, ok := email.(string); ok {
-		req.UploaderEmail = emailStr
-	}
-
-	coursePhaseIDStr := ""
-	if coursePhaseID != nil {
-		coursePhaseIDStr = coursePhaseID.String()
-	}
-
-	// Upload the file
-	fileResponse, err := StorageServiceSingleton.UploadFile(c.Request.Context(), req)
+	response, err := StorageServiceSingleton.PresignUpload(c.Request.Context(), req)
 	if err != nil {
-		log.WithFields(log.Fields{
-			"path":          c.Request.URL.Path,
-			"method":        c.Request.Method,
-			"clientIP":      c.ClientIP(),
-			"userAgent":     c.Request.UserAgent(),
-			"uploaderUserID": userID.(string),
-			"filename":      fileHeader.Filename,
-			"sizeBytes":     fileHeader.Size,
-			"contentType":   fileHeader.Header.Get("Content-Type"),
-			"coursePhaseId": coursePhaseIDStr,
-		}).WithError(err).Error("Failed to upload file")
+		log.WithError(err).Error("Failed to presign upload")
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, response)
+}
+
+// completeUpload godoc
+// @Summary Complete a presigned upload
+// @Description Registers an uploaded file after a presigned upload completes
+// @Tags storage
+// @Accept json
+// @Produce json
+// @Success 201 {object} FileResponse
+// @Failure 400 {object} gin.H
+// @Failure 403 {object} gin.H
+// @Failure 500 {object} gin.H
+// @Router /storage/complete-upload [post]
+func completeUpload(c *gin.Context) {
+	var body completeUploadRequest
+	if err := c.ShouldBindJSON(&body); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid request body"})
+		return
+	}
+
+	userID, ok := getUserID(c)
+	if !ok {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "user not authenticated"})
+		return
+	}
+
+	email := ""
+	if emailVal, exists := c.Get("userEmail"); exists {
+		if emailStr, ok := emailVal.(string); ok {
+			email = emailStr
+		}
+	}
+
+	var coursePhaseID *uuid.UUID
+	if body.CoursePhaseID != "" {
+		phaseID, err := uuid.Parse(body.CoursePhaseID)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid course phase ID"})
+			return
+		}
+		coursePhaseID = &phaseID
+
+		if !ensureCoursePhaseAccess(c, phaseID, permissionValidation.PromptAdmin, permissionValidation.CourseLecturer, permissionValidation.CourseEditor, permissionValidation.CourseStudent) {
+			return
+		}
+	} else {
+		if !hasRole(c, permissionValidation.PromptAdmin) {
+			c.JSON(http.StatusForbidden, gin.H{"error": "course phase ID required"})
+			return
+		}
+	}
+
+	tags := parseTags(body.Tags)
+	req := CreateFileFromStorageKeyRequest{
+		StorageKey:       body.StorageKey,
+		OriginalFilename: body.OriginalFilename,
+		ContentType:      body.ContentType,
+		CoursePhaseID:    coursePhaseID,
+		Description:      body.Description,
+		Tags:             tags,
+	}
+
+	fileResponse, err := StorageServiceSingleton.CreateFileFromStorageKey(c.Request.Context(), req, userID, email)
+	if err != nil {
+		log.WithError(err).Error("Failed to complete upload")
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -161,40 +197,11 @@ func getFile(c *gin.Context) {
 		return
 	}
 
+	if !authorizeFileAccess(c, fileResponse) {
+		return
+	}
+
 	c.JSON(http.StatusOK, fileResponse)
-}
-
-// downloadFile godoc
-// @Summary Download a file
-// @Description Download the actual file content
-// @Tags storage
-// @Produce application/octet-stream
-// @Param fileId path string true "File ID"
-// @Success 200 {file} binary
-// @Failure 404 {object} gin.H
-// @Failure 500 {object} gin.H
-// @Router /storage/files/{fileId}/download [get]
-func downloadFile(c *gin.Context) {
-	fileID, err := uuid.Parse(c.Param("fileId"))
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid file ID"})
-		return
-	}
-
-	reader, filename, err := StorageServiceSingleton.DownloadFile(c.Request.Context(), fileID)
-	if err != nil {
-		log.WithError(err).Error("Failed to download file")
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to download file"})
-		return
-	}
-	defer reader.Close()
-
-	// Set headers for file download
-	c.Header("Content-Disposition", "attachment; filename="+filename)
-	c.Header("Content-Type", "application/octet-stream")
-
-	// Stream the file to the response
-	c.DataFromReader(http.StatusOK, -1, "application/octet-stream", reader, nil)
 }
 
 // deleteFile godoc
@@ -216,6 +223,21 @@ func deleteFile(c *gin.Context) {
 	}
 
 	hardDelete := c.Query("hard") == "true"
+
+	fileResponse, err := StorageServiceSingleton.GetFileByID(c.Request.Context(), fileID)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "file not found"})
+		return
+	}
+
+	if fileResponse.CoursePhaseID != nil {
+		if !ensureCoursePhaseAccess(c, *fileResponse.CoursePhaseID, permissionValidation.PromptAdmin, permissionValidation.CourseLecturer, permissionValidation.CourseEditor) {
+			return
+		}
+	} else if !hasRole(c, permissionValidation.PromptAdmin) {
+		c.JSON(http.StatusForbidden, gin.H{"error": "no permission to delete file"})
+		return
+	}
 
 	if err := StorageServiceSingleton.DeleteFile(c.Request.Context(), fileID, hardDelete); err != nil {
 		log.WithError(err).Error("Failed to delete file")
@@ -243,6 +265,10 @@ func getFilesByCoursePhase(c *gin.Context) {
 		return
 	}
 
+	if !ensureCoursePhaseAccess(c, coursePhaseID, permissionValidation.PromptAdmin, permissionValidation.CourseLecturer, permissionValidation.CourseEditor) {
+		return
+	}
+
 	files, err := StorageServiceSingleton.GetFilesByCoursePhaseID(c.Request.Context(), coursePhaseID)
 	if err != nil {
 		log.WithError(err).Error("Failed to get files by course phase")
@@ -251,4 +277,73 @@ func getFilesByCoursePhase(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, files)
+}
+
+func getUserID(c *gin.Context) (string, bool) {
+	userID, exists := c.Get("userID")
+	if !exists {
+		return "", false
+	}
+	userIDStr, ok := userID.(string)
+	return userIDStr, ok
+}
+
+func parseTags(tags string) []string {
+	if tags == "" {
+		return nil
+	}
+	parts := strings.Split(tags, ",")
+	result := make([]string, 0, len(parts))
+	for _, part := range parts {
+		part = strings.TrimSpace(part)
+		if part != "" {
+			result = append(result, part)
+		}
+	}
+	return result
+}
+
+func hasRole(c *gin.Context, role string) bool {
+	rolesVal, exists := c.Get("userRoles")
+	if !exists {
+		return false
+	}
+	userRoles, ok := rolesVal.(map[string]bool)
+	if !ok {
+		return false
+	}
+	return userRoles[role]
+}
+
+func ensureCoursePhaseAccess(c *gin.Context, coursePhaseID uuid.UUID, allowedRoles ...string) bool {
+	hasAccess, err := permissionValidation.CheckCoursePhasePermission(c, coursePhaseID, allowedRoles...)
+	if err != nil {
+		log.WithError(err).Error("Failed to check course phase permissions")
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to check permissions"})
+		return false
+	}
+	if !hasAccess {
+		return false
+	}
+	return true
+}
+
+func authorizeFileAccess(c *gin.Context, file *FileResponse) bool {
+	userID, ok := getUserID(c)
+	if ok && file.UploadedByUserID == userID {
+		return true
+	}
+
+	if file.CoursePhaseID == nil && hasRole(c, permissionValidation.PromptAdmin) {
+		return true
+	}
+
+	if file.CoursePhaseID != nil {
+		if ensureCoursePhaseAccess(c, *file.CoursePhaseID, permissionValidation.PromptAdmin, permissionValidation.CourseLecturer, permissionValidation.CourseEditor) {
+			return true
+		}
+	}
+
+	c.JSON(http.StatusForbidden, gin.H{"error": "no permission to access file"})
+	return false
 }

@@ -4,6 +4,7 @@ import { useFileUpload } from '@/hooks/useFileUpload'
 import { FileResponse } from '@/network/mutations/uploadFile'
 import { Button, Progress, Card, CardContent } from '@tumaet/prompt-ui-components'
 import { cn } from '../utils/cn'
+import { formatFileSize } from '@/lib/formatFileSize'
 
 export interface FileUploadProps {
   applicationId?: string
@@ -100,14 +101,6 @@ export const FileUpload: React.FC<FileUploadProps> = ({
     if (fileInputRef.current) {
       fileInputRef.current.value = ''
     }
-  }
-
-  const formatFileSize = (bytes: number): string => {
-    if (bytes === 0) return '0 Bytes'
-    const k = 1024
-    const sizes = ['Bytes', 'KB', 'MB', 'GB']
-    const i = Math.floor(Math.log(bytes) / Math.log(k))
-    return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + ' ' + sizes[i]
   }
 
   return (

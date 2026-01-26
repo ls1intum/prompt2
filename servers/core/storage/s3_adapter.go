@@ -17,40 +17,20 @@ import (
 // Compatible with AWS S3, SeaweedFS S3 gateway, MinIO, and other S3-compatible storage
 type S3Adapter struct {
 	client          *s3.Client
+	presignClient   *s3.PresignClient
 	bucket          string
 	forcePathStyle  bool
 	presignDuration time.Duration
+	publicEndpoint  string
 }
 
 // NewS3Adapter creates a new S3 storage adapter
 // Works with AWS S3, SeaweedFS S3 gateway, MinIO, and other S3-compatible services
-func NewS3Adapter(bucket, region, endpoint, accessKey, secretKey string, forcePathStyle bool) (*S3Adapter, error) {
+func NewS3Adapter(bucket, region, endpoint, publicEndpoint, accessKey, secretKey string, forcePathStyle bool) (*S3Adapter, error) {
 	ctx := context.Background()
 	var cfg aws.Config
 	var err error
-
-	if endpoint != "" {
-		// Custom endpoint (SeaweedFS, MinIO, etc.)
-		customResolver := aws.EndpointResolverWithOptionsFunc(func(service, region string, options ...interface{}) (aws.Endpoint, error) {
-			return aws.Endpoint{
-				URL:               endpoint,
-				SigningRegion:     region,
-				HostnameImmutable: true,
-			}, nil
-		})
-
-		cfg, err = config.LoadDefaultConfig(ctx,
-			config.WithRegion(region),
-			config.WithEndpointResolverWithOptions(customResolver),
-			config.WithCredentialsProvider(credentials.NewStaticCredentialsProvider(accessKey, secretKey, "")),
-		)
-	} else {
-		// AWS S3
-		cfg, err = config.LoadDefaultConfig(ctx,
-			config.WithRegion(region),
-			config.WithCredentialsProvider(credentials.NewStaticCredentialsProvider(accessKey, secretKey, "")),
-		)
-	}
+	cfg, err = buildS3Config(ctx, region, endpoint, accessKey, secretKey)
 
 	if err != nil {
 		return nil, fmt.Errorf("failed to load AWS config: %w", err)
@@ -59,6 +39,18 @@ func NewS3Adapter(bucket, region, endpoint, accessKey, secretKey string, forcePa
 	client := s3.NewFromConfig(cfg, func(o *s3.Options) {
 		o.UsePathStyle = forcePathStyle
 	})
+
+	presignConfig := cfg
+	if publicEndpoint != "" && publicEndpoint != endpoint {
+		presignConfig, err = buildS3Config(ctx, region, publicEndpoint, accessKey, secretKey)
+		if err != nil {
+			return nil, fmt.Errorf("failed to load AWS presign config: %w", err)
+		}
+	}
+
+	presignClient := s3.NewPresignClient(s3.NewFromConfig(presignConfig, func(o *s3.Options) {
+		o.UsePathStyle = forcePathStyle
+	}))
 
 	_, err = client.HeadBucket(ctx, &s3.HeadBucketInput{
 		Bucket: aws.String(bucket),
@@ -86,10 +78,35 @@ func NewS3Adapter(bucket, region, endpoint, accessKey, secretKey string, forcePa
 
 	return &S3Adapter{
 		client:          client,
+		presignClient:   presignClient,
 		bucket:          bucket,
 		forcePathStyle:  forcePathStyle,
 		presignDuration: 15 * time.Minute, // Default presign duration
+		publicEndpoint:  publicEndpoint,
 	}, nil
+}
+
+func buildS3Config(ctx context.Context, region, endpoint, accessKey, secretKey string) (aws.Config, error) {
+	if endpoint != "" {
+		customResolver := aws.EndpointResolverWithOptionsFunc(func(service, region string, options ...interface{}) (aws.Endpoint, error) {
+			return aws.Endpoint{
+				URL:               endpoint,
+				SigningRegion:     region,
+				HostnameImmutable: true,
+			}, nil
+		})
+
+		return config.LoadDefaultConfig(ctx,
+			config.WithRegion(region),
+			config.WithEndpointResolverWithOptions(customResolver),
+			config.WithCredentialsProvider(credentials.NewStaticCredentialsProvider(accessKey, secretKey, "")),
+		)
+	}
+
+	return config.LoadDefaultConfig(ctx,
+		config.WithRegion(region),
+		config.WithCredentialsProvider(credentials.NewStaticCredentialsProvider(accessKey, secretKey, "")),
+	)
 }
 
 // Upload stores a file in S3
@@ -166,6 +183,28 @@ func (s *S3Adapter) Delete(ctx context.Context, storageKey string) error {
 	return nil
 }
 
+// GetUploadURL returns a presigned URL for uploading a file
+func (s *S3Adapter) GetUploadURL(ctx context.Context, storageKey string, contentType string, ttl int) (string, error) {
+	duration := s.presignDuration
+	if ttl > 0 {
+		duration = time.Duration(ttl) * time.Second
+	}
+
+	request, err := s.presignClient.PresignPutObject(ctx, &s3.PutObjectInput{
+		Bucket:      aws.String(s.bucket),
+		Key:         aws.String(storageKey),
+		ContentType: aws.String(contentType),
+	}, func(opts *s3.PresignOptions) {
+		opts.Expires = duration
+	})
+	if err != nil {
+		log.WithError(err).WithField("key", storageKey).Error("Failed to generate presigned upload URL")
+		return "", fmt.Errorf("failed to generate presigned upload URL: %w", err)
+	}
+
+	return request.URL, nil
+}
+
 // GetURL returns a presigned URL for accessing the file
 func (s *S3Adapter) GetURL(ctx context.Context, storageKey string, ttl int) (string, error) {
 	duration := s.presignDuration
@@ -173,8 +212,7 @@ func (s *S3Adapter) GetURL(ctx context.Context, storageKey string, ttl int) (str
 		duration = time.Duration(ttl) * time.Second
 	}
 
-	presignClient := s3.NewPresignClient(s.client)
-	request, err := presignClient.PresignGetObject(ctx, &s3.GetObjectInput{
+	request, err := s.presignClient.PresignGetObject(ctx, &s3.GetObjectInput{
 		Bucket: aws.String(s.bucket),
 		Key:    aws.String(storageKey),
 	}, func(opts *s3.PresignOptions) {

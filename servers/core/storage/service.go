@@ -2,14 +2,17 @@ package storage
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"mime/multipart"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
 	db "github.com/ls1intum/prompt2/servers/core/db/sqlc"
@@ -36,6 +39,28 @@ type FileUploadRequest struct {
 	CoursePhaseID  *uuid.UUID
 	Description    string
 	Tags           []string
+}
+
+type PresignUploadRequest struct {
+	Filename      string
+	ContentType   string
+	CoursePhaseID *uuid.UUID
+	Description   string
+	Tags          []string
+}
+
+type PresignUploadResponse struct {
+	UploadURL  string `json:"uploadUrl"`
+	StorageKey string `json:"storageKey"`
+}
+
+type CreateFileFromStorageKeyRequest struct {
+	StorageKey       string
+	OriginalFilename string
+	ContentType      string
+	CoursePhaseID    *uuid.UUID
+	Description      string
+	Tags             []string
 }
 
 // FileResponse represents a file in API responses
@@ -152,6 +177,131 @@ func (s *StorageService) UploadFile(ctx context.Context, req FileUploadRequest) 
 		"size":       uploadResult.Size,
 		"uploadedBy": req.UploaderUserID,
 	}).Info("File uploaded successfully")
+
+	return s.convertToFileResponse(ctx, fileRecord), nil
+}
+
+// PresignUpload creates a presigned upload URL for a file
+func (s *StorageService) PresignUpload(ctx context.Context, req PresignUploadRequest) (*PresignUploadResponse, error) {
+	if req.Filename == "" {
+		return nil, fmt.Errorf("filename is required")
+	}
+
+	if req.ContentType == "" {
+		return nil, fmt.Errorf("content type is required")
+	}
+
+	if len(s.allowedTypes) > 0 && !s.isAllowedType(req.ContentType) {
+		return nil, fmt.Errorf("file type %s is not allowed", req.ContentType)
+	}
+
+	safeOriginal := sanitizeFilename(req.Filename)
+	if safeOriginal == "" {
+		ext := filepath.Ext(req.Filename)
+		safeOriginal = "file" + ext
+	}
+	uniqueFilename := fmt.Sprintf("%s-%s", uuid.New().String(), safeOriginal)
+	storageKey := buildStorageKey(req.CoursePhaseID, uniqueFilename)
+
+	uploadURL, err := s.storageAdapter.GetUploadURL(ctx, storageKey, req.ContentType, presignTTLSeconds())
+	if err != nil {
+		return nil, err
+	}
+
+	return &PresignUploadResponse{
+		UploadURL:  uploadURL,
+		StorageKey: storageKey,
+	}, nil
+}
+
+// CreateFileFromStorageKey stores file metadata after a presigned upload completes.
+func (s *StorageService) CreateFileFromStorageKey(ctx context.Context, req CreateFileFromStorageKeyRequest, uploaderUserID, uploaderEmail string) (*FileResponse, error) {
+	if req.StorageKey == "" {
+		return nil, fmt.Errorf("storage key is required")
+	}
+
+	ctxWithTimeout, cancel := db.GetTimeoutContext(ctx)
+	defer cancel()
+
+	existing, err := s.queries.GetFileByStorageKey(ctxWithTimeout, req.StorageKey)
+	if err == nil {
+		if existing.UploadedByUserID != uploaderUserID {
+			return nil, fmt.Errorf("storage key already used by another user")
+		}
+		return s.convertToFileResponse(ctx, existing), nil
+	}
+	if err != nil && !errors.Is(err, pgx.ErrNoRows) {
+		return nil, fmt.Errorf("failed to check existing file: %w", err)
+	}
+
+	if req.CoursePhaseID != nil {
+		expectedPrefix := fmt.Sprintf("course-phase/%s/", req.CoursePhaseID.String())
+		if !strings.HasPrefix(req.StorageKey, expectedPrefix) {
+			return nil, fmt.Errorf("storage key does not match course phase")
+		}
+	}
+
+	metadata, err := s.storageAdapter.GetMetadata(ctx, req.StorageKey)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get metadata for storage key: %w", err)
+	}
+
+	contentType := metadata.ContentType
+	if contentType == "" {
+		contentType = req.ContentType
+	}
+
+	if contentType == "" {
+		return nil, fmt.Errorf("content type is required")
+	}
+
+	if metadata.Size > s.maxFileSize {
+		return nil, fmt.Errorf("file size %d bytes exceeds maximum allowed size %d bytes", metadata.Size, s.maxFileSize)
+	}
+
+	if len(s.allowedTypes) > 0 && !s.isAllowedType(contentType) {
+		return nil, fmt.Errorf("file type %s is not allowed", contentType)
+	}
+
+	uniqueFilename := filepath.Base(req.StorageKey)
+	originalFilename := req.OriginalFilename
+	if originalFilename == "" {
+		originalFilename = uniqueFilename
+	}
+
+	storageProvider := utils.GetEnv("STORAGE_PROVIDER", "seaweedfs")
+
+	var coursePhaseIDPgtype pgtype.UUID
+	if req.CoursePhaseID != nil {
+		coursePhaseIDPgtype = pgtype.UUID{Bytes: *req.CoursePhaseID, Valid: true}
+	}
+
+	var emailPgtype pgtype.Text
+	if uploaderEmail != "" {
+		emailPgtype = pgtype.Text{String: uploaderEmail, Valid: true}
+	}
+
+	var descriptionPgtype pgtype.Text
+	if req.Description != "" {
+		descriptionPgtype = pgtype.Text{String: req.Description, Valid: true}
+	}
+
+	fileRecord, err := s.queries.CreateFile(ctxWithTimeout, db.CreateFileParams{
+		Filename:         uniqueFilename,
+		OriginalFilename: originalFilename,
+		ContentType:      contentType,
+		SizeBytes:        metadata.Size,
+		StorageKey:       req.StorageKey,
+		StorageProvider:  storageProvider,
+		UploadedByUserID: uploaderUserID,
+		UploadedByEmail:  emailPgtype,
+		CoursePhaseID:    coursePhaseIDPgtype,
+		Description:      descriptionPgtype,
+		Tags:             req.Tags,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("failed to save file metadata: %w", err)
+	}
 
 	return s.convertToFileResponse(ctx, fileRecord), nil
 }
@@ -300,7 +450,7 @@ func (s *StorageService) isAllowedType(contentType string) bool {
 // convertToFileResponse converts a database file record to an API response
 func (s *StorageService) convertToFileResponse(ctx context.Context, file db.File) *FileResponse {
 	// Generate download URL
-	downloadURL, err := s.storageAdapter.GetURL(ctx, file.StorageKey, 0)
+	downloadURL, err := s.storageAdapter.GetURL(ctx, file.StorageKey, presignTTLSeconds())
 	if err != nil {
 		log.WithError(err).WithField("storageKey", file.StorageKey).Warn("Failed to generate download URL")
 		downloadURL = ""
@@ -338,4 +488,13 @@ func (s *StorageService) convertToFileResponse(ctx context.Context, file db.File
 	}
 
 	return response
+}
+
+func presignTTLSeconds() int {
+	value := utils.GetEnv("S3_PRESIGN_TTL_SECONDS", "900")
+	ttl, err := strconv.Atoi(value)
+	if err != nil || ttl <= 0 {
+		return 900
+	}
+	return ttl
 }

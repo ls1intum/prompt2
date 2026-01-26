@@ -1,3 +1,4 @@
+import axios from 'axios'
 import { axiosInstance } from '@/network/configService'
 import { FileResponse } from '@/network/mutations/uploadFile'
 
@@ -12,7 +13,11 @@ export const getFileMetadata = async (fileId: string): Promise<FileResponse> => 
 
 export const downloadFile = async (fileId: string): Promise<Blob> => {
   try {
-    const response = await axiosInstance.get(`/api/storage/files/${fileId}/download`, {
+    const metadata = await getFileMetadata(fileId)
+    if (!metadata?.downloadUrl) {
+      throw new Error('No download URL available')
+    }
+    const response = await axios.get(metadata.downloadUrl, {
       responseType: 'blob',
     })
     return response.data

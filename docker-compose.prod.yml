@@ -98,6 +98,7 @@ services:
       - S3_BUCKET
       - S3_REGION
       - S3_ENDPOINT
+      - S3_PUBLIC_ENDPOINT
       - S3_ACCESS_KEY
       - S3_SECRET_KEY
       - S3_FORCE_PATH_STYLE
@@ -535,13 +536,7 @@ services:
       - ./seaweedfs_master_data:/data
     restart: unless-stopped
     labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.seaweedfs-master.rule=Host(`${CORE_HOST}`) && PathPrefix(`/seaweedfs`)"
-      - "traefik.http.routers.seaweedfs-master.entrypoints=websecure"
-      - "traefik.http.routers.seaweedfs-master.tls.certresolver=letsencrypt"
-      - "traefik.http.middlewares.seaweedfs-strip.stripprefix.prefixes=/seaweedfs"
-      - "traefik.http.routers.seaweedfs-master.middlewares=seaweedfs-strip"
-      - "traefik.http.services.seaweedfs-master.loadbalancer.server.port=9333"
+      - "traefik.enable=false"
     expose:
       - "9333"
       - "19333"
@@ -564,13 +559,7 @@ services:
       - seaweedfs-master
     restart: unless-stopped
     labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.seaweedfs-volume.rule=Host(`${CORE_HOST}`) && PathPrefix(`/seaweedfs-volume`)"
-      - "traefik.http.routers.seaweedfs-volume.entrypoints=websecure"
-      - "traefik.http.routers.seaweedfs-volume.tls.certresolver=letsencrypt"
-      - "traefik.http.middlewares.seaweedfs-volume-strip.stripprefix.prefixes=/seaweedfs-volume"
-      - "traefik.http.routers.seaweedfs-volume.middlewares=seaweedfs-volume-strip"
-      - "traefik.http.services.seaweedfs-volume.loadbalancer.server.port=8080"
+      - "traefik.enable=false"
     expose:
       - "8080"
       - "18080"
@@ -578,6 +567,56 @@ services:
       - prompt-network
     healthcheck:
       test: ["CMD-SHELL", "wget --spider -q http://localhost:8080/status || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  # SeaweedFS Filer (required for S3)
+  seaweedfs-filer:
+    image: chrislusf/seaweedfs:latest
+    container_name: prompt-seaweedfs-filer
+    command: "filer -master=seaweedfs-master:9333 -ip=seaweedfs-filer -ip.bind=0.0.0.0"
+    volumes:
+      - ./seaweedfs_filer_data:/data
+    depends_on:
+      - seaweedfs-master
+    restart: unless-stopped
+    expose:
+      - "8888"
+    networks:
+      - prompt-network
+    healthcheck:
+      test: ["CMD-SHELL", "wget --spider -q http://localhost:8888/ || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  # SeaweedFS S3 Gateway (public access via presigned URLs only)
+  seaweedfs-s3:
+    image: chrislusf/seaweedfs:latest
+    container_name: prompt-seaweedfs-s3
+    command: "s3 -filer=seaweedfs-filer:8888 -ip.bind=0.0.0.0 -config=/etc/seaweedfs/s3.json"
+    depends_on:
+      - seaweedfs-master
+      - seaweedfs-filer
+    restart: unless-stopped
+    environment:
+      - WEED_S3_DEFAULT_USER=admin
+      - WEED_S3_DEFAULT_PWD=admin123
+    volumes:
+      - ./seaweedfs-config:/etc/seaweedfs
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.seaweedfs-s3.rule=Host(`s3.${CORE_HOST}`)"
+      - "traefik.http.routers.seaweedfs-s3.entrypoints=websecure"
+      - "traefik.http.routers.seaweedfs-s3.tls.certresolver=letsencrypt"
+      - "traefik.http.services.seaweedfs-s3.loadbalancer.server.port=8333"
+    expose:
+      - "8333"
+    networks:
+      - prompt-network
+    healthcheck:
+      test: ["CMD-SHELL", "wget --spider -q http://localhost:8333/ || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 3

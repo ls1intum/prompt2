@@ -30,11 +30,12 @@ func InitStorageModule(routerGroup *gin.RouterGroup, queries db.Queries, conn *p
 	bucket := utils.GetEnv("S3_BUCKET", "prompt-files")
 	region := utils.GetEnv("S3_REGION", "us-east-1")
 	endpoint := utils.GetEnv("S3_ENDPOINT", "http://localhost:8334") // Empty for AWS S3, set for SeaweedFS/MinIO
+	publicEndpoint := utils.GetEnv("S3_PUBLIC_ENDPOINT", "")
 	accessKey := utils.GetEnv("S3_ACCESS_KEY", "admin")
 	secretKey := utils.GetEnv("S3_SECRET_KEY", "admin123")
 	forcePathStyle := utils.GetEnv("S3_FORCE_PATH_STYLE", "true") == "true" // Required for SeaweedFS/MinIO
 	
-	adapter, err := NewS3Adapter(bucket, region, endpoint, accessKey, secretKey, forcePathStyle)
+	adapter, err := NewS3Adapter(bucket, region, endpoint, publicEndpoint, accessKey, secretKey, forcePathStyle)
 	if err != nil {
 		return fmt.Errorf("failed to create S3 adapter: %w", err)
 	}
