@@ -13,7 +13,7 @@ interface AllocationSummaryCardProps {
 export const AllocationSummaryCard = ({
   coursePhaseParticipations,
   teamAllocations,
-}: AllocationSummaryCardProps): JSX.Element => {
+}: AllocationSummaryCardProps) => {
   const allocationStats = useMemo(() => {
     if (!coursePhaseParticipations || !teamAllocations) {
       return {

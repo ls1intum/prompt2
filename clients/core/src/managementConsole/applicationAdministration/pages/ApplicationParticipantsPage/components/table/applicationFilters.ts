@@ -1,6 +1,6 @@
-import { getStatusBadge } from '@/utils/getStatusBadge'
 import { PassStatus } from '@tumaet/prompt-shared-state'
 import { TableFilter } from '@tumaet/prompt-ui-components/dist/types/components/table/TableTypes'
+import { getApplicationStatusBadge, getApplicationStatusString } from './getApplicationStatusBadge'
 
 export function getApplicationFilters(
   additionalScores?: { key: string; name: string }[],
@@ -11,7 +11,14 @@ export function getApplicationFilters(
       id: 'passStatus',
       label: 'Status',
       options: Object.values(PassStatus),
-      getDisplay: (v) => getStatusBadge(v as PassStatus),
+      optionLabel: (v) => getApplicationStatusBadge(v as PassStatus),
+      badge: {
+        label: 'Application',
+        displayValue(filtervalue) {
+          const ps = filtervalue as PassStatus
+          return getApplicationStatusString(ps)
+        },
+      },
     },
     {
       type: 'select',

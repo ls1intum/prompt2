@@ -4,8 +4,8 @@ import { getStatusBadge } from '@/utils/getStatusBadge'
 import { PassStatus } from '@tumaet/prompt-shared-state'
 
 export function getParticipantColumns(
-  extraColumns: ExtraParticipantColumn[],
-): ColumnDef<ParticipantRow>[] {
+  extraColumns: ExtraParticipantColumn<any>[],
+): ColumnDef<ParticipantRow, any>[] {
   return [
     {
       accessorKey: 'firstName',
@@ -28,6 +28,18 @@ export function getParticipantColumns(
       header: 'Status',
       cell: (info) => getStatusBadge(info.getValue() as PassStatus),
     },
-    ...extraColumns,
+
+    ...extraColumns.map(
+      (col): ColumnDef<ParticipantRow, any> => ({
+        id: col.id,
+        header: col.header,
+        accessorFn: col.accessorFn!,
+        cell: col.cell,
+        enableSorting: col.enableSorting,
+        sortingFn: col.sortingFn,
+        enableColumnFilter: col.enableColumnFilter,
+        filterFn: col.filterFn,
+      }),
+    ),
   ]
 }

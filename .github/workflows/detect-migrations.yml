@@ -1,8 +1,7 @@
 name: Detect Migration Changes
 
 on:
-  pull_request:
-    types: [opened, synchronize]
+  workflow_call:
 
 jobs:
   detect-migrations:

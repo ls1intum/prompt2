@@ -6,7 +6,7 @@ export const getStudents = async (): Promise<Student[]> => {
     return (
       await axiosInstance.get('/api/students/', {
         headers: {
-          'Content-Type': 'application/json-path+json',
+          'Content-Type': 'application/json',
         },
       })
     ).data

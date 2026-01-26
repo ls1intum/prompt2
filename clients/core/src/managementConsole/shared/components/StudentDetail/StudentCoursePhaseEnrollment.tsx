@@ -1,11 +1,14 @@
-import { CoursePhaseEnrollment } from '@core/network/queries/getStudentEnrollments'
-import { PassStatus } from '@tumaet/prompt-shared-state'
-import { Check, ChevronsRight, Clock, X } from 'lucide-react'
-import { ReactElement } from 'react'
+import { PhaseStudentDetailMapping } from '@core/managementConsole/PhaseMapping/PhaseStudentDetailMapping'
+import {
+  CourseEnrollment,
+  CoursePhaseEnrollment,
+} from '@core/network/queries/getStudentEnrollments'
+import { Suspense } from 'react'
+import { ProgressIndicator } from './PhaseProgressIndicator'
+import { LinkHeading } from './LinkHeading'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@tumaet/prompt-ui-components'
 
 export function parsePostgresTimestamp(ts: string): Date {
-  // Convert "YYYY-MM-DD HH:mm:ss.SSSSSS"
-  // → "YYYY-MM-DDTHH:mm:ss.SSSZ"
   return new Date(ts.replace(' ', 'T') + 'Z')
 }
 
@@ -22,80 +25,62 @@ export function formatDateTime(ts: string | null): string {
   })
 }
 
-function RoundLayout({
-  children,
-  className,
-}: {
-  children: ReactElement
-  className: string
-}): ReactElement {
-  return (
-    <div
-      className={
-        'w-7 h-7 overflow-hidden rounded-full flex items-center justify-center ' + className
-      }
-    >
-      {children}
-    </div>
-  )
-}
-
-function ProgressIndicator({ passStatus }: { passStatus: PassStatus | 'CURRENT' }): ReactElement {
-  return (
-    <>
-      {passStatus == PassStatus.PASSED && (
-        <RoundLayout className='bg-green-100 dark:bg-green-900'>
-          <Check className='w-4 h-4 text-green-800 dark:text-green-300' />
-        </RoundLayout>
-      )}
-      {passStatus == PassStatus.FAILED && (
-        <RoundLayout className='bg-red-100 dark:bg-red-900'>
-          <X className='w-4 h-4 text-red-800 dark:text-red-300' />
-        </RoundLayout>
-      )}
-      {passStatus == PassStatus.NOT_ASSESSED && (
-        <RoundLayout className='bg-gray-100 dark:bg-gray-900'>
-          <Clock className='w-4 h-4 text-gray-800 dark:text-gray-300' />
-        </RoundLayout>
-      )}
-      {passStatus == 'CURRENT' && (
-        <RoundLayout className='bg-blue-100 dark:bg-blue-900'>
-          {/* <img src='/prompt_logo.svg' alt='Prompt logo' className='size-6' /> */}
-          <ChevronsRight className='w-5 h-5 text-blue-800 dark:text-blue-300' />
-        </RoundLayout>
-      )}
-    </>
-  )
-}
-
 export function StudentCoursePhaseEnrollment({
-  cpe,
+  coursePhaseEnrollment,
+  courseEnrollment,
   showLine,
   current,
+  studentId,
+  courseId,
 }: {
-  cpe: CoursePhaseEnrollment
+  coursePhaseEnrollment: CoursePhaseEnrollment
+  courseEnrollment: CourseEnrollment
   showLine?: boolean
   current: boolean
+  studentId: string
+  courseId: string
 }) {
+  const PhaseDetail = PhaseStudentDetailMapping[coursePhaseEnrollment.coursePhaseType.name]
   return (
-    <div className='flex gap-2' key={cpe.coursePhaseId}>
+    <div className='flex gap-2' key={coursePhaseEnrollment.coursePhaseId}>
       <div className='relative flex flex-col'>
         {!showLine && (
           <div className='absolute top-0 bottom-0 w-px bg-gray-300 left-1/2 -translate-x-1/2' />
         )}
         <div className='relative z-10'>
-          <ProgressIndicator passStatus={current ? 'CURRENT' : cpe.passStatus} />
+          <Tooltip>
+            <TooltipTrigger>
+              <ProgressIndicator
+                passStatus={current ? 'CURRENT' : coursePhaseEnrollment.passStatus}
+              />
+            </TooltipTrigger>
+            <TooltipContent>
+              <div className='text-sm text-muted-foreground'>
+                <span className='font-semibold'>{coursePhaseEnrollment.passStatus}</span> on{' '}
+                {formatDateTime(coursePhaseEnrollment.lastModified)}
+              </div>
+            </TooltipContent>
+          </Tooltip>
         </div>
       </div>
-      <div className='ml-2 mb-[0.85rem]'>
-        <div className='flex gap-1 items-baseline'>
-          <div className='font-semibold text-lg'>{cpe.name}</div>
-          <div className='text-sm text-muted-foreground'>{cpe.coursePhaseType.name}</div>
+      <div className='ml-2 mb-[0.85rem] group'>
+        <div>
+          <LinkHeading
+            targetURL={`/management/course/${courseId}/${coursePhaseEnrollment.coursePhaseId}`}
+          >
+            <div className='font-semibold text-lg'>{coursePhaseEnrollment.name}</div>
+          </LinkHeading>
         </div>
-        {cpe.passStatus !== PassStatus.NOT_ASSESSED && (
-          <div className='text-sm text-muted-foreground'>
-            <span className='font-semibold'>{cpe.passStatus}</span> on{' '}
-            {formatDateTime(cpe.lastModified)}
+        {PhaseDetail && (
+          <div className='inline-block w-fit max-w-full py-2 px-3 border rounded-md empty:hidden'>
+            <Suspense fallback={null}>
+              <PhaseDetail
+                studentId={studentId}
+                coursePhaseId={coursePhaseEnrollment.coursePhaseId}
+                courseId={courseId}
+                courseParticipationId={courseEnrollment.courseParticipationId}
+              />
+            </Suspense>
           </div>
         )}
       </div>

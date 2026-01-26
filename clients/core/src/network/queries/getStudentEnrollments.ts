@@ -17,6 +17,7 @@ export interface CoursePhaseEnrollment {
 
 export interface CourseEnrollment {
   courseId: string
+  courseParticipationId: string
   studentReadableData: object
   name: string
   semesterTag: string
@@ -34,16 +35,13 @@ export interface StudentEnrollments {
 
 export const getStudentEnrollments = async (studentId: string): Promise<StudentEnrollments> => {
   try {
-    const d = (
+    return (
       await axiosInstance.get(`/api/students/${studentId}/enrollments`, {
         headers: {
           'Content-Type': 'application/json-path+json',
         },
       })
     ).data
-
-    console.log(d)
-    return d
   } catch (err) {
     console.error(err)
     throw err

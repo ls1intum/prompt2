@@ -16,7 +16,7 @@ export function getParticipantActions(
   },
   extraActions: RowAction<ParticipantRow>[],
   exportDeps: ExportDeps,
-  extraColumns: ExtraParticipantColumn[] = [],
+  extraColumns: ExtraParticipantColumn<any>[] = [],
 ): RowAction<ParticipantRow>[] {
   return [
     {
@@ -50,8 +50,8 @@ export function getParticipantActions(
           courseParticipationID: r.courseParticipationID,
           passStatus: r.passStatus,
           restrictedData: r.restrictedData,
-          studentReadableData: {},
-          prevData: {},
+          studentReadableData: r.studentReadableData ?? {},
+          prevData: r.prevData ?? {},
           student: r.student,
         }))
 

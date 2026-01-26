@@ -23,7 +23,7 @@ export default function UnauthorizedPage({
   onLogout,
   backUrl,
   customMessage,
-}: UnauthorizedPageProps): JSX.Element {
+}: UnauthorizedPageProps) {
   const navigate = useNavigate()
 
   return (

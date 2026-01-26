@@ -199,7 +199,9 @@ func handleError(c *gin.Context, statusCode int, err error) {
 // @Description Get all of a students enrollments, provide student UUID
 // @Tags students
 // @Produce json
-// @Success 200 {object}
+// @Param uuid path string true "Student UUID"
+// @Success 200 {object} studentDTO.StudentEnrollmentsDTO
+// @Failure 400 {object} utils.ErrorResponse
 // @Failure 500 {object} utils.ErrorResponse
 // @Router /students/{uuid}/enrollments [get]
 func getStudentEnrollments(c *gin.Context) {

@@ -1736,6 +1736,59 @@ const docTemplate = `{
                 }
             }
         },
+        "/courses/{uuid}/archive": {
+            "put": {
+                "description": "Set archived=true (with archived_on=NOW()) or archived=false (with archived_on=NULL)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "courses"
+                ],
+                "summary": "Archive or unarchive a course",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Course UUID",
+                        "name": "uuid",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Archive status update",
+                        "name": "update",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/courseDTO.CourseArchiveStatus"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Updated course",
+                        "schema": {
+                            "$ref": "#/definitions/courseDTO.Course"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/courses/{uuid}/copy": {
             "post": {
                 "description": "Copy a course by UUID",
@@ -2683,6 +2736,41 @@ const docTemplate = `{
                 }
             }
         },
+        "/students/notes": {
+            "get": {
+                "description": "Get all instructor notes with note versions",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "students"
+                ],
+                "summary": "Get all notes",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/studentDTO.InstructorNote"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/students/search/{searchString}": {
             "get": {
                 "description": "Search students by a search string",
@@ -2709,6 +2797,35 @@ const docTemplate = `{
                             "type": "array",
                             "items": {
                                 "$ref": "#/definitions/studentDTO.Student"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/students/with-courses": {
+            "get": {
+                "description": "Get a list of all students with the property 'courses' a list of courses that the student is taking part of or was",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "students"
+                ],
+                "summary": "Get all students with courses",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/studentDTO.StudentWithCourseParticipationsDTO"
                             }
                         }
                     },
@@ -2796,6 +2913,124 @@ const docTemplate = `{
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/studentDTO.Student"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/students/{uuid}/enrollments": {
+            "get": {
+                "description": "Get all of a students enrollments, provide student UUID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "students"
+                ],
+                "summary": "Get student enrollments by ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Student UUID",
+                        "name": "uuid",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/studentDTO.StudentEnrollmentsDTO"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/students/{uuid}/notes": {
+            "get": {
+                "description": "Get all instructor notes with note versions for a specific student, provided the student ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "students"
+                ],
+                "summary": "Get all notes for a student",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Student UUID",
+                        "name": "uuid",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/studentDTO.InstructorNote"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Create a new instructor note or a new edit for a specific student given its ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "students"
+                ],
+                "summary": "Create an instructor Note for a student",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/studentDTO.InstructorNote"
+                            }
                         }
                     },
                     "400": {
@@ -3116,6 +3351,12 @@ const docTemplate = `{
                 "id": {
                     "type": "string"
                 },
+                "longDescription": {
+                    "type": "string"
+                },
+                "shortDescription": {
+                    "type": "string"
+                },
                 "startDate": {
                     "type": "string"
                 },
@@ -3324,6 +3565,12 @@ const docTemplate = `{
         "courseDTO.Course": {
             "type": "object",
             "properties": {
+                "archived": {
+                    "type": "boolean"
+                },
+                "archivedOn": {
+                    "type": "string"
+                },
                 "courseType": {
                     "type": "string"
                 },
@@ -3336,6 +3583,9 @@ const docTemplate = `{
                 "id": {
                     "type": "string"
                 },
+                "longDescription": {
+                    "type": "string"
+                },
                 "name": {
                     "type": "string"
                 },
@@ -3345,6 +3595,9 @@ const docTemplate = `{
                 "semesterTag": {
                     "type": "string"
                 },
+                "shortDescription": {
+                    "type": "string"
+                },
                 "startDate": {
                     "type": "string"
                 },
@@ -3352,6 +3605,14 @@ const docTemplate = `{
                     "$ref": "#/definitions/meta.MetaData"
                 },
                 "template": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "courseDTO.CourseArchiveStatus": {
+            "type": "object",
+            "properties": {
+                "archived": {
                     "type": "boolean"
                 }
             }
@@ -3378,6 +3639,12 @@ const docTemplate = `{
         "courseDTO.CourseWithPhases": {
             "type": "object",
             "properties": {
+                "archived": {
+                    "type": "boolean"
+                },
+                "archivedOn": {
+                    "type": "string"
+                },
                 "coursePhases": {
                     "type": "array",
                     "items": {
@@ -3396,6 +3663,9 @@ const docTemplate = `{
                 "id": {
                     "type": "string"
                 },
+                "longDescription": {
+                    "type": "string"
+                },
                 "name": {
                     "type": "string"
                 },
@@ -3405,11 +3675,17 @@ const docTemplate = `{
                 "semesterTag": {
                     "type": "string"
                 },
+                "shortDescription": {
+                    "type": "string"
+                },
                 "startDate": {
                     "type": "string"
                 },
                 "studentReadableData": {
                     "$ref": "#/definitions/meta.MetaData"
+                },
+                "template": {
+                    "type": "boolean"
                 }
             }
         },
@@ -3425,6 +3701,9 @@ const docTemplate = `{
                 "endDate": {
                     "type": "string"
                 },
+                "longDescription": {
+                    "type": "string"
+                },
                 "name": {
                     "type": "string"
                 },
@@ -3432,6 +3711,9 @@ const docTemplate = `{
                     "$ref": "#/definitions/meta.MetaData"
                 },
                 "semesterTag": {
+                    "type": "string"
+                },
+                "shortDescription": {
                     "type": "string"
                 },
                 "startDate": {
@@ -3474,8 +3756,14 @@ const docTemplate = `{
                 "endDate": {
                     "type": "string"
                 },
+                "longDescription": {
+                    "type": "string"
+                },
                 "restrictedData": {
                     "$ref": "#/definitions/meta.MetaData"
+                },
+                "shortDescription": {
+                    "type": "string"
                 },
                 "startDate": {
                     "type": "string"
@@ -3823,6 +4111,9 @@ const docTemplate = `{
                 "baseUrl": {
                     "type": "string"
                 },
+                "description": {
+                    "$ref": "#/definitions/pgtype.Text"
+                },
                 "id": {
                     "type": "string"
                 },
@@ -4109,6 +4400,17 @@ const docTemplate = `{
             "type": "object",
             "additionalProperties": true
         },
+        "pgtype.Text": {
+            "type": "object",
+            "properties": {
+                "string": {
+                    "type": "string"
+                },
+                "valid": {
+                    "type": "boolean"
+                }
+            }
+        },
         "resolutionDTO.Resolution": {
             "type": "object",
             "properties": {
@@ -4122,6 +4424,84 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "endpointPath": {
+                    "type": "string"
+                }
+            }
+        },
+        "studentDTO.CourseEnrollmentDTO": {
+            "type": "object",
+            "properties": {
+                "courseId": {
+                    "type": "string"
+                },
+                "courseParticipationId": {
+                    "type": "string"
+                },
+                "coursePhases": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/studentDTO.CoursePhaseEnrollmentDTO"
+                    }
+                },
+                "courseType": {
+                    "type": "string"
+                },
+                "ects": {
+                    "type": "integer"
+                },
+                "endDate": {
+                    "type": "string"
+                },
+                "longDescription": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "semesterTag": {
+                    "type": "string"
+                },
+                "startDate": {
+                    "type": "string"
+                },
+                "studentReadableData": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                }
+            }
+        },
+        "studentDTO.CoursePhaseEnrollmentDTO": {
+            "type": "object",
+            "properties": {
+                "coursePhaseId": {
+                    "type": "string"
+                },
+                "coursePhaseType": {
+                    "$ref": "#/definitions/studentDTO.CoursePhaseTypeDTO"
+                },
+                "isInitialPhase": {
+                    "type": "boolean"
+                },
+                "lastModified": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "passStatus": {
+                    "type": "string"
+                }
+            }
+        },
+        "studentDTO.CoursePhaseTypeDTO": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "name": {
                     "type": "string"
                 }
             }
@@ -4167,6 +4547,52 @@ const docTemplate = `{
                 }
             }
         },
+        "studentDTO.InstructorNote": {
+            "type": "object",
+            "properties": {
+                "author": {
+                    "type": "string"
+                },
+                "dateCreated": {
+                    "type": "string"
+                },
+                "dateDeleted": {
+                    "type": "string"
+                },
+                "deletedBy": {
+                    "type": "string"
+                },
+                "forStudent": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "versions": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/studentDTO.NoteVersion"
+                    }
+                }
+            }
+        },
+        "studentDTO.NoteVersion": {
+            "type": "object",
+            "properties": {
+                "content": {
+                    "type": "string"
+                },
+                "dateCreated": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "versionNumber": {
+                    "type": "integer"
+                }
+            }
+        },
         "studentDTO.Student": {
             "type": "object",
             "properties": {
@@ -4204,6 +4630,64 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "universityLogin": {
+                    "type": "string"
+                }
+            }
+        },
+        "studentDTO.StudentCourseParticipationDTO": {
+            "type": "object",
+            "properties": {
+                "courseId": {
+                    "type": "string"
+                },
+                "courseName": {
+                    "type": "string"
+                },
+                "studentReadableData": {
+                    "type": "object",
+                    "additionalProperties": {}
+                }
+            }
+        },
+        "studentDTO.StudentEnrollmentsDTO": {
+            "type": "object",
+            "properties": {
+                "courses": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/studentDTO.CourseEnrollmentDTO"
+                    }
+                }
+            }
+        },
+        "studentDTO.StudentWithCourseParticipationsDTO": {
+            "type": "object",
+            "properties": {
+                "courses": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/studentDTO.StudentCourseParticipationDTO"
+                    }
+                },
+                "currentSemester": {
+                    "type": "integer"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "firstName": {
+                    "type": "string"
+                },
+                "hasUniversityAccount": {
+                    "type": "boolean"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "lastName": {
+                    "type": "string"
+                },
+                "studyProgram": {
                     "type": "string"
                 }
             }

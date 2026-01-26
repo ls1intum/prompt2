@@ -28,7 +28,7 @@ export const ConfirmSendEmailDialog = ({
   isOpen,
   onClose,
   emailType,
-}: ConfirmSendEmailDialogProps): JSX.Element => {
+}: ConfirmSendEmailDialogProps) => {
   const { phaseId } = useParams<{ phaseId: string }>()
 
   const [mailRecipients, setMailRecipients] = useState({})

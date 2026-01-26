@@ -67,7 +67,7 @@ const config: (env: Record<string, string>) => container.Configuration = (env) =
       publicPath: 'auto', // Whole Domain is crucial when deployed under other domain!
     },
     resolve: {
-      extensions: ['.ts', '.tsx', '.js', '.jsx'],
+      extensions: ['.ts', '.tsx', '.js', '.mjs', '.jsx'],
       alias: {
         '@': path.resolve('../shared_library'),
       },
@@ -79,6 +79,7 @@ const config: (env: Record<string, string>) => container.Configuration = (env) =
         exposes: {
           './routes': './routes',
           './sidebar': './sidebar',
+          './provide': './src/provide',
         },
         shared: {
           react: { singleton: true, requiredVersion: deps.react },

@@ -5,7 +5,7 @@ import { useIntroCourseStore } from './zustand/useIntroCourseStore'
 import { DeveloperProfilePage } from './pages/DeveloperProfile/DeveloperProfilePage'
 import { StudentSeatAssignmentDisplay } from './pages/StudentSeatAssignmentDisplay/StudentSeatAssignmentDisplay'
 
-export const IntroCoursePage = (): JSX.Element => {
+export const IntroCoursePage = () => {
   // TODO: replace with actual state management
   const { developerProfile, seatAssignment } = useIntroCourseStore()
   const [stepsOpen, setStepsOpen] = useState(() => {

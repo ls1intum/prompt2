@@ -22,16 +22,17 @@ type CoursePhaseEnrollmentDTO struct {
 }
 
 type CourseEnrollmentDTO struct {
-	CourseID            uuid.UUID                  `json:"courseId"`
-	Name                string                     `json:"name"`
-	SemesterTag         string                     `json:"semesterTag"`
-	CourseType          string                     `json:"courseType"`
-	Ects                int32                      `json:"ects"`
-	StartDate           *time.Time                 `json:"startDate"`
-	EndDate             *time.Time                 `json:"endDate"`
-	LongDescription     *string                    `json:"longDescription"`
-	StudentReadableData json.RawMessage            `json:"studentReadableData"`
-	CoursePhases        []CoursePhaseEnrollmentDTO `json:"coursePhases"`
+	CourseID              uuid.UUID                  `json:"courseId"`
+	CourseParticipationID *uuid.UUID                 `json:"courseParticipationId"`
+	Name                  string                     `json:"name"`
+	SemesterTag           string                     `json:"semesterTag"`
+	CourseType            string                     `json:"courseType"`
+	Ects                  int32                      `json:"ects"`
+	StartDate             *time.Time                 `json:"startDate"`
+	EndDate               *time.Time                 `json:"endDate"`
+	LongDescription       *string                    `json:"longDescription"`
+	StudentReadableData   json.RawMessage            `json:"studentReadableData"`
+	CoursePhases          []CoursePhaseEnrollmentDTO `json:"coursePhases"`
 }
 
 type StudentEnrollmentsDTO struct {
@@ -39,6 +40,9 @@ type StudentEnrollmentsDTO struct {
 }
 
 func GetStudentEnrollmentsDTOFromDB(row []byte) (StudentEnrollmentsDTO, error) {
+	if len(row) == 0 || string(row) == "null" {
+		return StudentEnrollmentsDTO{Courses: []CourseEnrollmentDTO{}}, nil
+	}
 
 	var courses []CourseEnrollmentDTO
 	if err := json.Unmarshal(row, &courses); err != nil {

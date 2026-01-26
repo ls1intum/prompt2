@@ -79,7 +79,7 @@ func checkPhaseCopyable(c *gin.Context, phaseID, phaseTypeID uuid.UUID, phaseNam
 		checkedCoursePhases[phaseTypeID] = true
 		return nil
 	}
-	resp.Body.Close()
+	_ = resp.Body.Close()
 
 	if resp.StatusCode == http.StatusNotFound {
 		*missingPhases = append(*missingPhases, phaseName+" ("+coursePhaseType.Name+")")

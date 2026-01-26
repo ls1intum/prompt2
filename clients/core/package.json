@@ -1,6 +1,6 @@
 {
   "name": "client",
-  "version": "2.6.7",
+  "version": "2.7.0",
   "main": "src/index.ts",
   "license": "MIT",
   "scripts": {
@@ -11,23 +11,23 @@
     "check-performance": "webpack --mode=production --env NODE_ENV=production --env BUNDLE_SIZE=true"
   },
   "dependencies": {
-    "@dagrejs/dagre": "^1.1.4",
-    "@sentry/react": "^10.22.0",
-    "@xyflow/react": "^12.3.6",
+    "@dagrejs/dagre": "^1.1.8",
+    "@sentry/react": "^10.36.0",
+    "@xyflow/react": "^12.10.0",
     "date-fns-tz": "^3.2.0",
     "external-remotes-plugin": "^1.0.0",
-    "i18n-iso-countries": "^7.13.0",
+    "i18n-iso-countries": "^7.14.0",
     "react-beautiful-dnd": "^13.1.1",
     "sha256": "^0.2.0"
   },
   "devDependencies": {
     "clean-webpack-plugin": "^4.0.0",
     "compression-webpack-plugin": "^11.1.0",
-    "css-minimizer-webpack-plugin": "^7.0.0",
-    "html-webpack-plugin": "^5.6.0",
-    "webpack": "^5.91.0",
-    "webpack-bundle-analyzer": "^4.10.2",
-    "webpack-cli": "^5.1.4"
+    "css-minimizer-webpack-plugin": "^7.0.4",
+    "html-webpack-plugin": "^5.6.6",
+    "webpack": "^5.104.1",
+    "webpack-bundle-analyzer": "^5.1.1",
+    "webpack-cli": "^6.0.1"
   },
   "packageManager": "yarn@4.1.0"
 }

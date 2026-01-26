@@ -3,7 +3,7 @@ import { Plus } from 'lucide-react'
 import { CourseCreationChoiceDialog } from '@managementConsole/courseOverview/AddingCourse/components/CourseCreationChoiceDialog'
 import { SidebarMenuButton } from '@tumaet/prompt-ui-components'
 
-export const AddCourseButton = (): JSX.Element => {
+export const AddCourseButton = () => {
   return (
     <SidebarMenuItem>
       <CourseCreationChoiceDialog>

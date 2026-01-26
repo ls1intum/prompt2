@@ -69,7 +69,10 @@ WHERE id = ANY($1::uuid[]);
 -- name: GetAllStudentsWithCourseParticipations :many
 SELECT
   s.id AS student_id,
-  (s.first_name || ' ' || s.last_name)::text AS student_name,
+  s.first_name AS student_first_name,
+  s.last_name AS student_last_name,
+  s.email AS student_email,
+  s.has_university_account AS student_has_university_account,
   s.current_semester,
   s.study_program,
   COALESCE(
@@ -90,7 +93,9 @@ LEFT JOIN course c
 GROUP BY
   s.id,
   s.first_name,
-  s.last_name;
+  s.last_name,
+  s.email,
+  s.has_university_account;
 
 -- name: GetStudentEnrollments :one
 WITH RECURSIVE
@@ -130,6 +135,7 @@ course_phases AS (
     SELECT
         cp.student_id,
         cp.course_id,
+        cp.course_participation_id,
         COALESCE(
             jsonb_agg(
                 jsonb_build_object(
@@ -155,13 +161,14 @@ course_phases AS (
     LEFT JOIN course_phase_participation cpp
         ON cpp.course_participation_id = cp.course_participation_id
        AND cpp.course_phase_id = ps.id
-    GROUP BY cp.student_id, cp.course_id
+    GROUP BY cp.student_id, cp.course_id, cp.course_participation_id
 )
 SELECT
     COALESCE(
         jsonb_agg(
             jsonb_build_object(
                 'courseId', c.id,
+                'courseParticipationId', cp.course_participation_id,
                 'name', c.name,
                 'semesterTag', c.semester_tag,
                 'courseType', c.course_type,

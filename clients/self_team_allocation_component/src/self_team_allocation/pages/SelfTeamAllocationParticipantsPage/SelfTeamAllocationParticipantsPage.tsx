@@ -13,7 +13,7 @@ import { CoursePhaseParticipationsTable } from '@/components/pages/CoursePhasePa
 import { getAllTeams } from '../../network/queries/getAllTeams'
 import { ExtraParticipantColumn } from '@/components/pages/CoursePhaseParticipationsTable/table/participationRow'
 
-export const SelfTeamAllocationParticipantsPage = (): JSX.Element => {
+export const SelfTeamAllocationParticipantsPage = () => {
   const { phaseId } = useParams<{ phaseId: string }>()
 
   const {
@@ -36,7 +36,7 @@ export const SelfTeamAllocationParticipantsPage = (): JSX.Element => {
     queryFn: () => getAllTeams(phaseId ?? ''),
   })
 
-  const extraColumns: ExtraParticipantColumn[] = useMemo(() => {
+  const extraColumns: ExtraParticipantColumn<any>[] = useMemo(() => {
     if (!teams) return []
 
     const teamNameById = new Map(teams.map(({ id, name }) => [id, name]))

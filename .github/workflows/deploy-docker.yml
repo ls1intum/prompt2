@@ -57,6 +57,9 @@ on:
       SMTP_PASSWORD:
         required: true
 
+permissions:
+  contents: read
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -66,7 +69,7 @@ jobs:
     steps:
       - name: SSH to VM and Execute Docker-Compose Down
         continue-on-error: true
-        uses: appleboy/ssh-action@v1.0.3
+        uses: appleboy/ssh-action@v1.2.4
         with:
           host: ${{ vars.VM_HOST }}
           username: ${{ vars.VM_USERNAME }}
@@ -158,7 +161,7 @@ jobs:
           target: /home/${{ vars.VM_USERNAME }}/postfix-config/
 
       - name: Verify and extract maintenance assets on VM
-        uses: appleboy/ssh-action@v1.0.3
+        uses: appleboy/ssh-action@v1.2.4
         with:
           host: ${{ vars.VM_HOST }}
           username: ${{ vars.VM_USERNAME }}
@@ -175,7 +178,7 @@ jobs:
             tar xzf maintenance.tar.gz -C /home/${{ vars.VM_USERNAME }}
 
       - name: SSH to VM and create .env.prod file
-        uses: appleboy/ssh-action@v1.0.3
+        uses: appleboy/ssh-action@v1.2.4
         with:
           host: ${{ vars.VM_HOST }}
           username: ${{ vars.VM_USERNAME }}
@@ -187,7 +190,7 @@ jobs:
           proxy_port: ${{ vars.DEPLOYMENT_GATEWAY_PORT }}
           script: |
             touch .env.prod 
-            echo "ENVIRONMENT=production" > .env.prod
+            echo "ENVIRONMENT=${{ inputs.environment }}" > .env.prod
             echo "CORE_HOST=${{ vars.CORE_HOST }}" >> .env.prod
             echo "SERVER_CORE_HOST=${{ vars.SERVER_CORE_HOST }}" >> .env.prod
             echo "INTRO_COURSE_HOST=${{ vars.INTRO_COURSE_HOST }}" >> .env.prod
@@ -245,10 +248,16 @@ jobs:
             echo "SMTP_USERNAME=${{ secrets.SMTP_USERNAME }}" >> .env.prod
             echo "SMTP_PASSWORD=${{ secrets.SMTP_PASSWORD }}" >> .env.prod
 
+            echo "SENTRY_DSN_CORE=${{ vars.SENTRY_DSN_CORE }}" >> .env.prod
+            echo "SENTRY_DSN_INTRO_COURSE=${{ vars.SENTRY_DSN_INTRO_COURSE }}" >> .env.prod
+            echo "SENTRY_DSN_TEAM_ALLOCATION=${{ vars.SENTRY_DSN_TEAM_ALLOCATION }}" >> .env.prod
+            echo "SENTRY_DSN_SELF_TEAM_ALLOCATION=${{ vars.SENTRY_DSN_SELF_TEAM_ALLOCATION }}" >> .env.prod
+            echo "SENTRY_DSN_ASSESSMENT=${{ vars.SENTRY_DSN_ASSESSMENT }}" >> .env.prod
+
             echo "GITLAB_ACCESS_TOKEN=${{ vars.GITLAB_ACCESS_TOKEN }}" >> .env.prod
 
       - name: SSH to VM and Execute Docker-Compose Up
-        uses: appleboy/ssh-action@v1.0.3
+        uses: appleboy/ssh-action@v1.2.4
         with:
           host: ${{ vars.VM_HOST }}
           username: ${{ vars.VM_USERNAME }}

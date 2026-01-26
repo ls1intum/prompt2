@@ -73,7 +73,7 @@ export const EvaluationCompletionPage = ({
           })
         }
         setDialogOpen(false)
-      } catch (err) {
+      } catch {
         setError('An error occurred while updating the completion status.')
       }
     }

@@ -36,7 +36,7 @@ const queryClient = new QueryClient({
 const keycloakUrl = parseURL(env.KEYCLOAK_HOST)
 const keycloakRealmName = env.KEYCLOAK_REALM_NAME
 
-export const App = (): JSX.Element => {
+export const App = () => {
   return (
     <KeycloakProvider keycloakRealmName={keycloakRealmName} keycloakUrl={keycloakUrl}>
       <QueryClientProvider client={queryClient}>

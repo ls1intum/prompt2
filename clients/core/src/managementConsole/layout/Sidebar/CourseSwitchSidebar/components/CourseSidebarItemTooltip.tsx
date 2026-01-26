@@ -5,9 +5,7 @@ interface CourseSidebarItemTooltipProps {
   course: Course
 }
 
-export const CourseSidebarItemTooltip = ({
-  course,
-}: CourseSidebarItemTooltipProps): JSX.Element => {
+export const CourseSidebarItemTooltip = ({ course }: CourseSidebarItemTooltipProps) => {
   return (
     <div className='flex items-center gap-3'>
       <p>

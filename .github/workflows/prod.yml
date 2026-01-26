@@ -4,6 +4,14 @@ on:
   release:
     types: [published]
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  packages: write
+
 jobs:
   lint-servers:
     uses: ./.github/workflows/lint-servers.yml

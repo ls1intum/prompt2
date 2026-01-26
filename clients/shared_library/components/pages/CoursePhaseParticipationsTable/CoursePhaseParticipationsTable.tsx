@@ -14,7 +14,7 @@ import { useParticipantBatchActions } from './utils/updateBatch'
 interface CoursePhaseParticipationsTablePageProps {
   phaseId: string
   participants: CoursePhaseParticipationWithStudent[]
-  extraColumns?: ExtraParticipantColumn[]
+  extraColumns?: ExtraParticipantColumn<any>[]
   extraFilters?: TableFilter[]
   extraActions?: RowAction<ParticipantRow>[]
   exportDeps?: ExportDeps
@@ -53,6 +53,7 @@ export const CoursePhaseParticipationsTable = ({
       filters={filters}
       actions={actions}
       onRowClick={(row) => onClickRowAction?.(row)}
+      initialState={{ columnVisibility: { matriculationNumber: false, universityLogin: false } }}
     />
   )
 }

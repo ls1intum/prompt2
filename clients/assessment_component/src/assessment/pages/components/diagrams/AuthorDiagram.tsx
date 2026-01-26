@@ -24,7 +24,7 @@ interface AuthorDiagramProps {
 export const AuthorDiagram = ({
   participationsWithAssessment,
   showGrade = false,
-}: AuthorDiagramProps): JSX.Element => {
+}: AuthorDiagramProps) => {
   const data = Array.from(
     groupBy(
       participationsWithAssessment,

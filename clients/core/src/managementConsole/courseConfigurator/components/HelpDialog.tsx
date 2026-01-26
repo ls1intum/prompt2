@@ -8,7 +8,7 @@ import {
 import { HelpCircle, Lightbulb, MousePointer, ArrowRight } from 'lucide-react'
 import { useState } from 'react'
 
-export const HelpDialog = (): JSX.Element => {
+export const HelpDialog = () => {
   const [helpOpen, setHelpOpen] = useState(false)
 
   return (
