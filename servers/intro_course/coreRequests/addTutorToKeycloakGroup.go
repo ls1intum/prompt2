@@ -30,7 +30,11 @@ func SendAddStudentsToKeycloakGroup(authHeader string, courseID uuid.UUID, stude
 	if err != nil {
 		return err
 	}
-	defer resp.Body.Close()
+	defer func() {
+		if closeErr := resp.Body.Close(); closeErr != nil {
+			log.Warn("Failed to close response body:", closeErr)
+		}
+	}()
 
 	if resp.StatusCode != http.StatusOK {
 		log.Error("Received non-OK response:", resp.Status)

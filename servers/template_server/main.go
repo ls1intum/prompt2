@@ -6,7 +6,11 @@ import (
 	"os"
 	"os/exec"
 	"strings"
+	"time"
 
+	"github.com/getsentry/sentry-go"
+	sentrygin "github.com/getsentry/sentry-go/gin"
+	sentrylogrus "github.com/getsentry/sentry-go/logrus"
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5/pgxpool"
 	promptSDK "github.com/ls1intum/prompt-sdk"
@@ -39,6 +43,58 @@ func runMigrations(databaseURL string) {
 	}
 }
 
+func initSentry() {
+	sentryDsn := promptSDK.GetEnv("SENTRY_DSN_TEMPLATE_SERVER", "")
+	if sentryDsn == "" {
+		log.Info("Sentry DSN not configured, skipping initialization")
+		return
+	}
+
+	transport := sentry.NewHTTPTransport()
+	transport.Timeout = 2 * time.Second
+
+	if err := sentry.Init(sentry.ClientOptions{
+		Dsn:              sentryDsn,
+		Environment:      promptSDK.GetEnv("ENVIRONMENT", "development"),
+		Debug:            false,
+		Transport:        transport,
+		EnableLogs:       true,
+		AttachStacktrace: true,
+		SendDefaultPII:   true,
+		EnableTracing:    true,
+		TracesSampleRate: 1.0,
+	}); err != nil {
+		log.Errorf("Sentry initialization failed: %v", err)
+		return
+	}
+
+	client := sentry.CurrentHub().Client()
+	if client == nil {
+		log.Error("Sentry client is nil")
+		return
+	}
+
+	logHook := sentrylogrus.NewLogHookFromClient(
+		[]log.Level{log.InfoLevel, log.WarnLevel},
+		client,
+	)
+
+	eventHook := sentrylogrus.NewEventHookFromClient(
+		[]log.Level{log.ErrorLevel, log.FatalLevel, log.PanicLevel},
+		client,
+	)
+
+	log.AddHook(logHook)
+	log.AddHook(eventHook)
+
+	log.RegisterExitHandler(func() {
+		eventHook.Flush(5 * time.Second)
+		logHook.Flush(5 * time.Second)
+	})
+
+	log.Info("Sentry initialized successfully")
+}
+
 func initKeycloak(queries db.Queries) {
 	baseURL := promptSDK.GetEnv("KEYCLOAK_HOST", "http://localhost:8081")
 	if !strings.HasPrefix(baseURL, "http") {
@@ -55,15 +111,22 @@ func initKeycloak(queries db.Queries) {
 	}
 }
 
+// @title           PROMPT Template API
+// @version         1.0
+// @description     This is the template server of PROMPT.
+// @host            localhost:8086
+// @BasePath        /template-service/api
+// @externalDocs.description  PROMPT Documentation
+// @externalDocs.url          https://ls1intum.github.io/prompt2/
 func main() {
-	// establish database connection
+	initSentry()
+	defer sentry.Flush(2 * time.Second)
+
 	databaseURL := getDatabaseURL()
 	log.Debugf("Connecting to database at host=%s port=%s db=%s user=%s sslmode=%s", dbHost, dbPort, dbName, dbUser, sslMode)
 
-	// run migrations
 	runMigrations(databaseURL)
 
-	// establish db connection
 	conn, err := pgxpool.New(context.Background(), databaseURL)
 	if err != nil {
 		log.Fatalf("Unable to create connection pool: %v\n", err)
@@ -75,15 +138,13 @@ func main() {
 	clientHost := promptSDK.GetEnv("CORE_HOST", "http://localhost:3000")
 
 	router := gin.Default()
+	router.Use(sentrygin.New(sentrygin.Options{}))
 	router.Use(promptSDK.CORSMiddleware(clientHost))
 
 	api := router.Group("template-service/api/course_phase/:coursePhaseID")
 	initKeycloak(*query)
 
-	api.GET("/hello", func(c *gin.Context) {
-		c.JSON(200, gin.H{
-			"message": "Hello from the template service"})
-	})
+	api.GET("/hello", helloTemplateServer)
 
 	copyApi := router.Group("template-service/api")
 	copy.InitCopyModule(copyApi, *query, conn)
@@ -93,8 +154,23 @@ func main() {
 	template.InitTemplateModule(api, *query, conn)
 
 	serverAddress := promptSDK.GetEnv("SERVER_ADDRESS", "localhost:8086")
+	log.Info("Template Server started")
 	err = router.Run(serverAddress)
 	if err != nil {
 		log.Fatalf("Failed to start server: %v", err)
 	}
+}
+
+// helloTemplateServer godoc
+// @Summary Template server health check
+// @Description Returns a simple hello message from the template server.
+// @Tags template
+// @Produce json
+// @Param coursePhaseID path string true "Course Phase UUID"
+// @Success 200 {object} map[string]string
+// @Router /course_phase/{coursePhaseID}/hello [get]
+func helloTemplateServer(c *gin.Context) {
+	c.JSON(200, gin.H{
+		"message": "Hello from the template service",
+	})
 }

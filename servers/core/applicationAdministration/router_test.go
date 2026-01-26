@@ -131,11 +131,12 @@ func (suite *ApplicationAdminRouterTestSuite) TestUpdateApplicationFormEndpoint_
 	// Verify QuestionsText
 	assert.Equal(suite.T(), 2, len(updatedForm.QuestionsText))
 	for _, question := range updatedForm.QuestionsText {
-		if question.Title == "New Motivation" {
+		switch question.Title {
+		case "New Motivation":
 			assert.Equal(suite.T(), 300, question.AllowedLength)
-		} else if question.Title == "Expierence" {
+		case "Expierence":
 			assert.Equal(suite.T(), 500, question.AllowedLength)
-		} else {
+		default:
 			suite.T().Errorf("Unexpected question title: %s", question.Title)
 		}
 	}
@@ -143,11 +144,12 @@ func (suite *ApplicationAdminRouterTestSuite) TestUpdateApplicationFormEndpoint_
 	// Verify QuestionsMultiSelect
 	assert.Equal(suite.T(), 2, len(updatedForm.QuestionsMultiSelect))
 	for _, question := range updatedForm.QuestionsMultiSelect {
-		if question.Title == "New Devices" {
+		switch question.Title {
+		case "New Devices":
 			assert.ElementsMatch(suite.T(), []string{"Option1", "Option2"}, question.Options)
-		} else if question.Title == "Available Devices" {
+		case "Available Devices":
 			assert.ElementsMatch(suite.T(), []string{"iPhone", "iPad", "MacBook", "Vision"}, question.Options)
-		} else {
+		default:
 			suite.T().Errorf("Unexpected question title: %s", question.Title)
 		}
 	}

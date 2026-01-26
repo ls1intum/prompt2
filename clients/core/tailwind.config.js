@@ -95,5 +95,6 @@ export default {
     './src/**/*.{js,ts,jsx,tsx}',
     '../node_modules/@tumaet/prompt-ui-components/dist/**/*.{js,ts,jsx,tsx}',
     '../shared_library/**/*.{js,ts,jsx,tsx}',
+    '!../shared_library/node_modules/**',
   ],
 }
