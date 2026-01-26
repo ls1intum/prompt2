@@ -205,6 +205,19 @@ type ApplicationAssessment struct {
 	CourseParticipationID uuid.UUID   `json:"course_participation_id"`
 }
 
+type ApplicationQuestionFileUpload struct {
+	ID                       uuid.UUID   `json:"id"`
+	CoursePhaseID            uuid.UUID   `json:"course_phase_id"`
+	Title                    string      `json:"title"`
+	Description              pgtype.Text `json:"description"`
+	IsRequired               bool        `json:"is_required"`
+	AllowedFileTypes         pgtype.Text `json:"allowed_file_types"`
+	MaxFileSizeMb            pgtype.Int4 `json:"max_file_size_mb"`
+	OrderNum                 int32       `json:"order_num"`
+	AccessibleForOtherPhases bool        `json:"accessible_for_other_phases"`
+	AccessKey                pgtype.Text `json:"access_key"`
+}
+
 type ApplicationQuestionMultiSelect struct {
 	ID                       uuid.UUID   `json:"id"`
 	CoursePhaseID            uuid.UUID   `json:"course_phase_id"`

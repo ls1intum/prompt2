@@ -94,6 +94,27 @@ definitions:
       applicationQuestionID:
         type: string
     type: object
+  applicationDTO.CreateQuestionFileUpload:
+    properties:
+      accessKey:
+        type: string
+      accessibleForOtherPhases:
+        type: boolean
+      allowedFileTypes:
+        type: string
+      coursePhaseID:
+        type: string
+      description:
+        type: string
+      isRequired:
+        type: boolean
+      maxFileSizeMB:
+        type: integer
+      orderNum:
+        type: integer
+      title:
+        type: string
+    type: object
   applicationDTO.CreateQuestionMultiSelect:
     properties:
       accessKey:
@@ -152,6 +173,10 @@ definitions:
     type: object
   applicationDTO.Form:
     properties:
+      questionsFileUpload:
+        items:
+          $ref: '#/definitions/applicationDTO.QuestionFileUpload'
+        type: array
       questionsMultiSelect:
         items:
           $ref: '#/definitions/applicationDTO.QuestionMultiSelect'
@@ -165,6 +190,10 @@ definitions:
     properties:
       applicationPhase:
         $ref: '#/definitions/applicationDTO.OpenApplication'
+      questionsFileUpload:
+        items:
+          $ref: '#/definitions/applicationDTO.QuestionFileUpload'
+        type: array
       questionsMultiSelect:
         items:
           $ref: '#/definitions/applicationDTO.QuestionMultiSelect'
@@ -230,6 +259,29 @@ definitions:
         $ref: '#/definitions/meta.MetaData'
       score:
         type: integer
+    type: object
+  applicationDTO.QuestionFileUpload:
+    properties:
+      accessKey:
+        type: string
+      accessibleForOtherPhases:
+        type: boolean
+      allowedFileTypes:
+        type: string
+      coursePhaseID:
+        type: string
+      description:
+        type: string
+      id:
+        type: string
+      isRequired:
+        type: boolean
+      maxFileSizeMB:
+        type: integer
+      orderNum:
+        type: integer
+      title:
+        type: string
     type: object
   applicationDTO.QuestionMultiSelect:
     properties:
@@ -303,6 +355,10 @@ definitions:
     - StatusNewUser
   applicationDTO.UpdateForm:
     properties:
+      createQuestionsFileUpload:
+        items:
+          $ref: '#/definitions/applicationDTO.CreateQuestionFileUpload'
+        type: array
       createQuestionsMultiSelect:
         items:
           $ref: '#/definitions/applicationDTO.CreateQuestionMultiSelect'
@@ -311,6 +367,10 @@ definitions:
         items:
           $ref: '#/definitions/applicationDTO.CreateQuestionText'
         type: array
+      deleteQuestionsFileUpload:
+        items:
+          type: string
+        type: array
       deleteQuestionsMultiSelect:
         items:
           type: string
@@ -318,6 +378,10 @@ definitions:
       deleteQuestionsText:
         items:
           type: string
+        type: array
+      updateQuestionsFileUpload:
+        items:
+          $ref: '#/definitions/applicationDTO.QuestionFileUpload'
         type: array
       updateQuestionsMultiSelect:
         items:

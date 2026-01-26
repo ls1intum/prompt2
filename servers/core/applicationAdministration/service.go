@@ -9,13 +9,13 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
+	promptSDK "github.com/ls1intum/prompt-sdk"
 	"github.com/ls1intum/prompt2/servers/core/applicationAdministration/applicationDTO"
 	"github.com/ls1intum/prompt2/servers/core/course/courseParticipation"
 	"github.com/ls1intum/prompt2/servers/core/course/courseParticipation/courseParticipationDTO"
 	"github.com/ls1intum/prompt2/servers/core/coursePhase"
 	"github.com/ls1intum/prompt2/servers/core/coursePhase/coursePhaseParticipation"
 	"github.com/ls1intum/prompt2/servers/core/coursePhase/coursePhaseParticipation/coursePhaseParticipationDTO"
-	promptSDK "github.com/ls1intum/prompt-sdk"
 	db "github.com/ls1intum/prompt2/servers/core/db/sqlc"
 	"github.com/ls1intum/prompt2/servers/core/student"
 	log "github.com/sirupsen/logrus"
@@ -55,7 +55,12 @@ func GetApplicationForm(ctx context.Context, coursePhaseID uuid.UUID) (applicati
 		return applicationDTO.Form{}, err
 	}
 
-	applicationFormDTO := applicationDTO.GetFormDTOFromDBModel(applicationQuestionsText, applicationQuestionsMultiSelect)
+	applicationQuestionsFileUpload, err := ApplicationServiceSingleton.queries.GetApplicationQuestionsFileUploadForCoursePhase(ctxWithTimeout, coursePhaseID)
+	if err != nil {
+		return applicationDTO.Form{}, err
+	}
+
+	applicationFormDTO := applicationDTO.GetFormDTOFromDBModel(applicationQuestionsText, applicationQuestionsMultiSelect, applicationQuestionsFileUpload)
 
 	return applicationFormDTO, nil
 }
@@ -96,6 +101,14 @@ func UpdateApplicationForm(ctx context.Context, coursePhaseId uuid.UUID, form ap
 		}
 	}
 
+	for _, questionID := range form.DeleteQuestionsFileUpload {
+		err := qtx.DeleteApplicationQuestionFileUpload(ctx, questionID)
+		if err != nil {
+			log.Error(err)
+			return errors.New("could not delete question")
+		}
+	}
+
 	// Create all questions to be created
 	for _, question := range form.CreateQuestionsText {
 		questionDBModel := question.GetDBModel()
@@ -123,6 +136,19 @@ func UpdateApplicationForm(ctx context.Context, coursePhaseId uuid.UUID, form ap
 		}
 	}
 
+	for _, question := range form.CreateQuestionsFileUpload {
+		questionDBModel := question.GetDBModel()
+		questionDBModel.ID = uuid.New()
+		// force ensuring right course phase id -> but also checked in validation
+		questionDBModel.CoursePhaseID = coursePhaseId
+
+		err = qtx.CreateApplicationQuestionFileUpload(ctx, questionDBModel)
+		if err != nil {
+			log.Error(err)
+			return errors.New("could not create question")
+		}
+	}
+
 	// Update the rest
 	for _, question := range form.UpdateQuestionsMultiSelect {
 		questionDBModel := question.GetDBModel()
@@ -136,6 +162,15 @@ func UpdateApplicationForm(ctx context.Context, coursePhaseId uuid.UUID, form ap
 	for _, question := range form.UpdateQuestionsText {
 		questionDBModel := question.GetDBModel()
 		err = qtx.UpdateApplicationQuestionText(ctx, questionDBModel)
+		if err != nil {
+			log.Error(err)
+			return errors.New("could not update question")
+		}
+	}
+
+	for _, question := range form.UpdateQuestionsFileUpload {
+		questionDBModel := question.GetDBModel()
+		err = qtx.UpdateApplicationQuestionFileUpload(ctx, questionDBModel)
 		if err != nil {
 			log.Error(err)
 			return errors.New("could not update question")
@@ -188,7 +223,13 @@ func GetApplicationFormWithDetails(ctx context.Context, coursePhaseID uuid.UUID)
 		return applicationDTO.FormWithDetails{}, errors.New("could not get application form")
 	}
 
-	openApplicationDTO := applicationDTO.GetFormWithDetailsDTOFromDBModel(applicationCoursePhase, applicationFormText, applicationFormMultiSelect)
+	applicationFormFileUpload, err := ApplicationServiceSingleton.queries.GetApplicationQuestionsFileUploadForCoursePhase(ctxWithTimeout, coursePhaseID)
+	if err != nil {
+		log.Error(err)
+		return applicationDTO.FormWithDetails{}, errors.New("could not get application form")
+	}
+
+	openApplicationDTO := applicationDTO.GetFormWithDetailsDTOFromDBModel(applicationCoursePhase, applicationFormText, applicationFormMultiSelect, applicationFormFileUpload)
 
 	return openApplicationDTO, nil
 }

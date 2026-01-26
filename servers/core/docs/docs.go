@@ -3243,6 +3243,38 @@ const docTemplate = `{
                 }
             }
         },
+        "applicationDTO.CreateQuestionFileUpload": {
+            "type": "object",
+            "properties": {
+                "accessKey": {
+                    "type": "string"
+                },
+                "accessibleForOtherPhases": {
+                    "type": "boolean"
+                },
+                "allowedFileTypes": {
+                    "type": "string"
+                },
+                "coursePhaseID": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "isRequired": {
+                    "type": "boolean"
+                },
+                "maxFileSizeMB": {
+                    "type": "integer"
+                },
+                "orderNum": {
+                    "type": "integer"
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
         "applicationDTO.CreateQuestionMultiSelect": {
             "type": "object",
             "properties": {
@@ -3330,6 +3362,12 @@ const docTemplate = `{
         "applicationDTO.Form": {
             "type": "object",
             "properties": {
+                "questionsFileUpload": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/applicationDTO.QuestionFileUpload"
+                    }
+                },
                 "questionsMultiSelect": {
                     "type": "array",
                     "items": {
@@ -3349,6 +3387,12 @@ const docTemplate = `{
             "properties": {
                 "applicationPhase": {
                     "$ref": "#/definitions/applicationDTO.OpenApplication"
+                },
+                "questionsFileUpload": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/applicationDTO.QuestionFileUpload"
+                    }
                 },
                 "questionsMultiSelect": {
                     "type": "array",
@@ -3449,6 +3493,41 @@ const docTemplate = `{
                 },
                 "score": {
                     "type": "integer"
+                }
+            }
+        },
+        "applicationDTO.QuestionFileUpload": {
+            "type": "object",
+            "properties": {
+                "accessKey": {
+                    "type": "string"
+                },
+                "accessibleForOtherPhases": {
+                    "type": "boolean"
+                },
+                "allowedFileTypes": {
+                    "type": "string"
+                },
+                "coursePhaseID": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "isRequired": {
+                    "type": "boolean"
+                },
+                "maxFileSizeMB": {
+                    "type": "integer"
+                },
+                "orderNum": {
+                    "type": "integer"
+                },
+                "title": {
+                    "type": "string"
                 }
             }
         },
@@ -3558,6 +3637,12 @@ const docTemplate = `{
         "applicationDTO.UpdateForm": {
             "type": "object",
             "properties": {
+                "createQuestionsFileUpload": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/applicationDTO.CreateQuestionFileUpload"
+                    }
+                },
                 "createQuestionsMultiSelect": {
                     "type": "array",
                     "items": {
@@ -3570,6 +3655,12 @@ const docTemplate = `{
                         "$ref": "#/definitions/applicationDTO.CreateQuestionText"
                     }
                 },
+                "deleteQuestionsFileUpload": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
                 "deleteQuestionsMultiSelect": {
                     "type": "array",
                     "items": {
@@ -3580,6 +3671,12 @@ const docTemplate = `{
                     "type": "array",
                     "items": {
                         "type": "string"
+                    }
+                },
+                "updateQuestionsFileUpload": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/applicationDTO.QuestionFileUpload"
                     }
                 },
                 "updateQuestionsMultiSelect": {
