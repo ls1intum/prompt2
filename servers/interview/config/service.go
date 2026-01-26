@@ -16,5 +16,5 @@ var ConfigServiceSingleton *ConfigService
 type ConfigHandler struct{}
 
 func (h *ConfigHandler) HandlePhaseConfig(c *gin.Context) (config map[string]bool, err error) {
-	return nil, nil
+	return map[string]bool{}, nil
 }
