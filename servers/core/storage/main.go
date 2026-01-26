@@ -1,0 +1,61 @@
+package storage
+
+import (
+	"fmt"
+	"strings"
+
+	"github.com/gin-gonic/gin"
+	"github.com/jackc/pgx/v5/pgxpool"
+	db "github.com/ls1intum/prompt2/servers/core/db/sqlc"
+	"github.com/ls1intum/prompt2/servers/core/utils"
+	log "github.com/sirupsen/logrus"
+)
+
+// InitStorageModule initializes the storage module with routes and service
+func InitStorageModule(routerGroup *gin.RouterGroup, queries db.Queries, conn *pgxpool.Pool, authMiddleware func() gin.HandlerFunc, permissionRoleMiddleware func(allowedRoles ...string) gin.HandlerFunc) error {
+	// Get storage configuration from environment
+	maxFileSizeMB := int64(50) // Default 50MB
+	
+	// Parse allowed file types
+	allowedTypesStr := utils.GetEnv("ALLOWED_FILE_TYPES", "")
+	var allowedTypes []string
+	if allowedTypesStr != "" {
+		allowedTypes = strings.Split(allowedTypesStr, ",")
+		for i := range allowedTypes {
+			allowedTypes[i] = strings.TrimSpace(allowedTypes[i])
+		}
+	}
+
+	// S3 configuration (works with AWS S3, SeaweedFS S3 gateway, MinIO, etc.)
+	bucket := utils.GetEnv("S3_BUCKET", "prompt-files")
+	region := utils.GetEnv("S3_REGION", "us-east-1")
+	endpoint := utils.GetEnv("S3_ENDPOINT", "http://localhost:8333") // Empty for AWS S3, set for SeaweedFS/MinIO
+	accessKey := utils.GetEnv("S3_ACCESS_KEY", "admin")
+	secretKey := utils.GetEnv("S3_SECRET_KEY", "admin123")
+	forcePathStyle := utils.GetEnv("S3_FORCE_PATH_STYLE", "true") == "true" // Required for SeaweedFS/MinIO
+	
+	adapter, err := NewS3Adapter(bucket, region, endpoint, accessKey, secretKey, forcePathStyle)
+	if err != nil {
+		return fmt.Errorf("failed to create S3 adapter: %w", err)
+	}
+	
+	log.WithFields(log.Fields{
+		"bucket":         bucket,
+		"region":         region,
+		"endpoint":       endpoint,
+		"forcePathStyle": forcePathStyle,
+	}).Info("Initialized S3-compatible storage adapter")
+
+	// Create storage service singleton
+	StorageServiceSingleton = NewStorageService(queries, conn, adapter, maxFileSizeMB, allowedTypes)
+	
+	log.WithFields(log.Fields{
+		"maxFileSizeMB": maxFileSizeMB,
+		"allowedTypes":  allowedTypes,
+	}).Info("Storage service initialized")
+
+	// Setup routes
+	setupStorageRouter(routerGroup, authMiddleware, permissionRoleMiddleware)
+	
+	return nil
+}

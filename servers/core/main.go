@@ -27,6 +27,7 @@ import (
 	"github.com/ls1intum/prompt2/servers/core/keycloakTokenVerifier"
 	"github.com/ls1intum/prompt2/servers/core/mailing"
 	"github.com/ls1intum/prompt2/servers/core/permissionValidation"
+	"github.com/ls1intum/prompt2/servers/core/storage"
 	"github.com/ls1intum/prompt2/servers/core/student"
 	"github.com/ls1intum/prompt2/servers/core/utils"
 	log "github.com/sirupsen/logrus"
@@ -220,6 +221,11 @@ func main() {
 	courseParticipation.InitCourseParticipationModule(api, *query, conn)
 	coursePhaseParticipation.InitCoursePhaseParticipationModule(api, *query, conn)
 	applicationAdministration.InitApplicationAdministrationModule(api, *query, conn)
+	
+	// Initialize storage module
+	if err := storage.InitStorageModule(api, *query, conn, keycloakTokenVerifier.KeycloakMiddleware, permissionValidation.CheckAccessControlByRole); err != nil {
+		log.Fatalf("Failed to initialize storage module: %v", err)
+	}
 
 	serverAddress := utils.GetEnv("SERVER_ADDRESS", "localhost:8080")
 	log.Info("Core Server started")

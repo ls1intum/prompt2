@@ -59,6 +59,8 @@ docker-compose up db keycloak
 go test ./...
 ```
 
+Always verify tests pass before committing.
+
 **Test Structure:**
 
 - Tests use `testcontainers-go` for database isolation
@@ -227,7 +229,7 @@ serverAddress := utils.GetEnv("SERVER_ADDRESS", "localhost:8080")
 
 ## Creating New Course Phases
 
-### Frontend Component
+### Client side Component
 
 1. Copy `clients/template_component/` to `clients/your_component/`
 2. Update `webpack.config.ts` with unique port and component name
@@ -236,7 +238,7 @@ serverAddress := utils.GetEnv("SERVER_ADDRESS", "localhost:8080")
 5. Register in `core/webpack.config.ts` remotes
 6. Import in core with `React.lazy()`
 
-### Backend Service
+### Server Service
 
 1. Copy `servers/template_server/` to `servers/your_service/`
 2. Update `go.mod` module path
@@ -248,7 +250,7 @@ serverAddress := utils.GetEnv("SERVER_ADDRESS", "localhost:8080")
 
 ## Common Patterns
 
-### API Calls (Frontend)
+### API Calls (Client side)
 
 ```typescript
 // In shared_library/network/queries/
@@ -264,7 +266,7 @@ const { data, isLoading } = useQuery({
 });
 ```
 
-### Error Handling (Backend)
+### Error Handling (Server)
 
 ```go
 func handler(c *gin.Context) {
@@ -281,7 +283,6 @@ func handler(c *gin.Context) {
 
 ```go
 import log "github.com/sirupsen/logrus"
-
 log.Debug("Debug message")
 log.Info("Info message")
 log.Warn("Warning")
@@ -293,3 +294,7 @@ log.Error("Error occurred: ", err)
 - **User/Admin Docs:** `docs/` (Docusaurus) - run with `yarn start`
 - **API Docs:** Swagger annotations in Go code (`@Summary`, `@Tags`, etc.)
 - **Live Instance:** <https://prompt.aet.cit.tum.de/>
+
+## Important
+
+Don't create any summary documents!

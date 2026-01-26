@@ -323,6 +323,24 @@ type CoursePhaseTypePhaseRequiredInputDto struct {
 	Specification     []byte    `json:"specification"`
 }
 
+type File struct {
+	ID               uuid.UUID        `json:"id"`
+	Filename         string           `json:"filename"`
+	OriginalFilename string           `json:"original_filename"`
+	ContentType      string           `json:"content_type"`
+	SizeBytes        int64            `json:"size_bytes"`
+	StorageKey       string           `json:"storage_key"`
+	StorageProvider  string           `json:"storage_provider"`
+	UploadedByUserID string           `json:"uploaded_by_user_id"`
+	UploadedByEmail  pgtype.Text      `json:"uploaded_by_email"`
+	CoursePhaseID    pgtype.UUID      `json:"course_phase_id"`
+	Description      pgtype.Text      `json:"description"`
+	Tags             []string         `json:"tags"`
+	CreatedAt        pgtype.Timestamp `json:"created_at"`
+	UpdatedAt        pgtype.Timestamp `json:"updated_at"`
+	DeletedAt        pgtype.Timestamp `json:"deleted_at"`
+}
+
 type ParticipationDataDependencyGraph struct {
 	FromCoursePhaseID    uuid.UUID `json:"from_course_phase_id"`
 	ToCoursePhaseID      uuid.UUID `json:"to_course_phase_id"`

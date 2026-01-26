@@ -822,6 +822,9 @@ definitions:
     x-enum-varnames:
     - StudyDegreeBachelor
     - StudyDegreeMaster
+  gin.H:
+    additionalProperties: {}
+    type: object
   keycloakRealmDTO.AddStudentsToGroup:
     properties:
       studentsToAdd:
@@ -902,6 +905,39 @@ definitions:
       dtoName:
         type: string
       endpointPath:
+        type: string
+    type: object
+  storage.FileResponse:
+    properties:
+      contentType:
+        type: string
+      coursePhaseId:
+        type: string
+      createdAt:
+        type: string
+      description:
+        type: string
+      downloadUrl:
+        type: string
+      filename:
+        type: string
+      id:
+        type: string
+      originalFilename:
+        type: string
+      sizeBytes:
+        type: integer
+      storageKey:
+        type: string
+      tags:
+        items:
+          type: string
+        type: array
+      updatedAt:
+        type: string
+      uploadedByEmail:
+        type: string
+      uploadedByUserId:
         type: string
     type: object
   studentDTO.CreateStudent:
@@ -2733,6 +2769,158 @@ paths:
       summary: Manually trigger status mail for a course phase
       tags:
       - mailing
+  /storage/course-phases/{coursePhaseId}/files:
+    get:
+      description: Get all files associated with a course phase
+      parameters:
+      - description: Course Phase ID
+        in: path
+        name: coursePhaseId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/storage.FileResponse'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/gin.H'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/gin.H'
+      summary: Get files by course phase
+      tags:
+      - storage
+  /storage/files/{fileId}:
+    delete:
+      description: Delete a file from storage and database
+      parameters:
+      - description: File ID
+        in: path
+        name: fileId
+        required: true
+        type: string
+      - description: Hard delete (remove from storage)
+        in: query
+        name: hard
+        type: boolean
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/gin.H'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/gin.H'
+      summary: Delete a file
+      tags:
+      - storage
+    get:
+      description: Get metadata for a specific file
+      parameters:
+      - description: File ID
+        in: path
+        name: fileId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/storage.FileResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/gin.H'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/gin.H'
+      summary: Get file metadata
+      tags:
+      - storage
+  /storage/files/{fileId}/download:
+    get:
+      description: Download the actual file content
+      parameters:
+      - description: File ID
+        in: path
+        name: fileId
+        required: true
+        type: string
+      produces:
+      - application/octet-stream
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: file
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/gin.H'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/gin.H'
+      summary: Download a file
+      tags:
+      - storage
+  /storage/upload:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Upload a file to the storage backend
+      parameters:
+      - description: File to upload
+        in: formData
+        name: file
+        required: true
+        type: file
+      - description: Course Phase ID to associate with the file
+        in: formData
+        name: coursePhaseId
+        type: string
+      - description: File description
+        in: formData
+        name: description
+        type: string
+      - description: Comma-separated tags
+        in: formData
+        name: tags
+        type: string
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/storage.FileResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/gin.H'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/gin.H'
+      summary: Upload a file
+      tags:
+      - storage
   /students/:
     get:
       description: Get a list of all students
