@@ -6,6 +6,7 @@ import { useStudentEnrollments } from '@core/network/hooks/useStudentEnrollments
 import { Loader2 } from 'lucide-react'
 import { StudentProfile } from '@/components/StudentProfile'
 import { PassStatus } from '@tumaet/prompt-shared-state'
+import { InstructorNotes } from '../shared/components/InstructorNote/InstructorNotes'
 
 export const StudentDetailPage = () => {
   const { studentId } = useParams<{ studentId: string }>()
@@ -14,15 +15,13 @@ export const StudentDetailPage = () => {
   const enrollments = useStudentEnrollments(studentId)
 
   return (
-    <div>
-      <div className='flex flex-col w-full justify-between gap-8'>
-        <div className='flex flex-col gap-y-2 text-sm'>
-          {student.isLoading && <Loader2 className='h-4 w-4 animate-spin' />}
-          {student.isSuccess && (
-            <StudentProfile student={student.data} status={PassStatus.PASSED} />
-          )}
-        </div>
+    <div className='flex flex-col w-full justify-between gap-8'>
+      <div className='flex flex-col gap-y-2 text-sm'>
+        {student.isLoading && <Loader2 className='h-4 w-4 animate-spin' />}
+        {student.isSuccess && <StudentProfile student={student.data} status={PassStatus.PASSED} />}
+      </div>
 
+      <div className='grid grid-cols-2'>
         <div className='flex flex-col gap-5'>
           {enrollments.isLoading && <Loader2 className='h-4 w-4 animate-spin' />}
           {enrollments.isSuccess &&
@@ -32,6 +31,8 @@ export const StudentDetailPage = () => {
               </div>
             ))}
         </div>
+
+        <InstructorNotes />
       </div>
     </div>
   )
