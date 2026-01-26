@@ -61,16 +61,22 @@ func buildFileUploadAnswerDTOs(ctx context.Context, answers []db.ApplicationAnsw
 
 // createOrReplaceFileUploadAnswer creates a new file upload answer, deleting the old file if one exists
 func createOrReplaceFileUploadAnswer(ctx context.Context, qtx *db.Queries, answer applicationDTO.CreateAnswerFileUpload, courseParticipationID uuid.UUID) error {
+	if answer.FileID == uuid.Nil {
+		return nil
+	}
+
 	// Check if there's an existing file upload answer for this question
 	existingAnswer, err := qtx.GetApplicationAnswerFileUploadByQuestionAndParticipation(ctx, db.GetApplicationAnswerFileUploadByQuestionAndParticipationParams{
 		ApplicationQuestionID: answer.ApplicationQuestionID,
 		CourseParticipationID: courseParticipationID,
 	})
 	if err == nil {
-		// Existing answer found, delete the old file from storage
-		deleteErr := storage.StorageServiceSingleton.DeleteFile(ctx, existingAnswer.FileID, true)
-		if deleteErr != nil {
-			log.WithError(deleteErr).WithField("fileId", existingAnswer.FileID).Warn("Failed to delete old file, continuing with save")
+		if existingAnswer.FileID != answer.FileID {
+			// Existing answer found, delete the old file from storage
+			deleteErr := storage.StorageServiceSingleton.DeleteFile(ctx, existingAnswer.FileID, true)
+			if deleteErr != nil {
+				log.WithError(deleteErr).WithField("fileId", existingAnswer.FileID).Warn("Failed to delete old file, continuing with save")
+			}
 		}
 	}
 
@@ -83,16 +89,22 @@ func createOrReplaceFileUploadAnswer(ctx context.Context, qtx *db.Queries, answe
 
 // createOrOverwriteFileUploadAnswer creates or overwrites a file upload answer, deleting the old file if one exists
 func createOrOverwriteFileUploadAnswer(ctx context.Context, qtx *db.Queries, answer applicationDTO.CreateAnswerFileUpload, courseParticipationID uuid.UUID) error {
+	if answer.FileID == uuid.Nil {
+		return nil
+	}
+
 	// Check if there's an existing file upload answer for this question
 	existingAnswer, err := qtx.GetApplicationAnswerFileUploadByQuestionAndParticipation(ctx, db.GetApplicationAnswerFileUploadByQuestionAndParticipationParams{
 		ApplicationQuestionID: answer.ApplicationQuestionID,
 		CourseParticipationID: courseParticipationID,
 	})
 	if err == nil {
-		// Existing answer found, delete the old file from storage
-		deleteErr := storage.StorageServiceSingleton.DeleteFile(ctx, existingAnswer.FileID, true)
-		if deleteErr != nil {
-			log.WithError(deleteErr).WithField("fileId", existingAnswer.FileID).Warn("Failed to delete old file, continuing with save")
+		if existingAnswer.FileID != answer.FileID {
+			// Existing answer found, delete the old file from storage
+			deleteErr := storage.StorageServiceSingleton.DeleteFile(ctx, existingAnswer.FileID, true)
+			if deleteErr != nil {
+				log.WithError(deleteErr).WithField("fileId", existingAnswer.FileID).Warn("Failed to delete old file, continuing with save")
+			}
 		}
 	}
 
