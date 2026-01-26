@@ -184,6 +184,13 @@ func (ns NullStudyDegree) Value() (driver.Value, error) {
 	return string(ns.StudyDegree), nil
 }
 
+type ApplicationAnswerFileUpload struct {
+	ID                    uuid.UUID `json:"id"`
+	ApplicationQuestionID uuid.UUID `json:"application_question_id"`
+	CourseParticipationID uuid.UUID `json:"course_participation_id"`
+	FileID                uuid.UUID `json:"file_id"`
+}
+
 type ApplicationAnswerMultiSelect struct {
 	ID                    uuid.UUID `json:"id"`
 	ApplicationQuestionID uuid.UUID `json:"application_question_id"`

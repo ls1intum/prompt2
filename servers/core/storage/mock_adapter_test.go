@@ -8,16 +8,16 @@ import (
 
 // MockStorageAdapter is a mock implementation of StorageAdapter for testing
 type MockStorageAdapter struct {
-	UploadFunc      func(ctx context.Context, filename string, contentType string, reader io.Reader) (*UploadResult, error)
+	UploadFunc      func(ctx context.Context, storageKey string, contentType string, reader io.Reader) (*UploadResult, error)
 	DownloadFunc    func(ctx context.Context, storageKey string) (io.ReadCloser, error)
 	DeleteFunc      func(ctx context.Context, storageKey string) error
 	GetURLFunc      func(ctx context.Context, storageKey string, ttl int) (string, error)
 	GetMetadataFunc func(ctx context.Context, storageKey string) (*FileMetadata, error)
 }
 
-func (m *MockStorageAdapter) Upload(ctx context.Context, filename string, contentType string, reader io.Reader) (*UploadResult, error) {
+func (m *MockStorageAdapter) Upload(ctx context.Context, storageKey string, contentType string, reader io.Reader) (*UploadResult, error) {
 	if m.UploadFunc != nil {
-		return m.UploadFunc(ctx, filename, contentType, reader)
+		return m.UploadFunc(ctx, storageKey, contentType, reader)
 	}
 	// Default mock behavior - read the actual content to get size
 	content, err := io.ReadAll(reader)
@@ -25,8 +25,8 @@ func (m *MockStorageAdapter) Upload(ctx context.Context, filename string, conten
 		return nil, err
 	}
 	return &UploadResult{
-		StorageKey: "mock-storage-key/" + filename,
-		PublicURL:  "https://mock-storage.example.com/mock-storage-key/" + filename,
+		StorageKey: "mock-storage-key/" + storageKey,
+		PublicURL:  "https://mock-storage.example.com/mock-storage-key/" + storageKey,
 		Size:       int64(len(content)),
 	}, nil
 }

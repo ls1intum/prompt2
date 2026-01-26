@@ -161,7 +161,10 @@ export const ApplicationQuestionConfig = () => {
                 (question) => 'options' in question,
               )}
               questionsText={applicationQuestions.filter(
-                (question) => 'options' in question === false,
+                (question) => !('options' in question) && !('allowedFileTypes' in question),
+              )}
+              questionsFileUpload={applicationQuestions.filter(
+                (question) => 'allowedFileTypes' in question,
               )}
             />
             <AddQuestionMenu

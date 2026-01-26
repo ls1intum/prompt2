@@ -10,7 +10,6 @@ import (
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/credentials"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
-	"github.com/google/uuid"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -61,6 +60,23 @@ func NewS3Adapter(bucket, region, endpoint, accessKey, secretKey string, forcePa
 		o.UsePathStyle = forcePathStyle
 	})
 
+	_, err = client.HeadBucket(ctx, &s3.HeadBucketInput{
+		Bucket: aws.String(bucket),
+	})
+
+	if err != nil {
+		// Bucket doesn't exist, try to create it
+		log.WithField("bucket", bucket).Info("Bucket does not exist, attempting to create it")
+		_, createErr := client.CreateBucket(ctx, &s3.CreateBucketInput{
+			Bucket: aws.String(bucket),
+		})
+		if createErr != nil {
+			log.WithError(createErr).WithField("bucket", bucket).Warn("Failed to create bucket - it may need to be created manually")
+		} else {
+			log.WithField("bucket", bucket).Info("Bucket created successfully")
+		}
+	}
+
 	log.WithFields(log.Fields{
 		"bucket":         bucket,
 		"region":         region,
@@ -77,9 +93,11 @@ func NewS3Adapter(bucket, region, endpoint, accessKey, secretKey string, forcePa
 }
 
 // Upload stores a file in S3
-func (s *S3Adapter) Upload(ctx context.Context, filename string, contentType string, reader io.Reader) (*UploadResult, error) {
-	// Generate unique key
-	key := fmt.Sprintf("%s/%s", uuid.New().String(), filename)
+func (s *S3Adapter) Upload(ctx context.Context, storageKey string, contentType string, reader io.Reader) (*UploadResult, error) {
+	key := storageKey
+	if key == "" {
+		return nil, fmt.Errorf("storage key cannot be empty")
+	}
 
 	// Upload to S3
 	_, err := s.client.PutObject(ctx, &s3.PutObjectInput{

@@ -25,7 +25,7 @@ type UploadResult struct {
 type StorageAdapter interface {
 	// Upload stores a file and returns metadata about the stored file
 	// The reader will be consumed entirely, and the method takes ownership of closing it if needed
-	Upload(ctx context.Context, filename string, contentType string, reader io.Reader) (*UploadResult, error)
+	Upload(ctx context.Context, storageKey string, contentType string, reader io.Reader) (*UploadResult, error)
 
 	// Download retrieves a file by its storage key
 	// The caller is responsible for closing the returned reader

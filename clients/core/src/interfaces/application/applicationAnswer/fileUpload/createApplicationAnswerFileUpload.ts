@@ -1,4 +1,4 @@
 export interface CreateApplicationAnswerFileUpload {
-  questionID: string
+  applicationQuestionID: string
   fileID: string
 }

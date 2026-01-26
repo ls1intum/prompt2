@@ -3132,6 +3132,32 @@ const docTemplate = `{
                 }
             }
         },
+        "applicationDTO.AnswerFileUpload": {
+            "type": "object",
+            "properties": {
+                "applicationQuestionID": {
+                    "type": "string"
+                },
+                "courseParticipationID": {
+                    "type": "string"
+                },
+                "fileID": {
+                    "type": "string"
+                },
+                "fileName": {
+                    "type": "string"
+                },
+                "fileSize": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "uploadedAt": {
+                    "type": "string"
+                }
+            }
+        },
         "applicationDTO.AnswerMultiSelect": {
             "type": "object",
             "properties": {
@@ -3175,6 +3201,12 @@ const docTemplate = `{
         "applicationDTO.Application": {
             "type": "object",
             "properties": {
+                "answersFileUpload": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/applicationDTO.AnswerFileUpload"
+                    }
+                },
                 "answersMultiSelect": {
                     "type": "array",
                     "items": {
@@ -3186,6 +3218,9 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/applicationDTO.AnswerText"
                     }
+                },
+                "id": {
+                    "type": "string"
                 },
                 "status": {
                     "$ref": "#/definitions/applicationDTO.StatusEnum"
@@ -3215,6 +3250,17 @@ const docTemplate = `{
                 },
                 "student": {
                     "$ref": "#/definitions/studentDTO.Student"
+                }
+            }
+        },
+        "applicationDTO.CreateAnswerFileUpload": {
+            "type": "object",
+            "properties": {
+                "applicationQuestionID": {
+                    "type": "string"
+                },
+                "fileID": {
+                    "type": "string"
                 }
             }
         },
@@ -3460,6 +3506,12 @@ const docTemplate = `{
         "applicationDTO.PostApplication": {
             "type": "object",
             "properties": {
+                "answersFileUpload": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/applicationDTO.CreateAnswerFileUpload"
+                    }
+                },
                 "answersMultiSelect": {
                     "type": "array",
                     "items": {

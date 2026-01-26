@@ -18,12 +18,13 @@ interface ApplicationQuestionFileUploadFormProps {
   answer?: ApplicationAnswerFileUpload
   isInstructorView?: boolean
   applicationId?: string
+  coursePhaseId?: string
 }
 
 export const ApplicationQuestionFileUploadForm = forwardRef<
   QuestionFileUploadFormRef,
   ApplicationQuestionFileUploadFormProps
->(({ question, answer, isInstructorView = false, applicationId }, ref) => {
+>(({ question, answer, isInstructorView = false, applicationId, coursePhaseId }, ref) => {
   const [uploadedFile, setUploadedFile] = useState<FileResponse | null>(null)
   const [error, setError] = useState<string | null>(null)
 
@@ -37,7 +38,7 @@ export const ApplicationQuestionFileUploadForm = forwardRef<
       return true
     },
     getValues: () => ({
-      questionID: question.id,
+      applicationQuestionID: question.id,
       fileID: uploadedFile?.id || answer?.fileID || '',
     }),
     rerender: (_newAnswer?: ApplicationAnswerFileUpload) => {
@@ -68,6 +69,7 @@ export const ApplicationQuestionFileUploadForm = forwardRef<
       {!isInstructorView && !answer && (
         <FileUpload
           applicationId={applicationId}
+          coursePhaseId={coursePhaseId}
           accept={question.allowedFileTypes}
           maxSizeMB={question.maxFileSizeMB || 50}
           onSuccess={handleUploadSuccess}

@@ -45,24 +45,45 @@ func uploadFile(c *gin.Context) {
 	// Get the uploaded file
 	fileHeader, err := c.FormFile("file")
 	if err != nil {
+		log.WithFields(log.Fields{
+			"path":      c.Request.URL.Path,
+			"method":    c.Request.Method,
+			"clientIP":  c.ClientIP(),
+			"userAgent": c.Request.UserAgent(),
+		}).WithError(err).Warn("Upload failed: file is required")
 		c.JSON(http.StatusBadRequest, gin.H{"error": "file is required"})
 		return
 	}
 
 	// Get user information from context
-	userID, exists := c.Get("keycloak_user_id")
+	userID, exists := c.Get("userID")
 	if !exists {
+		log.WithFields(log.Fields{
+			"path":                  c.Request.URL.Path,
+			"method":                c.Request.Method,
+			"clientIP":              c.ClientIP(),
+			"userAgent":             c.Request.UserAgent(),
+			"hasAuthorizationHeader": c.GetHeader("Authorization") != "",
+			"hasUserID":             exists,
+		}).Warn("Upload unauthorized: user id missing in context")
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "user not authenticated"})
 		return
 	}
 
-	email, _ := c.Get("email")
+	email, _ := c.Get("userEmail")
 
 	// Parse optional parameters
 	var coursePhaseID *uuid.UUID
 	if phaseIDStr := c.PostForm("coursePhaseId"); phaseIDStr != "" {
 		phaseID, err := uuid.Parse(phaseIDStr)
 		if err != nil {
+			log.WithFields(log.Fields{
+				"path":         c.Request.URL.Path,
+				"method":       c.Request.Method,
+				"clientIP":     c.ClientIP(),
+				"userAgent":    c.Request.UserAgent(),
+				"coursePhaseId": phaseIDStr,
+			}).WithError(err).Warn("Upload failed: invalid course phase ID")
 			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid course phase ID"})
 			return
 		}
@@ -91,10 +112,25 @@ func uploadFile(c *gin.Context) {
 		req.UploaderEmail = emailStr
 	}
 
+	coursePhaseIDStr := ""
+	if coursePhaseID != nil {
+		coursePhaseIDStr = coursePhaseID.String()
+	}
+
 	// Upload the file
 	fileResponse, err := StorageServiceSingleton.UploadFile(c.Request.Context(), req)
 	if err != nil {
-		log.WithError(err).Error("Failed to upload file")
+		log.WithFields(log.Fields{
+			"path":          c.Request.URL.Path,
+			"method":        c.Request.Method,
+			"clientIP":      c.ClientIP(),
+			"userAgent":     c.Request.UserAgent(),
+			"uploaderUserID": userID.(string),
+			"filename":      fileHeader.Filename,
+			"sizeBytes":     fileHeader.Size,
+			"contentType":   fileHeader.Header.Get("Content-Type"),
+			"coursePhaseId": coursePhaseIDStr,
+		}).WithError(err).Error("Failed to upload file")
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}

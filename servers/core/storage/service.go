@@ -89,10 +89,15 @@ func (s *StorageService) UploadFile(ctx context.Context, req FileUploadRequest) 
 
 	// Generate a unique filename to prevent collisions
 	ext := filepath.Ext(req.File.Filename)
-	uniqueFilename := fmt.Sprintf("%s%s", uuid.New().String(), ext)
+	safeOriginal := sanitizeFilename(req.File.Filename)
+	if safeOriginal == "" {
+		safeOriginal = "file" + ext
+	}
+	uniqueFilename := fmt.Sprintf("%s-%s", uuid.New().String(), safeOriginal)
+	storageKey := buildStorageKey(req.CoursePhaseID, uniqueFilename)
 
 	// Upload to storage backend
-	uploadResult, err := s.storageAdapter.Upload(ctx, uniqueFilename, req.File.Header.Get("Content-Type"), file)
+	uploadResult, err := s.storageAdapter.Upload(ctx, storageKey, req.File.Header.Get("Content-Type"), file)
 	if err != nil {
 		log.WithError(err).Error("Failed to upload file to storage backend")
 		return nil, fmt.Errorf("failed to upload file: %w", err)
@@ -254,6 +259,28 @@ func (s *StorageService) GetFilesByCoursePhaseID(ctx context.Context, coursePhas
 	}
 
 	return responses, nil
+}
+
+func buildStorageKey(coursePhaseID *uuid.UUID, filename string) string {
+	if coursePhaseID == nil {
+		return filename
+	}
+
+	return fmt.Sprintf("course-phase/%s/%s", coursePhaseID.String(), filename)
+}
+
+func sanitizeFilename(filename string) string {
+	sanitized := filepath.Base(filename)
+	sanitized = strings.TrimSpace(sanitized)
+	sanitized = strings.ReplaceAll(sanitized, "\\", "_")
+	sanitized = strings.ReplaceAll(sanitized, "/", "_")
+	sanitized = strings.ReplaceAll(sanitized, "..", "_")
+
+	if sanitized == "" || sanitized == "." {
+		return ""
+	}
+
+	return sanitized
 }
 
 // isAllowedType checks if the file type is allowed

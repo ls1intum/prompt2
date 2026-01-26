@@ -1,7 +1,6 @@
 export interface ApplicationAnswerFileUpload {
   id: string
-  applicationID: string
-  questionID: string
+  applicationQuestionID: string
   fileID: string
   fileName: string
   fileSize: number
