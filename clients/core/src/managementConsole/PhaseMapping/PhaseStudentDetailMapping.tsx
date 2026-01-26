@@ -3,17 +3,10 @@ import { AssessmentStudentDetailComponent } from './ExternalStudentDetailCompone
 import { DevOpsStudentDetailComponent } from './ExternalStudentDetailComponents/DevOpsStudentDetailComponent'
 import { InterviewStudentDetailComponent } from './ExternalStudentDetailComponents/InterviewStudentDetailComponent'
 import { IntroCourseDeveloperStudentDetailComponent } from './ExternalStudentDetailComponents/IntroCourseDeveloperStudentDetailComponent'
-import { IntroCourseTutorStudentDetailComponent } from './ExternalStudentDetailComponents/IntroCourseTutorStudentDetailComponent'
 import { MatchingStudentDetailComponent } from './ExternalStudentDetailComponents/MatchingStudentDetailComponent'
 import { SelfTeamAllocationStudentDetailComponent } from './ExternalStudentDetailComponents/SelfTeamAllocationStudentDetailComponent'
 import { TeamAllocationStudentDetailComponent } from './ExternalStudentDetailComponents/TeamAllocationStudentDetailComponent'
-
-export interface CoursePhaseStudentIdentifierProps {
-  studentId: string
-  courseId: string
-  coursePhaseId: string
-  courseParticipationId: string
-}
+import { CoursePhaseStudentIdentifierProps } from '@/interfaces/studentDetail'
 
 function Fallback() {
   return <></>
@@ -27,7 +20,6 @@ export const PhaseStudentDetailMapping: {
   Interview: InterviewStudentDetailComponent,
   Matching: MatchingStudentDetailComponent,
   'Intro Course Developer': IntroCourseDeveloperStudentDetailComponent,
-  IntroCourseTutor: IntroCourseTutorStudentDetailComponent,
   Assessment: AssessmentStudentDetailComponent,
   'DevOps Challenge': DevOpsStudentDetailComponent,
   'Team Allocation': TeamAllocationStudentDetailComponent,

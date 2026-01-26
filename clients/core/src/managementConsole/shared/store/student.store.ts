@@ -17,19 +17,25 @@ export const useStudentStore = create<StudentStore>((set) => ({
   studentsById: {},
   students: [],
   upsertStudent: (student) =>
-    set((state) => ({
-      studentsById: {
-        ...state.studentsById,
-        [student.id!]: student,
-      },
-      students: [...state.students, student],
-    })),
+    set((state) => {
+      const studentsById = { ...state.studentsById, [student.id!]: student }
+      const students = state.students.map((s) => (s.id === student.id ? student : s))
+      if (!state.studentsById[student.id!]) {
+        students.push(student)
+      }
+      return { studentsById, students }
+    }),
+
   upsertStudents: (students) =>
     set((state) => {
-      const nextStudentsById = { ...state.studentsById }
+      const studentsById = { ...state.studentsById }
+      let nextStudents = state.students
       students.forEach((student) => {
-        nextStudentsById[student.id!] = student
+        const exists = !!studentsById[student.id!]
+        studentsById[student.id!] = student
+        nextStudents = nextStudents.map((s) => (s.id === student.id ? student : s))
+        if (!exists) nextStudents = [...nextStudents, student]
       })
-      return { studentsById: nextStudentsById, students: state.students.concat(students) }
+      return { studentsById, students: nextStudents }
     }),
 }))

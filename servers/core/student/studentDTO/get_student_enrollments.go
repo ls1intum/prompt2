@@ -40,6 +40,9 @@ type StudentEnrollmentsDTO struct {
 }
 
 func GetStudentEnrollmentsDTOFromDB(row []byte) (StudentEnrollmentsDTO, error) {
+  if len(row) == 0 || string(row) == "null" {
+    return StudentEnrollmentsDTO{Courses: []CourseEnrollmentDTO{}}, nil
+  }
 
 	var courses []CourseEnrollmentDTO
 	if err := json.Unmarshal(row, &courses); err != nil {

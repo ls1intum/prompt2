@@ -1,4 +1,4 @@
-import { CoursePhaseStudentIdentifierProps } from '../PhaseStudentDetailMapping'
+import { CoursePhaseStudentIdentifierProps } from '@/interfaces/studentDetail'
 import { safeFederatedLazyStudentDetail } from '../utils/safeFederatedLazy'
 
 export const MatchingStudentDetailComponent =

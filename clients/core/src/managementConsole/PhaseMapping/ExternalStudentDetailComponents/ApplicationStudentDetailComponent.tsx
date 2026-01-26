@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react'
 import { useQuery } from '@tanstack/react-query'
 
-import type { CoursePhaseStudentIdentifierProps } from '../PhaseStudentDetailMapping'
+import { CoursePhaseStudentIdentifierProps } from '@/interfaces/studentDetail'
 import type { ApplicationParticipation } from '../../applicationAdministration/interfaces/applicationParticipation'
 
 import { getApplicationParticipations } from '@core/network/queries/applicationParticipations'
