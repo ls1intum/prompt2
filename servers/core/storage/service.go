@@ -351,15 +351,15 @@ func (s *StorageService) DeleteFile(ctx context.Context, fileID uuid.UUID, hardD
 	defer cancel()
 
 	if hardDelete {
-		// Delete from storage backend
-		if err := s.storageAdapter.Delete(ctx, fileResp.StorageKey); err != nil {
-			log.WithError(err).WithField("fileId", fileID).Error("Failed to delete file from storage")
-			return fmt.Errorf("failed to delete file from storage: %w", err)
-		}
-
 		// Hard delete from database
 		if err := s.queries.HardDeleteFile(ctxWithTimeout, fileID); err != nil {
 			return fmt.Errorf("failed to delete file record: %w", err)
+		}
+
+		// Delete from storage backend
+		if err := s.storageAdapter.Delete(ctx, fileResp.StorageKey); err != nil {
+			log.WithError(err).WithField("fileId", fileID).Warn("File record deleted but storage deletion failed - orphaned storage object")
+			return nil
 		}
 
 		log.WithField("fileId", fileID).Info("File hard deleted successfully")

@@ -66,8 +66,7 @@ CREATE TABLE IF NOT EXISTS files (
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     deleted_at TIMESTAMP,
-    CONSTRAINT fk_files_course_phase FOREIGN KEY (course_phase_id) REFERENCES course_phase(id) ON DELETE SET NULL,
-    CONSTRAINT fk_files_uploaded_by FOREIGN KEY (uploaded_by_user_id) REFERENCES users(keycloak_user_id) ON DELETE CASCADE
+    CONSTRAINT fk_files_course_phase FOREIGN KEY (course_phase_id) REFERENCES course_phase(id) ON DELETE SET NULL
 );
 
 -- Indexes for performance

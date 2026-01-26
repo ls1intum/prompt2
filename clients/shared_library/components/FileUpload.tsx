@@ -15,7 +15,6 @@ export interface FileUploadProps {
   onSuccess?: (file: FileResponse) => void
   onError?: (error: Error) => void
   className?: string
-  multiple?: boolean
 }
 
 export const FileUpload: React.FC<FileUploadProps> = ({
@@ -27,7 +26,6 @@ export const FileUpload: React.FC<FileUploadProps> = ({
   onSuccess,
   onError,
   className,
-  multiple = false,
 }) => {
   const [selectedFile, setSelectedFile] = React.useState<File | null>(null)
   const [dragActive, setDragActive] = React.useState(false)
@@ -36,6 +34,9 @@ export const FileUpload: React.FC<FileUploadProps> = ({
   const { upload, uploadProgress, isUploading } = useFileUpload({
     onSuccess: (data) => {
       setSelectedFile(null)
+      if (fileInputRef.current) {
+        fileInputRef.current.value = ''
+      }
       onSuccess?.(data)
     },
     onError: (error) => {
@@ -120,7 +121,6 @@ export const FileUpload: React.FC<FileUploadProps> = ({
             className='hidden'
             onChange={handleChange}
             accept={accept}
-            multiple={multiple}
             disabled={isUploading}
           />
 

@@ -86,7 +86,7 @@ func createOrReplaceFileUploadAnswer(ctx context.Context, qtx *db.Queries, answe
 	answerDBModel := answer.GetDBModel()
 	answerDBModel.ID = uuid.New()
 	answerDBModel.CourseParticipationID = courseParticipationID
-	return qtx.CreateApplicationAnswerFileUpload(ctx, answerDBModel)
+	return qtx.CreateOrOverwriteApplicationAnswerFileUpload(ctx, db.CreateOrOverwriteApplicationAnswerFileUploadParams(answerDBModel))
 }
 
 // createOrOverwriteFileUploadAnswer creates or overwrites a file upload answer, deleting the old file if one exists
