@@ -35,6 +35,7 @@ type applicationCompleteUploadRequest struct {
 // @Accept json
 // @Produce json
 // @Param coursePhaseID path string true "Course Phase UUID"
+// @Param body body applicationPresignUploadRequest true "Presign request"
 // @Success 200 {object} storage.PresignUploadResponse
 // @Failure 400 {object} utils.ErrorResponse
 // @Failure 500 {object} utils.ErrorResponse
@@ -63,7 +64,7 @@ func presignApplicationUploadExternal(c *gin.Context) {
 	})
 	if err != nil {
 		log.WithError(err).Error("Failed to presign external upload")
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to generate upload URL"})
 		return
 	}
 
@@ -77,6 +78,7 @@ func presignApplicationUploadExternal(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param coursePhaseID path string true "Course Phase UUID"
+// @Param body body applicationCompleteUploadRequest true "Complete request"
 // @Success 201 {object} storage.FileResponse
 // @Failure 400 {object} utils.ErrorResponse
 // @Failure 500 {object} utils.ErrorResponse
@@ -106,7 +108,7 @@ func completeApplicationUploadExternal(c *gin.Context) {
 	}, externalUploaderID, "")
 	if err != nil {
 		log.WithError(err).Error("Failed to complete external upload")
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to complete upload"})
 		return
 	}
 
@@ -121,6 +123,7 @@ func completeApplicationUploadExternal(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param coursePhaseID path string true "Course Phase UUID"
+// @Param body body applicationPresignUploadRequest true "Presign request"
 // @Success 200 {object} storage.PresignUploadResponse
 // @Failure 400 {object} utils.ErrorResponse
 // @Failure 401 {object} utils.ErrorResponse
@@ -134,6 +137,10 @@ func presignApplicationUploadAuthenticated(c *gin.Context) {
 
 	coursePhaseID, ok := parseCoursePhaseID(c)
 	if !ok {
+		return
+	}
+
+	if !ensureOpenApplicationPhase(c, coursePhaseID) {
 		return
 	}
 
@@ -167,6 +174,7 @@ func presignApplicationUploadAuthenticated(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param coursePhaseID path string true "Course Phase UUID"
+// @Param body body applicationCompleteUploadRequest true "Complete request"
 // @Success 201 {object} storage.FileResponse
 // @Failure 400 {object} utils.ErrorResponse
 // @Failure 401 {object} utils.ErrorResponse
@@ -181,6 +189,10 @@ func completeApplicationUploadAuthenticated(c *gin.Context) {
 
 	coursePhaseID, ok := parseCoursePhaseID(c)
 	if !ok {
+		return
+	}
+
+	if !ensureOpenApplicationPhase(c, coursePhaseID) {
 		return
 	}
 

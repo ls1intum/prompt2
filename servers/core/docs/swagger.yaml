@@ -1,5 +1,29 @@
 basePath: /api/
 definitions:
+  applicationAdministration.applicationCompleteUploadRequest:
+    properties:
+      contentType:
+        type: string
+      description:
+        type: string
+      originalFilename:
+        type: string
+      storageKey:
+        type: string
+      tags:
+        type: string
+    type: object
+  applicationAdministration.applicationPresignUploadRequest:
+    properties:
+      contentType:
+        type: string
+      description:
+        type: string
+      filename:
+        type: string
+      tags:
+        type: string
+    type: object
   applicationDTO.AdditionalScore:
     properties:
       key:
@@ -1570,6 +1594,12 @@ paths:
         name: coursePhaseID
         required: true
         type: string
+      - description: Complete request
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/applicationAdministration.applicationCompleteUploadRequest'
       produces:
       - application/json
       responses:
@@ -1600,6 +1630,12 @@ paths:
         name: coursePhaseID
         required: true
         type: string
+      - description: Presign request
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/applicationAdministration.applicationPresignUploadRequest'
       produces:
       - application/json
       responses:
@@ -1743,6 +1779,12 @@ paths:
         name: coursePhaseID
         required: true
         type: string
+      - description: Complete request
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/applicationAdministration.applicationCompleteUploadRequest'
       produces:
       - application/json
       responses:
@@ -1779,6 +1821,12 @@ paths:
         name: coursePhaseID
         required: true
         type: string
+      - description: Presign request
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/applicationAdministration.applicationPresignUploadRequest'
       produces:
       - application/json
       responses:

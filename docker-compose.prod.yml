@@ -601,8 +601,8 @@ services:
       - seaweedfs-filer
     restart: unless-stopped
     environment:
-      - WEED_S3_DEFAULT_USER=admin
-      - WEED_S3_DEFAULT_PWD=admin123
+      - WEED_S3_DEFAULT_USER=${SEAWEEDFS_S3_USER}
+      - WEED_S3_DEFAULT_PWD=${SEAWEEDFS_S3_PASSWORD}
     volumes:
       - ./seaweedfs-config:/etc/seaweedfs
     labels:

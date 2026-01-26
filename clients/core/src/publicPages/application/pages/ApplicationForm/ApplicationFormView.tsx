@@ -126,7 +126,10 @@ export const ApplicationFormView = ({
       if (!ref) continue
       const isValid = await ref.validate()
       if (isValid) {
-        answersFileUpload.push(ref.getValues())
+        const value = ref.getValues()
+        if (value.fileID) {
+          answersFileUpload.push(value)
+        }
       } else {
         allValid = false
       }

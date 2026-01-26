@@ -92,7 +92,6 @@ export const ApplicationQuestionFileUploadForm = forwardRef<
 
       {!isInstructorView && !existingAnswer && (
         <FileUpload
-          applicationId={applicationId}
           coursePhaseId={coursePhaseId}
           accept={question.allowedFileTypes}
           maxSizeMB={question.maxFileSizeMB || 50}

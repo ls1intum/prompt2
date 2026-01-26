@@ -84,7 +84,7 @@ export const AddQuestionMenu = ({
       coursePhaseID: phaseId!,
       isRequired: false,
       orderNum: applicationQuestions.length + 1,
-      allowedFileTypes: 'application/pdf',
+      allowedFileTypes: '.pdf',
       maxFileSizeMB: 10,
       accessKey: '',
       accessibleForOtherPhases: false,

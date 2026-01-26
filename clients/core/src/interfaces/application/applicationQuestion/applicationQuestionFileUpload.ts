@@ -4,7 +4,7 @@ export interface ApplicationQuestionFileUpload {
   title: string
   description?: string
   isRequired: boolean
-  allowedFileTypes?: string  // Comma-separated MIME types
+  allowedFileTypes?: string  // Comma-separated extensions or MIME types
   maxFileSizeMB?: number
   orderNum: number
   accessibleForOtherPhases?: boolean

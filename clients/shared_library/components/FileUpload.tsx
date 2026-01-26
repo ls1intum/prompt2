@@ -7,7 +7,6 @@ import { cn } from '../utils/cn'
 import { formatFileSize } from '@/lib/formatFileSize'
 
 export interface FileUploadProps {
-  applicationId?: string
   coursePhaseId?: string
   description?: string
   tags?: string
@@ -20,7 +19,6 @@ export interface FileUploadProps {
 }
 
 export const FileUpload: React.FC<FileUploadProps> = ({
-  applicationId,
   coursePhaseId,
   description,
   tags,
@@ -89,7 +87,6 @@ export const FileUpload: React.FC<FileUploadProps> = ({
 
     upload.mutate({
       file: selectedFile,
-      applicationId,
       coursePhaseId,
       description,
       tags,

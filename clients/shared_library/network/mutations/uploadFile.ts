@@ -3,7 +3,6 @@ import { axiosInstance } from '@/network/configService'
 
 export interface FileUploadParams {
   file: File
-  applicationId?: string
   coursePhaseId?: string
   description?: string
   tags?: string

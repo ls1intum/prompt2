@@ -228,6 +228,11 @@ func (s *StorageService) CreateFileFromStorageKey(ctx context.Context, req Creat
 		if existing.UploadedByUserID != uploaderUserID {
 			return nil, fmt.Errorf("storage key already used by another user")
 		}
+		if req.CoursePhaseID != nil {
+			if !existing.CoursePhaseID.Valid || existing.CoursePhaseID.Bytes != *req.CoursePhaseID {
+				return nil, fmt.Errorf("storage key already used for a different course phase")
+			}
+		}
 		return s.convertToFileResponse(ctx, existing), nil
 	}
 	if err != nil && !errors.Is(err, pgx.ErrNoRows) {

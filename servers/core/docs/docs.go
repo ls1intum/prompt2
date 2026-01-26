@@ -701,6 +701,15 @@ const docTemplate = `{
                         "name": "coursePhaseID",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "description": "Complete request",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/applicationAdministration.applicationCompleteUploadRequest"
+                        }
                     }
                 ],
                 "responses": {
@@ -756,6 +765,15 @@ const docTemplate = `{
                         "name": "coursePhaseID",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "description": "Presign request",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/applicationAdministration.applicationPresignUploadRequest"
+                        }
                     }
                 ],
                 "responses": {
@@ -982,6 +1000,15 @@ const docTemplate = `{
                         "name": "coursePhaseID",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "description": "Complete request",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/applicationAdministration.applicationCompleteUploadRequest"
+                        }
                     }
                 ],
                 "responses": {
@@ -1026,6 +1053,15 @@ const docTemplate = `{
                         "name": "coursePhaseID",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "description": "Presign request",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/applicationAdministration.applicationPresignUploadRequest"
+                        }
                     }
                 ],
                 "responses": {
@@ -3131,6 +3167,43 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "applicationAdministration.applicationCompleteUploadRequest": {
+            "type": "object",
+            "properties": {
+                "contentType": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "originalFilename": {
+                    "type": "string"
+                },
+                "storageKey": {
+                    "type": "string"
+                },
+                "tags": {
+                    "type": "string"
+                }
+            }
+        },
+        "applicationAdministration.applicationPresignUploadRequest": {
+            "type": "object",
+            "properties": {
+                "contentType": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "filename": {
+                    "type": "string"
+                },
+                "tags": {
+                    "type": "string"
+                }
+            }
+        },
         "applicationDTO.AdditionalScore": {
             "type": "object",
             "properties": {
