@@ -48,40 +48,59 @@ export const TeamAllocationParticipantsPage = () => {
     queryFn: () => getTeamAllocations(phaseId ?? ''),
   })
 
-  const extraColumns: ExtraParticipantColumn[] = useMemo(() => {
+  const extraColumns: ExtraParticipantColumn<any>[] = useMemo(() => {
     if (!teams || !teamAllocations) return []
 
-    // Build a quick lookup so we don’t do an O(n²) “find” in the loop.
     const teamNameById = new Map(teams.map(({ id, name }) => [id, name]))
 
-    const teamNameExtraData = teamAllocations.flatMap(({ projectId, students }) => {
+    const getTeamNameForParticipation = (courseParticipationID: string): string => {
+      const allocation = teamAllocations.find(({ students }) =>
+        students.includes(courseParticipationID),
+      )
+
+      if (!allocation) return 'No Team'
+
+      return teamNameById.get(allocation.projectId) ?? 'No Team'
+    }
+
+    const teamNameExtraData: any[] = []
+    for (const { projectId, students } of teamAllocations) {
       const teamName = teamNameById.get(projectId) ?? 'No Team'
 
-      return students.map((courseParticipationID) => ({
-        courseParticipationID,
-        value: teamName,
-        stringValue: teamName,
-      }))
-    })
+      for (const courseParticipationID of students) {
+        teamNameExtraData.push({
+          courseParticipationID,
+          value: teamName,
+          stringValue: teamName,
+        })
+      }
+    }
 
     return [
       {
         id: 'allocatedTeam',
         header: 'Allocated Team',
-        extraData: teamNameExtraData,
+
+        accessorFn: (row) => getTeamNameForParticipation(row.courseParticipationID),
+
+        cell: ({ getValue }) => getValue(),
+
         enableSorting: true,
         sortingFn: (rowA, rowB) => {
           const a = rowA.getValue('allocatedTeam') as string
           const b = rowB.getValue('allocatedTeam') as string
           return a.localeCompare(b)
         },
+
         enableColumnFilter: true,
         filterFn: (row, columnId, filterValue) => {
           const value = String(row.getValue(columnId) ?? '').toLowerCase()
           if (!Array.isArray(filterValue)) return false
           return filterValue.map((v) => v.toLowerCase()).includes(value)
         },
-      },
+
+        extraData: teamNameExtraData,
+      } satisfies ExtraParticipantColumn<string>,
     ]
   }, [teams, teamAllocations])
 
@@ -118,6 +137,7 @@ export const TeamAllocationParticipantsPage = () => {
   const isError = isParticipationsError || isTeamsError || isTeamAllocationsError
   const isPending = isCoursePhaseParticipationsPending || isTeamsPending || isTeamAllocationsPending
 
+  if (!phaseId) return <ErrorPage onRetry={refetch} description='Invalid course phase ID' />
   if (isError)
     return <ErrorPage onRetry={refetch} description='Could not fetch participants or teams' />
   if (isPending)
@@ -135,7 +155,7 @@ export const TeamAllocationParticipantsPage = () => {
       </p>
       <div className='w-full'>
         <CoursePhaseParticipationsTable
-          phaseId={phaseId!}
+          phaseId={phaseId}
           participants={coursePhaseParticipations.participations ?? []}
           extraColumns={extraColumns}
         />

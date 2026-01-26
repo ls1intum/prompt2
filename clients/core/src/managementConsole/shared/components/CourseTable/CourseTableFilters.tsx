@@ -7,7 +7,7 @@ export const CourseTableFilters: TableFilter[] = [
     id: 'courseType',
     label: 'Course Type',
     options: Object.keys(CourseTypeDetails),
-    getDisplay: (value) => CourseTypeDetails[value as Course['courseType']].name,
+    optionLabel: (value) => CourseTypeDetails[value as Course['courseType']].name,
   },
   {
     type: 'numericRange',

@@ -16,7 +16,7 @@ export function getParticipantActions(
   },
   extraActions: RowAction<ParticipantRow>[],
   exportDeps: ExportDeps,
-  extraColumns: ExtraParticipantColumn[] = [],
+  extraColumns: ExtraParticipantColumn<any>[] = [],
 ): RowAction<ParticipantRow>[] {
   return [
     {
