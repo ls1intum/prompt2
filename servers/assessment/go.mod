@@ -11,6 +11,7 @@ require (
 	github.com/jackc/pgx/v5 v5.8.0
 	github.com/ls1intum/prompt-sdk v1.0.11
 	github.com/sirupsen/logrus v1.9.4
+	github.com/swaggo/swag v1.16.6
 )
 
 require (
