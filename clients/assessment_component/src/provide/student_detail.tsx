@@ -7,7 +7,6 @@ import type { StudentAssessment } from '../assessment/interfaces/studentAssessme
 import { getStudentAssessment } from '../assessment/network/queries/getStudentAssessment'
 import { GradeSuggestionBadge } from '../assessment/pages/components/badges'
 import { Link } from 'react-router-dom'
-import { Button } from '@tumaet/prompt-ui-components'
 
 export const StudentDetail: React.FC<CoursePhaseStudentIdentifierProps> = ({
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -26,6 +25,8 @@ export const StudentDetail: React.FC<CoursePhaseStudentIdentifierProps> = ({
   if (!studentAssessment) return null
 
   const completion = studentAssessment.assessmentCompletion
+  if (!completion) return null
+
   const completionStatus = completion.completed ? 'Completed' : 'Not completed'
   const completedAt = completion.completedAt
     ? new Date(completion.completedAt).toLocaleString()
@@ -63,7 +64,7 @@ export const StudentDetail: React.FC<CoursePhaseStudentIdentifierProps> = ({
         to={`/management/course/${courseId}/${coursePhaseId}/participants/${courseParticipationId}`}
         className='mt-2 text-blue-600'
       >
-        Open this Assessment
+        Assessment
       </Link>
     </div>
   )

@@ -63,7 +63,7 @@ export function StudentCoursePhaseEnrollment({
           </Tooltip>
         </div>
       </div>
-      <div className='ml-2 mb-[0.85rem] group'>
+      <div className='ml-2 mb-[0.85rem] group w-full pr-2'>
         <div>
           <LinkHeading
             targetURL={`/management/course/${courseId}/${coursePhaseEnrollment.coursePhaseId}`}
@@ -72,7 +72,7 @@ export function StudentCoursePhaseEnrollment({
           </LinkHeading>
         </div>
         {PhaseDetail && (
-          <div className='inline-block w-fit max-w-full py-2 px-3 border rounded-md empty:hidden'>
+          <div className='inline-block w-full py-2 px-3 border rounded-md empty:hidden'>
             <Suspense fallback={null}>
               <PhaseDetail
                 studentId={studentId}

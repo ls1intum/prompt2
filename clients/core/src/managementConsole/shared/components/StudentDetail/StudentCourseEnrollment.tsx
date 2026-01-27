@@ -39,47 +39,50 @@ export function StudentCourseEnrollment({
   const canShowMore = !hasFailed && futurePhases.length > 0
 
   return (
-    <CourseDetail studentCourseEnrollment={courseEnrollment}>
-      {visiblePhases.map((courseParticipation, index) => (
-        <StudentCoursePhaseEnrollment
-          key={courseParticipation.coursePhaseId}
-          coursePhaseEnrollment={courseParticipation}
-          courseEnrollment={courseEnrollment}
-          studentId={studentId}
-          courseId={courseEnrollment.courseId}
-          current={index === currentIndex}
-          showLine={
-            index === phases.length - 1 || courseParticipation.passStatus === PassStatus.FAILED
-          }
-        />
-      ))}
-
-      {canShowMore && !showFuturePhases && (
-        <Button
-          variant='ghost'
-          className='transform -translate-x-9 -translate-y-3 text-blue-600 text-xs'
-          onClick={() => setShowFuturePhases(true)}
-        >
-          Show More
-        </Button>
-      )}
-
-      {canShowMore &&
-        showFuturePhases &&
-        futurePhases.map((courseParticipation, index) => (
+    <div>
+      <CourseDetail studentCourseEnrollment={courseEnrollment} />
+      <div className='mt-4 ml-3'>
+        {visiblePhases.map((courseParticipation, index) => (
           <StudentCoursePhaseEnrollment
             key={courseParticipation.coursePhaseId}
             coursePhaseEnrollment={courseParticipation}
             courseEnrollment={courseEnrollment}
             studentId={studentId}
             courseId={courseEnrollment.courseId}
-            current={false}
+            current={index === currentIndex}
             showLine={
-              cutoffIndex + index + 1 === phases.length - 1 ||
-              courseParticipation.passStatus === PassStatus.FAILED
+              index === phases.length - 1 || courseParticipation.passStatus === PassStatus.FAILED
             }
           />
         ))}
-    </CourseDetail>
+
+        {canShowMore && !showFuturePhases && (
+          <Button
+            variant='ghost'
+            className='transform -translate-x-4 -translate-y-3 text-blue-600 text-xs'
+            onClick={() => setShowFuturePhases(true)}
+          >
+            More
+          </Button>
+        )}
+
+        {canShowMore &&
+          showFuturePhases &&
+          futurePhases.map((courseParticipation, index) => (
+            <StudentCoursePhaseEnrollment
+              key={courseParticipation.coursePhaseId}
+              coursePhaseEnrollment={courseParticipation}
+              courseEnrollment={courseEnrollment}
+              studentId={studentId}
+              courseId={courseEnrollment.courseId}
+              current={false}
+              showLine={
+                cutoffIndex + index + 1 === phases.length - 1 ||
+                courseParticipation.passStatus === PassStatus.FAILED
+              }
+            />
+          ))}
+      </div>
+    </div>
   )
 }
