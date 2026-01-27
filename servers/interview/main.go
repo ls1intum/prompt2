@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"net/url"
 	"os"
 	"os/exec"
 	"strings"
@@ -31,7 +32,17 @@ var sslMode string = promptSDK.GetEnv("SSL_MODE", "disable")
 var timeZone string = promptSDK.GetEnv("DB_TIMEZONE", "Europe/Berlin")
 
 func getDatabaseURL() string {
-	return fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=%s&TimeZone=%s", dbUser, dbPassword, dbHost, dbPort, dbName, sslMode, timeZone)
+	u := &url.URL{
+		Scheme: "postgres",
+		User:   url.UserPassword(dbUser, dbPassword),
+		Host:   fmt.Sprintf("%s:%s", dbHost, dbPort),
+		Path:   "/" + dbName,
+	}
+	q := u.Query()
+	q.Set("sslmode", sslMode)
+	q.Set("TimeZone", timeZone)
+	u.RawQuery = q.Encode()
+	return u.String()
 }
 
 func runMigrations(databaseURL string) {

@@ -122,13 +122,36 @@ func (q *Queries) DeleteInterviewSlot(ctx context.Context, id uuid.UUID) error {
 	return err
 }
 
-const getInterviewAssignmentByParticipation = `-- name: GetInterviewAssignmentByParticipation :one
+const getInterviewAssignment = `-- name: GetInterviewAssignment :one
 SELECT id, interview_slot_id, course_participation_id, assigned_at FROM interview_assignment
-WHERE course_participation_id = $1
+WHERE id = $1
 `
 
-func (q *Queries) GetInterviewAssignmentByParticipation(ctx context.Context, courseParticipationID uuid.UUID) (InterviewAssignment, error) {
-	row := q.db.QueryRow(ctx, getInterviewAssignmentByParticipation, courseParticipationID)
+func (q *Queries) GetInterviewAssignment(ctx context.Context, id uuid.UUID) (InterviewAssignment, error) {
+	row := q.db.QueryRow(ctx, getInterviewAssignment, id)
+	var i InterviewAssignment
+	err := row.Scan(
+		&i.ID,
+		&i.InterviewSlotID,
+		&i.CourseParticipationID,
+		&i.AssignedAt,
+	)
+	return i, err
+}
+
+const getInterviewAssignmentByParticipation = `-- name: GetInterviewAssignmentByParticipation :one
+SELECT ia.id, ia.interview_slot_id, ia.course_participation_id, ia.assigned_at FROM interview_assignment ia
+JOIN interview_slot s ON ia.interview_slot_id = s.id
+WHERE ia.course_participation_id = $1 AND s.course_phase_id = $2
+`
+
+type GetInterviewAssignmentByParticipationParams struct {
+	CourseParticipationID uuid.UUID `json:"course_participation_id"`
+	CoursePhaseID         uuid.UUID `json:"course_phase_id"`
+}
+
+func (q *Queries) GetInterviewAssignmentByParticipation(ctx context.Context, arg GetInterviewAssignmentByParticipationParams) (InterviewAssignment, error) {
+	row := q.db.QueryRow(ctx, getInterviewAssignmentByParticipation, arg.CourseParticipationID, arg.CoursePhaseID)
 	var i InterviewAssignment
 	err := row.Scan(
 		&i.ID,

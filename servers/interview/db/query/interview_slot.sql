@@ -40,9 +40,14 @@ INSERT INTO interview_assignment (
     $1, $2
 ) RETURNING *;
 
--- name: GetInterviewAssignmentByParticipation :one
+-- name: GetInterviewAssignment :one
 SELECT * FROM interview_assignment
-WHERE course_participation_id = $1;
+WHERE id = $1;
+
+-- name: GetInterviewAssignmentByParticipation :one
+SELECT ia.* FROM interview_assignment ia
+JOIN interview_slot s ON ia.interview_slot_id = s.id
+WHERE ia.course_participation_id = $1 AND s.course_phase_id = $2;
 
 -- name: GetInterviewAssignmentsBySlot :many
 SELECT * FROM interview_assignment

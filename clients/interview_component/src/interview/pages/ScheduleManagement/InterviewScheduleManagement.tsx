@@ -155,11 +155,18 @@ export const InterviewScheduleManagement = () => {
     })
   }
 
+  const isTimeRangeValid =
+    !!formData.start_time &&
+    !!formData.end_time &&
+    new Date(formData.start_time) < new Date(formData.end_time)
+
   const handleCreateSlot = () => {
+    if (!isTimeRangeValid) return
     createSlotMutation.mutate(formData)
   }
 
   const handleUpdateSlot = () => {
+    if (!isTimeRangeValid) return
     if (editingSlot) {
       updateSlotMutation.mutate({ id: editingSlot.id, data: formData })
     }
@@ -230,6 +237,9 @@ export const InterviewScheduleManagement = () => {
                   value={formData.end_time}
                   onChange={(e) => setFormData({ ...formData, end_time: e.target.value })}
                 />
+                {formData.start_time && formData.end_time && !isTimeRangeValid && (
+                  <p className='text-sm text-destructive'>End time must be after start time.</p>
+                )}
               </div>
               <div className='space-y-2'>
                 <Label htmlFor='location'>Location (Optional)</Label>
@@ -259,9 +269,7 @@ export const InterviewScheduleManagement = () => {
               </Button>
               <Button
                 onClick={handleCreateSlot}
-                disabled={
-                  !formData.start_time || !formData.end_time || createSlotMutation.isPending
-                }
+                disabled={!isTimeRangeValid || createSlotMutation.isPending}
               >
                 {createSlotMutation.isPending ? 'Creating...' : 'Create'}
               </Button>
@@ -295,6 +303,9 @@ export const InterviewScheduleManagement = () => {
                 value={formData.end_time}
                 onChange={(e) => setFormData({ ...formData, end_time: e.target.value })}
               />
+              {formData.start_time && formData.end_time && !isTimeRangeValid && (
+                <p className='text-sm text-destructive'>End time must be after start time.</p>
+              )}
             </div>
             <div className='space-y-2'>
               <Label htmlFor='edit_location'>Location (Optional)</Label>
@@ -324,7 +335,7 @@ export const InterviewScheduleManagement = () => {
             </Button>
             <Button
               onClick={handleUpdateSlot}
-              disabled={!formData.start_time || !formData.end_time || updateSlotMutation.isPending}
+              disabled={!isTimeRangeValid || updateSlotMutation.isPending}
             >
               {updateSlotMutation.isPending ? 'Updating...' : 'Update'}
             </Button>

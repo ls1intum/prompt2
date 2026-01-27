@@ -2,7 +2,9 @@ package interview_slot
 
 import (
 	"context"
+	"database/sql"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -234,7 +236,7 @@ func getAllInterviewSlots(c *gin.Context) {
 		response = append(response, *slot)
 	}
 
-	log.Debugf("Returning %d slots with assignments. Sample: %+v", len(response), response)
+	log.Debugf("Returning %d slots with assignments", len(response))
 
 	c.JSON(http.StatusOK, response)
 }
@@ -296,8 +298,8 @@ func getInterviewSlot(c *gin.Context) {
 		Capacity:      slot.Capacity,
 		AssignedCount: int64(len(assignments)),
 		Assignments:   assignmentInfos,
-		CreatedAt:     slot.CreatedAt.Time,
-		UpdatedAt:     slot.UpdatedAt.Time,
+		CreatedAt:     pgTimestamptzToTime(slot.CreatedAt),
+		UpdatedAt:     pgTimestamptzToTime(slot.UpdatedAt),
 	}
 
 	c.JSON(http.StatusOK, response)
@@ -431,7 +433,27 @@ func createInterviewAssignment(c *gin.Context) {
 	}
 
 	// Check if student already has an assignment
-	existingAssignment, err := InterviewSlotServiceSingleton.queries.GetInterviewAssignmentByParticipation(context.Background(), participationUUID)
+	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid course phase ID"})
+		return
+	}
+
+	// Verify slot belongs to this course phase
+	if slot.CoursePhaseID != coursePhaseID {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Interview slot not found"})
+		return
+	}
+
+	existingAssignment, err := InterviewSlotServiceSingleton.queries.GetInterviewAssignmentByParticipation(context.Background(), db.GetInterviewAssignmentByParticipationParams{
+		CourseParticipationID: participationUUID,
+		CoursePhaseID:         coursePhaseID,
+	})
+	if err != nil && !errors.Is(err, sql.ErrNoRows) {
+		log.Errorf("Failed to check existing assignment: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to check existing assignment"})
+		return
+	}
 	if err == nil && existingAssignment.ID != uuid.Nil {
 		c.JSON(http.StatusConflict, gin.H{"error": "You already have an interview slot assigned"})
 		return
@@ -494,7 +516,16 @@ func getMyInterviewAssignment(c *gin.Context) {
 		}
 	}
 
-	assignment, err := InterviewSlotServiceSingleton.queries.GetInterviewAssignmentByParticipation(context.Background(), participationUUID)
+	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid course phase ID"})
+		return
+	}
+
+	assignment, err := InterviewSlotServiceSingleton.queries.GetInterviewAssignmentByParticipation(context.Background(), db.GetInterviewAssignmentByParticipationParams{
+		CourseParticipationID: participationUUID,
+		CoursePhaseID:         coursePhaseID,
+	})
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "No interview assignment found"})
 		return
@@ -523,8 +554,8 @@ func getMyInterviewAssignment(c *gin.Context) {
 			Location:      pgTextToStringPtr(slot.Location),
 			Capacity:      slot.Capacity,
 			AssignedCount: count,
-			CreatedAt:     slot.CreatedAt.Time,
-			UpdatedAt:     slot.UpdatedAt.Time,
+			CreatedAt:     pgTimestamptzToTime(slot.CreatedAt),
+			UpdatedAt:     pgTimestamptzToTime(slot.UpdatedAt),
 		}
 	}
 
@@ -613,6 +644,37 @@ func deleteInterviewAssignment(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid assignment ID"})
 		return
+	}
+
+	// Get the assignment first to verify ownership
+	assignment, err := InterviewSlotServiceSingleton.queries.GetInterviewAssignment(context.Background(), assignmentID)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			c.JSON(http.StatusNotFound, gin.H{"error": "Assignment not found"})
+		} else {
+			log.Errorf("Failed to get interview assignment: %v", err)
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get interview assignment"})
+		}
+		return
+	}
+
+	// Verify the user owns this assignment (unless admin/lecturer)
+	courseParticipationID, exists := c.Get("courseParticipationID")
+	if exists {
+		participationUUID, ok := courseParticipationID.(uuid.UUID)
+		if !ok {
+			// Try parsing as string
+			participationStr, isString := courseParticipationID.(string)
+			if isString {
+				participationUUID, _ = uuid.Parse(participationStr)
+			}
+		}
+		if ok || participationUUID != uuid.Nil {
+			if assignment.CourseParticipationID != participationUUID {
+				c.JSON(http.StatusForbidden, gin.H{"error": "Cannot delete another user's assignment"})
+				return
+			}
+		}
 	}
 
 	err = InterviewSlotServiceSingleton.queries.DeleteInterviewAssignment(context.Background(), assignmentID)
