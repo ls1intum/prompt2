@@ -4532,12 +4532,12 @@ __metadata:
   linkType: hard
 
 "@tumaet/prompt-shared-state@npm:^1.0.5":
-  version: 1.0.5
-  resolution: "@tumaet/prompt-shared-state@npm:1.0.5"
+  version: 1.0.6
+  resolution: "@tumaet/prompt-shared-state@npm:1.0.6"
   dependencies:
     typescript: "npm:^5.7.3"
-    zustand: "npm:^5.0.3"
-  checksum: 10c0/03e998167429d3570b09c1a7c1176fffd01db977f01798baabd554379b1124009996a2c16d24f0ed99d317df7f250d461f3e50943e775697e914a3f155ef76c5
+    zustand: "npm:^5.0.10"
+  checksum: 10c0/04944e2c8a7d34c28a5458b549e96a28660068831b39ea9d48a8ce844f376016835bd0c60a9bd96bc7b1576a8d57f8adee4aed742ee232e46cb7f4a0cef5ce5c
   languageName: node
   linkType: hard
 
@@ -18164,7 +18164,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"zustand@npm:^5.0.10, zustand@npm:^5.0.3":
+"zustand@npm:^5.0.10":
   version: 5.0.10
   resolution: "zustand@npm:5.0.10"
   peerDependencies:
