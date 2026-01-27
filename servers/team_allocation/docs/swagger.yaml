@@ -257,27 +257,6 @@ paths:
       summary: Get allocation by course participation ID
       tags:
       - allocation
-  /course_phase/{coursePhaseID}/hello:
-    get:
-      description: Returns a simple hello message from the team allocation server.
-      parameters:
-      - description: Course Phase UUID
-        in: path
-        name: coursePhaseID
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      summary: Team allocation server health check
-      tags:
-      - team-allocation
   /course_phase/{coursePhaseID}/skill:
     get:
       description: Get all skills for a course phase

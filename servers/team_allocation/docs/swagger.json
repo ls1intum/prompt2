@@ -123,38 +123,6 @@
                 }
             }
         },
-        "/course_phase/{coursePhaseID}/hello": {
-            "get": {
-                "description": "Returns a simple hello message from the team allocation server.",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "team-allocation"
-                ],
-                "summary": "Team allocation server health check",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Course Phase UUID",
-                        "name": "coursePhaseID",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            }
-        },
         "/course_phase/{coursePhaseID}/skill": {
             "get": {
                 "security": [

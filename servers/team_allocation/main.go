@@ -154,7 +154,7 @@ func main() {
 	api := router.Group("team-allocation/api/course_phase/:coursePhaseID")
 	initKeycloak(*query)
 
-	api.GET("/hello", helloTeamAllocationServer)
+	// No health endpoint; health checks are handled externally.
 
 	skills.InitSkillModule(api, *query, conn)
 	teams.InitTeamModule(api, *query, conn)
@@ -174,18 +174,4 @@ func main() {
 	if err != nil {
 		log.Fatalf("Failed to start server: %v", err)
 	}
-}
-
-// helloTeamAllocationServer godoc
-// @Summary Team allocation server health check
-// @Description Returns a simple hello message from the team allocation server.
-// @Tags team-allocation
-// @Produce json
-// @Param coursePhaseID path string true "Course Phase UUID"
-// @Success 200 {object} map[string]string
-// @Router /course_phase/{coursePhaseID}/hello [get]
-func helloTeamAllocationServer(c *gin.Context) {
-	c.JSON(200, gin.H{
-		"message": "Hello from team allocation service",
-	})
 }
