@@ -2701,7 +2701,7 @@ paths:
             $ref: '#/definitions/utils.ErrorResponse'
       summary: Get all notes for a student
       tags:
-      - students
+      - instructorNotes
     post:
       description: Create a new instructor note or a new edit for a specific student
         given its ID
@@ -2724,7 +2724,7 @@ paths:
             $ref: '#/definitions/utils.ErrorResponse'
       summary: Create an instructor Note for a student
       tags:
-      - students
+      - instructorNotes
   /keycloak/{courseID}/group:
     put:
       consumes:

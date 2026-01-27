@@ -14,13 +14,11 @@ import (
 func setupStudentRouter(router *gin.RouterGroup, authMiddleware func() gin.HandlerFunc, permissionRoleMiddleware func(allowedRoles ...string) gin.HandlerFunc) {
 	student := router.Group("/students", authMiddleware())
 	student.GET("/", permissionRoleMiddleware(permissionValidation.PromptAdmin, permissionValidation.PromptLecturer), getAllStudents)
+	student.POST("/", permissionRoleMiddleware(permissionValidation.PromptAdmin, permissionValidation.PromptLecturer), createStudent)
 	student.GET("/with-courses", permissionRoleMiddleware(permissionValidation.PromptAdmin, permissionValidation.PromptLecturer), getAllStudentsWithCourses)
 	student.GET("/search/:searchString", permissionRoleMiddleware(permissionValidation.PromptAdmin, permissionValidation.PromptLecturer), searchStudents)
 	student.GET("/:uuid", permissionRoleMiddleware(permissionValidation.PromptAdmin, permissionValidation.PromptLecturer), getStudentByID)
-	student.GET("/", permissionRoleMiddleware(permissionValidation.PromptAdmin, permissionValidation.PromptLecturer), getAllStudents)
-	student.POST("/", permissionRoleMiddleware(permissionValidation.PromptAdmin, permissionValidation.PromptLecturer), createStudent)
 	student.PUT("/:uuid", permissionRoleMiddleware(permissionValidation.PromptAdmin, permissionValidation.PromptLecturer), updateStudent)
-	student.GET("/search/:searchString", permissionRoleMiddleware(permissionValidation.PromptAdmin, permissionValidation.PromptLecturer), searchStudents)
 	student.GET("/:uuid/enrollments", permissionRoleMiddleware(permissionValidation.PromptAdmin, permissionValidation.PromptLecturer), getStudentEnrollments)
 }
 

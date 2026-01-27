@@ -2393,7 +2393,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "students"
+                    "instructorNotes"
                 ],
                 "summary": "Get all notes for a student",
                 "parameters": [
@@ -2435,7 +2435,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "students"
+                    "instructorNotes"
                 ],
                 "summary": "Create an instructor Note for a student",
                 "responses": {

@@ -2399,7 +2399,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "students"
+                    "instructorNotes"
                 ],
                 "summary": "Get all notes for a student",
                 "parameters": [
@@ -2441,7 +2441,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "students"
+                    "instructorNotes"
                 ],
                 "summary": "Create an instructor Note for a student",
                 "responses": {

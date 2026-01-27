@@ -11,16 +11,16 @@ import (
 )
 
 func setupInstructorNoteRouter(router *gin.RouterGroup, authMiddleware func() gin.HandlerFunc, permissionRoleMiddleware func(allowedRoles ...string) gin.HandlerFunc) {
-	student := router.Group("/instructor-notes", authMiddleware())
-	student.GET("/", permissionRoleMiddleware(permissionValidation.PromptAdmin, permissionValidation.PromptLecturer), getAllInstructorNotes)
-	student.GET("/:student-uuid", permissionRoleMiddleware(permissionValidation.PromptAdmin, permissionValidation.PromptLecturer), getInstructorNoteForStudentByID)
-	student.POST("/:student-uuid", permissionRoleMiddleware(permissionValidation.PromptAdmin, permissionValidation.PromptLecturer), createInstructorNoteForStudentByID)
+	instructorNoteRouter := router.Group("/instructor-notes", authMiddleware())
+	instructorNoteRouter.GET("/", permissionRoleMiddleware(permissionValidation.PromptAdmin, permissionValidation.PromptLecturer), getAllInstructorNotes)
+	instructorNoteRouter.GET("/:student-uuid", permissionRoleMiddleware(permissionValidation.PromptAdmin, permissionValidation.PromptLecturer), getInstructorNoteForStudentByID)
+	instructorNoteRouter.POST("/:student-uuid", permissionRoleMiddleware(permissionValidation.PromptAdmin, permissionValidation.PromptLecturer), createInstructorNoteForStudentByID)
 }
 
 // getAllInstructorNotes godoc
 // @Summary Get all notes
 // @Description Get all instructor notes with note versions
-// @Tags students
+// @Tags instructorNotes
 // @Produce json
 // @Success 200 {object} []instructorNoteDTO.InstructorNote 
 // @Failure 400 {object} utils.ErrorResponse
@@ -38,7 +38,7 @@ func getAllInstructorNotes(c *gin.Context) {
 // getInstructorNoteForStudentByID godoc
 // @Summary Get all notes for a student
 // @Description Get all instructor notes with note versions for a specific student, provided the student ID
-// @Tags students
+// @Tags instructorNotes
 // @Produce json
 // @Param uuid path string true "Student UUID"
 // @Success 200 {object} []instructorNoteDTO.InstructorNote 
@@ -64,7 +64,7 @@ func getInstructorNoteForStudentByID(c *gin.Context) {
 // createInstructorNoteForStudentByID godoc
 // @Summary Create an instructor Note for a student
 // @Description Create a new instructor note or a new edit for a specific student given its ID
-// @Tags students
+// @Tags instructorNotes
 // @Produce json
 // @Success 200 {object} []instructorNoteDTO.InstructorNote 
 // @Failure 400 {object} utils.ErrorResponse
