@@ -202,7 +202,7 @@ func deleteAssessment(c *gin.Context) {
 		handleError(c, http.StatusInternalServerError, err)
 		return
 	}
-	c.Status(http.StatusOK)
+	c.String(http.StatusOK, "OK")
 }
 
 // listAssessmentsByStudentInPhase godoc

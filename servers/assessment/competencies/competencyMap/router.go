@@ -1,6 +1,7 @@
 package competencyMap
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -33,19 +34,29 @@ func setupCompetencyMapRouter(routerGroup *gin.RouterGroup, authMiddleware func(
 // @Accept json
 // @Param coursePhaseID path string true "Course phase ID"
 // @Param mapping body competencyMapDTO.CompetencyMapping true "Competency mapping payload"
-// @Success 201 {string} string "Created"
+// @Success 201 {object} map[string]string "Created"
 // @Failure 400 {object} map[string]string
 // @Failure 500 {object} map[string]string
 // @Router /course_phase/{coursePhaseID}/competency-mappings [post]
 func createCompetencyMapping(c *gin.Context) {
+	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
+	if err != nil {
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
 	var req competencyMapDTO.CompetencyMapping
 	if err := c.BindJSON(&req); err != nil {
 		handleError(c, http.StatusBadRequest, err)
 		return
 	}
 
-	err := CreateCompetencyMapping(c, req)
+	err = CreateCompetencyMapping(c, coursePhaseID, req)
 	if err != nil {
+		if errors.Is(err, ErrCompetencyNotInCoursePhase) {
+			handleError(c, http.StatusBadRequest, err)
+			return
+		}
 		handleError(c, http.StatusInternalServerError, err)
 		return
 	}
@@ -60,19 +71,29 @@ func createCompetencyMapping(c *gin.Context) {
 // @Accept json
 // @Param coursePhaseID path string true "Course phase ID"
 // @Param mapping body competencyMapDTO.CompetencyMapping true "Competency mapping payload"
-// @Success 200 {string} string "OK"
+// @Success 200 {object} map[string]string "OK"
 // @Failure 400 {object} map[string]string
 // @Failure 500 {object} map[string]string
 // @Router /course_phase/{coursePhaseID}/competency-mappings [delete]
 func deleteCompetencyMapping(c *gin.Context) {
+	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
+	if err != nil {
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
 	var req competencyMapDTO.CompetencyMapping
 	if err := c.BindJSON(&req); err != nil {
 		handleError(c, http.StatusBadRequest, err)
 		return
 	}
 
-	err := DeleteCompetencyMapping(c, req)
+	err = DeleteCompetencyMapping(c, coursePhaseID, req)
 	if err != nil {
+		if errors.Is(err, ErrCompetencyNotInCoursePhase) {
+			handleError(c, http.StatusBadRequest, err)
+			return
+		}
 		handleError(c, http.StatusInternalServerError, err)
 		return
 	}
@@ -91,7 +112,13 @@ func deleteCompetencyMapping(c *gin.Context) {
 // @Failure 500 {object} map[string]string
 // @Router /course_phase/{coursePhaseID}/competency-mappings [get]
 func getAllCompetencyMappings(c *gin.Context) {
-	mappings, err := GetAllCompetencyMappings(c)
+	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
+	if err != nil {
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	mappings, err := GetAllCompetencyMappings(c, coursePhaseID)
 	if err != nil {
 		handleError(c, http.StatusInternalServerError, err)
 		return
@@ -112,14 +139,24 @@ func getAllCompetencyMappings(c *gin.Context) {
 // @Failure 500 {object} map[string]string
 // @Router /course_phase/{coursePhaseID}/competency-mappings/from/{fromCompetencyID} [get]
 func getCompetencyMappings(c *gin.Context) {
+	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
+	if err != nil {
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
 	fromCompetencyID, err := uuid.Parse(c.Param("fromCompetencyID"))
 	if err != nil {
 		handleError(c, http.StatusBadRequest, err)
 		return
 	}
 
-	mappings, err := GetCompetencyMappings(c, fromCompetencyID)
+	mappings, err := GetCompetencyMappings(c, coursePhaseID, fromCompetencyID)
 	if err != nil {
+		if errors.Is(err, ErrCompetencyNotInCoursePhase) {
+			handleError(c, http.StatusBadRequest, err)
+			return
+		}
 		handleError(c, http.StatusInternalServerError, err)
 		return
 	}
@@ -139,14 +176,24 @@ func getCompetencyMappings(c *gin.Context) {
 // @Failure 500 {object} map[string]string
 // @Router /course_phase/{coursePhaseID}/competency-mappings/to/{toCompetencyID} [get]
 func getReverseCompetencyMappings(c *gin.Context) {
+	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
+	if err != nil {
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
 	toCompetencyID, err := uuid.Parse(c.Param("toCompetencyID"))
 	if err != nil {
 		handleError(c, http.StatusBadRequest, err)
 		return
 	}
 
-	mappings, err := GetReverseCompetencyMappings(c, toCompetencyID)
+	mappings, err := GetReverseCompetencyMappings(c, coursePhaseID, toCompetencyID)
 	if err != nil {
+		if errors.Is(err, ErrCompetencyNotInCoursePhase) {
+			handleError(c, http.StatusBadRequest, err)
+			return
+		}
 		handleError(c, http.StatusInternalServerError, err)
 		return
 	}
@@ -166,14 +213,24 @@ func getReverseCompetencyMappings(c *gin.Context) {
 // @Failure 500 {object} map[string]string
 // @Router /course_phase/{coursePhaseID}/competency-mappings/evaluations/{fromCompetencyID} [get]
 func getEvaluationsByMappedCompetency(c *gin.Context) {
+	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
+	if err != nil {
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
 	fromCompetencyID, err := uuid.Parse(c.Param("fromCompetencyID"))
 	if err != nil {
 		handleError(c, http.StatusBadRequest, err)
 		return
 	}
 
-	evaluations, err := GetEvaluationsByMappedCompetency(c, fromCompetencyID)
+	evaluations, err := GetEvaluationsByMappedCompetency(c, coursePhaseID, fromCompetencyID)
 	if err != nil {
+		if errors.Is(err, ErrCompetencyNotInCoursePhase) {
+			handleError(c, http.StatusBadRequest, err)
+			return
+		}
 		handleError(c, http.StatusInternalServerError, err)
 		return
 	}
