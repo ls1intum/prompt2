@@ -665,15 +665,20 @@ func deleteInterviewAssignment(c *gin.Context) {
 		if !ok {
 			// Try parsing as string
 			participationStr, isString := courseParticipationID.(string)
-			if isString {
-				participationUUID, _ = uuid.Parse(participationStr)
-			}
-		}
-		if ok || participationUUID != uuid.Nil {
-			if assignment.CourseParticipationID != participationUUID {
-				c.JSON(http.StatusForbidden, gin.H{"error": "Cannot delete another user's assignment"})
+			if !isString {
+				c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid course participation ID format"})
 				return
 			}
+			var err error
+			participationUUID, err = uuid.Parse(participationStr)
+			if err != nil {
+				c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid course participation ID"})
+				return
+			}
+		}
+		if assignment.CourseParticipationID != participationUUID {
+			c.JSON(http.StatusForbidden, gin.H{"error": "Cannot delete another user's assignment"})
+			return
 		}
 	}
 
