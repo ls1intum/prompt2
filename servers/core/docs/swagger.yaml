@@ -904,6 +904,57 @@ definitions:
       endpointPath:
         type: string
     type: object
+  studentDTO.CourseEnrollmentDTO:
+    properties:
+      courseId:
+        type: string
+      courseParticipationId:
+        type: string
+      coursePhases:
+        items:
+          $ref: '#/definitions/studentDTO.CoursePhaseEnrollmentDTO'
+        type: array
+      courseType:
+        type: string
+      ects:
+        type: integer
+      endDate:
+        type: string
+      longDescription:
+        type: string
+      name:
+        type: string
+      semesterTag:
+        type: string
+      startDate:
+        type: string
+      studentReadableData:
+        items:
+          type: integer
+        type: array
+    type: object
+  studentDTO.CoursePhaseEnrollmentDTO:
+    properties:
+      coursePhaseId:
+        type: string
+      coursePhaseType:
+        $ref: '#/definitions/studentDTO.CoursePhaseTypeDTO'
+      isInitialPhase:
+        type: boolean
+      lastModified:
+        type: string
+      name:
+        type: string
+      passStatus:
+        type: string
+    type: object
+  studentDTO.CoursePhaseTypeDTO:
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+    type: object
   studentDTO.CreateStudent:
     properties:
       currentSemester:
@@ -956,6 +1007,44 @@ definitions:
       studyProgram:
         type: string
       universityLogin:
+        type: string
+    type: object
+  studentDTO.StudentCourseParticipationDTO:
+    properties:
+      courseId:
+        type: string
+      courseName:
+        type: string
+      studentReadableData:
+        additionalProperties: {}
+        type: object
+    type: object
+  studentDTO.StudentEnrollmentsDTO:
+    properties:
+      courses:
+        items:
+          $ref: '#/definitions/studentDTO.CourseEnrollmentDTO'
+        type: array
+    type: object
+  studentDTO.StudentWithCourseParticipationsDTO:
+    properties:
+      courses:
+        items:
+          $ref: '#/definitions/studentDTO.StudentCourseParticipationDTO'
+        type: array
+      currentSemester:
+        type: integer
+      email:
+        type: string
+      firstName:
+        type: string
+      hasUniversityAccount:
+        type: boolean
+      id:
+        type: string
+      lastName:
+        type: string
+      studyProgram:
         type: string
     type: object
   utils.ErrorResponse:
@@ -2842,6 +2931,33 @@ paths:
       summary: Update a student
       tags:
       - students
+  /students/{uuid}/enrollments:
+    get:
+      description: Get all of a students enrollments, provide student UUID
+      parameters:
+      - description: Student UUID
+        in: path
+        name: uuid
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/studentDTO.StudentEnrollmentsDTO'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      summary: Get student enrollments by ID
+      tags:
+      - students
   /students/search/{searchString}:
     get:
       description: Search students by a search string
@@ -2865,6 +2981,26 @@ paths:
           schema:
             $ref: '#/definitions/utils.ErrorResponse'
       summary: Search students
+      tags:
+      - students
+  /students/with-courses:
+    get:
+      description: Get a list of all students with the property 'courses' a list of
+        courses that the student is taking part of or was
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/studentDTO.StudentWithCourseParticipationsDTO'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      summary: Get all students with courses
       tags:
       - students
 swagger: "2.0"
