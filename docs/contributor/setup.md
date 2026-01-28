@@ -46,13 +46,20 @@ Before you can build and run **Prompt**, you must install and configure the foll
 
 6. **Yarn**  
    - We use **Yarn** (version >= 4.0.1) to manage front-end dependencies.  
-   - First, install Corepack if you're using Homebrew (it's not included by default):
+   - First, install Corepack:
+     - **macOS (Homebrew users)**: Homebrew strips Corepack from Node.js, so install it separately:
 
-     ```bash
-     brew install corepack
-     ```
+       ```bash
+       brew install corepack
+       ```
 
-   - Then enable Corepack by running:
+     - **Other platforms**: Corepack is included with Node.js 16.9+. If missing, install via npm:
+
+       ```bash
+       npm install -g corepack
+       ```
+
+   - Enable Corepack by running:
 
      ```bash
      corepack enable
@@ -69,16 +76,7 @@ Before you can build and run **Prompt**, you must install and configure the foll
      git clone https://github.com/ls1intum/prompt2.git
      ```
 
-2. **Configure Environment Variables**  
-   - Copy the `.env.template` file to create your local `.env` file:
-
-     ```bash
-     cp .env.template .env
-     ```
-
-   - Edit the `.env` file and adjust the values as needed (e.g., Keycloak client secret).
-
-3. **Start the Database and Keycloak Server**
+2. **Start the Database and Keycloak Server**
    - Prompt requires both a database (PostgreSQL) and a Keycloak instance to run.
    - We recommend using the provided Docker setup:
 
@@ -106,10 +104,24 @@ Before you can build and run **Prompt**, you must install and configure the foll
    - **Generate a Client Secret**:
      - Go to **Clients** > **prompt-server** > **Credentials**.
      - Click **Save**, then **Regenerate** to get a new secret.
-     - Copy the generated secret and store it in your environment (e.g., a local `.env` file - important: This is currently not considered by the application itself. The .env file only works when running in docker).  
-       You can also paste it into `servers/core/main.go` under `KEYCLOAK_CLIENT_SECRET`, but we recommend using an environment variable.
+     - Copy the generated secret for the next step.
 
-4. **Backend Setup**  
+4. **Configure Environment Variables**
+   - **If using Docker** (recommended for development):
+     - Copy the `.env.template` file to create your local `.env` file:
+
+       ```bash
+       cp .env.template .env
+       ```
+
+     - Edit the `.env` file and add the Keycloak client secret from the previous step and adjust other values as needed.
+     - The `.env` file is automatically loaded by `docker-compose` for variable substitution.
+
+   - **If running locally without Docker**:
+     - The `.env` file is **not** loaded by the Go application when running outside Docker.
+     - You must set environment variables manually (e.g., `export KEYCLOAK_CLIENT_SECRET=...`) or paste the secret into `servers/core/main.go` under `KEYCLOAK_CLIENT_SECRET`.
+
+5. **Backend Setup**  
    - Navigate to the core server folder:
 
      ```bash
@@ -130,7 +142,7 @@ Before you can build and run **Prompt**, you must install and configure the foll
 
    - Make sure the backend can connect to PostgreSQL and Keycloak (check your logs/terminal for any errors).
 
-5. **Client Side Setup**  
+6. **Client Side Setup**  
    - In a separate terminal, navigate to the clients folder:
 
      ```bash
