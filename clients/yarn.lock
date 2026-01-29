@@ -6077,7 +6077,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"axios@npm:^1.12.0, axios@npm:^1.13.3":
+"axios@npm:^1.12.0, axios@npm:^1.13.4":
   version: 1.13.4
   resolution: "axios@npm:1.13.4"
   dependencies:
@@ -14303,7 +14303,7 @@ __metadata:
     "@typescript-eslint/eslint-plugin": "npm:^8.54.0"
     "@typescript-eslint/parser": "npm:^8.54.0"
     autoprefixer: "npm:^10.4.23"
-    axios: "npm:^1.13.3"
+    axios: "npm:^1.13.4"
     class-variance-authority: "npm:^0.7.1"
     clsx: "npm:^2.1.1"
     css-loader: "npm:^7.1.2"
