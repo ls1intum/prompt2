@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"net/http"
 	"os"
 	"os/exec"
 	"strings"
@@ -115,6 +116,29 @@ func initKeycloak(queries db.Queries) {
 	}
 }
 
+// helloAssessment godoc
+// @Summary Assessment service health check
+// @Description Returns a simple hello message from the assessment service.
+// @Tags health
+// @Produce json
+// @Param coursePhaseID path string true "Course phase ID"
+// @Success 200 {object} map[string]string
+// @Router /course_phase/{coursePhaseID}/hello [get]
+func helloAssessment(c *gin.Context) {
+	c.JSON(http.StatusOK, gin.H{
+		"message": "Hello from assessment service",
+	})
+}
+
+// @title           PROMPT Assessment API
+// @version         1.0
+// @description     This is the assessment server of PROMPT.
+
+// @host      localhost:8085
+// @BasePath  /assessment/api
+
+// @externalDocs.description  PROMPT Documentation
+// @externalDocs.url          https://ls1intum.github.io/prompt2/
 func main() {
 	initSentry()
 	defer sentry.Flush(2 * time.Second)
@@ -142,10 +166,7 @@ func main() {
 	api := router.Group("assessment/api/course_phase/:coursePhaseID")
 	initKeycloak(*query)
 
-	api.GET("/hello", func(c *gin.Context) {
-		c.JSON(200, gin.H{
-			"message": "Hello from assessment service"})
-	})
+	api.GET("/hello", helloAssessment)
 
 	competencies.InitCompetencyModule(api, *query, conn)
 	categories.InitCategoryModule(api, *query, conn)

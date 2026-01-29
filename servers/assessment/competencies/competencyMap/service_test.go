@@ -14,9 +14,10 @@ import (
 
 type CompetencyMapServiceTestSuite struct {
 	suite.Suite
-	suiteCtx context.Context
-	cleanup  func()
-	service  CompetencyMapService
+	suiteCtx      context.Context
+	cleanup       func()
+	service       CompetencyMapService
+	coursePhaseID uuid.UUID
 }
 
 func (suite *CompetencyMapServiceTestSuite) SetupSuite() {
@@ -32,6 +33,7 @@ func (suite *CompetencyMapServiceTestSuite) SetupSuite() {
 		conn:    testDB.Conn,
 	}
 	CompetencyMapServiceSingleton = &suite.service
+	suite.coursePhaseID = uuid.MustParse("4179d58a-d00d-4fa7-94a5-397bc69fab02")
 }
 
 func (suite *CompetencyMapServiceTestSuite) TearDownSuite() {
@@ -48,11 +50,11 @@ func (suite *CompetencyMapServiceTestSuite) TestCreateCompetencyMapping() {
 		ToCompetencyID:   toCompetencyID,
 	}
 
-	err := CreateCompetencyMapping(suite.suiteCtx, req)
+	err := CreateCompetencyMapping(suite.suiteCtx, suite.coursePhaseID, req)
 	assert.NoError(suite.T(), err)
 
 	// Verify the mapping was created
-	mappings, err := GetCompetencyMappings(suite.suiteCtx, fromCompetencyID)
+	mappings, err := GetCompetencyMappings(suite.suiteCtx, suite.coursePhaseID, fromCompetencyID)
 	assert.NoError(suite.T(), err)
 	assert.GreaterOrEqual(suite.T(), len(mappings), 1) // Should have at least the one we just created
 
@@ -77,7 +79,7 @@ func (suite *CompetencyMapServiceTestSuite) TestDeleteCompetencyMapping() {
 		FromCompetencyID: fromCompetencyID,
 		ToCompetencyID:   toCompetencyID,
 	}
-	err := CreateCompetencyMapping(suite.suiteCtx, createReq)
+	err := CreateCompetencyMapping(suite.suiteCtx, suite.coursePhaseID, createReq)
 	assert.NoError(suite.T(), err)
 
 	// Then delete it
@@ -85,11 +87,11 @@ func (suite *CompetencyMapServiceTestSuite) TestDeleteCompetencyMapping() {
 		FromCompetencyID: fromCompetencyID,
 		ToCompetencyID:   toCompetencyID,
 	}
-	err = DeleteCompetencyMapping(suite.suiteCtx, deleteReq)
+	err = DeleteCompetencyMapping(suite.suiteCtx, suite.coursePhaseID, deleteReq)
 	assert.NoError(suite.T(), err)
 
 	// Verify the mapping was deleted - check that our specific mapping is gone
-	mappings, err := GetCompetencyMappings(suite.suiteCtx, fromCompetencyID)
+	mappings, err := GetCompetencyMappings(suite.suiteCtx, suite.coursePhaseID, fromCompetencyID)
 	assert.NoError(suite.T(), err)
 
 	// Ensure our specific mapping is not found
@@ -119,13 +121,13 @@ func (suite *CompetencyMapServiceTestSuite) TestGetAllCompetencyMappings() {
 		ToCompetencyID:   toCompetencyID2,
 	}
 
-	err := CreateCompetencyMapping(suite.suiteCtx, req1)
+	err := CreateCompetencyMapping(suite.suiteCtx, suite.coursePhaseID, req1)
 	assert.NoError(suite.T(), err)
-	err = CreateCompetencyMapping(suite.suiteCtx, req2)
+	err = CreateCompetencyMapping(suite.suiteCtx, suite.coursePhaseID, req2)
 	assert.NoError(suite.T(), err)
 
 	// Get all mappings
-	mappings, err := GetAllCompetencyMappings(suite.suiteCtx)
+	mappings, err := GetAllCompetencyMappings(suite.suiteCtx, suite.coursePhaseID)
 	assert.NoError(suite.T(), err)
 	assert.GreaterOrEqual(suite.T(), len(mappings), 8) // 6 from dump + 2 we just created
 }
