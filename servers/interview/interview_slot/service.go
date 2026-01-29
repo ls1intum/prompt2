@@ -561,33 +561,38 @@ func createInterviewAssignment(c *gin.Context) {
 // @Failure 500 {object} map[string]string
 // @Router /course_phase/{coursePhaseID}/interview-assignments/my-assignment [get]
 func getMyInterviewAssignment(c *gin.Context) {
-	courseParticipationID, exists := c.Get("courseParticipationID")
+	// Get user ID from context
+	userID, exists := c.Get("userID")
 	if !exists {
-		// If no courseParticipationID exists, the user is not a student (likely admin/lecturer)
-		// Return 404 as they don't have an assignment
-		c.JSON(http.StatusNotFound, gin.H{"error": "No interview assignment found"})
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "User ID not found"})
 		return
 	}
 
-	participationUUID, ok := courseParticipationID.(uuid.UUID)
+	userIDStr, ok := userID.(string)
 	if !ok {
-		// Try parsing as string if it's not already a UUID
-		participationStr, isString := courseParticipationID.(string)
-		if !isString {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid course participation ID format"})
-			return
-		}
-		var err error
-		participationUUID, err = uuid.Parse(participationStr)
-		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid course participation ID"})
-			return
-		}
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid user ID"})
+		return
 	}
 
 	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid course phase ID"})
+		return
+	}
+
+	// Fetch all students to find the user's course participation ID
+	studentMap := fetchAllStudentsForCoursePhase(c, coursePhaseID)
+
+	var participationUUID uuid.UUID
+	for participationID, student := range studentMap {
+		if student != nil && student.ID.String() == userIDStr {
+			participationUUID = participationID
+			break
+		}
+	}
+
+	if participationUUID == uuid.Nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "No course participation found for user"})
 		return
 	}
 
@@ -732,25 +737,57 @@ func deleteInterviewAssignment(c *gin.Context) {
 		return
 	}
 
-	// Verify the user owns this assignment (unless admin/lecturer)
-	courseParticipationID, exists := c.Get("courseParticipationID")
-	if exists {
-		participationUUID, ok := courseParticipationID.(uuid.UUID)
+	// Check user roles for authorization
+	userRoles, exists := c.Get("userRoles")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "User roles not found"})
+		return
+	}
+
+	roles, ok := userRoles.([]string)
+	if !ok {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid user roles"})
+		return
+	}
+
+	// Check if user is admin or lecturer (can delete any assignment)
+	isAdminOrLecturer := false
+	for _, role := range roles {
+		if role == "PromptAdmin" || role == "CourseLecturer" {
+			isAdminOrLecturer = true
+			break
+		}
+	}
+
+	// If not admin/lecturer, verify ownership
+	if !isAdminOrLecturer {
+		// Get user ID from context to find their course participation
+		userID, exists := c.Get("userID")
+		if !exists {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "User ID not found"})
+			return
+		}
+
+		userIDStr, ok := userID.(string)
 		if !ok {
-			// Try parsing as string
-			participationStr, isString := courseParticipationID.(string)
-			if !isString {
-				c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid course participation ID format"})
-				return
-			}
-			var err error
-			participationUUID, err = uuid.Parse(participationStr)
-			if err != nil {
-				c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid course participation ID"})
-				return
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid user ID"})
+			return
+		}
+
+		// Fetch course participation to verify ownership
+		coursePhaseID, _ := uuid.Parse(c.Param("coursePhaseID"))
+		studentMap := fetchAllStudentsForCoursePhase(c, coursePhaseID)
+
+		// Find the user's course participation ID
+		var userParticipationID uuid.UUID
+		for participationID, student := range studentMap {
+			if student != nil && student.ID.String() == userIDStr {
+				userParticipationID = participationID
+				break
 			}
 		}
-		if assignment.CourseParticipationID != participationUUID {
+
+		if userParticipationID == uuid.Nil || assignment.CourseParticipationID != userParticipationID {
 			c.JSON(http.StatusForbidden, gin.H{"error": "Cannot delete another user's assignment"})
 			return
 		}
