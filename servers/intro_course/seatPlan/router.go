@@ -27,6 +27,19 @@ func setupSeatPlanRouter(router *gin.RouterGroup, authMiddleware func(allowedRol
 
 }
 
+// createSeatPlan godoc
+// @Summary Create seat plan
+// @Description Creates the initial seat plan with seat names.
+// @Tags seat-plan
+// @Accept json
+// @Produce json
+// @Param coursePhaseID path string true "Course Phase UUID"
+// @Param request body []string true "Seat names"
+// @Success 201
+// @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Security ApiKeyAuth
+// @Router /course_phase/{coursePhaseID}/seat_plan [post]
 func createSeatPlan(c *gin.Context) {
 	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
 	if err != nil {
@@ -57,6 +70,17 @@ func createSeatPlan(c *gin.Context) {
 	c.Status(http.StatusCreated)
 }
 
+// getSeatPlan godoc
+// @Summary Get seat plan
+// @Description Returns the seat plan for the course phase.
+// @Tags seat-plan
+// @Produce json
+// @Param coursePhaseID path string true "Course Phase UUID"
+// @Success 200 {array} seatPlanDTO.Seat
+// @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Security ApiKeyAuth
+// @Router /course_phase/{coursePhaseID}/seat_plan [get]
 func getSeatPlan(c *gin.Context) {
 	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
 	if err != nil {
@@ -74,6 +98,19 @@ func getSeatPlan(c *gin.Context) {
 	c.JSON(http.StatusOK, seats)
 }
 
+// updateSeatPlan godoc
+// @Summary Update seat plan
+// @Description Updates the seat plan assignments and device information.
+// @Tags seat-plan
+// @Accept json
+// @Produce json
+// @Param coursePhaseID path string true "Course Phase UUID"
+// @Param request body []seatPlanDTO.Seat true "Seat plan updates"
+// @Success 200
+// @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Security ApiKeyAuth
+// @Router /course_phase/{coursePhaseID}/seat_plan [put]
 func updateSeatPlan(c *gin.Context) {
 	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
 	if err != nil {
@@ -97,6 +134,16 @@ func updateSeatPlan(c *gin.Context) {
 	c.Status(http.StatusOK)
 }
 
+// deleteSeatPlan godoc
+// @Summary Delete seat plan
+// @Description Deletes the seat plan for the course phase.
+// @Tags seat-plan
+// @Param coursePhaseID path string true "Course Phase UUID"
+// @Success 200
+// @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Security ApiKeyAuth
+// @Router /course_phase/{coursePhaseID}/seat_plan [delete]
 func deleteSeatPlan(c *gin.Context) {
 	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
 	if err != nil {
@@ -114,6 +161,17 @@ func deleteSeatPlan(c *gin.Context) {
 	c.Status(http.StatusOK)
 }
 
+// getOwnSeatAssignment godoc
+// @Summary Get own seat assignment
+// @Description Returns the seat assignment for the authenticated student.
+// @Tags seat-plan
+// @Produce json
+// @Param coursePhaseID path string true "Course Phase UUID"
+// @Success 200 {object} seatPlanDTO.SeatAssignment
+// @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Security ApiKeyAuth
+// @Router /course_phase/{coursePhaseID}/seat_plan/own-assignment [get]
 func getOwnSeatAssignment(c *gin.Context) {
 	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
 	if err != nil {

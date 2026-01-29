@@ -25,6 +25,19 @@ func setupInfrastructureRouter(router *gin.RouterGroup, authMiddleware func(allo
 	infrastructureRouter.PUT("/gitlab/student-setup/:courseParticipationID/manual", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), manuallyOverwriteStudentGitlabStatus)
 }
 
+// createCourseSetup godoc
+// @Summary Create course infrastructure
+// @Description Creates the GitLab course infrastructure for the course phase.
+// @Tags infrastructure
+// @Accept json
+// @Produce json
+// @Param coursePhaseID path string true "Course Phase UUID"
+// @Param request body infrastructureDTO.CreateCourseInfrastructureRequest true "Course infrastructure request"
+// @Success 201
+// @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Security ApiKeyAuth
+// @Router /course_phase/{coursePhaseID}/infrastructure/gitlab/course-setup [post]
 func createCourseSetup(c *gin.Context) {
 	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
 	if err != nil {
@@ -52,6 +65,20 @@ func createCourseSetup(c *gin.Context) {
 	c.Status(http.StatusCreated)
 }
 
+// setupStudentInfrastructure godoc
+// @Summary Create student infrastructure
+// @Description Creates the GitLab repository for a student.
+// @Tags infrastructure
+// @Accept json
+// @Produce json
+// @Param coursePhaseID path string true "Course Phase UUID"
+// @Param courseParticipationID path string true "Course Participation UUID"
+// @Param request body infrastructureDTO.CreateStudentRepo true "Student repository request"
+// @Success 201
+// @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Security ApiKeyAuth
+// @Router /course_phase/{coursePhaseID}/infrastructure/gitlab/student-setup/{courseParticipationID} [post]
 func setupStudentInfrastructure(c *gin.Context) {
 	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
 	if err != nil {
@@ -87,6 +114,17 @@ func setupStudentInfrastructure(c *gin.Context) {
 
 }
 
+// getAllStudentGitlabStatus godoc
+// @Summary Get student GitLab status
+// @Description Returns GitLab setup status for all course participations.
+// @Tags infrastructure
+// @Produce json
+// @Param coursePhaseID path string true "Course Phase UUID"
+// @Success 200 {array} infrastructureDTO.GitlabStatus
+// @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Security ApiKeyAuth
+// @Router /course_phase/{coursePhaseID}/infrastructure/gitlab/student-setup [get]
 func getAllStudentGitlabStatus(c *gin.Context) {
 	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
 	if err != nil {
@@ -104,6 +142,18 @@ func getAllStudentGitlabStatus(c *gin.Context) {
 	c.JSON(http.StatusOK, studentInfrastructureStatus)
 }
 
+// manuallyOverwriteStudentGitlabStatus godoc
+// @Summary Manually overwrite student GitLab status
+// @Description Marks GitLab setup as completed for a student.
+// @Tags infrastructure
+// @Produce json
+// @Param coursePhaseID path string true "Course Phase UUID"
+// @Param courseParticipationID path string true "Course Participation UUID"
+// @Success 200 {object} map[string]string
+// @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Security ApiKeyAuth
+// @Router /course_phase/{coursePhaseID}/infrastructure/gitlab/student-setup/{courseParticipationID}/manual [put]
 func manuallyOverwriteStudentGitlabStatus(c *gin.Context) {
 	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
 	if err != nil {

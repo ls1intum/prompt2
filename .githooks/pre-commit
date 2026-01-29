@@ -5,7 +5,7 @@ repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "${repo_root}"
 
 staged_files="$(git diff --cached --name-only)"
-if ! echo "${staged_files}" | grep -Eq '^servers/(core|template_server|self_team_allocation)/'; then
+if ! echo "${staged_files}" | grep -Eq '^servers/(core|template_server|self_team_allocation|intro_course)/'; then
   exit 0
 fi
 
@@ -42,4 +42,9 @@ fi
 if echo "${staged_files}" | grep -Eq '^servers/self_team_allocation/'; then
   SWAG_BIN="${swag_bin}" ./scripts/generate-api-spec.sh self_team_allocation
   git add servers/self_team_allocation/docs
+fi
+
+if echo "${staged_files}" | grep -Eq '^servers/intro_course/'; then
+  SWAG_BIN="${swag_bin}" ./scripts/generate-api-spec.sh intro_course
+  git add servers/intro_course/docs
 fi

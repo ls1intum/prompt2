@@ -27,6 +27,19 @@ func setupDeveloperProfileRouter(router *gin.RouterGroup, authMiddleware func(al
 
 }
 
+// createDeveloperProfile godoc
+// @Summary Create developer profile
+// @Description Creates a developer profile for the authenticated student.
+// @Tags developer-profile
+// @Accept json
+// @Produce json
+// @Param coursePhaseID path string true "Course Phase UUID"
+// @Param request body developerProfileDTO.PostDeveloperProfile true "Developer profile payload"
+// @Success 201
+// @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Security ApiKeyAuth
+// @Router /course_phase/{coursePhaseID}/developer_profile [post]
 func createDeveloperProfile(c *gin.Context) {
 	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
 	if err != nil {
@@ -64,6 +77,17 @@ func createDeveloperProfile(c *gin.Context) {
 	c.Status(http.StatusCreated)
 }
 
+// getOwnDeveloperProfile godoc
+// @Summary Get own developer profile
+// @Description Returns the developer profile for the authenticated student.
+// @Tags developer-profile
+// @Produce json
+// @Param coursePhaseID path string true "Course Phase UUID"
+// @Success 200 {object} developerProfileDTO.DeveloperProfile
+// @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Security ApiKeyAuth
+// @Router /course_phase/{coursePhaseID}/developer_profile/self [get]
 func getOwnDeveloperProfile(c *gin.Context) {
 	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
 	if err != nil {
@@ -87,6 +111,17 @@ func getOwnDeveloperProfile(c *gin.Context) {
 	c.JSON(http.StatusOK, developerProfile)
 }
 
+// getAllDeveloperProfiles godoc
+// @Summary Get all developer profiles
+// @Description Returns all developer profiles for the course phase.
+// @Tags developer-profile
+// @Produce json
+// @Param coursePhaseID path string true "Course Phase UUID"
+// @Success 200 {array} developerProfileDTO.DeveloperProfile
+// @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Security ApiKeyAuth
+// @Router /course_phase/{coursePhaseID}/developer_profile [get]
 func getAllDeveloperProfiles(c *gin.Context) {
 	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
 	if err != nil {
@@ -103,6 +138,20 @@ func getAllDeveloperProfiles(c *gin.Context) {
 	c.JSON(http.StatusOK, developerProfiles)
 }
 
+// updateDeveloperProfile godoc
+// @Summary Update developer profile
+// @Description Creates or updates a developer profile for a course participation.
+// @Tags developer-profile
+// @Accept json
+// @Produce json
+// @Param coursePhaseID path string true "Course Phase UUID"
+// @Param courseParticipationID path string true "Course Participation UUID"
+// @Param request body developerProfileDTO.DeveloperProfile true "Developer profile payload"
+// @Success 200
+// @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Security ApiKeyAuth
+// @Router /course_phase/{coursePhaseID}/developer_profile/{courseParticipationID} [put]
 func updateDeveloperProfile(c *gin.Context) {
 	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
 	if err != nil {
@@ -132,6 +181,17 @@ func updateDeveloperProfile(c *gin.Context) {
 	c.Status(http.StatusOK)
 }
 
+// getDevicesForAllParticipations godoc
+// @Summary Get devices for all participations
+// @Description Returns the device list for each course participation in the course phase.
+// @Tags devices
+// @Produce json
+// @Param coursePhaseID path string true "Course Phase UUID"
+// @Success 200 {array} developerProfileDTO.DeviceWithParticipationID
+// @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Security ApiKeyAuth
+// @Router /course_phase/{coursePhaseID}/devices [get]
 func getDevicesForAllParticipations(c *gin.Context) {
 	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
 	if err != nil {
@@ -148,6 +208,19 @@ func getDevicesForAllParticipations(c *gin.Context) {
 	c.JSON(http.StatusOK, devices)
 }
 
+// getDevicesForCourseParticipation godoc
+// @Summary Get devices for course participation
+// @Description Returns device identifiers for the specified course participation.
+// @Tags devices
+// @Produce json
+// @Param coursePhaseID path string true "Course Phase UUID"
+// @Param courseParticipationID path string true "Course Participation UUID"
+// @Success 200 {array} string
+// @Failure 400 {object} map[string]string
+// @Failure 404 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Security ApiKeyAuth
+// @Router /course_phase/{coursePhaseID}/devices/{courseParticipationID} [get]
 func getDevicesForCourseParticipation(c *gin.Context) {
 	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
 	if err != nil {
