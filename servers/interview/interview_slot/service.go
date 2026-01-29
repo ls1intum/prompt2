@@ -386,6 +386,19 @@ func updateInterviewSlot(c *gin.Context) {
 		return
 	}
 
+	// Validate that new capacity is not less than current assigned count
+	currentAssignedCount, err := InterviewSlotServiceSingleton.queries.CountAssignmentsBySlot(context.Background(), slotID)
+	if err != nil {
+		log.Errorf("Failed to count assignments for slot: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to validate capacity"})
+		return
+	}
+
+	if req.Capacity < int32(currentAssignedCount) {
+		c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("Cannot reduce capacity to %d: slot has %d existing assignments", req.Capacity, currentAssignedCount)})
+		return
+	}
+
 	slot, err := InterviewSlotServiceSingleton.queries.UpdateInterviewSlot(context.Background(), db.UpdateInterviewSlotParams{
 		ID:        slotID,
 		StartTime: timeToPgTimestamptz(req.StartTime),
