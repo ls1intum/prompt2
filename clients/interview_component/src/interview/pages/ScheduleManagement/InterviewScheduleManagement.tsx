@@ -279,9 +279,10 @@ export const InterviewScheduleManagement = () => {
                   type='number'
                   min='1'
                   value={formData.capacity}
-                  onChange={(e) =>
-                    setFormData({ ...formData, capacity: parseInt(e.target.value) || 1 })
-                  }
+                  onChange={(e) => {
+                    const value = parseInt(e.target.value)
+                    setFormData({ ...formData, capacity: value > 0 ? value : 1 })
+                  }}
                 />
               </div>
             </div>
@@ -345,9 +346,10 @@ export const InterviewScheduleManagement = () => {
                 type='number'
                 min='1'
                 value={formData.capacity}
-                onChange={(e) =>
-                  setFormData({ ...formData, capacity: parseInt(e.target.value) || 1 })
-                }
+                onChange={(e) => {
+                  const value = parseInt(e.target.value)
+                  setFormData({ ...formData, capacity: value > 0 ? value : 1 })
+                }}
               />
             </div>
           </div>

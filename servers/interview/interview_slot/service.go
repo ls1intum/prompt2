@@ -14,6 +14,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
+	promptSDK "github.com/ls1intum/prompt-sdk"
 	sdkUtils "github.com/ls1intum/prompt-sdk/utils"
 	db "github.com/ls1intum/prompt2/servers/interview/db/sqlc"
 	log "github.com/sirupsen/logrus"
@@ -282,8 +283,9 @@ func getInterviewSlot(c *gin.Context) {
 	// Get assignments for this slot
 	assignments, err := InterviewSlotServiceSingleton.queries.GetInterviewAssignmentsBySlot(context.Background(), slotID)
 	if err != nil {
-		log.Warnf("Failed to get assignments for slot %s: %v", slotID, err)
-		assignments = []db.InterviewAssignment{}
+		log.Errorf("Failed to get assignments for slot %s: %v", slotID, err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get assignments"})
+		return
 	}
 
 	// Get all students for this course phase
@@ -750,17 +752,23 @@ func deleteInterviewAssignment(c *gin.Context) {
 		return
 	}
 
-	// Check if user is admin or lecturer (can delete any assignment)
-	isAdminOrLecturer := false
+	// Check if user has privileged role (can delete any assignment)
+	isPrivileged := false
+	privilegedRoles := []string{promptSDK.PromptAdmin, promptSDK.PromptLecturer, promptSDK.CourseLecturer, promptSDK.CourseEditor}
 	for _, role := range roles {
-		if role == "PromptAdmin" || role == "CourseLecturer" {
-			isAdminOrLecturer = true
+		for _, privileged := range privilegedRoles {
+			if role == privileged {
+				isPrivileged = true
+				break
+			}
+		}
+		if isPrivileged {
 			break
 		}
 	}
 
-	// If not admin/lecturer, verify ownership
-	if !isAdminOrLecturer {
+	// If not privileged, verify ownership
+	if !isPrivileged {
 		// Get user ID from context to find their course participation
 		userID, exists := c.Get("userID")
 		if !exists {
@@ -775,7 +783,11 @@ func deleteInterviewAssignment(c *gin.Context) {
 		}
 
 		// Fetch course participation to verify ownership
-		coursePhaseID, _ := uuid.Parse(c.Param("coursePhaseID"))
+		coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid course phase ID"})
+			return
+		}
 		studentMap := fetchAllStudentsForCoursePhase(c, coursePhaseID)
 
 		// Find the user's course participation ID
