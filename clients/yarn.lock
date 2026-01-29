@@ -6668,7 +6668,7 @@ __metadata:
     react-beautiful-dnd: "npm:^13.1.1"
     sha256: "npm:^0.2.0"
     webpack: "npm:^5.104.1"
-    webpack-bundle-analyzer: "npm:^5.1.1"
+    webpack-bundle-analyzer: "npm:^5.2.0"
     webpack-cli: "npm:^6.0.1"
   languageName: unknown
   linkType: soft
@@ -17441,7 +17441,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"webpack-bundle-analyzer@npm:^5.1.1":
+"webpack-bundle-analyzer@npm:^5.2.0":
   version: 5.2.0
   resolution: "webpack-bundle-analyzer@npm:5.2.0"
   dependencies:
