@@ -178,11 +178,11 @@ func getAllInterviewSlots(c *gin.Context) {
 	}
 
 	// Get all students for this course phase at once
+	// This may fail for non-admin users due to permissions, which is OK - they'll see slots without student names
 	studentMap, err := fetchAllStudentsForCoursePhase(c, coursePhaseID)
 	if err != nil {
-		log.Errorf("Failed to fetch students for course phase: %v", err)
-		c.JSON(http.StatusBadGateway, gin.H{"error": "Failed to fetch student information"})
-		return
+		log.Warnf("Failed to fetch students for course phase (may be due to permissions): %v", err)
+		studentMap = make(map[uuid.UUID]*StudentInfo) // Empty map - slots will show without student details
 	}
 
 	// Group assignments by slot
@@ -298,11 +298,11 @@ func getInterviewSlot(c *gin.Context) {
 	}
 
 	// Get all students for this course phase
+	// This may fail for non-admin users due to permissions, which is OK - they'll see assignments without student names
 	studentMap, err := fetchAllStudentsForCoursePhase(c, coursePhaseID)
 	if err != nil {
-		log.Errorf("Failed to fetch students for course phase: %v", err)
-		c.JSON(http.StatusBadGateway, gin.H{"error": "Failed to fetch student information"})
-		return
+		log.Warnf("Failed to fetch students for course phase (may be due to permissions): %v", err)
+		studentMap = make(map[uuid.UUID]*StudentInfo) // Empty map - assignments will show without student details
 	}
 
 	assignmentInfos := make([]AssignmentInfo, len(assignments))
@@ -603,45 +603,68 @@ func createInterviewAssignment(c *gin.Context) {
 // @Failure 500 {object} map[string]string
 // @Router /course_phase/{coursePhaseID}/interview-assignments/my-assignment [get]
 func getMyInterviewAssignment(c *gin.Context) {
-	// Get user ID from context
-	userID, exists := c.Get("userID")
-	if !exists {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "User ID not found"})
-		return
-	}
-
-	userIDStr, ok := userID.(string)
-	if !ok {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid user ID"})
-		return
-	}
-
 	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid course phase ID"})
 		return
 	}
 
-	// Fetch all students to find the user's course participation ID
-	studentMap, err := fetchAllStudentsForCoursePhase(c, coursePhaseID)
+	// Fetch the user's own course participation ID from core service
+	coreURL := sdkUtils.GetCoreUrl()
+	url := fmt.Sprintf("%s/api/course_phases/%s/participations/self", coreURL, coursePhaseID)
+
+	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
-		log.Errorf("Failed to fetch students for course phase: %v", err)
-		c.JSON(http.StatusBadGateway, gin.H{"error": "Failed to fetch student information"})
+		log.Errorf("Failed to create request for self participation: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch participation"})
 		return
 	}
 
-	var participationUUID uuid.UUID
-	for participationID, student := range studentMap {
-		if student != nil && student.ID.String() == userIDStr {
-			participationUUID = participationID
-			break
-		}
+	// Forward the authorization header
+	authHeader := c.GetHeader("Authorization")
+	if authHeader != "" {
+		req.Header.Set("Authorization", authHeader)
 	}
 
-	if participationUUID == uuid.Nil {
+	client := &http.Client{Timeout: 5 * time.Second}
+	resp, err := client.Do(req)
+	if err != nil {
+		log.Errorf("Failed to fetch self participation: %v", err)
+		c.JSON(http.StatusBadGateway, gin.H{"error": "Failed to fetch participation"})
+		return
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode == http.StatusNotFound {
 		c.JSON(http.StatusNotFound, gin.H{"error": "No course participation found for user"})
 		return
 	}
+
+	if resp.StatusCode != http.StatusOK {
+		log.Errorf("Core service returned status %d for self participation", resp.StatusCode)
+		c.JSON(http.StatusBadGateway, gin.H{"error": "Failed to fetch participation"})
+		return
+	}
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		log.Errorf("Failed to read self participation response: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to read participation"})
+		return
+	}
+
+	var selfParticipation struct {
+		CourseParticipationID uuid.UUID `json:"courseParticipationID"`
+	}
+
+	if err := json.Unmarshal(body, &selfParticipation); err != nil {
+		log.Errorf("Failed to unmarshal self participation: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to parse participation"})
+		return
+	}
+
+	participationUUID := selfParticipation.CourseParticipationID
+	log.Debugf("Found participation UUID %s for course phase %s", participationUUID, coursePhaseID)
 
 	assignment, err := InterviewSlotServiceSingleton.queries.GetInterviewAssignmentByParticipation(context.Background(), db.GetInterviewAssignmentByParticipationParams{
 		CourseParticipationID: participationUUID,
