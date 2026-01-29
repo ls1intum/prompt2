@@ -45,6 +45,11 @@ type CreateInterviewAssignmentRequest struct {
 	InterviewSlotID uuid.UUID `json:"interview_slot_id" binding:"required"`
 }
 
+type CreateInterviewAssignmentAdminRequest struct {
+	InterviewSlotID       uuid.UUID `json:"interview_slot_id" binding:"required"`
+	CourseParticipationID uuid.UUID `json:"course_participation_id" binding:"required"`
+}
+
 type StudentInfo struct {
 	ID        uuid.UUID `json:"id"`
 	FirstName string    `json:"firstName"`
@@ -567,6 +572,119 @@ func createInterviewAssignment(c *gin.Context) {
 	assignment, err := qtx.CreateInterviewAssignment(ctx, db.CreateInterviewAssignmentParams{
 		InterviewSlotID:       req.InterviewSlotID,
 		CourseParticipationID: participationUUID,
+	})
+
+	if err != nil {
+		log.Errorf("Failed to create interview assignment: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create interview assignment"})
+		return
+	}
+
+	// Commit the transaction
+	if err := tx.Commit(ctx); err != nil {
+		log.Errorf("Failed to commit transaction: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create assignment"})
+		return
+	}
+
+	response := InterviewAssignmentResponse{
+		ID:                    assignment.ID,
+		InterviewSlotID:       assignment.InterviewSlotID,
+		CourseParticipationID: assignment.CourseParticipationID,
+		AssignedAt:            assignment.AssignedAt.Time,
+	}
+
+	c.JSON(http.StatusCreated, response)
+}
+
+// createInterviewAssignmentAdmin godoc
+// @Summary Manually assign a student to an interview slot (Admin only)
+// @Description Allows admins/lecturers to manually assign any student to an interview slot
+// @Tags interview-assignments
+// @Accept json
+// @Produce json
+// @Param coursePhaseID path string true "Course Phase UUID"
+// @Param request body CreateInterviewAssignmentAdminRequest true "Assignment details with course participation ID"
+// @Success 201 {object} InterviewAssignmentResponse
+// @Failure 400 {object} map[string]string
+// @Failure 409 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /course_phase/{coursePhaseID}/interview-assignments/admin [post]
+func createInterviewAssignmentAdmin(c *gin.Context) {
+	var req CreateInterviewAssignmentAdminRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid course phase ID"})
+		return
+	}
+
+	// Use transaction to prevent race condition
+	ctx := context.Background()
+	tx, err := InterviewSlotServiceSingleton.conn.Begin(ctx)
+	if err != nil {
+		log.Errorf("Failed to begin transaction: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to process request"})
+		return
+	}
+	defer tx.Rollback(ctx)
+
+	qtx := InterviewSlotServiceSingleton.queries.WithTx(tx)
+
+	// Lock the slot row using FOR UPDATE
+	slot, err := qtx.GetInterviewSlotForUpdate(ctx, req.InterviewSlotID)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			c.JSON(http.StatusNotFound, gin.H{"error": "Interview slot not found"})
+		} else {
+			log.Errorf("Failed to get interview slot: %v", err)
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get interview slot"})
+		}
+		return
+	}
+
+	// Verify slot belongs to this course phase
+	if slot.CoursePhaseID != coursePhaseID {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Interview slot not found"})
+		return
+	}
+
+	// Check capacity within transaction
+	count, err := qtx.CountAssignmentsBySlot(ctx, req.InterviewSlotID)
+	if err != nil {
+		log.Errorf("Failed to count assignments: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to check slot availability"})
+		return
+	}
+
+	if count >= int64(slot.Capacity) {
+		c.JSON(http.StatusConflict, gin.H{"error": "Interview slot is full"})
+		return
+	}
+
+	// Check if student already has an assignment
+	existingAssignment, err := qtx.GetInterviewAssignmentByParticipation(ctx, db.GetInterviewAssignmentByParticipationParams{
+		CourseParticipationID: req.CourseParticipationID,
+		CoursePhaseID:         coursePhaseID,
+	})
+	if err != nil && !errors.Is(err, sql.ErrNoRows) {
+		log.Errorf("Failed to check existing assignment: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to check existing assignment"})
+		return
+	}
+	if err == nil && existingAssignment.ID != uuid.Nil {
+		c.JSON(http.StatusConflict, gin.H{"error": "Student already has an interview slot assigned"})
+		return
+	}
+
+	// Create assignment within transaction
+	assignment, err := qtx.CreateInterviewAssignment(ctx, db.CreateInterviewAssignmentParams{
+		InterviewSlotID:       req.InterviewSlotID,
+		CourseParticipationID: req.CourseParticipationID,
 	})
 
 	if err != nil {

@@ -18,6 +18,7 @@ func setupInterviewSlotRouter(routerGroup *gin.RouterGroup, authMiddleware func(
 	// Student routes - book interview slots
 	assignmentRouter := routerGroup.Group("/interview-assignments")
 	assignmentRouter.POST("", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.PromptLecturer, promptSDK.CourseStudent), createInterviewAssignment)
+	assignmentRouter.POST("/admin", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), createInterviewAssignmentAdmin)
 	assignmentRouter.GET("/my-assignment", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.PromptLecturer, promptSDK.CourseStudent), getMyInterviewAssignment)
 	assignmentRouter.DELETE("/:assignmentId", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.PromptLecturer, promptSDK.CourseStudent), deleteInterviewAssignment)
 }

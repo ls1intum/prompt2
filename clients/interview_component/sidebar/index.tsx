@@ -14,8 +14,8 @@ const interviewSidebarItems: SidebarMenuItemProps = {
   ],
   subitems: [
     {
-      title: 'Manage Interviews',
-      goToPath: '/manage',
+      title: 'Participants',
+      goToPath: '/participants',
       requiredPermissions: [Role.PROMPT_ADMIN, Role.COURSE_LECTURER],
     },
     {
@@ -25,7 +25,7 @@ const interviewSidebarItems: SidebarMenuItemProps = {
     },
     {
       title: 'Mailing',
-      goToPath: '/manage/mailing',
+      goToPath: '/mailing',
       requiredPermissions: [Role.PROMPT_ADMIN, Role.COURSE_LECTURER],
     },
     {
