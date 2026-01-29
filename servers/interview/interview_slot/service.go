@@ -748,14 +748,6 @@ func fetchAllStudentsForCoursePhase(c *gin.Context, coursePhaseID uuid.UUID) (ma
 	return studentMap, nil
 }
 
-// fetchStudentInfo fetches student information for a specific course participation ID
-func fetchStudentInfo(c *gin.Context, courseParticipationID uuid.UUID) *StudentInfo {
-	// This function is kept for compatibility but should be replaced with fetchAllStudentsForCoursePhase
-	// for better performance when fetching multiple students
-	log.Warn("fetchStudentInfo called for single student - consider using fetchAllStudentsForCoursePhase for batch fetching")
-	return nil
-}
-
 // deleteInterviewAssignment godoc
 // @Summary Delete an interview assignment
 // @Description Removes a student's assignment to an interview slot
