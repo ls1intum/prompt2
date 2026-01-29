@@ -69,7 +69,7 @@ jobs:
     steps:
       - name: SSH to VM and Execute Docker-Compose Down
         continue-on-error: true
-        uses: appleboy/ssh-action@v1.2.4
+        uses: appleboy/ssh-action@v1.2.5
         with:
           host: ${{ vars.VM_HOST }}
           username: ${{ vars.VM_USERNAME }}
@@ -161,7 +161,7 @@ jobs:
           target: /home/${{ vars.VM_USERNAME }}/postfix-config/
 
       - name: Verify and extract maintenance assets on VM
-        uses: appleboy/ssh-action@v1.2.4
+        uses: appleboy/ssh-action@v1.2.5
         with:
           host: ${{ vars.VM_HOST }}
           username: ${{ vars.VM_USERNAME }}
@@ -178,7 +178,7 @@ jobs:
             tar xzf maintenance.tar.gz -C /home/${{ vars.VM_USERNAME }}
 
       - name: SSH to VM and create .env.prod file
-        uses: appleboy/ssh-action@v1.2.4
+        uses: appleboy/ssh-action@v1.2.5
         with:
           host: ${{ vars.VM_HOST }}
           username: ${{ vars.VM_USERNAME }}
@@ -269,7 +269,7 @@ jobs:
             echo "SEAWEEDFS_S3_PASSWORD=${{ secrets.SEAWEEDFS_S3_PASSWORD }}" >> .env.prod
 
       - name: SSH to VM and Execute Docker-Compose Up
-        uses: appleboy/ssh-action@v1.2.4
+        uses: appleboy/ssh-action@v1.2.5
         with:
           host: ${{ vars.VM_HOST }}
           username: ${{ vars.VM_USERNAME }}

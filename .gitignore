@@ -13,6 +13,9 @@ seaweedfs_master_data/
 seaweedfs_volume_data/
 seaweedfs_filer_data/
 justfile
+seaweedfs_master_data/
+seaweedfs_volume_data/
+seaweedfs_filer_data/
 
 **/*/.DS_Store
 **/.gocache/
