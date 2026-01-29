@@ -5,11 +5,11 @@ import {
   CardHeader,
   CardTitle,
   Avatar,
+  AvatarImage,
   AvatarFallback,
   Separator,
   Badge,
 } from '@tumaet/prompt-ui-components'
-import { AvatarImage } from '@radix-ui/react-avatar'
 import {
   getStudyDegreeString,
   CoursePhaseParticipationWithStudent,
