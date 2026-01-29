@@ -454,7 +454,7 @@ export const InterviewScheduleManagement = () => {
                       </TableCell>
                       <TableCell className='text-right'>
                         <div className='flex justify-end gap-2'>
-                          <Button variant='ghost' size='sm' onClick={() => handleEditClick(slot)}>
+                          <Button variant='ghost' size='sm' onClick={() => handleEditClick(slot)} aria-label='Edit slot'>
                             <Pencil className='h-4 w-4' />
                           </Button>
                           <Button
@@ -462,6 +462,7 @@ export const InterviewScheduleManagement = () => {
                             size='sm'
                             onClick={() => handleDeleteClick(slot.id)}
                             disabled={deleteSlotMutation.isPending}
+                            aria-label='Delete slot'
                           >
                             <Trash2 className='h-4 w-4' />
                           </Button>
