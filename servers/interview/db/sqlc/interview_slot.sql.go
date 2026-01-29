@@ -213,6 +213,28 @@ func (q *Queries) GetInterviewSlot(ctx context.Context, id uuid.UUID) (Interview
 	return i, err
 }
 
+const getInterviewSlotForUpdate = `-- name: GetInterviewSlotForUpdate :one
+SELECT id, course_phase_id, start_time, end_time, location, capacity, created_at, updated_at FROM interview_slot
+WHERE id = $1
+FOR UPDATE
+`
+
+func (q *Queries) GetInterviewSlotForUpdate(ctx context.Context, id uuid.UUID) (InterviewSlot, error) {
+	row := q.db.QueryRow(ctx, getInterviewSlotForUpdate, id)
+	var i InterviewSlot
+	err := row.Scan(
+		&i.ID,
+		&i.CoursePhaseID,
+		&i.StartTime,
+		&i.EndTime,
+		&i.Location,
+		&i.Capacity,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
 const getInterviewSlotWithAssignments = `-- name: GetInterviewSlotWithAssignments :many
 SELECT 
     s.id as slot_id,

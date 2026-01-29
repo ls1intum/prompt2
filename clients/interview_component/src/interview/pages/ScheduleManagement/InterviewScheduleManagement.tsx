@@ -80,7 +80,7 @@ export const InterviewScheduleManagement = () => {
   })
 
   // Fetch all slots
-  const { data: slots, isLoading } = useQuery<InterviewSlot[]>({
+  const { data: slots, isLoading, isError } = useQuery<InterviewSlot[]>({
     queryKey: ['interviewSlots', phaseId],
     queryFn: async () => {
       const response = await interviewAxiosInstance.get(
@@ -110,6 +110,9 @@ export const InterviewScheduleManagement = () => {
       setIsCreateDialogOpen(false)
       resetForm()
     },
+    onError: (error) => {
+      console.error('Failed to create slot:', error)
+    },
   })
 
   // Update slot mutation
@@ -132,6 +135,9 @@ export const InterviewScheduleManagement = () => {
       setEditingSlot(null)
       resetForm()
     },
+    onError: (error) => {
+      console.error('Failed to update slot:', error)
+    },
   })
 
   // Delete slot mutation
@@ -143,6 +149,9 @@ export const InterviewScheduleManagement = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['interviewSlots', phaseId] })
+    },
+    onError: (error) => {
+      console.error('Failed to delete slot:', error)
     },
   })
 
@@ -197,6 +206,19 @@ export const InterviewScheduleManagement = () => {
     return (
       <div className='flex items-center justify-center h-64'>
         <div className='text-muted-foreground'>Loading...</div>
+      </div>
+    )
+  }
+
+  if (isError) {
+    return (
+      <div className='container mx-auto py-8 px-4'>
+        <ManagementPageHeader>Interview Schedule Management</ManagementPageHeader>
+        <Alert variant='destructive' className='mt-4'>
+          <AlertDescription>
+            Failed to load interview slots. Please try again later.
+          </AlertDescription>
+        </Alert>
       </div>
     )
   }

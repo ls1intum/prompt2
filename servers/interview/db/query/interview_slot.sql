@@ -13,6 +13,11 @@ INSERT INTO interview_slot (
 SELECT * FROM interview_slot
 WHERE id = $1;
 
+-- name: GetInterviewSlotForUpdate :one
+SELECT * FROM interview_slot
+WHERE id = $1
+FOR UPDATE;
+
 -- name: GetInterviewSlotsByCoursePhase :many
 SELECT * FROM interview_slot
 WHERE course_phase_id = $1
