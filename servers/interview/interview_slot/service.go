@@ -131,7 +131,7 @@ func createInterviewSlot(c *gin.Context) {
 		return
 	}
 
-	if req.EndTime.Before(req.StartTime) {
+	if !req.EndTime.After(req.StartTime) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "End time must be after start time"})
 		return
 	}
@@ -178,7 +178,12 @@ func getAllInterviewSlots(c *gin.Context) {
 	}
 
 	// Get all students for this course phase at once
-	studentMap := fetchAllStudentsForCoursePhase(c, coursePhaseID)
+	studentMap, err := fetchAllStudentsForCoursePhase(c, coursePhaseID)
+	if err != nil {
+		log.Errorf("Failed to fetch students for course phase: %v", err)
+		c.JSON(http.StatusBadGateway, gin.H{"error": "Failed to fetch student information"})
+		return
+	}
 
 	// Group assignments by slot
 	slotMap := make(map[uuid.UUID]*InterviewSlotResponse)
@@ -269,8 +274,12 @@ func getInterviewSlot(c *gin.Context) {
 
 	slot, err := InterviewSlotServiceSingleton.queries.GetInterviewSlot(context.Background(), slotID)
 	if err != nil {
-		log.Errorf("Failed to get interview slot: %v", err)
-		c.JSON(http.StatusNotFound, gin.H{"error": "Interview slot not found"})
+		if errors.Is(err, sql.ErrNoRows) {
+			c.JSON(http.StatusNotFound, gin.H{"error": "Interview slot not found"})
+		} else {
+			log.Errorf("Failed to get interview slot: %v", err)
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get interview slot"})
+		}
 		return
 	}
 
@@ -289,7 +298,12 @@ func getInterviewSlot(c *gin.Context) {
 	}
 
 	// Get all students for this course phase
-	studentMap := fetchAllStudentsForCoursePhase(c, coursePhaseID)
+	studentMap, err := fetchAllStudentsForCoursePhase(c, coursePhaseID)
+	if err != nil {
+		log.Errorf("Failed to fetch students for course phase: %v", err)
+		c.JSON(http.StatusBadGateway, gin.H{"error": "Failed to fetch student information"})
+		return
+	}
 
 	assignmentInfos := make([]AssignmentInfo, len(assignments))
 	for i, assignment := range assignments {
@@ -350,7 +364,7 @@ func updateInterviewSlot(c *gin.Context) {
 		return
 	}
 
-	if req.EndTime.Before(req.StartTime) {
+	if !req.EndTime.After(req.StartTime) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "End time must be after start time"})
 		return
 	}
@@ -358,8 +372,12 @@ func updateInterviewSlot(c *gin.Context) {
 	// Verify slot belongs to this course phase before updating
 	existingSlot, err := InterviewSlotServiceSingleton.queries.GetInterviewSlot(context.Background(), slotID)
 	if err != nil {
-		log.Errorf("Failed to get interview slot: %v", err)
-		c.JSON(http.StatusNotFound, gin.H{"error": "Interview slot not found"})
+		if errors.Is(err, sql.ErrNoRows) {
+			c.JSON(http.StatusNotFound, gin.H{"error": "Interview slot not found"})
+		} else {
+			log.Errorf("Failed to get interview slot: %v", err)
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get interview slot"})
+		}
 		return
 	}
 
@@ -411,8 +429,12 @@ func deleteInterviewSlot(c *gin.Context) {
 	// Verify slot belongs to this course phase before deleting
 	existingSlot, err := InterviewSlotServiceSingleton.queries.GetInterviewSlot(context.Background(), slotID)
 	if err != nil {
-		log.Errorf("Failed to get interview slot: %v", err)
-		c.JSON(http.StatusNotFound, gin.H{"error": "Interview slot not found"})
+		if errors.Is(err, sql.ErrNoRows) {
+			c.JSON(http.StatusNotFound, gin.H{"error": "Interview slot not found"})
+		} else {
+			log.Errorf("Failed to get interview slot: %v", err)
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get interview slot"})
+		}
 		return
 	}
 
@@ -485,7 +507,12 @@ func createInterviewAssignment(c *gin.Context) {
 	// Lock the slot row using FOR UPDATE
 	slot, err := qtx.GetInterviewSlotForUpdate(ctx, req.InterviewSlotID)
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Interview slot not found"})
+		if errors.Is(err, sql.ErrNoRows) {
+			c.JSON(http.StatusNotFound, gin.H{"error": "Interview slot not found"})
+		} else {
+			log.Errorf("Failed to get interview slot: %v", err)
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get interview slot"})
+		}
 		return
 	}
 
@@ -583,7 +610,12 @@ func getMyInterviewAssignment(c *gin.Context) {
 	}
 
 	// Fetch all students to find the user's course participation ID
-	studentMap := fetchAllStudentsForCoursePhase(c, coursePhaseID)
+	studentMap, err := fetchAllStudentsForCoursePhase(c, coursePhaseID)
+	if err != nil {
+		log.Errorf("Failed to fetch students for course phase: %v", err)
+		c.JSON(http.StatusBadGateway, gin.H{"error": "Failed to fetch student information"})
+		return
+	}
 
 	var participationUUID uuid.UUID
 	for participationID, student := range studentMap {
@@ -645,14 +677,13 @@ func getMyInterviewAssignment(c *gin.Context) {
 
 // fetchAllStudentsForCoursePhase fetches all students for a course phase from the core service
 // and returns a map of course participation ID to student info
-func fetchAllStudentsForCoursePhase(c *gin.Context, coursePhaseID uuid.UUID) map[uuid.UUID]*StudentInfo {
+func fetchAllStudentsForCoursePhase(c *gin.Context, coursePhaseID uuid.UUID) (map[uuid.UUID]*StudentInfo, error) {
 	coreURL := sdkUtils.GetCoreUrl()
 	url := fmt.Sprintf("%s/api/course_phases/%s/participations", coreURL, coursePhaseID)
 
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
-		log.Warnf("Failed to create request for course phase participations: %v", err)
-		return make(map[uuid.UUID]*StudentInfo)
+		return nil, fmt.Errorf("failed to create request for course phase participations: %w", err)
 	}
 
 	// Forward the authorization header
@@ -664,20 +695,17 @@ func fetchAllStudentsForCoursePhase(c *gin.Context, coursePhaseID uuid.UUID) map
 	client := &http.Client{Timeout: 5 * time.Second}
 	resp, err := client.Do(req)
 	if err != nil {
-		log.Warnf("Failed to fetch course phase participations: %v", err)
-		return make(map[uuid.UUID]*StudentInfo)
+		return nil, fmt.Errorf("failed to fetch course phase participations: %w", err)
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		log.Warnf("Core service returned status %d for course phase participations", resp.StatusCode)
-		return make(map[uuid.UUID]*StudentInfo)
+		return nil, fmt.Errorf("core service returned status %d for course phase participations", resp.StatusCode)
 	}
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		log.Warnf("Failed to read course phase participations response: %v", err)
-		return make(map[uuid.UUID]*StudentInfo)
+		return nil, fmt.Errorf("failed to read course phase participations response: %w", err)
 	}
 
 	var participationsResponse struct {
@@ -688,8 +716,7 @@ func fetchAllStudentsForCoursePhase(c *gin.Context, coursePhaseID uuid.UUID) map
 	}
 
 	if err := json.Unmarshal(body, &participationsResponse); err != nil {
-		log.Warnf("Failed to unmarshal course phase participations: %v", err)
-		return make(map[uuid.UUID]*StudentInfo)
+		return nil, fmt.Errorf("failed to unmarshal course phase participations: %w", err)
 	}
 
 	// Build map of course participation ID to student info
@@ -699,7 +726,7 @@ func fetchAllStudentsForCoursePhase(c *gin.Context, coursePhaseID uuid.UUID) map
 		studentMap[participation.CourseParticipationID] = &studentCopy
 	}
 
-	return studentMap
+	return studentMap, nil
 }
 
 // fetchStudentInfo fetches student information for a specific course participation ID
@@ -788,7 +815,12 @@ func deleteInterviewAssignment(c *gin.Context) {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid course phase ID"})
 			return
 		}
-		studentMap := fetchAllStudentsForCoursePhase(c, coursePhaseID)
+		studentMap, err := fetchAllStudentsForCoursePhase(c, coursePhaseID)
+		if err != nil {
+			log.Errorf("Failed to fetch students for course phase: %v", err)
+			c.JSON(http.StatusBadGateway, gin.H{"error": "Failed to fetch student information"})
+			return
+		}
 
 		// Find the user's course participation ID
 		var userParticipationID uuid.UUID

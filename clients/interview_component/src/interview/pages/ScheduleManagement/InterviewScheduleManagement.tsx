@@ -389,7 +389,7 @@ export const InterviewScheduleManagement = () => {
               <TableBody>
                 {slots.map((slot) => {
                   const isFull = slot.assigned_count >= slot.capacity
-                  const isPast = new Date(slot.start_time) < new Date()
+                  const isPast = new Date(slot.end_time) < new Date()
 
                   return (
                     <TableRow key={slot.id}>
