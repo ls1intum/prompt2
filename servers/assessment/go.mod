@@ -3,7 +3,7 @@ module github.com/ls1intum/prompt2/servers/assessment
 go 1.25.6
 
 require (
-	github.com/getsentry/sentry-go v0.41.0
+	github.com/getsentry/sentry-go v0.42.0
 	github.com/getsentry/sentry-go/gin v0.41.0
 	github.com/getsentry/sentry-go/logrus v0.41.0
 	github.com/gin-gonic/gin v1.11.0
@@ -11,12 +11,16 @@ require (
 	github.com/jackc/pgx/v5 v5.8.0
 	github.com/ls1intum/prompt-sdk v1.0.11
 	github.com/sirupsen/logrus v1.9.4
+	github.com/swaggo/swag v1.16.6
 )
 
 require (
 	dario.cat/mergo v1.0.2 // indirect
 	github.com/Azure/go-ansiterm v0.0.0-20250102033503-faa5f7b0171c // indirect
+	github.com/KyleBanks/depth v1.2.1 // indirect
 	github.com/Microsoft/go-winio v0.6.2 // indirect
+	github.com/PuerkitoBio/purell v1.1.1 // indirect
+	github.com/PuerkitoBio/urlesc v0.0.0-20170810143723-de5bf2ad4578 // indirect
 	github.com/bytedance/gopkg v0.1.3 // indirect
 	github.com/cenkalti/backoff/v4 v4.3.0 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
@@ -34,10 +38,16 @@ require (
 	github.com/go-logr/logr v1.4.3 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/go-ole/go-ole v1.3.0 // indirect
+	github.com/go-openapi/jsonpointer v0.19.5 // indirect
+	github.com/go-openapi/jsonreference v0.19.6 // indirect
+	github.com/go-openapi/spec v0.20.4 // indirect
+	github.com/go-openapi/swag v0.19.15 // indirect
 	github.com/goccy/go-yaml v1.19.2 // indirect
+	github.com/josharian/intern v1.0.0 // indirect
 	github.com/klauspost/compress v1.18.3 // indirect
 	github.com/lufia/plan9stats v0.0.0-20251013123823-9fd1530e3ec3 // indirect
 	github.com/magiconair/properties v1.8.10 // indirect
+	github.com/mailru/easyjson v0.7.6 // indirect
 	github.com/moby/docker-image-spec v1.3.1 // indirect
 	github.com/moby/go-archive v0.2.0 // indirect
 	github.com/moby/patternmatcher v0.6.0 // indirect
@@ -63,6 +73,9 @@ require (
 	go.opentelemetry.io/otel/metric v1.39.0 // indirect
 	go.opentelemetry.io/otel/trace v1.39.0 // indirect
 	go.opentelemetry.io/proto/otlp v1.9.0 // indirect
+	golang.org/x/mod v0.31.0 // indirect
+	golang.org/x/tools v0.40.0 // indirect
+	gopkg.in/yaml.v2 v2.4.0 // indirect
 )
 
 require (
