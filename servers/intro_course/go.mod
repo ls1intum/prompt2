@@ -13,7 +13,7 @@ require (
 	github.com/sirupsen/logrus v1.9.4
 	github.com/stretchr/testify v1.11.1
 	github.com/testcontainers/testcontainers-go v0.40.0
-	gitlab.com/gitlab-org/api/client-go v1.17.0
+	gitlab.com/gitlab-org/api/client-go v1.24.0
 )
 
 require (
