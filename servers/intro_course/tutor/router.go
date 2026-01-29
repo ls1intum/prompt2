@@ -20,6 +20,17 @@ func setupTutorRouter(router *gin.RouterGroup, authMiddleware func(allowedRoles 
 	tutorRouter.PUT("/:tutorID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), updateGitLabUsername)
 }
 
+// getTutors godoc
+// @Summary Get tutors
+// @Description Returns all tutors for the course phase.
+// @Tags tutor
+// @Produce json
+// @Param coursePhaseID path string true "Course Phase UUID"
+// @Success 200 {array} tutorDTO.Tutor
+// @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Security ApiKeyAuth
+// @Router /course_phase/{coursePhaseID}/tutor [get]
 func getTutors(c *gin.Context) {
 	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
 	if err != nil {
@@ -37,6 +48,20 @@ func getTutors(c *gin.Context) {
 	c.JSON(http.StatusOK, tutors)
 }
 
+// importTutors godoc
+// @Summary Import tutors
+// @Description Imports tutors and assigns them to the Keycloak groups.
+// @Tags tutor
+// @Accept json
+// @Produce json
+// @Param coursePhaseID path string true "Course Phase UUID"
+// @Param courseID path string true "Course UUID"
+// @Param request body []tutorDTO.Tutor true "List of tutors to import"
+// @Success 201
+// @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Security ApiKeyAuth
+// @Router /course_phase/{coursePhaseID}/tutor/course/{courseID} [post]
 func importTutors(c *gin.Context) {
 	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
 	if err != nil {
@@ -86,6 +111,20 @@ func importTutors(c *gin.Context) {
 	c.Status(http.StatusCreated)
 }
 
+// updateGitLabUsername godoc
+// @Summary Update tutor GitLab username
+// @Description Updates the GitLab username for a tutor.
+// @Tags tutor
+// @Accept json
+// @Produce json
+// @Param coursePhaseID path string true "Course Phase UUID"
+// @Param tutorID path string true "Tutor UUID"
+// @Param request body tutorDTO.UpdateTutor true "GitLab username update"
+// @Success 200
+// @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Security ApiKeyAuth
+// @Router /course_phase/{coursePhaseID}/tutor/{tutorID} [put]
 func updateGitLabUsername(c *gin.Context) {
 	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
 	if err != nil {
