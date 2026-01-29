@@ -647,7 +647,17 @@ func getMyInterviewAssignment(c *gin.Context) {
 	// Get slot details
 	slot, err := InterviewSlotServiceSingleton.queries.GetInterviewSlot(context.Background(), assignment.InterviewSlotID)
 	if err != nil {
-		log.Warnf("Failed to get slot details: %v", err)
+		log.Errorf("Failed to get slot details: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get slot details"})
+		return
+	}
+
+	// Count assignments for the slot
+	count, err := InterviewSlotServiceSingleton.queries.CountAssignmentsBySlot(context.Background(), slot.ID)
+	if err != nil {
+		log.Errorf("Failed to count assignments for slot: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to count assignments"})
+		return
 	}
 
 	response := InterviewAssignmentResponse{
@@ -655,11 +665,7 @@ func getMyInterviewAssignment(c *gin.Context) {
 		InterviewSlotID:       assignment.InterviewSlotID,
 		CourseParticipationID: assignment.CourseParticipationID,
 		AssignedAt:            assignment.AssignedAt.Time,
-	}
-
-	if err == nil {
-		count, _ := InterviewSlotServiceSingleton.queries.CountAssignmentsBySlot(context.Background(), slot.ID)
-		response.SlotDetails = &InterviewSlotResponse{
+		SlotDetails: &InterviewSlotResponse{
 			ID:            slot.ID,
 			CoursePhaseID: slot.CoursePhaseID,
 			StartTime:     pgTimestamptzToTime(slot.StartTime),
@@ -669,7 +675,7 @@ func getMyInterviewAssignment(c *gin.Context) {
 			AssignedCount: count,
 			CreatedAt:     pgTimestamptzToTime(slot.CreatedAt),
 			UpdatedAt:     pgTimestamptzToTime(slot.UpdatedAt),
-		}
+		},
 	}
 
 	c.JSON(http.StatusOK, response)
