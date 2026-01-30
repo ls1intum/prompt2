@@ -603,8 +603,6 @@ export const InterviewScheduleManagement = () => {
                         value={participation.courseParticipationID}
                       >
                         {participation.student.firstName} {participation.student.lastName}
-                        {participation.student.matriculationNumber &&
-                          ` (${participation.student.matriculationNumber})`}
                       </SelectItem>
                     ))}
                   </SelectContent>
