@@ -2,6 +2,8 @@ import { useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { interviewAxiosInstance } from '../../network/interviewServerConfig'
+import { getCoursePhaseParticipations } from '@/network/queries/getCoursePhaseParticipations'
+import { CoursePhaseParticipationsWithResolution } from '@tumaet/prompt-shared-state'
 import {
   Button,
   Card,
@@ -28,8 +30,13 @@ import {
   ManagementPageHeader,
   Alert,
   AlertDescription,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from '@tumaet/prompt-ui-components'
-import { Calendar, Clock, MapPin, Users, Plus, Pencil, Trash2 } from 'lucide-react'
+import { Calendar, Clock, MapPin, Users, Plus, Pencil, Trash2, UserPlus } from 'lucide-react'
 import { format } from 'date-fns'
 
 interface StudentInfo {
@@ -71,12 +78,22 @@ export const InterviewScheduleManagement = () => {
   const queryClient = useQueryClient()
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
+  const [isAssignDialogOpen, setIsAssignDialogOpen] = useState(false)
+  const [assigningSlot, setAssigningSlot] = useState<InterviewSlot | null>(null)
+  const [selectedParticipationId, setSelectedParticipationId] = useState<string>('')
   const [editingSlot, setEditingSlot] = useState<InterviewSlot | null>(null)
   const [formData, setFormData] = useState<SlotFormData>({
     start_time: '',
     end_time: '',
     location: '',
     capacity: 1,
+  })
+
+  // Fetch all participants
+  const { data: participations } = useQuery<CoursePhaseParticipationsWithResolution>({
+    queryKey: ['participants', phaseId],
+    queryFn: () => getCoursePhaseParticipations(phaseId ?? ''),
+    enabled: !!phaseId,
   })
 
   // Fetch all slots
@@ -155,6 +172,36 @@ export const InterviewScheduleManagement = () => {
     },
   })
 
+  // Manual assignment mutation (admin)
+  const assignStudentMutation = useMutation({
+    mutationFn: async ({
+      slotId,
+      participationId,
+    }: {
+      slotId: string
+      participationId: string
+    }) => {
+      const response = await interviewAxiosInstance.post(
+        `interview/api/course_phase/${phaseId}/interview-assignments/admin`,
+        {
+          interview_slot_id: slotId,
+          course_participation_id: participationId,
+        },
+      )
+      return response.data
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['interviewSlots', phaseId] })
+      setIsAssignDialogOpen(false)
+      setSelectedParticipationId('')
+      setAssigningSlot(null)
+    },
+    onError: (error: any) => {
+      console.error('Failed to assign student:', error)
+      alert(error.response?.data?.error || 'Failed to assign student')
+    },
+  })
+
   const resetForm = () => {
     setFormData({
       start_time: '',
@@ -201,6 +248,32 @@ export const InterviewScheduleManagement = () => {
       deleteSlotMutation.mutate(slotId)
     }
   }
+
+  const handleAssignClick = (slot: InterviewSlot) => {
+    setAssigningSlot(slot)
+    setSelectedParticipationId('')
+    setIsAssignDialogOpen(true)
+  }
+
+  const handleAssignStudent = () => {
+    if (assigningSlot && selectedParticipationId) {
+      assignStudentMutation.mutate({
+        slotId: assigningSlot.id,
+        participationId: selectedParticipationId,
+      })
+    }
+  }
+
+  // Get list of already assigned participation IDs
+  const assignedParticipationIds = new Set(
+    slots?.flatMap((slot) => slot.assignments.map((a) => a.course_participation_id)) || [],
+  )
+
+  // Filter unassigned students
+  const unassignedStudents =
+    participations?.participations.filter(
+      (p) => !assignedParticipationIds.has(p.courseParticipationID),
+    ) || []
 
   if (isLoading) {
     return (
@@ -456,6 +529,16 @@ export const InterviewScheduleManagement = () => {
                       </TableCell>
                       <TableCell className='text-right'>
                         <div className='flex justify-end gap-2'>
+                          <Button
+                            variant='ghost'
+                            size='sm'
+                            onClick={() => handleAssignClick(slot)}
+                            disabled={isFull || isPast}
+                            aria-label='Assign student'
+                            title='Assign student to slot'
+                          >
+                            <UserPlus className='h-4 w-4' />
+                          </Button>
                           <Button variant='ghost' size='sm' onClick={() => handleEditClick(slot)} aria-label='Edit slot'>
                             <Pencil className='h-4 w-4' />
                           </Button>
@@ -485,6 +568,85 @@ export const InterviewScheduleManagement = () => {
           </AlertDescription>
         </Alert>
       )}
+
+      {/* Assign Student Dialog */}
+      <Dialog open={isAssignDialogOpen} onOpenChange={setIsAssignDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Assign Student to Interview Slot</DialogTitle>
+            <DialogDescription>
+              {assigningSlot && (
+                <>
+                  Manually assign a student to the slot on{' '}
+                  {new Date(assigningSlot.start_time).toLocaleString('en-US', {
+                    dateStyle: 'medium',
+                    timeStyle: 'short',
+                  })}
+                  . This slot has {assigningSlot.assigned_count}/{assigningSlot.capacity} students
+                  assigned.
+                </>
+              )}
+            </DialogDescription>
+          </DialogHeader>
+          <div className='space-y-4 py-4'>
+            {unassignedStudents.length > 0 ? (
+              <div className='space-y-2'>
+                <Label htmlFor='student-select'>Select Student</Label>
+                <Select value={selectedParticipationId} onValueChange={setSelectedParticipationId}>
+                  <SelectTrigger id='student-select'>
+                    <SelectValue placeholder='Choose a student...' />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {unassignedStudents.map((participation) => (
+                      <SelectItem
+                        key={participation.courseParticipationID}
+                        value={participation.courseParticipationID}
+                      >
+                        {participation.student.firstName} {participation.student.lastName}
+                        {participation.student.matriculationNumber &&
+                          ` (${participation.student.matriculationNumber})`}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <p className='text-sm text-muted-foreground'>
+                  {unassignedStudents.length} unassigned student
+                  {unassignedStudents.length !== 1 && 's'} available
+                </p>
+              </div>
+            ) : (
+              <Alert>
+                <AlertDescription>
+                  All students have been assigned to interview slots. No unassigned students are
+                  available.
+                </AlertDescription>
+              </Alert>
+            )}
+          </div>
+          <DialogFooter>
+            <Button
+              variant='outline'
+              onClick={() => {
+                setIsAssignDialogOpen(false)
+                setSelectedParticipationId('')
+                setAssigningSlot(null)
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleAssignStudent}
+              disabled={
+                !selectedParticipationId ||
+                assignStudentMutation.isPending ||
+                unassignedStudents.length === 0
+              }
+            >
+              {assignStudentMutation.isPending ? 'Assigning...' : 'Assign Student'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
