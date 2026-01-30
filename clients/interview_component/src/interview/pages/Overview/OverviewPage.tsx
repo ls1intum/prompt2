@@ -1,18 +1,54 @@
 import { useState } from 'react'
-import { useLocation, useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import { cn, ManagementPageHeader, useScreenSize } from '@tumaet/prompt-ui-components'
 import { StudentCard } from '../../components/StudentCard'
 import { useParticipationStore } from '../../zustand/useParticipationStore'
 import { SortDropdownMenu } from '../../components/SortDropdownMenu'
 import { useSorting } from '../../hooks/useSorting'
+import { useQuery } from '@tanstack/react-query'
+import { interviewAxiosInstance } from '../../network/interviewServerConfig'
+
+interface AssignmentInfo {
+  id: string
+  course_participation_id: string
+  assigned_at: string
+}
+
+interface InterviewSlotData {
+  id: string
+  start_time: string
+  end_time: string
+  location: string | null
+  assignments: AssignmentInfo[]
+}
 
 export const OverviewPage = () => {
-  const { interviewSlots } = useParticipationStore()
+  const { phaseId } = useParams<{ phaseId: string }>()
   const navigate = useNavigate()
   const path = useLocation().pathname
   const { width } = useScreenSize() // use this for more fine-grained control over the layout
   const [sortBy, setSortBy] = useState<string | undefined>('Interview Date')
   const orderedParticipations = useSorting(sortBy)
+
+  // Fetch interview slots with assignments
+  const { data: slots } = useQuery<InterviewSlotData[]>({
+    queryKey: ['interviewSlots', phaseId],
+    queryFn: async () => {
+      const response = await interviewAxiosInstance.get(
+        `interview/api/course_phase/${phaseId}/interview-slots`,
+      )
+      return response.data
+    },
+    enabled: !!phaseId,
+  })
+
+  // Create a map of participation ID to interview slot
+  const participationToSlot = new Map<string, InterviewSlotData>()
+  slots?.forEach((slot) => {
+    slot.assignments.forEach((assignment) => {
+      participationToSlot.set(assignment.course_participation_id, slot)
+    })
+  })
 
   return (
     <div>
@@ -36,9 +72,7 @@ export const OverviewPage = () => {
           >
             <StudentCard
               participation={participation}
-              interviewSlot={interviewSlots.find(
-                (slot) => slot.courseParticipationID === participation.courseParticipationID,
-              )}
+              interviewSlot={participationToSlot.get(participation.courseParticipationID)}
             />
           </div>
         ))}
