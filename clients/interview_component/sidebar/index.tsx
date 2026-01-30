@@ -14,6 +14,11 @@ const interviewSidebarItems: SidebarMenuItemProps = {
   ],
   subitems: [
     {
+      title: 'Manage Interviews',
+      goToPath: '/manage',
+      requiredPermissions: [Role.PROMPT_ADMIN, Role.COURSE_LECTURER],
+    },
+    {
       title: 'Participants',
       goToPath: '/participants',
       requiredPermissions: [Role.PROMPT_ADMIN, Role.COURSE_LECTURER],

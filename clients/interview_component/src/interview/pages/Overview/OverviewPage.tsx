@@ -4,7 +4,6 @@ import { cn, ManagementPageHeader, useScreenSize } from '@tumaet/prompt-ui-compo
 import { StudentCard } from '../../components/StudentCard'
 import { useParticipationStore } from '../../zustand/useParticipationStore'
 import { SortDropdownMenu } from '../../components/SortDropdownMenu'
-import { InterviewTimesDialog } from '../../components/InterviewTimesDialog'
 import { useSorting } from '../../hooks/useSorting'
 
 export const OverviewPage = () => {
@@ -21,7 +20,6 @@ export const OverviewPage = () => {
       <div className='flex justify-between items-center mt-4 mb-6'>
         <div className='flex space-x-2'>
           <SortDropdownMenu sortBy={sortBy} setSortBy={setSortBy} />
-          <InterviewTimesDialog />
         </div>
       </div>
       <div
