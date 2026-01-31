@@ -1,11 +1,4 @@
-import {
-  Card,
-  CardHeader,
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from '@tumaet/prompt-ui-components'
+import { Card, Tabs, TabsContent, TabsList, TabsTrigger } from '@tumaet/prompt-ui-components'
 import { GalleryVerticalEnd, NotepadText } from 'lucide-react'
 import { ReactNode } from 'react'
 
@@ -40,9 +33,13 @@ function InstructorNoteDescriptor() {
   )
 }
 
-function SideBySideView({ courseEnrollment, instructorNotes, className }: SideBySideViewProps) {
+function SideBySideView({
+  courseEnrollment,
+  instructorNotes,
+  className = '',
+}: SideBySideViewProps) {
   return (
-    <div className={'grid grid-cols-2 mt-4 ' + className}>
+    <div className={`grid grid-cols-2 mt-4 ${className}`}>
       <div className=' lg:pr-2 xl:pr-4'>{courseEnrollment}</div>
       <div>{instructorNotes}</div>
     </div>
