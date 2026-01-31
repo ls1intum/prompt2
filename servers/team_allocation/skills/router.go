@@ -20,6 +20,17 @@ func setupSkillRouter(routerGroup *gin.RouterGroup, authMiddleware func(allowedR
 	skillRouter.DELETE("/:skillID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), deleteSkill)
 }
 
+// getAllSkills godoc
+// @Summary Get all skills
+// @Description Get all skills for a course phase
+// @Tags skill
+// @Produce json
+// @Param coursePhaseID path string true "Course Phase UUID"
+// @Success 200 {array} skillDTO.Skill
+// @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Security ApiKeyAuth
+// @Router /course_phase/{coursePhaseID}/skill [get]
 func getAllSkills(c *gin.Context) {
 	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
 	if err != nil {
@@ -36,6 +47,19 @@ func getAllSkills(c *gin.Context) {
 	c.JSON(http.StatusOK, skills)
 }
 
+// createSkills godoc
+// @Summary Create new skills
+// @Description Create one or more skills for a course phase
+// @Tags skill
+// @Accept json
+// @Produce json
+// @Param coursePhaseID path string true "Course Phase UUID"
+// @Param request body skillDTO.CreateSkillsRequest true "Skill names to create"
+// @Success 201
+// @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Security ApiKeyAuth
+// @Router /course_phase/{coursePhaseID}/skill [post]
 func createSkills(c *gin.Context) {
 	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
 	if err != nil {
@@ -58,6 +82,20 @@ func createSkills(c *gin.Context) {
 	c.Status(http.StatusCreated)
 }
 
+// updateSkill godoc
+// @Summary Update skill
+// @Description Update a skill name
+// @Tags skill
+// @Accept json
+// @Produce json
+// @Param coursePhaseID path string true "Course Phase UUID"
+// @Param skillID path string true "Skill UUID"
+// @Param request body skillDTO.UpdateSkillRequest true "New skill name"
+// @Success 200
+// @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Security ApiKeyAuth
+// @Router /course_phase/{coursePhaseID}/skill/{skillID} [put]
 func updateSkill(c *gin.Context) {
 	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
 	if err != nil {
@@ -87,6 +125,18 @@ func updateSkill(c *gin.Context) {
 	c.Status(http.StatusOK)
 }
 
+// deleteSkill godoc
+// @Summary Delete skill
+// @Description Delete a skill by its ID
+// @Tags skill
+// @Produce json
+// @Param coursePhaseID path string true "Course Phase UUID"
+// @Param skillID path string true "Skill UUID"
+// @Success 200
+// @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Security ApiKeyAuth
+// @Router /course_phase/{coursePhaseID}/skill/{skillID} [delete]
 func deleteSkill(c *gin.Context) {
 	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
 	if err != nil {

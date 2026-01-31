@@ -112,6 +112,17 @@ func initKeycloak() {
 	}
 }
 
+// @title           PROMPT Intro Course API
+// @version         1.0
+// @description     This is the intro course server of PROMPT.
+// @host            localhost:8082
+// @BasePath        /intro-course/api
+// @externalDocs.description  PROMPT Documentation
+// @externalDocs.url          https://ls1intum.github.io/prompt2/
+// @securityDefinitions.apikey ApiKeyAuth
+// @in header
+// @name Authorization
+// @description Bearer token authentication. Use format: Bearer {token}
 func main() {
 	initSentry()
 	defer sentry.Flush(2 * time.Second)

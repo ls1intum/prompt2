@@ -16,6 +16,7 @@ permissions:
 
 jobs:
   detect-migrations:
+    if: github.event_name == 'pull_request'
     uses: ./.github/workflows/detect-migrations.yml
     secrets: inherit
     permissions:
