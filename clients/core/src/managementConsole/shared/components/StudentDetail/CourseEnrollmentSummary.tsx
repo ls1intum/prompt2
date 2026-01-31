@@ -20,6 +20,7 @@ export function CourseEnrollmentSummary({ enrollments }: CourseEnrollmentSummary
   }).length
 
   const completed = enrollments.filter((enrollment) => {
+    if (enrollment.coursePhases.length === 0) return false
     const { hasFailed, hasNotAssessed } = countEnrollmentPhaseStatuses(enrollment)
     return !hasFailed && !hasNotAssessed
   }).length
