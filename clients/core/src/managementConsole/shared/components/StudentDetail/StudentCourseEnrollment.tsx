@@ -39,9 +39,9 @@ export function StudentCourseEnrollment({
   const canShowMore = !hasFailed && futurePhases.length > 0
 
   return (
-    <div>
+    <div className='w-full'>
       <CourseDetail studentCourseEnrollment={courseEnrollment} />
-      <div className='mt-4 ml-3'>
+      <div className='mt-4 ml-3 w-full'>
         {visiblePhases.map((courseParticipation, index) => (
           <StudentCoursePhaseEnrollment
             key={courseParticipation.coursePhaseId}

@@ -35,5 +35,10 @@ export function CourseEnrollmentSummary({ enrollments }: CourseEnrollmentSummary
 
   if (parts.length === 0) return null
 
-  return <div className='text-sm'>{parts.join(' · ')}</div>
+  return (
+    <div className='w-full text-center'>
+      <span className='font-semibold'>Summary</span>
+      <p className='text-sm -mt-1'>{parts.join(' · ')}</p>
+    </div>
+  )
 }
