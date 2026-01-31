@@ -20,14 +20,14 @@ import { getStatusColor } from '@/lib/getStatusColor'
 
 interface StudentProfileProps {
   student: Student
-  status: PassStatus
+  status?: PassStatus
 }
 
 export const StudentProfile = ({ student, status }: StudentProfileProps) => {
   return (
     <Card className='relative overflow-hidden'>
       {/* Status indicator */}
-      <div className={`h-16 ${getStatusColor(status)}`} />
+      <div className={`h-16 ${status ? getStatusColor(status) : 'bg-gray-100'}`} />
       <div className='mb-4'>
         <Avatar className='absolute w-24 h-24 border-4 border-background rounded-full transform left-3 -translate-y-1/2'>
           <AvatarImage src={getGravatarUrl(student.email)} alt={student.lastName} />

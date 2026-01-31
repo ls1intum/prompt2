@@ -5,7 +5,6 @@ import { useStudent } from '@core/network/hooks/useStudent'
 import { useStudentEnrollments } from '@core/network/hooks/useStudentEnrollments'
 import { Loader2 } from 'lucide-react'
 import { StudentProfile } from '@/components/StudentProfile'
-import { PassStatus } from '@tumaet/prompt-shared-state'
 import { InstructorNotes } from '../shared/components/InstructorNote/InstructorNotes'
 import { StudentDetailContentLayout } from '../shared/components/StudentDetail/StudentDetailContentLayout'
 import { CourseEnrollmentSummary } from '../shared/components/StudentDetail/CourseEnrollmentSummary'
@@ -26,7 +25,7 @@ export const StudentDetailPage = () => {
       <div className='flex flex-col gap-y-2 text-sm'>
         {student.isLoading && <Loader2 className='h-4 w-4 animate-spin' />}
         {student.isError && <p className='text-destructive'>Failed to load student data</p>}
-        {student.isSuccess && <StudentProfile student={student.data} status={PassStatus.PASSED} />}
+        {student.isSuccess && <StudentProfile student={student.data} />}
       </div>
 
       <StudentDetailContentLayout
