@@ -25,6 +25,7 @@ export const StudentDetailPage = () => {
     <div className='flex flex-col w-full justify-between gap-2'>
       <div className='flex flex-col gap-y-2 text-sm'>
         {student.isLoading && <Loader2 className='h-4 w-4 animate-spin' />}
+        {student.isError && <p className='text-destructive'>Failed to load student data</p>}
         {student.isSuccess && <StudentProfile student={student.data} status={PassStatus.PASSED} />}
       </div>
 
@@ -32,6 +33,7 @@ export const StudentDetailPage = () => {
         courseEnrollment={
           <div className='flex flex-col gap-5'>
             {enrollments.isLoading && <Loader2 className='h-4 w-4 animate-spin' />}
+            {enrollments.isError && <p className='text-destructive'>Failed to load enrollments</p>}
             {enrollments.isSuccess && (
               <>
                 {enrollments.data?.courses.map((ce: CourseEnrollment) => (
