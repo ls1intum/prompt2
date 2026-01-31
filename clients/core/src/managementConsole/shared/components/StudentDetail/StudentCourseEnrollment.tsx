@@ -5,15 +5,6 @@ import { useState } from 'react'
 import { Button } from '@tumaet/prompt-ui-components'
 import { CourseDetail } from './CourseDetail'
 
-export function formatDate(date: string | null): string {
-  if (!date) return '-'
-  return new Date(date).toLocaleDateString('us-US', {
-    year: 'numeric',
-    month: 'short',
-    day: '2-digit',
-  })
-}
-
 export function StudentCourseEnrollment({
   courseEnrollment,
   studentId,

@@ -1,15 +1,7 @@
 import { CourseAvatar } from '@core/managementConsole/layout/Sidebar/CourseSwitchSidebar/components/CourseAvatar'
 import { CourseEnrollment } from '@core/network/queries/getStudentEnrollments'
 import { LinkHeading } from './LinkHeading'
-
-export function formatDate(date: string | null): string {
-  if (!date) return '-'
-  return new Date(date).toLocaleDateString('us-US', {
-    year: 'numeric',
-    month: 'short',
-    day: '2-digit',
-  })
-}
+import { formatDate } from './util/formatDate'
 
 interface CourseDetailProps {
   studentCourseEnrollment: CourseEnrollment
