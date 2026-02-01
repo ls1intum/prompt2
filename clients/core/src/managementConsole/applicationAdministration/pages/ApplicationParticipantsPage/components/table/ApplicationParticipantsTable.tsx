@@ -1,4 +1,4 @@
-import { ReactNode, useMemo } from 'react'
+import { ReactNode, useCallback, useMemo } from 'react'
 import { PromptTable, TableFilter } from '@tumaet/prompt-ui-components'
 
 import { useDeleteApplications } from '../../hooks/useDeleteApplications'
@@ -10,16 +10,13 @@ import { getApplicationActions } from './applicationActions'
 import { PassStatus } from '@tumaet/prompt-shared-state'
 import { useUpdateCoursePhaseParticipationBatch } from '@/hooks/useUpdateCoursePhaseParticipationBatch'
 import { ColumnDef } from '@tanstack/react-table'
+import { useNavigate, useParams } from 'react-router-dom'
 
-export const ApplicationParticipantsTable = ({
-  phaseId,
-  openDialog,
-}: {
-  phaseId: string
-  openDialog: (row: ApplicationRow) => void
-}): ReactNode => {
+export const ApplicationParticipantsTable = ({ phaseId }: { phaseId: string }): ReactNode => {
+  const { courseId } = useParams()
   const { participations, additionalScores } = useApplicationStore()
   const { mutate: deleteApplications } = useDeleteApplications()
+  const navigate = useNavigate()
 
   const data = useMemo(
     () => buildApplicationRows(participations, additionalScores),
@@ -36,6 +33,15 @@ export const ApplicationParticipantsTable = ({
     [additionalScores],
   )
 
+  const viewApplication = useCallback(
+    (row: ApplicationRow) => {
+      navigate(
+        `/management/course/${courseId}/${phaseId}/participants/${row.courseParticipationID}`,
+      )
+    },
+    [navigate, courseId, phaseId],
+  )
+
   const { mutate: updateBatch } = useUpdateCoursePhaseParticipationBatch()
 
   const actions = useMemo(() => {
@@ -50,11 +56,11 @@ export const ApplicationParticipantsTable = ({
         })),
       )
     }
-    return getApplicationActions(deleteApplications, openDialog, {
+    return getApplicationActions(deleteApplications, viewApplication, {
       setPassed: (r) => setStatus(PassStatus.PASSED, r),
       setFailed: (r) => setStatus(PassStatus.FAILED, r),
     })
-  }, [deleteApplications, openDialog, phaseId, updateBatch])
+  }, [deleteApplications, viewApplication, phaseId, updateBatch])
 
   return (
     <PromptTable<ApplicationRow>
@@ -62,7 +68,7 @@ export const ApplicationParticipantsTable = ({
       columns={columns}
       filters={filters}
       actions={actions}
-      onRowClick={openDialog}
+      onRowClick={viewApplication}
     />
   )
 }
