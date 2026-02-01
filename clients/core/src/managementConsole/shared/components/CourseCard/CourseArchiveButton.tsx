@@ -7,7 +7,7 @@ interface CourseArchiveButtonProps {
   courseId: string
 }
 
-export const handleArchive = async (archived, courseId) => {
+export const handleArchive = async (archived: boolean, courseId: string): Promise<void> => {
   if (archived) {
     await unarchiveCourses([courseId])
   } else {
