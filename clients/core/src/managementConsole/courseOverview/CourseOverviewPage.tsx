@@ -4,7 +4,7 @@ import {
   useAuthStore,
   useCourseStore,
 } from '@tumaet/prompt-shared-state'
-import { Link, useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import {
   Card,
   CardContent,
@@ -27,6 +27,7 @@ export const CourseOverview = () => {
   const { courseId } = useParams<{ courseId: string }>()
   const course = courses.find((c) => c.id === courseId) as Course | undefined
   const { permissions } = useAuthStore()
+  const navigate = useNavigate()
 
   const formatDate = (dateString: string): string => {
     const [year, month, date] = dateString.split('-')
@@ -75,11 +76,14 @@ export const CourseOverview = () => {
                 <Tooltip>
                   <TooltipContent>Open Course Settings</TooltipContent>
                   <TooltipTrigger>
-                    <Link to={`/management/course/${courseId}/settings`}>
-                      <Button variant='outline'>
-                        <Settings />
-                      </Button>
-                    </Link>
+                    <Button
+                      variant='outline'
+                      onClick={() => {
+                        navigate(`/management/course/${courseId}/settings`)
+                      }}
+                    >
+                      <Settings />
+                    </Button>
                   </TooltipTrigger>
                 </Tooltip>
               )}
