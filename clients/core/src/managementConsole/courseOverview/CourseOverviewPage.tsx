@@ -4,19 +4,23 @@ import {
   useAuthStore,
   useCourseStore,
 } from '@tumaet/prompt-shared-state'
-import { useParams } from 'react-router-dom'
+import { Link, useParams } from 'react-router-dom'
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
   CardDescription,
+  Button,
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
 } from '@tumaet/prompt-ui-components'
-import { CalendarDays, GraduationCap, Clock, Calendar } from 'lucide-react'
+import { CalendarDays, GraduationCap, Clock, Calendar, Settings } from 'lucide-react'
 import { CourseTypeDetails } from '@tumaet/prompt-shared-state'
-import { EditCourseDropdown } from './components/EditCourseDropdown'
 import { CourseStatusTag } from '../layout/Sidebar/CourseSwitchSidebar/components/CourseStatusTag'
 import type { Course } from '@tumaet/prompt-shared-state'
+import { CourseArchiveButton } from '../shared/components/CourseCard/CourseArchiveButton'
 
 export const CourseOverview = () => {
   const { courses } = useCourseStore()
@@ -64,7 +68,22 @@ export const CourseOverview = () => {
                 <CourseStatusTag course={course} />
               </CardDescription>
             </div>
-            {canEdit && <EditCourseDropdown />}
+
+            <div className='flex gap-2'>
+              {canEdit && <CourseArchiveButton archived={course.archived} courseId={course.id} />}
+              {canEdit && (
+                <Tooltip>
+                  <TooltipContent>Open Course Settings</TooltipContent>
+                  <TooltipTrigger>
+                    <Link to={`/management/course/${courseId}/settings`}>
+                      <Button variant='outline'>
+                        <Settings />
+                      </Button>
+                    </Link>
+                  </TooltipTrigger>
+                </Tooltip>
+              )}
+            </div>
           </div>
         </CardHeader>
         <CardContent className='p-6'>

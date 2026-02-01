@@ -23,6 +23,7 @@ import DynamicIcon from '@/components/DynamicIcon'
 import { useNavigate } from 'react-router-dom'
 import { archiveCourses, unarchiveCourses } from '@core/network/mutations/updateCourseArchiveStatus'
 import { formatDate } from '@core/utils/formatDate'
+import { CourseArchiveButton } from './CourseArchiveButton'
 
 type CourseMetaItemProps = {
   icon: React.ReactNode
@@ -48,14 +49,6 @@ export const CourseCard = ({ course }: CourseCardProps) => {
   const bgColor = course.studentReadableData?.['bg-color'] || 'bg-gray-50'
   const navigate = useNavigate()
 
-  const handleArchive = async () => {
-    if (course.archived) {
-      await unarchiveCourses([course.id])
-    } else {
-      await archiveCourses([course.id])
-    }
-  }
-
   return (
     <Card className='overflow-hidden border border-gray-200 h-full flex flex-col'>
       <CardHeader className={`rounded-t-lg ${bgColor} py-6 px-6 border-b`}>
@@ -78,17 +71,7 @@ export const CourseCard = ({ course }: CourseCardProps) => {
 
           <Tooltip>
             <TooltipTrigger asChild>
-              <button
-                onClick={handleArchive}
-                className='shrink-0 p-2 rounded-md bg-white focus-visible:ring-2 focus-visible:ring-offset-2 hover:bg-gray-100'
-                aria-label={course.archived ? 'Unarchive course' : 'Archive course'}
-              >
-                {course.archived ? (
-                  <ArchiveRestore className='w-6 h-6 text-gray-600' />
-                ) : (
-                  <Archive className='w-6 h-6 text-gray-600' />
-                )}
-              </button>
+              <CourseArchiveButton archived={course.archived} courseId={course.id} />
             </TooltipTrigger>
 
             <TooltipContent>
