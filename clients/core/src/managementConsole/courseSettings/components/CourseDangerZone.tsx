@@ -19,7 +19,7 @@ interface CourseDangeZoneActionProps {
   disabled?: boolean
 }
 
-function CourseDangeZoneAction({
+function CourseDangerZoneAction({
   title,
   description,
   action,
@@ -89,14 +89,14 @@ export default function CourseDangerZone() {
       >
         <div className='px-5 pb-5'>
           <div className='px-2 w-full flex flex-col border border-border rounded-md divide-y'>
-            <CourseDangeZoneAction
+            <CourseDangerZoneAction
               title='Copy Course'
               description='Create a copy of this course. You can change some of the copies properties. Leaves this course unaffected'
               action={() => setCopyCourseDialogOpen(true)}
               label='Copy'
               variant='default'
             />
-            <CourseDangeZoneAction
+            <CourseDangerZoneAction
               title='Make Template'
               description='Create a template version of this course that can be used to quickly create new courses with the same structure'
               action={() => setTemplateDialogOpen(true)}
@@ -104,23 +104,31 @@ export default function CourseDangerZone() {
               variant='default'
               disabled={isTemplateLoading || isTemplate}
             />
-            <CourseDangeZoneAction
+            <CourseDangerZoneAction
               title={`${course.archived ? 'Unarchive' : 'Archive'} Course`}
               description={
                 course.archived
                   ? 'Unarchive this course to make it active again'
                   : 'The Course will no longer appear in the sidebar but is still retrievable at the Archived Courses page. This can be undone.'
               }
-              action={() => {
-                handleArchive(course.archived, course.id)
-                toast({
-                  title: `${course.archived ? 'Archived' : 'Unarchived'} Course`,
-                })
+              action={async () => {
+                try {
+                  await handleArchive(course.archived, course.id)
+                  toast({
+                    title: `${!course.archived ? 'Archived' : 'Unarchived'} Course`,
+                  })
+                } catch {
+                  toast({
+                    title: 'Failed to update course archive status',
+                    description: 'Please try again later!',
+                    variant: 'destructive',
+                  })
+                }
               }}
               label={course.archived ? 'Unarchive' : 'Archive'}
               variant='default'
             />
-            <CourseDangeZoneAction
+            <CourseDangerZoneAction
               title='Delete Course'
               description='Permanently deletes the course. This action is non-reversible.'
               action={() => setDeleteDialogOpen(true)}
