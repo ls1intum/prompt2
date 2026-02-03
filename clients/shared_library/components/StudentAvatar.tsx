@@ -59,9 +59,9 @@ export const RenderStudents = ({
         fallback
       ) : (
         <ul className='flex flex-wrap gap-x-2'>
-          {students.map((member) => (
-            <li key={member.id}>
-              <StudentAvatar student={member} />
+          {students.map((student) => (
+            <li key={student.id ?? student.email}>
+              <StudentAvatar student={student} />
             </li>
           ))}
         </ul>
