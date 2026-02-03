@@ -3863,7 +3863,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@tiptap/extension-code-block-lowlight@npm:^3.15.3":
+"@tiptap/extension-code-block-lowlight@npm:^3.19.0":
   version: 3.19.0
   resolution: "@tiptap/extension-code-block-lowlight@npm:3.19.0"
   peerDependencies:
@@ -3924,7 +3924,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@tiptap/extension-color@npm:^3.15.3":
+"@tiptap/extension-color@npm:^3.19.0":
   version: 3.19.0
   resolution: "@tiptap/extension-color@npm:3.19.0"
   peerDependencies:
@@ -4039,7 +4039,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@tiptap/extension-heading@npm:^3.15.3, @tiptap/extension-heading@npm:^3.19.0":
+"@tiptap/extension-heading@npm:^3.19.0":
   version: 3.19.0
   resolution: "@tiptap/extension-heading@npm:3.19.0"
   peerDependencies:
@@ -4068,7 +4068,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@tiptap/extension-horizontal-rule@npm:^3.15.3, @tiptap/extension-horizontal-rule@npm:^3.19.0":
+"@tiptap/extension-horizontal-rule@npm:^3.19.0":
   version: 3.19.0
   resolution: "@tiptap/extension-horizontal-rule@npm:3.19.0"
   peerDependencies:
@@ -4087,7 +4087,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@tiptap/extension-image@npm:^3.15.3":
+"@tiptap/extension-image@npm:^3.19.0":
   version: 3.19.0
   resolution: "@tiptap/extension-image@npm:3.19.0"
   peerDependencies:
@@ -4126,7 +4126,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@tiptap/extension-link@npm:^3.15.3, @tiptap/extension-link@npm:^3.19.0":
+"@tiptap/extension-link@npm:^3.19.0":
   version: 3.19.0
   resolution: "@tiptap/extension-link@npm:3.19.0"
   dependencies:
@@ -4221,7 +4221,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@tiptap/extension-placeholder@npm:^3.15.3":
+"@tiptap/extension-placeholder@npm:^3.19.0":
   version: 3.19.0
   resolution: "@tiptap/extension-placeholder@npm:3.19.0"
   peerDependencies:
@@ -4257,7 +4257,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@tiptap/extension-text-style@npm:^3.15.3":
+"@tiptap/extension-text-style@npm:^3.19.0":
   version: 3.19.0
   resolution: "@tiptap/extension-text-style@npm:3.19.0"
   peerDependencies:
@@ -4293,7 +4293,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@tiptap/extension-typography@npm:^3.15.3":
+"@tiptap/extension-typography@npm:^3.19.0":
   version: 3.19.0
   resolution: "@tiptap/extension-typography@npm:3.19.0"
   peerDependencies:
@@ -4311,7 +4311,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@tiptap/extension-underline@npm:^3.15.3, @tiptap/extension-underline@npm:^3.19.0":
+"@tiptap/extension-underline@npm:^3.19.0":
   version: 3.19.0
   resolution: "@tiptap/extension-underline@npm:3.19.0"
   peerDependencies:
@@ -4356,7 +4356,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@tiptap/pm@npm:^3.15.3, @tiptap/pm@npm:^3.19.0":
+"@tiptap/pm@npm:^3.19.0":
   version: 3.19.0
   resolution: "@tiptap/pm@npm:3.19.0"
   dependencies:
@@ -4400,7 +4400,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@tiptap/react@npm:^3.15.3":
+"@tiptap/react@npm:^3.19.0":
   version: 3.19.0
   resolution: "@tiptap/react@npm:3.19.0"
   dependencies:
@@ -4454,7 +4454,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@tiptap/starter-kit@npm:^3.15.3":
+"@tiptap/starter-kit@npm:^3.19.0":
   version: 3.19.0
   resolution: "@tiptap/starter-kit@npm:3.19.0"
   dependencies:
@@ -14302,19 +14302,19 @@ __metadata:
     "@tailwindcss/typography": "npm:^0.5.19"
     "@tanstack/react-query": "npm:^5.90.20"
     "@tanstack/react-table": "npm:^8.21.3"
-    "@tiptap/extension-code-block-lowlight": "npm:^3.15.3"
-    "@tiptap/extension-color": "npm:^3.15.3"
-    "@tiptap/extension-heading": "npm:^3.15.3"
-    "@tiptap/extension-horizontal-rule": "npm:^3.15.3"
-    "@tiptap/extension-image": "npm:^3.15.3"
-    "@tiptap/extension-link": "npm:^3.15.3"
-    "@tiptap/extension-placeholder": "npm:^3.15.3"
-    "@tiptap/extension-text-style": "npm:^3.15.3"
-    "@tiptap/extension-typography": "npm:^3.15.3"
-    "@tiptap/extension-underline": "npm:^3.15.3"
-    "@tiptap/pm": "npm:^3.15.3"
-    "@tiptap/react": "npm:^3.15.3"
-    "@tiptap/starter-kit": "npm:^3.15.3"
+    "@tiptap/extension-code-block-lowlight": "npm:^3.19.0"
+    "@tiptap/extension-color": "npm:^3.19.0"
+    "@tiptap/extension-heading": "npm:^3.19.0"
+    "@tiptap/extension-horizontal-rule": "npm:^3.19.0"
+    "@tiptap/extension-image": "npm:^3.19.0"
+    "@tiptap/extension-link": "npm:^3.19.0"
+    "@tiptap/extension-placeholder": "npm:^3.19.0"
+    "@tiptap/extension-text-style": "npm:^3.19.0"
+    "@tiptap/extension-typography": "npm:^3.19.0"
+    "@tiptap/extension-underline": "npm:^3.19.0"
+    "@tiptap/pm": "npm:^3.19.0"
+    "@tiptap/react": "npm:^3.19.0"
+    "@tiptap/starter-kit": "npm:^3.19.0"
     "@tumaet/prompt-shared-state": "npm:^1.0.6"
     "@tumaet/prompt-ui-components": "npm:^1.0.6"
     "@types/copy-webpack-plugin": "npm:^10.1.3"
