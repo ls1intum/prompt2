@@ -226,6 +226,40 @@ Set these according to your deployment version (default is `main`).
 - **`SMTP_PASSWORD`** (Optional)  
   Password for SMTP authentication. Leave empty if your SMTP server doesn't require authentication.
 
+#### File Storage (S3-Compatible) Variables
+
+PROMPT now stores uploaded files in an S3-compatible bucket (SeaweedFS S3 gateway, AWS S3, MinIO, etc.). The storage service uses presigned URLs, so you must configure both internal and public endpoints.
+
+- **`S3_BUCKET`**  
+  Bucket name for uploaded files (e.g., `prompt-files`).
+
+- **`S3_REGION`**  
+  Region for your S3-compatible backend. Use `us-east-1` for SeaweedFS.
+
+- **`S3_ENDPOINT`**  
+  Internal endpoint used by the server to reach the S3 API.  
+  Example (SeaweedFS S3 gateway): `http://seaweedfs-s3:8333`.
+
+- **`S3_PUBLIC_ENDPOINT`**  
+  Public endpoint used in presigned URLs that clients access.  
+  Example (production): `https://s3.<your-domain>`  
+  Example (local): `http://localhost:8334`.
+
+- **`S3_ACCESS_KEY`** / **`S3_SECRET_KEY`**  
+  Credentials for the S3 API. Required for non-local endpoints.
+
+- **`S3_FORCE_PATH_STYLE`**  
+  Set to `true` for SeaweedFS/MinIO. Set to `false` for AWS S3.
+
+- **`MAX_FILE_UPLOAD_SIZE_MB`**  
+  Maximum allowed file size for uploads (default: `50`).
+
+- **`ALLOWED_FILE_TYPES`**  
+  Comma-separated list of allowed MIME types. Leave empty to allow all.
+
+- **`SEAWEEDFS_S3_USER`** / **`SEAWEEDFS_S3_PASSWORD`**  
+  Credentials for the SeaweedFS S3 gateway (should match `S3_ACCESS_KEY` / `S3_SECRET_KEY`).
+
 ---
 
 ### 3.2 Select the Appropriate Docker Compose File
@@ -235,6 +269,11 @@ Set these according to your deployment version (default is `main`).
 
 - **`docker-compose.extern.prod.yml`**  
   Includes a Keycloak container. Refer to the Keycloak configuration above for details.
+
+### 3.3 File Bucket Notes
+
+- The S3-compatible adapter checks for the bucket at startup and will attempt to create it if it does not exist (when the backend supports it).
+- For production, ensure your DNS and TLS are set up for the `S3_PUBLIC_ENDPOINT` so presigned URLs are reachable by clients.
 
 ---
 
