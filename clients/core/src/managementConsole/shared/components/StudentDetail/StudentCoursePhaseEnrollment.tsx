@@ -7,6 +7,7 @@ import { Suspense } from 'react'
 import { ProgressIndicator } from './PhaseProgressIndicator'
 import { LinkHeading } from './LinkHeading'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@tumaet/prompt-ui-components'
+import { PassStatus } from '@tumaet/prompt-shared-state'
 
 export function parsePostgresTimestamp(ts: string): Date {
   return new Date(ts.replace(' ', 'T') + 'Z')
@@ -56,8 +57,14 @@ export function StudentCoursePhaseEnrollment({
             </TooltipTrigger>
             <TooltipContent>
               <div className='text-sm text-muted-foreground'>
-                <span className='font-semibold'>{coursePhaseEnrollment.passStatus}</span> on{' '}
-                {formatDateTime(coursePhaseEnrollment.lastModified)}
+                {coursePhaseEnrollment.passStatus !== PassStatus.NOT_ASSESSED ? (
+                  <>
+                    <span className='font-semibold'>{coursePhaseEnrollment.passStatus}</span> on{' '}
+                    {formatDateTime(coursePhaseEnrollment.lastModified)}
+                  </>
+                ) : (
+                  <span>phase participation ongoing</span>
+                )}
               </div>
             </TooltipContent>
           </Tooltip>
