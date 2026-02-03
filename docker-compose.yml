@@ -264,7 +264,7 @@ services:
     image: base:latest
 
   db:
-    image: "postgres:15.2-alpine"
+    image: "postgres:15.15-alpine"
     container_name: prompt-db
     environment:
       - POSTGRES_USER=${DB_CORE_USER}
@@ -282,7 +282,7 @@ services:
       - "5432:5432"
 
   db-intro-course:
-    image: "postgres:15.2-alpine"
+    image: "postgres:15.15-alpine"
     container_name: prompt-db-intro-course
     environment:
       - POSTGRES_USER=${DB_INTRO_COURSE_USER}
@@ -300,7 +300,7 @@ services:
       - "5433:5432"
 
   db-team-allocation:
-    image: "postgres:15.2-alpine"
+    image: "postgres:15.15-alpine"
     container_name: prompt-db-team-allocation
     environment:
       - POSTGRES_USER=${DB_TEAM_ALLOCATION_USER}
@@ -318,7 +318,7 @@ services:
       - "5434:5432"
 
   db-assessment:
-    image: "postgres:15.2-alpine"
+    image: "postgres:15.15-alpine"
     container_name: prompt-db-assessment
     environment:
       - POSTGRES_USER=${DB_ASSESSMENT_USER}
@@ -337,7 +337,7 @@ services:
 
   # Database for the template server
   db-template-server:
-    image: "postgres:15.2-alpine"
+    image: "postgres:15.15-alpine"
     container_name: prompt-db-template-server
     environment:
       - POSTGRES_USER=${DB_TEMPLATE_USER:-prompt-postgres}
@@ -354,7 +354,7 @@ services:
       - "5437:5432"
 
   db-self-team-allocation:
-    image: "postgres:15.2-alpine"
+    image: "postgres:15.15-alpine"
     container_name: prompt-db-self-team-allocation
     environment:
       - POSTGRES_USER=${DB_SELF_TEAM_ALLOCATION_USER}
@@ -372,7 +372,7 @@ services:
       - "5436:5432"
 
   keycloak-db:
-    image: "postgres:15.2-alpine"
+    image: "postgres:15.15-alpine"
     container_name: prompt-keycloak-db
     environment:
       - POSTGRES_USER=${KEYCLOAK_DB_USER}
