@@ -20,7 +20,6 @@ import { CalendarDays, GraduationCap, Clock, Calendar, Settings } from 'lucide-r
 import { CourseTypeDetails } from '@tumaet/prompt-shared-state'
 import { CourseStatusTag } from '../layout/Sidebar/CourseSwitchSidebar/components/CourseStatusTag'
 import type { Course } from '@tumaet/prompt-shared-state'
-import { CourseArchiveButton } from '../shared/components/CourseCard/CourseArchiveButton'
 
 export const CourseOverview = () => {
   const { courses } = useCourseStore()
