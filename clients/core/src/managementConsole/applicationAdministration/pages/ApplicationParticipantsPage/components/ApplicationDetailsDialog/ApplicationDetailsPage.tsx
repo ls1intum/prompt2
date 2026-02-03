@@ -11,6 +11,11 @@ import { AssessmentCard } from './components/AssessmentCard'
 import { ApplicationAnswersTable } from '../table/ApplicationAnswersTable'
 import { StudentProfile } from '@/components/StudentProfile'
 import { useApplicationStore } from '@core/managementConsole/applicationAdministration/zustand/useApplicationStore'
+import { useStudentEnrollments } from '@core/network/hooks/useStudentEnrollments'
+import { CourseEnrollmentSummary } from '@core/managementConsole/shared/components/StudentDetail/CourseEnrollmentSummary'
+import { StudentCourseEnrollment } from '@core/managementConsole/shared/components/StudentDetail/StudentCourseEnrollment'
+import { CourseEnrollment } from '@core/network/queries/getStudentEnrollments'
+import { ApplicationDetailPageLayout } from './components/ApplicatioDetailPageLayout'
 
 export const ApplicationDetailsPage = () => {
   const { phaseId, participationId } = useParams<{ phaseId: string; participationId: string }>()
@@ -42,6 +47,9 @@ export const ApplicationDetailsPage = () => {
     queryFn: () => getApplicationForm(phaseId ?? ''),
     enabled: !!phaseId,
   })
+
+  const studentId = fetchedApplication?.student?.id
+  const enrollments = useStudentEnrollments(studentId)
 
   if (isApplicationError || isApplicationFormError) {
     return (
@@ -83,25 +91,47 @@ export const ApplicationDetailsPage = () => {
         <MissingUniversityData student={fetchedApplication.student} />
       )}
 
-      {fetchedApplication && fetchedApplicationForm && (
-        <ApplicationAnswersTable
-          questions={[
-            ...fetchedApplicationForm.questionsMultiSelect,
-            ...fetchedApplicationForm.questionsText,
-          ]}
-          answersMultiSelect={fetchedApplication.answersMultiSelect}
-          answersText={fetchedApplication.answersText}
-        />
-      )}
+      <ApplicationDetailPageLayout
+        applicationViews={
+          <div className='flex flex-col gap-2'>
+            {fetchedApplication && fetchedApplicationForm && (
+              <ApplicationAnswersTable
+                questions={[
+                  ...fetchedApplicationForm.questionsMultiSelect,
+                  ...fetchedApplicationForm.questionsText,
+                ]}
+                answersMultiSelect={fetchedApplication.answersMultiSelect}
+                answersText={fetchedApplication.answersText}
+              />
+            )}
 
-      {status && (
-        <AssessmentCard
-          score={score}
-          restrictedData={restrictedData}
-          acceptanceStatus={status}
-          courseParticipationID={participationId ?? ''}
-        />
-      )}
+            {status && (
+              <AssessmentCard
+                score={score}
+                restrictedData={restrictedData}
+                acceptanceStatus={status}
+                courseParticipationID={participationId ?? ''}
+              />
+            )}
+          </div>
+        }
+        courseEnrollment={
+          <div className='flex flex-col gap-5 border rounded-lg p-5'>
+            {enrollments.isLoading && <Loader2 className='h-4 w-4 animate-spin' />}
+            {enrollments.isError && <p className='text-destructive'>Failed to load enrollments</p>}
+            {enrollments.isSuccess && studentId && (
+              <>
+                {enrollments.data?.courses.map((ce: CourseEnrollment) => (
+                  <div className='flex gap-4 w-full' key={ce.courseId}>
+                    <StudentCourseEnrollment courseEnrollment={ce} studentId={studentId} />
+                  </div>
+                ))}
+                <CourseEnrollmentSummary enrollments={enrollments.data?.courses || []} />
+              </>
+            )}
+          </div>
+        }
+      />
     </div>
   )
 }
