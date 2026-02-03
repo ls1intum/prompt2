@@ -50,6 +50,11 @@ jobs:
           set -euo pipefail
 
           workflows_changed="${{ steps.changed-workflows.outputs.any_changed }}"
+          event_name="${{ github.event_name }}"
+          force_all=false
+          if [ "$event_name" = "release" ]; then
+            force_all=true
+          fi
 
           add_unique() {
             local list="$1"
@@ -58,54 +63,71 @@ jobs:
           }
 
           server_modules="[]"
-          if [ "$workflows_changed" = "true" ]; then
-            for dir in servers/*/; do
-              module=$(basename "$dir")
-              [ -f "$dir/go.mod" ] && server_modules=$(add_unique "$server_modules" "$module")
-            done
+          if [ "$workflows_changed" = "true" ] || [ "$force_all" = "true" ]; then
+            if compgen -G "servers/*/" > /dev/null; then
+              for dir in servers/*/; do
+                module=$(basename "$dir")
+                [ -f "$dir/go.mod" ] && server_modules=$(add_unique "$server_modules" "$module")
+              done
+            fi
           else
-            for dir in $(echo '${{ steps.changed-servers.outputs.all_changed_files }}' | jq -r '.[]'); do
+            while IFS= read -r dir; do
               module=$(echo "$dir" | cut -d'/' -f2)
               [ -n "$module" ] && [ -f "servers/$module/go.mod" ] && server_modules=$(add_unique "$server_modules" "$module")
-            done
+            done < <(echo '${{ steps.changed-servers.outputs.all_changed_files }}' | jq -r '.[]')
           fi
 
           client_modules="[]"
-          if [ "$workflows_changed" = "true" ]; then
-            for dir in clients/*/; do
-              module=$(basename "$dir")
-              [ -f "$dir/eslint.config.mjs" ] && client_modules=$(add_unique "$client_modules" "$module")
-            done
+          if [ "$workflows_changed" = "true" ] || [ "$force_all" = "true" ]; then
+            if compgen -G "clients/*/" > /dev/null; then
+              for dir in clients/*/; do
+                module=$(basename "$dir")
+                [ -f "$dir/eslint.config.mjs" ] && client_modules=$(add_unique "$client_modules" "$module")
+              done
+            fi
           else
-            for dir in $(echo '${{ steps.changed-clients.outputs.all_changed_files }}' | jq -r '.[]'); do
+            while IFS= read -r dir; do
               module=$(echo "$dir" | cut -d'/' -f2)
               [ -n "$module" ] && [ -f "clients/$module/eslint.config.mjs" ] && client_modules=$(add_unique "$client_modules" "$module")
-            done
+            done < <(echo '${{ steps.changed-clients.outputs.all_changed_files }}' | jq -r '.[]')
           fi
 
           is_api_spec_module() {
             local module="$1"
             local modfile="servers/$module/go.mod"
-            [ -f "$modfile" ] && grep -q "swaggo/swag" "$modfile"
+            if [ -f "$modfile" ] && grep -q "swaggo/swag" "$modfile"; then
+              return 0
+            fi
+            return 1
           }
 
           api_spec_directories="[]"
-          if [ "$workflows_changed" = "true" ]; then
-            for dir in servers/*/; do
-              module=$(basename "$dir")
-              if is_api_spec_module "$module"; then
-                api_spec_directories=$(add_unique "$api_spec_directories" "$module")
-              fi
-            done
+          if [ "$workflows_changed" = "true" ] || [ "$force_all" = "true" ]; then
+            if compgen -G "servers/*/" > /dev/null; then
+              for dir in servers/*/; do
+                module=$(basename "$dir")
+                if is_api_spec_module "$module"; then
+                  api_spec_directories=$(add_unique "$api_spec_directories" "$module")
+                fi
+              done
+            fi
           else
-            for dir in $(echo '${{ steps.changed-servers.outputs.all_changed_files }}' | jq -r '.[]'); do
+            while IFS= read -r dir; do
               module=$(echo "$dir" | cut -d'/' -f2)
               if [ -n "$module" ] && is_api_spec_module "$module"; then
                 api_spec_directories=$(add_unique "$api_spec_directories" "$module")
               fi
-            done
+            done < <(echo '${{ steps.changed-servers.outputs.all_changed_files }}' | jq -r '.[]')
           fi
 
-          echo "server_modules=$server_modules" >> "$GITHUB_OUTPUT"
-          echo "api_spec_directories=$api_spec_directories" >> "$GITHUB_OUTPUT"
-          echo "client_modules=$client_modules" >> "$GITHUB_OUTPUT"
+          {
+            echo "server_modules<<EOF"
+            echo "$server_modules"
+            echo "EOF"
+            echo "api_spec_directories<<EOF"
+            echo "$api_spec_directories"
+            echo "EOF"
+            echo "client_modules<<EOF"
+            echo "$client_modules"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"

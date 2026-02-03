@@ -25,7 +25,7 @@ jobs:
         run: |
           set -euo pipefail
 
-          if [ -n "${{ inputs.directories }}" ]; then
+          if [ -n '${{ inputs.directories }}' ] && [ '${{ inputs.directories }}' != '[]' ]; then
             DIRS='${{ inputs.directories }}'
           else
             add_unique() {
@@ -37,19 +37,28 @@ jobs:
             is_api_spec_module() {
               local module="$1"
               local modfile="servers/$module/go.mod"
-              [ -f "$modfile" ] && grep -q "swaggo/swag" "$modfile"
+              if [ -f "$modfile" ] && grep -q "swaggo/swag" "$modfile"; then
+                return 0
+              fi
+              return 1
             }
 
             DIRS="[]"
-            for dir in servers/*/; do
-              module=$(basename "$dir")
-              if is_api_spec_module "$module"; then
-                DIRS=$(add_unique "$DIRS" "$module")
-              fi
-            done
+            if compgen -G "servers/*/" > /dev/null; then
+              for dir in servers/*/; do
+                module=$(basename "$dir")
+                if is_api_spec_module "$module"; then
+                  DIRS=$(add_unique "$DIRS" "$module")
+                fi
+              done
+            fi
           fi
 
-          echo "directories=$DIRS" >> "$GITHUB_OUTPUT"
+          {
+            echo "directories<<EOF"
+            echo "$DIRS"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
 
   generate-api-spec:
     runs-on: ubuntu-latest
