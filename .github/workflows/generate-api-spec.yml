@@ -22,11 +22,13 @@ jobs:
         with:
           fetch-depth: 0
       - id: resolve
+        env:
+          INPUT_DIRECTORIES: ${{ inputs.directories }}
         run: |
           set -euo pipefail
 
-          if [ -n '${{ inputs.directories }}' ] && [ '${{ inputs.directories }}' != '[]' ]; then
-            DIRS='${{ inputs.directories }}'
+          if [ -n "$INPUT_DIRECTORIES" ] && [ "$INPUT_DIRECTORIES" != '[]' ]; then
+            DIRS="$INPUT_DIRECTORIES"
           else
             add_unique() {
               local list="$1"
