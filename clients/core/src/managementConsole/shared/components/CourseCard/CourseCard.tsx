@@ -114,27 +114,19 @@ export const CourseCard = ({ course }: CourseCardProps) => {
       </CardContent>
 
       <CardFooter className='border-t flex w-full p-0'>
-        <div className='text-xs text-gray-500 w-1/2 p-4'>
-          {course.archivedOn && <>Archived on {formatDate(course.archivedOn)}</>}
-        </div>
+        <button
+          onClick={() => navigate(`/management/course/${course.id}`)}
+          className='text-sm font-medium text-primary flex items-center hover:underline focus-visible:ring-2 focus-visible:ring-offset-2 rounded w-1/2 p-3 pl-6'
+        >
+          Go to course <ChevronRight className='ml-1 h-4 w-4' />
+        </button>
 
-        <div className='flex flex-col w-1/2 border-l'>
-          <button
-            onClick={() => navigate(`/management/course/${course.id}`)}
-            className='text-sm font-medium text-primary flex items-center hover:underline focus-visible:ring-2 focus-visible:ring-offset-2 rounded h-1/2 p-2 pl-3'
-          >
-            Go to course <ChevronRight className='ml-1 h-4 w-4' />
-          </button>
-
-          <hr />
-
-          <button
-            onClick={() => navigate(`/management/course/${course.id}/settings`)}
-            className='text-sm font-medium text-primary flex items-center hover:underline focus-visible:ring-2 focus-visible:ring-offset-2 rounded h-1/2 p-2 pl-3'
-          >
-            Go to settings <ChevronRight className='ml-1 h-4 w-4' />
-          </button>
-        </div>
+        <button
+          onClick={() => navigate(`/management/course/${course.id}/settings`)}
+          className='text-sm font-medium text-primary flex items-center hover:underline focus-visible:ring-2 focus-visible:ring-offset-2 rounded w-1/2 p-3 pl-4 border-l'
+        >
+          Go to settings <ChevronRight className='ml-1 h-4 w-4' />
+        </button>
       </CardFooter>
     </Card>
   )
