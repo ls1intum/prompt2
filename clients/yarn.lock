@@ -15793,6 +15793,9 @@ __metadata:
     react-hook-form: "npm:^7.71.1"
     recharts: "npm:^3.7.0"
     tailwindcss: "npm:^4.1.18"
+    webpack: "npm:^5.104.1"
+    webpack-cli: "npm:^6.0.1"
+    webpack-dev-server: "npm:^5.2.3"
     zod: "npm:^4.3.6"
   languageName: unknown
   linkType: soft
