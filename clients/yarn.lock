@@ -3597,7 +3597,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@sentry/react@npm:^10.37.0":
+"@sentry/react@npm:^10.38.0":
   version: 10.38.0
   resolution: "@sentry/react@npm:10.38.0"
   dependencies:
@@ -6680,7 +6680,7 @@ __metadata:
   resolution: "client@workspace:core"
   dependencies:
     "@dagrejs/dagre": "npm:^1.1.8"
-    "@sentry/react": "npm:^10.37.0"
+    "@sentry/react": "npm:^10.38.0"
     "@xyflow/react": "npm:^12.10.0"
     clean-webpack-plugin: "npm:^4.0.0"
     compression-webpack-plugin: "npm:^11.1.0"
