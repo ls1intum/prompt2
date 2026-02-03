@@ -11,8 +11,8 @@ require (
 	github.com/jackc/pgx/v5 v5.8.0
 	github.com/ls1intum/prompt-sdk v1.0.11
 	github.com/sirupsen/logrus v1.9.4
-	github.com/swaggo/swag v1.16.6
 	github.com/stretchr/testify v1.11.1
+	github.com/swaggo/swag v1.16.6
 	github.com/testcontainers/testcontainers-go v0.40.0
 	gitlab.com/gitlab-org/api/client-go v1.25.0
 )
