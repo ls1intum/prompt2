@@ -70,24 +70,21 @@ export const CourseOverview = () => {
               </CardDescription>
             </div>
 
-            <div className='flex gap-2'>
-              {canEdit && <CourseArchiveButton archived={course.archived} courseId={course.id} />}
-              {canEdit && (
-                <Tooltip>
-                  <TooltipContent>Open Course Settings</TooltipContent>
-                  <TooltipTrigger>
-                    <Button
-                      variant='outline'
-                      onClick={() => {
-                        navigate(`/management/course/${courseId}/settings`)
-                      }}
-                    >
-                      <Settings />
-                    </Button>
-                  </TooltipTrigger>
-                </Tooltip>
-              )}
-            </div>
+            {canEdit && (
+              <Tooltip>
+                <TooltipContent>Open Course Settings</TooltipContent>
+                <TooltipTrigger>
+                  <Button
+                    variant='outline'
+                    onClick={() => {
+                      navigate(`/management/course/${courseId}/settings`)
+                    }}
+                  >
+                    <Settings />
+                  </Button>
+                </TooltipTrigger>
+              </Tooltip>
+            )}
           </div>
         </CardHeader>
         <CardContent className='p-6'>

@@ -118,12 +118,21 @@ export const CourseCard = ({ course }: CourseCardProps) => {
           {course.archivedOn && <>Archived on {formatDate(course.archivedOn)}</>}
         </div>
 
-        <button
-          onClick={() => navigate(`/management/course/${course.id}`)}
-          className='text-sm font-medium text-primary flex items-center hover:underline focus-visible:ring-2 focus-visible:ring-offset-2 rounded'
-        >
-          Go to course <ChevronRight className='ml-1 h-4 w-4' />
-        </button>
+        <div className='flex flex-col'>
+          <button
+            onClick={() => navigate(`/management/course/${course.id}`)}
+            className='text-sm font-medium text-primary flex items-center hover:underline focus-visible:ring-2 focus-visible:ring-offset-2 rounded'
+          >
+            Go to course <ChevronRight className='ml-1 h-4 w-4' />
+          </button>
+
+          <button
+            onClick={() => navigate(`/management/course/${course.id}/settings`)}
+            className='text-sm font-medium text-primary flex items-center hover:underline focus-visible:ring-2 focus-visible:ring-offset-2 rounded'
+          >
+            Go to settings <ChevronRight className='ml-1 h-4 w-4' />
+          </button>
+        </div>
       </CardFooter>
     </Card>
   )
