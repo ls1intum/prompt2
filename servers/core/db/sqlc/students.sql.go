@@ -410,7 +410,7 @@ SELECT
                 'coursePhases', cp.course_phases
             )
             ORDER BY c.start_date DESC, c.name
-        ),
+        ) FILTER (WHERE c.id IS NOT NULL),
         '[]'::jsonb
     )::jsonb AS courses
 FROM student s
