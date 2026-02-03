@@ -2774,6 +2774,35 @@ const docTemplate = `{
                 }
             }
         },
+        "/students/with-courses": {
+            "get": {
+                "description": "Get a list of all students with the property 'courses' a list of courses that the student is taking part of or was",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "students"
+                ],
+                "summary": "Get all students with courses",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/studentDTO.StudentWithCourseParticipationsDTO"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/students/{uuid}": {
             "get": {
                 "description": "Get a student by UUID",
@@ -2849,6 +2878,47 @@ const docTemplate = `{
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/studentDTO.Student"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/students/{uuid}/enrollments": {
+            "get": {
+                "description": "Get all of a students enrollments, provide student UUID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "students"
+                ],
+                "summary": "Get student enrollments by ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Student UUID",
+                        "name": "uuid",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/studentDTO.StudentEnrollmentsDTO"
                         }
                     },
                     "400": {
@@ -4246,6 +4316,84 @@ const docTemplate = `{
                 }
             }
         },
+        "studentDTO.CourseEnrollmentDTO": {
+            "type": "object",
+            "properties": {
+                "courseId": {
+                    "type": "string"
+                },
+                "courseParticipationId": {
+                    "type": "string"
+                },
+                "coursePhases": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/studentDTO.CoursePhaseEnrollmentDTO"
+                    }
+                },
+                "courseType": {
+                    "type": "string"
+                },
+                "ects": {
+                    "type": "integer"
+                },
+                "endDate": {
+                    "type": "string"
+                },
+                "longDescription": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "semesterTag": {
+                    "type": "string"
+                },
+                "startDate": {
+                    "type": "string"
+                },
+                "studentReadableData": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                }
+            }
+        },
+        "studentDTO.CoursePhaseEnrollmentDTO": {
+            "type": "object",
+            "properties": {
+                "coursePhaseId": {
+                    "type": "string"
+                },
+                "coursePhaseType": {
+                    "$ref": "#/definitions/studentDTO.CoursePhaseTypeDTO"
+                },
+                "isInitialPhase": {
+                    "type": "boolean"
+                },
+                "lastModified": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "passStatus": {
+                    "type": "string"
+                }
+            }
+        },
+        "studentDTO.CoursePhaseTypeDTO": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
         "studentDTO.CreateStudent": {
             "type": "object",
             "properties": {
@@ -4324,6 +4472,64 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "universityLogin": {
+                    "type": "string"
+                }
+            }
+        },
+        "studentDTO.StudentCourseParticipationDTO": {
+            "type": "object",
+            "properties": {
+                "courseId": {
+                    "type": "string"
+                },
+                "courseName": {
+                    "type": "string"
+                },
+                "studentReadableData": {
+                    "type": "object",
+                    "additionalProperties": {}
+                }
+            }
+        },
+        "studentDTO.StudentEnrollmentsDTO": {
+            "type": "object",
+            "properties": {
+                "courses": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/studentDTO.CourseEnrollmentDTO"
+                    }
+                }
+            }
+        },
+        "studentDTO.StudentWithCourseParticipationsDTO": {
+            "type": "object",
+            "properties": {
+                "courses": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/studentDTO.StudentCourseParticipationDTO"
+                    }
+                },
+                "currentSemester": {
+                    "type": "integer"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "firstName": {
+                    "type": "string"
+                },
+                "hasUniversityAccount": {
+                    "type": "boolean"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "lastName": {
+                    "type": "string"
+                },
+                "studyProgram": {
                     "type": "string"
                 }
             }
