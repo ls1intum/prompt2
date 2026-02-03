@@ -1,0 +1,111 @@
+name: Detect Changes
+
+on:
+  workflow_call:
+    outputs:
+      server_modules:
+        description: "JSON array of server modules that should run"
+        value: ${{ jobs.detect.outputs.server_modules }}
+      api_spec_directories:
+        description: "JSON array of server modules that should generate API specs"
+        value: ${{ jobs.detect.outputs.api_spec_directories }}
+      client_modules:
+        description: "JSON array of client modules that should run"
+        value: ${{ jobs.detect.outputs.client_modules }}
+
+permissions:
+  contents: read
+
+jobs:
+  detect:
+    runs-on: ubuntu-latest
+    outputs:
+      server_modules: ${{ steps.set-outputs.outputs.server_modules }}
+      api_spec_directories: ${{ steps.set-outputs.outputs.api_spec_directories }}
+      client_modules: ${{ steps.set-outputs.outputs.client_modules }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: tj-actions/changed-files@v45
+        id: changed-servers
+        with:
+          files: servers/**
+          dir_names: true
+          dir_names_max_depth: 2
+          json: true
+      - uses: tj-actions/changed-files@v45
+        id: changed-clients
+        with:
+          files: clients/**
+          dir_names: true
+          dir_names_max_depth: 2
+          json: true
+      - uses: tj-actions/changed-files@v45
+        id: changed-workflows
+        with:
+          files: .github/workflows/**
+      - id: set-outputs
+        run: |
+          set -euo pipefail
+
+          workflows_changed="${{ steps.changed-workflows.outputs.any_changed }}"
+
+          add_unique() {
+            local list="$1"
+            local value="$2"
+            echo "$list" | jq --arg v "$value" 'if contains([$v]) then . else . + [$v] end'
+          }
+
+          server_modules="[]"
+          if [ "$workflows_changed" = "true" ]; then
+            for dir in servers/*/; do
+              module=$(basename "$dir")
+              [ -f "$dir/go.mod" ] && server_modules=$(add_unique "$server_modules" "$module")
+            done
+          else
+            for dir in $(echo '${{ steps.changed-servers.outputs.all_changed_files }}' | jq -r '.[]'); do
+              module=$(echo "$dir" | cut -d'/' -f2)
+              [ -n "$module" ] && [ -f "servers/$module/go.mod" ] && server_modules=$(add_unique "$server_modules" "$module")
+            done
+          fi
+
+          client_modules="[]"
+          if [ "$workflows_changed" = "true" ]; then
+            for dir in clients/*/; do
+              module=$(basename "$dir")
+              [ -f "$dir/eslint.config.mjs" ] && client_modules=$(add_unique "$client_modules" "$module")
+            done
+          else
+            for dir in $(echo '${{ steps.changed-clients.outputs.all_changed_files }}' | jq -r '.[]'); do
+              module=$(echo "$dir" | cut -d'/' -f2)
+              [ -n "$module" ] && [ -f "clients/$module/eslint.config.mjs" ] && client_modules=$(add_unique "$client_modules" "$module")
+            done
+          fi
+
+          is_api_spec_module() {
+            local module="$1"
+            local modfile="servers/$module/go.mod"
+            [ -f "$modfile" ] && grep -q "swaggo/swag" "$modfile"
+          }
+
+          api_spec_directories="[]"
+          if [ "$workflows_changed" = "true" ]; then
+            for dir in servers/*/; do
+              module=$(basename "$dir")
+              if is_api_spec_module "$module"; then
+                api_spec_directories=$(add_unique "$api_spec_directories" "$module")
+              fi
+            done
+          else
+            for dir in $(echo '${{ steps.changed-servers.outputs.all_changed_files }}' | jq -r '.[]'); do
+              module=$(echo "$dir" | cut -d'/' -f2)
+              if [ -n "$module" ] && is_api_spec_module "$module"; then
+                api_spec_directories=$(add_unique "$api_spec_directories" "$module")
+              fi
+            done
+          fi
+
+          echo "server_modules=$server_modules" >> "$GITHUB_OUTPUT"
+          echo "api_spec_directories=$api_spec_directories" >> "$GITHUB_OUTPUT"
+          echo "client_modules=$client_modules" >> "$GITHUB_OUTPUT"
