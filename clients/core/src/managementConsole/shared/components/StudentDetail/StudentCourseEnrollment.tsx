@@ -14,7 +14,7 @@ export function StudentCourseEnrollment({
 }) {
   const [showFuturePhases, setShowFuturePhases] = useState(false)
 
-  const phases = courseEnrollment.coursePhases
+  const phases = courseEnrollment.coursePhases ?? []
 
   const failedIndex = phases.findIndex((cp) => cp.passStatus === PassStatus.FAILED)
 
