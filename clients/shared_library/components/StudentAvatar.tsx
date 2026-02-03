@@ -36,16 +36,18 @@ export const StudentAvatar = ({ student }: StudentAvatarProps) => {
 export const RenderStudents = ({
   students,
   fallback,
+  className = '',
 }: {
   students: MinimalStudent[]
   fallback: ReactNode
+  className?: string
 }) => {
   return (
-    <div>
+    <div className={className}>
       {students.length === 0 ? (
-        <p className='text-xs italic text-muted-foreground'>{fallback}</p>
+        fallback
       ) : (
-        <ul className='flex flex-wrap gap-2'>
+        <ul className='flex flex-wrap gap-x-2'>
           {students.map((member) => (
             <li key={member.id}>
               <StudentAvatar student={member} />
