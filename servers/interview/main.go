@@ -106,6 +106,17 @@ func initSentry() {
 	log.Info("Sentry initialized successfully")
 }
 
+// @title           PROMPT Interview API
+// @version         1.0
+// @description     This is the interview server of PROMPT.
+// @host            localhost:8087
+// @BasePath        /interview/api
+// @externalDocs.description  PROMPT Documentation
+// @externalDocs.url          https://ls1intum.github.io/prompt2/
+// @securityDefinitions.apikey ApiKeyAuth
+// @in header
+// @name Authorization
+// @description Bearer token authentication. Use format: Bearer {token}
 func initKeycloak(queries db.Queries) {
 	baseURL := promptSDK.GetEnv("KEYCLOAK_HOST", "http://localhost:8081")
 	if !strings.HasPrefix(baseURL, "http") {

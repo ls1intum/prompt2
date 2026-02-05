@@ -1,0 +1,515 @@
+basePath: /interview/api
+definitions:
+  db.InterviewSlot:
+    properties:
+      capacity:
+        type: integer
+      course_phase_id:
+        type: string
+      created_at:
+        $ref: '#/definitions/pgtype.Timestamptz'
+      end_time:
+        $ref: '#/definitions/pgtype.Timestamptz'
+      id:
+        type: string
+      location:
+        $ref: '#/definitions/pgtype.Text'
+      start_time:
+        $ref: '#/definitions/pgtype.Timestamptz'
+      updated_at:
+        $ref: '#/definitions/pgtype.Timestamptz'
+    type: object
+  interview_slot.AssignmentInfo:
+    properties:
+      assigned_at:
+        type: string
+      course_participation_id:
+        type: string
+      id:
+        type: string
+      student:
+        $ref: '#/definitions/interview_slot.StudentInfo'
+    type: object
+  interview_slot.CreateInterviewAssignmentAdminRequest:
+    properties:
+      course_participation_id:
+        type: string
+      interview_slot_id:
+        type: string
+    required:
+    - course_participation_id
+    - interview_slot_id
+    type: object
+  interview_slot.CreateInterviewAssignmentRequest:
+    properties:
+      interview_slot_id:
+        type: string
+    required:
+    - interview_slot_id
+    type: object
+  interview_slot.CreateInterviewSlotRequest:
+    properties:
+      capacity:
+        minimum: 1
+        type: integer
+      end_time:
+        type: string
+      location:
+        type: string
+      start_time:
+        type: string
+    required:
+    - capacity
+    - end_time
+    - start_time
+    type: object
+  interview_slot.InterviewAssignmentResponse:
+    properties:
+      assigned_at:
+        type: string
+      course_participation_id:
+        type: string
+      id:
+        type: string
+      interview_slot_id:
+        type: string
+      slot_details:
+        $ref: '#/definitions/interview_slot.InterviewSlotResponse'
+    type: object
+  interview_slot.InterviewSlotResponse:
+    properties:
+      assigned_count:
+        type: integer
+      assignments:
+        items:
+          $ref: '#/definitions/interview_slot.AssignmentInfo'
+        type: array
+      capacity:
+        type: integer
+      course_phase_id:
+        type: string
+      created_at:
+        type: string
+      end_time:
+        type: string
+      id:
+        type: string
+      location:
+        type: string
+      start_time:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  interview_slot.StudentInfo:
+    properties:
+      email:
+        type: string
+      firstName:
+        type: string
+      id:
+        type: string
+      lastName:
+        type: string
+    type: object
+  interview_slot.UpdateInterviewSlotRequest:
+    properties:
+      capacity:
+        minimum: 1
+        type: integer
+      end_time:
+        type: string
+      location:
+        type: string
+      start_time:
+        type: string
+    required:
+    - capacity
+    - end_time
+    - start_time
+    type: object
+  pgtype.InfinityModifier:
+    enum:
+    - 1
+    - 0
+    - -1
+    format: int32
+    type: integer
+    x-enum-varnames:
+    - Infinity
+    - Finite
+    - NegativeInfinity
+  pgtype.Text:
+    properties:
+      string:
+        type: string
+      valid:
+        type: boolean
+    type: object
+  pgtype.Timestamptz:
+    properties:
+      infinityModifier:
+        $ref: '#/definitions/pgtype.InfinityModifier'
+      time:
+        type: string
+      valid:
+        type: boolean
+    type: object
+externalDocs:
+  description: PROMPT Documentation
+  url: https://ls1intum.github.io/prompt2/
+host: localhost:8087
+info:
+  contact: {}
+  description: This is the interview server of PROMPT.
+  title: PROMPT Interview API
+  version: "1.0"
+paths:
+  /course_phase/{coursePhaseID}/interview-assignments:
+    post:
+      consumes:
+      - application/json
+      description: Students can book themselves into an available interview slot
+      parameters:
+      - description: Course Phase UUID
+        in: path
+        name: coursePhaseID
+        required: true
+        type: string
+      - description: Assignment details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/interview_slot.CreateInterviewAssignmentRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/interview_slot.InterviewAssignmentResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "409":
+          description: Conflict
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Assign current user to an interview slot
+      tags:
+      - interview-assignments
+  /course_phase/{coursePhaseID}/interview-assignments/{assignmentId}:
+    delete:
+      description: Removes a student's assignment to an interview slot
+      parameters:
+      - description: Course Phase UUID
+        in: path
+        name: coursePhaseID
+        required: true
+        type: string
+      - description: Assignment UUID
+        in: path
+        name: assignmentId
+        required: true
+        type: string
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Delete an interview assignment
+      tags:
+      - interview-assignments
+  /course_phase/{coursePhaseID}/interview-assignments/admin:
+    post:
+      consumes:
+      - application/json
+      description: Allows admins/lecturers to manually assign any student to an interview
+        slot
+      parameters:
+      - description: Course Phase UUID
+        in: path
+        name: coursePhaseID
+        required: true
+        type: string
+      - description: Assignment details with course participation ID
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/interview_slot.CreateInterviewAssignmentAdminRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/interview_slot.InterviewAssignmentResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "409":
+          description: Conflict
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Manually assign a student to an interview slot (Admin only)
+      tags:
+      - interview-assignments
+  /course_phase/{coursePhaseID}/interview-assignments/my-assignment:
+    get:
+      description: Retrieves the interview assignment for the current student
+      parameters:
+      - description: Course Phase UUID
+        in: path
+        name: coursePhaseID
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/interview_slot.InterviewAssignmentResponse'
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get current user's interview assignment
+      tags:
+      - interview-assignments
+  /course_phase/{coursePhaseID}/interview-slots:
+    get:
+      description: Retrieves all interview slots with assignment details
+      parameters:
+      - description: Course Phase UUID
+        in: path
+        name: coursePhaseID
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/interview_slot.InterviewSlotResponse'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get all interview slots for a course phase
+      tags:
+      - interview-slots
+    post:
+      consumes:
+      - application/json
+      description: Creates a new interview time slot for the course phase
+      parameters:
+      - description: Course Phase UUID
+        in: path
+        name: coursePhaseID
+        required: true
+        type: string
+      - description: Interview slot details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/interview_slot.CreateInterviewSlotRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/db.InterviewSlot'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Create a new interview slot
+      tags:
+      - interview-slots
+  /course_phase/{coursePhaseID}/interview-slots/{slotId}:
+    delete:
+      description: Deletes an interview slot and all its assignments
+      parameters:
+      - description: Course Phase UUID
+        in: path
+        name: coursePhaseID
+        required: true
+        type: string
+      - description: Interview Slot UUID
+        in: path
+        name: slotId
+        required: true
+        type: string
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Delete an interview slot
+      tags:
+      - interview-slots
+    get:
+      description: Retrieves details of a specific interview slot
+      parameters:
+      - description: Course Phase UUID
+        in: path
+        name: coursePhaseID
+        required: true
+        type: string
+      - description: Interview Slot UUID
+        in: path
+        name: slotId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/interview_slot.InterviewSlotResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get a specific interview slot
+      tags:
+      - interview-slots
+    put:
+      consumes:
+      - application/json
+      description: Updates an existing interview slot
+      parameters:
+      - description: Course Phase UUID
+        in: path
+        name: coursePhaseID
+        required: true
+        type: string
+      - description: Interview Slot UUID
+        in: path
+        name: slotId
+        required: true
+        type: string
+      - description: Updated slot details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/interview_slot.UpdateInterviewSlotRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/db.InterviewSlot'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Update an interview slot
+      tags:
+      - interview-slots
+securityDefinitions:
+  ApiKeyAuth:
+    description: 'Bearer token authentication. Use format: Bearer {token}'
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
