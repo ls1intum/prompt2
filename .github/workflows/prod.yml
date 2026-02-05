@@ -15,6 +15,9 @@ permissions:
 jobs:
   detect-changes:
     uses: ./.github/workflows/detect-changes.yml
+    permissions:
+      contents: read
+      pull-requests: read
   lint-servers:
     needs: detect-changes
     uses: ./.github/workflows/lint-servers.yml
