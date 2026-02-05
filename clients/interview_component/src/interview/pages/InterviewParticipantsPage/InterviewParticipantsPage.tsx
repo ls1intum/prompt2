@@ -17,6 +17,7 @@ export const InterviewParticipantsPage = () => {
   } = useQuery<CoursePhaseParticipationsWithResolution>({
     queryKey: ['participants', phaseId],
     queryFn: () => getCoursePhaseParticipations(phaseId ?? ''),
+    enabled: !!phaseId,
   })
 
   return (
