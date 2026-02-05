@@ -918,6 +918,32 @@ func deleteInterviewAssignment(c *gin.Context) {
 		return
 	}
 
+	// Parse and verify the course phase ID from the path
+	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid course phase ID"})
+		return
+	}
+
+	// Fetch the slot to verify it belongs to the specified course phase
+	slot, err := InterviewSlotServiceSingleton.queries.GetInterviewSlot(context.Background(), assignment.InterviewSlotID)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			c.JSON(http.StatusNotFound, gin.H{"error": "Slot not found"})
+		} else {
+			log.Errorf("Failed to get interview slot: %v", err)
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get interview slot"})
+		}
+		return
+	}
+
+	// Verify the slot belongs to the course phase in the path
+	if slot.CoursePhaseID != coursePhaseID {
+		log.Warnf("Attempt to delete assignment %s: slot belongs to course phase %s but path specifies %s", assignmentID, slot.CoursePhaseID, coursePhaseID)
+		c.JSON(http.StatusForbidden, gin.H{"error": "Assignment does not belong to the specified course phase"})
+		return
+	}
+
 	// Check user roles for authorization
 	userRoles, exists := c.Get("userRoles")
 	if !exists {
@@ -962,11 +988,6 @@ func deleteInterviewAssignment(c *gin.Context) {
 		}
 
 		// Fetch course participation to verify ownership
-		coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
-		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid course phase ID"})
-			return
-		}
 		studentMap, err := fetchAllStudentsForCoursePhase(c, coursePhaseID)
 		if err != nil {
 			log.Errorf("Failed to fetch students for course phase: %v", err)
