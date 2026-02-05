@@ -22,23 +22,36 @@ jobs:
     permissions:
       contents: read
       pull-requests: write
+  detect-changes:
+    uses: ./.github/workflows/detect-changes.yml
   generate-api-spec:
+    needs: detect-changes
     uses: ./.github/workflows/generate-api-spec.yml
     secrets: inherit
+    with:
+      directories: ${{ needs.detect-changes.outputs.api_spec_directories }}
   lint-servers:
+    needs: detect-changes
     uses: ./.github/workflows/lint-servers.yml
     secrets: inherit
+    with:
+      modules: ${{ needs.detect-changes.outputs.server_modules }}
   test-servers:
-    needs: lint-servers
+    needs: [detect-changes, lint-servers]
     uses: ./.github/workflows/test-servers.yml
     secrets: inherit
+    with:
+      directories: ${{ needs.detect-changes.outputs.server_modules }}
   build-servers:
     needs: test-servers
     uses: ./.github/workflows/build-and-push-servers.yml
     secrets: inherit
   lint-clients:
+    needs: detect-changes
     uses: ./.github/workflows/lint-clients.yml
     secrets: inherit
+    with:
+      modules: ${{ needs.detect-changes.outputs.client_modules }}
   build-clients:
     needs: lint-clients
     uses: ./.github/workflows/build-and-push-clients.yml

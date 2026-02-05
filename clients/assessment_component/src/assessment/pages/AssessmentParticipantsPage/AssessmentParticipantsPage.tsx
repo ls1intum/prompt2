@@ -130,11 +130,6 @@ export const AssessmentParticipantsPage = () => {
       id: 'team',
       label: 'Team',
       options: teams.map((team) => team.name),
-      optionLabel: (value) => <p>{value}</p>,
-      badge: {
-        label: 'Team',
-        displayValue: (filtervalue) => `${filtervalue}`,
-      },
     },
   ]
 
