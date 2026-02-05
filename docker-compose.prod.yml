@@ -225,6 +225,38 @@ services:
     networks:
       - prompt-network
 
+  server-interview:
+    image: "ghcr.io/ls1intum/prompt2/prompt-server-interview:${SERVER_INTERVIEW_IMAGE_TAG}"
+    container_name: prompt-server-interview
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.server-interview.rule=Host(`${CORE_HOST}`) && PathPrefix(`/interview/api`)"
+      - "traefik.http.services.server-interview.loadbalancer.server.port=8080"
+      - "traefik.http.routers.server-interview.entrypoints=websecure"
+      - "traefik.http.routers.server-interview.tls.certresolver=letsencrypt"
+      - "traefik.http.middlewares.api-ratelimit.ratelimit.average=300"
+      - "traefik.http.middlewares.api-ratelimit.ratelimit.burst=100"
+      - "traefik.http.routers.server-interview.middlewares=api-ratelimit"
+    depends_on:
+      db-interview:
+        condition: service_healthy
+    expose:
+      - "8080"
+    environment:
+      - CORE_HOST
+      - SERVER_CORE_HOST
+      - SERVER_ADDRESS
+      - DB_HOST_INTERVIEW=db-interview
+      - DB_PORT_INTERVIEW=5432
+      - DB_NAME=${DB_INTERVIEW_NAME}
+      - DB_USER=${DB_INTERVIEW_USER}
+      - DB_PASSWORD=${DB_INTERVIEW_PASSWORD}
+      - KEYCLOAK_HOST
+      - KEYCLOAK_REALM_NAME
+      - SENTRY_DSN_INTERVIEW
+    networks:
+      - prompt-network
+
   db:
     image: "postgres:15.2-alpine"
     container_name: prompt-db
@@ -294,7 +326,16 @@ services:
       - POSTGRES_DB=${DB_NAME}
       - TZ=Europe/Berlin
     volumes:
-      - ./postgres_self_team_allocation_data:/var/lib/postgresql/data
+  db-interview:
+    image: "postgres:15.2-alpine"
+    container_name: prompt-db-interview
+    environment:
+      - POSTGRES_USER=${DB_INTERVIEW_USER}
+      - POSTGRES_PASSWORD=${DB_INTERVIEW_PASSWORD}
+      - POSTGRES_DB=${DB_INTERVIEW_NAME}
+      - TZ=Europe/Berlin
+    volumes:
+      - ./postgres_interview_data:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
       interval: 5s
@@ -384,6 +425,7 @@ services:
     depends_on:
       - server-core
       - server-intro-course
+      - server-interview
     networks:
       - prompt-network
 
