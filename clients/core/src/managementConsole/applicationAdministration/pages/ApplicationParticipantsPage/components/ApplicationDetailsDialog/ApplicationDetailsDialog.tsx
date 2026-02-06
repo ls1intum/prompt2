@@ -14,7 +14,7 @@ import { getApplicationAssessment } from '@core/network/queries/applicationAsses
 import { ApplicationForm } from '../../../../interfaces/form/applicationForm'
 import { getApplicationForm } from '@core/network/queries/applicationForm'
 import { MissingUniversityData } from './components/MissingUniversityData'
-import { getStatusBadge } from '../../utils/getStatusBadge'
+import { getStatusBadge, getStatusString } from '../../utils/getStatusBadge'
 import { PassStatus } from '@tumaet/prompt-shared-state'
 import { AssessmentCard } from './components/AssessmentCard'
 import { ApplicationAnswersTable } from '../table/ApplicationAnswersTable'
@@ -71,7 +71,8 @@ export const ApplicationDetailsDialog = ({
           <DialogTitle>
             {fetchedApplication?.student?.firstName} {fetchedApplication?.student?.lastName}{' '}
           </DialogTitle>
-          <DialogDescription>{getStatusBadge(status)}</DialogDescription>
+          <DialogDescription>Status: {getStatusString(status)}</DialogDescription>
+          <div className='mt-2'>{getStatusBadge(status)}</div>
         </DialogHeader>
         <div className='flex-1 overflow-y-auto p-4'>
           <div className='space-y-4'>
@@ -103,9 +104,11 @@ export const ApplicationDetailsDialog = ({
                     questions={[
                       ...fetchedApplicationForm.questionsMultiSelect,
                       ...fetchedApplicationForm.questionsText,
+                      ...fetchedApplicationForm.questionsFileUpload,
                     ]}
                     answersMultiSelect={fetchedApplication.answersMultiSelect}
                     answersText={fetchedApplication.answersText}
+                    answersFileUpload={fetchedApplication.answersFileUpload}
                   />
                 </>
               )}
