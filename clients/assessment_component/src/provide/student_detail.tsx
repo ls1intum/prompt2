@@ -25,6 +25,8 @@ export const StudentDetail: React.FC<CoursePhaseStudentIdentifierProps> = ({
   if (!studentAssessment) return null
 
   const completion = studentAssessment.assessmentCompletion
+  if (!completion) return null
+
   const completionStatus = completion.completed ? 'Completed' : 'Not completed'
   const completedAt = completion.completedAt
     ? new Date(completion.completedAt).toLocaleString()
@@ -33,14 +35,15 @@ export const StudentDetail: React.FC<CoursePhaseStudentIdentifierProps> = ({
   const author = completion.author || '-'
 
   return (
-    <div className='grid grid-cols-2 gap-y-4 gap-x-4'>
+    <div className='grid grid-cols-2 gap-y-4 gap-x-4 text-sm'>
       <div className='flex flex-col min-h-[92px]'>
         <div className='text-muted-foreground text-sm'>{completionStatus}</div>
         {completionStatus === 'Completed' && (
           <div className='font-medium break-words'>{completedAt}</div>
         )}
-        <div className='mt-1' />
-        <GradeSuggestionBadge gradeSuggestion={completion.gradeSuggestion} text={true} />
+        <div className='mt-1'>
+          <GradeSuggestionBadge gradeSuggestion={completion.gradeSuggestion} text={true} />
+        </div>
       </div>
 
       <div className='flex flex-col items-end text-right min-h-[92px]'>
@@ -54,16 +57,14 @@ export const StudentDetail: React.FC<CoursePhaseStudentIdentifierProps> = ({
         <hr />
         <div>
           <h4 className='text-muted-foreground text-sm mb-1'>Comment</h4>
-          <div style={{ maxWidth: '330px' }} className='whitespace-pre-wrap break-words'>
-            {comment}
-          </div>
+          <div className='whitespace-pre-wrap break-words'>{comment}</div>
         </div>
       </div>
       <Link
         to={`/management/course/${courseId}/${coursePhaseId}/participants/${courseParticipationId}`}
         className='mt-2 text-blue-600'
       >
-        Open this Assessment
+        Assessment
       </Link>
     </div>
   )

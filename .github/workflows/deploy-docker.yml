@@ -69,7 +69,7 @@ jobs:
     steps:
       - name: SSH to VM and Execute Docker-Compose Down
         continue-on-error: true
-        uses: appleboy/ssh-action@v1.2.4
+        uses: appleboy/ssh-action@v1.2.5
         with:
           host: ${{ vars.VM_HOST }}
           username: ${{ vars.VM_USERNAME }}
@@ -88,7 +88,7 @@ jobs:
             docker compose -f docker-compose.prod.yml --env-file=.env.prod rm -f $SERVICES
 
       - name: checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Package maintenance assets
         run: |
@@ -161,7 +161,7 @@ jobs:
           target: /home/${{ vars.VM_USERNAME }}/postfix-config/
 
       - name: Verify and extract maintenance assets on VM
-        uses: appleboy/ssh-action@v1.2.4
+        uses: appleboy/ssh-action@v1.2.5
         with:
           host: ${{ vars.VM_HOST }}
           username: ${{ vars.VM_USERNAME }}
@@ -178,7 +178,7 @@ jobs:
             tar xzf maintenance.tar.gz -C /home/${{ vars.VM_USERNAME }}
 
       - name: SSH to VM and create .env.prod file
-        uses: appleboy/ssh-action@v1.2.4
+        uses: appleboy/ssh-action@v1.2.5
         with:
           host: ${{ vars.VM_HOST }}
           username: ${{ vars.VM_USERNAME }}
@@ -257,7 +257,7 @@ jobs:
             echo "GITLAB_ACCESS_TOKEN=${{ vars.GITLAB_ACCESS_TOKEN }}" >> .env.prod
 
       - name: SSH to VM and Execute Docker-Compose Up
-        uses: appleboy/ssh-action@v1.2.4
+        uses: appleboy/ssh-action@v1.2.5
         with:
           host: ${{ vars.VM_HOST }}
           username: ${{ vars.VM_USERNAME }}

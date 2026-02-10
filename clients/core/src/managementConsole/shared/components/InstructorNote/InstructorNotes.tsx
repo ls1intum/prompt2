@@ -39,7 +39,7 @@ export function InstructorNotes() {
         <NotepadText className='w-10 h-10' />
         <h3 className='font-bold text-xl'>Instructor Notes</h3>
         <p className='text-center'>
-          Instructor Notes will appear here in the near future. Work in Progress :)
+          Instructor Notes will appear here in the near future. Work in Progress.
         </p>
       </div>
 

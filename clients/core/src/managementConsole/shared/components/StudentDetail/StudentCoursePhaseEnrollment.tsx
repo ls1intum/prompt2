@@ -7,6 +7,7 @@ import { Suspense } from 'react'
 import { ProgressIndicator } from './PhaseProgressIndicator'
 import { LinkHeading } from './LinkHeading'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@tumaet/prompt-ui-components'
+import { PassStatus } from '@tumaet/prompt-shared-state'
 
 export function parsePostgresTimestamp(ts: string): Date {
   return new Date(ts.replace(' ', 'T') + 'Z')
@@ -56,14 +57,20 @@ export function StudentCoursePhaseEnrollment({
             </TooltipTrigger>
             <TooltipContent>
               <div className='text-sm text-muted-foreground'>
-                <span className='font-semibold'>{coursePhaseEnrollment.passStatus}</span> on{' '}
-                {formatDateTime(coursePhaseEnrollment.lastModified)}
+                {coursePhaseEnrollment.passStatus !== PassStatus.NOT_ASSESSED ? (
+                  <>
+                    <span className='font-semibold'>{coursePhaseEnrollment.passStatus}</span> on{' '}
+                    {formatDateTime(coursePhaseEnrollment.lastModified)}
+                  </>
+                ) : (
+                  <span>phase participation ongoing</span>
+                )}
               </div>
             </TooltipContent>
           </Tooltip>
         </div>
       </div>
-      <div className='ml-2 mb-[0.85rem] group'>
+      <div className='ml-2 mb-[0.85rem] group w-full pr-2'>
         <div>
           <LinkHeading
             targetURL={`/management/course/${courseId}/${coursePhaseEnrollment.coursePhaseId}`}
@@ -72,7 +79,7 @@ export function StudentCoursePhaseEnrollment({
           </LinkHeading>
         </div>
         {PhaseDetail && (
-          <div className='inline-block w-fit max-w-full py-2 px-3 border rounded-md empty:hidden'>
+          <div className='inline-block w-full py-2 px-3 border rounded-md empty:hidden'>
             <Suspense fallback={null}>
               <PhaseDetail
                 studentId={studentId}

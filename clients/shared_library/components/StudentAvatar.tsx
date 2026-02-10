@@ -15,8 +15,8 @@ interface StudentAvatarProps {
 }
 
 export const StudentAvatar = ({ student }: StudentAvatarProps) => {
-  return (
-    <Link to={`/management/students/${student.id}`} className='flex items-center gap-2'>
+  const avatar = (
+    <>
       <Avatar className='h-6 w-6'>
         <AvatarImage
           src={getGravatarUrl(student.email)}
@@ -27,28 +27,41 @@ export const StudentAvatar = ({ student }: StudentAvatarProps) => {
           {student.lastName[0]}
         </AvatarFallback>
       </Avatar>
-      <span className='text-xs transition-colors hover:text-blue-500'>
+      <span className='text-xs transition-colors'>
         {student.firstName} {student.lastName}
       </span>
+    </>
+  )
+
+  return student.id ? (
+    <Link
+      to={`/management/students/${student.id}`}
+      className='flex items-center gap-2 hover:text-blue-500'
+    >
+      {avatar}
     </Link>
+  ) : (
+    avatar
   )
 }
 export const RenderStudents = ({
   students,
   fallback,
+  className = '',
 }: {
   students: MinimalStudent[]
   fallback: ReactNode
+  className?: string
 }) => {
   return (
-    <div>
+    <div className={className}>
       {students.length === 0 ? (
-        <p className='text-xs italic text-muted-foreground'>{fallback}</p>
+        fallback
       ) : (
-        <ul className='flex flex-wrap gap-2'>
-          {students.map((member) => (
-            <li key={member.id}>
-              <StudentAvatar student={member} />
+        <ul className='flex flex-wrap gap-x-2'>
+          {students.map((student) => (
+            <li key={student.id ?? student.email}>
+              <StudentAvatar student={student} />
             </li>
           ))}
         </ul>
