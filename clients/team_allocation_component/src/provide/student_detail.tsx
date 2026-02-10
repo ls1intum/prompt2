@@ -84,13 +84,14 @@ export const StudentDetail: React.FC<CoursePhaseStudentIdentifierProps> = ({
       <h4 className='font-semibold text-lg'>{team.name}</h4>
 
       <RenderStudents
+        className='mb-2 mt-1'
         students={tutors.map((tutor) => ({ ...tutor, email: 'no@mail.example' }))}
-        fallback={<p className='text-xs italic text-muted-foreground'>No tutors allocated</p>}
+        fallback={<p className='text-muted-foreground'>No tutors in this team</p>}
       />
 
       <RenderStudents
         students={members}
-        fallback={<p className='text-xs italic text-muted-foreground'>No members allocated.</p>}
+        fallback={<p className='text-muted-foreground'>No members in this team</p>}
       />
     </div>
   )
