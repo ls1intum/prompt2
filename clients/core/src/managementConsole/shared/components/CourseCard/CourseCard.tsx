@@ -1,4 +1,5 @@
 import {
+  Button,
   Card,
   CardContent,
   CardFooter,
@@ -9,19 +10,10 @@ import {
   TooltipTrigger,
 } from '@tumaet/prompt-ui-components'
 import { Course } from '@tumaet/prompt-shared-state'
-import {
-  CalendarDays,
-  GraduationCap,
-  Clock,
-  Calendar,
-  ChevronRight,
-  Archive,
-  ArchiveRestore,
-} from 'lucide-react'
+import { CalendarDays, GraduationCap, Clock, Calendar, ChevronRight, Settings } from 'lucide-react'
 import { CourseTypeDetails } from '@tumaet/prompt-shared-state'
 import DynamicIcon from '@/components/DynamicIcon'
 import { useNavigate } from 'react-router-dom'
-import { archiveCourses, unarchiveCourses } from '@core/network/mutations/updateCourseArchiveStatus'
 import { formatDate } from '@core/utils/formatDate'
 import { CourseArchiveButton } from './CourseArchiveButton'
 
@@ -48,6 +40,7 @@ type CourseCardProps = {
 export const CourseCard = ({ course }: CourseCardProps) => {
   const bgColor = course.studentReadableData?.['bg-color'] || 'bg-gray-50'
   const navigate = useNavigate()
+  const settingsURL = `/management/course/${course.id}/settings`
 
   return (
     <Card className='overflow-hidden border border-gray-200 h-full flex flex-col'>
@@ -69,15 +62,28 @@ export const CourseCard = ({ course }: CourseCardProps) => {
             </CardTitle>
           </div>
 
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <CourseArchiveButton archived={course.archived} courseId={course.id} />
-            </TooltipTrigger>
+          <div className='flex gap-2'>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <CourseArchiveButton archived={course.archived} courseId={course.id} />
+              </TooltipTrigger>
 
-            <TooltipContent>
-              {course.archived ? 'Unarchive this course' : 'Archive this course'}
-            </TooltipContent>
-          </Tooltip>
+              <TooltipContent>
+                {course.archived ? 'Unarchive this course' : 'Archive this course'}
+              </TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <Button
+                variant='outline'
+                onClick={() => navigate(settingsURL)}
+                className='shrink-0 focus-visible:ring-2 focus-visible:ring-offset-2'
+              >
+                <Settings />
+              </Button>
+
+              <TooltipContent>Go to Course Settings</TooltipContent>
+            </Tooltip>
+          </div>
         </div>
       </CardHeader>
 
@@ -113,19 +119,16 @@ export const CourseCard = ({ course }: CourseCardProps) => {
         </div>
       </CardContent>
 
-      <CardFooter className='border-t flex w-full p-0'>
-        <button
-          onClick={() => navigate(`/management/course/${course.id}`)}
-          className='text-sm font-medium text-primary flex items-center hover:underline focus-visible:ring-2 focus-visible:ring-offset-2 rounded w-1/2 p-3 pl-6'
-        >
-          Go to course <ChevronRight className='ml-1 h-4 w-4' />
-        </button>
+      <CardFooter className='px-6 py-4 border-t flex justify-between'>
+        <div className='text-xs text-gray-500'>
+          {course.archivedOn && <>Archived on {formatDate(course.archivedOn)}</>}
+        </div>
 
         <button
-          onClick={() => navigate(`/management/course/${course.id}/settings`)}
-          className='text-sm font-medium text-primary flex items-center hover:underline focus-visible:ring-2 focus-visible:ring-offset-2 rounded w-1/2 p-3 pl-4 border-l'
+          onClick={() => navigate(`/management/course/${course.id}`)}
+          className='text-sm font-medium text-primary flex items-center hover:underline focus-visible:ring-2 focus-visible:ring-offset-2 rounded'
         >
-          Go to settings <ChevronRight className='ml-1 h-4 w-4' />
+          Go to course <ChevronRight className='ml-1 h-4 w-4' />
         </button>
       </CardFooter>
     </Card>
