@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { useParams } from 'react-router-dom'
 import { Loader2 } from 'lucide-react'
-import { ErrorPage } from '@tumaet/prompt-ui-components'
+import { CardTitle, ErrorPage } from '@tumaet/prompt-ui-components'
 import { GetApplication } from '@core/interfaces/application/getApplication'
 import { getApplicationAssessment } from '@core/network/queries/applicationAssessment'
 import { ApplicationForm } from '../../../../interfaces/form/applicationForm'
@@ -15,7 +15,7 @@ import { useStudentEnrollments } from '@core/network/hooks/useStudentEnrollments
 import { CourseEnrollmentSummary } from '@core/managementConsole/shared/components/StudentDetail/CourseEnrollmentSummary'
 import { StudentCourseEnrollment } from '@core/managementConsole/shared/components/StudentDetail/StudentCourseEnrollment'
 import { CourseEnrollment } from '@core/network/queries/getStudentEnrollments'
-import { ApplicationDetailPageLayout } from './components/ApplicatioDetailPageLayout'
+import { ApplicationDetailPageLayout } from './components/ApplicationDetailPageLayout'
 
 export const ApplicationDetailsPage = () => {
   const { phaseId, participationId } = useParams<{ phaseId: string; participationId: string }>()

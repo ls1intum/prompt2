@@ -1,5 +1,5 @@
-import { Card, Tabs, TabsContent, TabsList, TabsTrigger } from '@tumaet/prompt-ui-components'
-import { FileUser, GalleryVerticalEnd, NotepadText } from 'lucide-react'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@tumaet/prompt-ui-components'
+import { FileUser, GalleryVerticalEnd } from 'lucide-react'
 import { ReactNode } from 'react'
 
 interface StudentDetailContentProps {
