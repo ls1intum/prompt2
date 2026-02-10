@@ -78,7 +78,7 @@ export const CourseCard = ({ course }: CourseCardProps) => {
                 onClick={() => navigate(settingsURL)}
                 className='shrink-0 focus-visible:ring-2 focus-visible:ring-offset-2'
               >
-                <Settings />
+                <Settings className='text-gray-600' />
               </Button>
 
               <TooltipContent>Go to Course Settings</TooltipContent>
