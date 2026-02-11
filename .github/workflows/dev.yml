@@ -41,12 +41,14 @@ jobs:
       modules: ${{ needs.detect-changes.outputs.server_modules }}
   test-servers:
     needs: [detect-changes, lint-servers]
+    if: always() && (needs.lint-servers.result == 'success' || needs.lint-servers.result == 'skipped')
     uses: ./.github/workflows/test-servers.yml
     secrets: inherit
     with:
       directories: ${{ needs.detect-changes.outputs.server_modules }}
   build-servers:
     needs: test-servers
+    if: always() && (needs.test-servers.result == 'success' || needs.test-servers.result == 'skipped')
     uses: ./.github/workflows/build-and-push-servers.yml
     secrets: inherit
   lint-clients:
@@ -57,6 +59,7 @@ jobs:
       modules: ${{ needs.detect-changes.outputs.client_modules }}
   build-clients:
     needs: lint-clients
+    if: always() && (needs.lint-clients.result == 'success' || needs.lint-clients.result == 'skipped')
     uses: ./.github/workflows/build-and-push-clients.yml
     secrets: inherit
   deploy-dev:
