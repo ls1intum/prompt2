@@ -1,6 +1,6 @@
 module github.com/ls1intum/prompt2/servers/core
 
-go 1.26
+go 1.25
 
 require (
 	github.com/Nerzal/gocloak/v13 v13.9.0
