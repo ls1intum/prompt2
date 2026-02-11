@@ -2,6 +2,11 @@ name: Detect Changes
 
 on:
   workflow_call:
+    inputs:
+      base_sha:
+        description: "Base SHA to compare against"
+        required: false
+        type: string
     outputs:
       server_modules:
         description: "JSON array of server modules that should run"
@@ -35,6 +40,7 @@ jobs:
           dir_names: true
           dir_names_max_depth: 2
           json: true
+          base_sha: ${{ inputs.base_sha }}
       - uses: tj-actions/changed-files@v45
         id: changed-clients
         with:
@@ -42,10 +48,12 @@ jobs:
           dir_names: true
           dir_names_max_depth: 2
           json: true
+          base_sha: ${{ inputs.base_sha }}
       - uses: tj-actions/changed-files@v45
         id: changed-workflows
         with:
           files: .github/workflows/**
+          base_sha: ${{ inputs.base_sha }}
       - uses: tj-actions/changed-files@v45
         id: changed-client-root
         with:
@@ -55,12 +63,14 @@ jobs:
             clients/lerna.json
             clients/Dockerfile
             clients/eslint.config.mjs
+          base_sha: ${{ inputs.base_sha }}
       - uses: tj-actions/changed-files@v45
         id: changed-server-root
         with:
           files: |
             servers/go.mod
             servers/go.sum
+          base_sha: ${{ inputs.base_sha }}
       - id: set-outputs
         run: |
           set -euo pipefail
