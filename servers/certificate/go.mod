@@ -1,18 +1,14 @@
 module github.com/prompt/certificate-service
 
-go 1.24.1
-
-toolchain go1.24.4
+go 1.25.6
 
 require (
 	github.com/gin-gonic/gin v1.10.0
 	github.com/google/uuid v1.6.0
 	github.com/jackc/pgx/v5 v5.7.4
-	github.com/ls1intum/prompt-sdk v0.0.0
+	github.com/ls1intum/prompt-sdk v1.0.11
 	github.com/minio/minio-go/v7 v7.0.61
 )
-
-replace github.com/ls1intum/prompt-sdk => ../../../Prompt-SDK
 
 require (
 	github.com/bytedance/sonic v1.11.6 // indirect
