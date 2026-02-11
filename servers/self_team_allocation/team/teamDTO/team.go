@@ -3,51 +3,50 @@ package teamDTO
 import (
 	"encoding/json"
 
-	"github.com/google/uuid"
+	"github.com/ls1intum/prompt-sdk/promptTypes"
 	db "github.com/ls1intum/prompt2/servers/self_team_allocation/db/sqlc"
 )
 
-type Team struct {
-	ID      uuid.UUID    `json:"id"`
-	Name    string       `json:"name"`
-	Members []TeamMember `json:"members"`
-}
-
-type TeamMember struct {
-	CourseParticipationID uuid.UUID `json:"courseParticipationID"`
-	StudentName           string    `json:"studentName"`
-}
-
-func GetTeamDTOFromDBModel(dbTeam db.GetTeamsWithStudentNamesRow) (Team, error) {
-	var members []TeamMember
+func GetTeamDTOFromDBModel(dbTeam db.GetTeamsWithStudentNamesRow) (promptTypes.Team, error) {
+	var members []promptTypes.Person
+	var tutors []promptTypes.Person
 	// unmarshal the JSON blob into your slice of structs
 	if err := json.Unmarshal(dbTeam.TeamMembers, &members); err != nil {
-		return Team{}, err
+		return promptTypes.Team{}, err
+	}
+	if err := json.Unmarshal(dbTeam.TeamTutors, &tutors); err != nil {
+		return promptTypes.Team{}, err
 	}
 
-	return Team{
+	return promptTypes.Team{
 		ID:      dbTeam.ID,
 		Name:    dbTeam.Name,
 		Members: members,
+		Tutors:  tutors,
 	}, nil
 }
 
-func GetTeamWithFullNamesByIdDTOFromDBModel(dbTeam db.GetTeamWithStudentNamesByTeamIDRow) (Team, error) {
-	var members []TeamMember
+func GetTeamWithFullNamesByIdDTOFromDBModel(dbTeam db.GetTeamWithStudentNamesByTeamIDRow) (promptTypes.Team, error) {
+	var members []promptTypes.Person
+	var tutors []promptTypes.Person
 	// unmarshal the JSON blob into your slice of structs
 	if err := json.Unmarshal(dbTeam.TeamMembers, &members); err != nil {
-		return Team{}, err
+		return promptTypes.Team{}, err
+	}
+	if err := json.Unmarshal(dbTeam.TeamTutors, &tutors); err != nil {
+		return promptTypes.Team{}, err
 	}
 
-	return Team{
+	return promptTypes.Team{
 		ID:      dbTeam.ID,
 		Name:    dbTeam.Name,
 		Members: members,
+		Tutors:  tutors,
 	}, nil
 }
 
-func GetTeamWithFullNameDTOsFromDBModels(dbTeams []db.GetTeamsWithStudentNamesRow) ([]Team, error) {
-	teams := make([]Team, 0, len(dbTeams))
+func GetTeamWithFullNameDTOsFromDBModels(dbTeams []db.GetTeamsWithStudentNamesRow) ([]promptTypes.Team, error) {
+	teams := make([]promptTypes.Team, 0, len(dbTeams))
 	for _, dbTeam := range dbTeams {
 		t, err := GetTeamDTOFromDBModel(dbTeam)
 		if err != nil {

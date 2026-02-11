@@ -47,10 +47,6 @@ func checkAllCoursePhasesCopyable(c *gin.Context, sourceCourseID uuid.UUID) ([]s
 
 // checkPhaseCopyable checks if a single course phase can be copied by sending a dummy request to the copy endpoint.
 func checkPhaseCopyable(c *gin.Context, phaseID, phaseTypeID uuid.UUID, phaseName string, checkedCoursePhases map[uuid.UUID]bool, missingPhases *[]string) error {
-	if checkedCoursePhases[phaseTypeID] {
-		return nil // already checked this phase type
-	}
-
 	coursePhaseType, err := CourseCopyServiceSingleton.queries.GetCoursePhaseTypeByID(c, phaseTypeID)
 	if err != nil {
 		return fmt.Errorf("failed to get phase type: %w", err)
@@ -83,7 +79,7 @@ func checkPhaseCopyable(c *gin.Context, phaseID, phaseTypeID uuid.UUID, phaseNam
 		checkedCoursePhases[phaseTypeID] = true
 		return nil
 	}
-	resp.Body.Close()
+	_ = resp.Body.Close()
 
 	if resp.StatusCode == http.StatusNotFound {
 		*missingPhases = append(*missingPhases, phaseName+" ("+coursePhaseType.Name+")")

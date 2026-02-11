@@ -1,7 +1,9 @@
 // Default values that shall be reused in every component
+import tailwindAnimate from 'tailwindcss-animate'
+import typography from '@tailwindcss/typography'
 
 /** @type {import('tailwindcss').Config} */
-module.exports = {
+export default {
   darkMode: ['class'],
   safelist: [
     'dark',
@@ -76,6 +78,9 @@ module.exports = {
         md: `calc(var(--radius) - 2px)`,
         sm: 'calc(var(--radius) - 4px)',
       },
+      spacing: {
+        sidebar: '222px',
+      },
     },
     screens: {
       sm: '640px',
@@ -85,9 +90,11 @@ module.exports = {
       '2xl': '1536px',
     },
   },
-  plugins: [require('tailwindcss-animate'), require('@tailwindcss/typography')],
+  plugins: [tailwindAnimate, typography],
   content: [
     './src/**/*.{js,ts,jsx,tsx}',
     '../node_modules/@tumaet/prompt-ui-components/dist/**/*.{js,ts,jsx,tsx}',
+    '../shared_library/**/*.{js,ts,jsx,tsx}',
+    '!../shared_library/node_modules/**',
   ],
 }

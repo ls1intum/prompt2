@@ -10,31 +10,42 @@ import {
   SelectValue,
 } from '@tumaet/prompt-ui-components'
 
+import { useCoursePhaseConfigStore } from '../../../../../zustand/useCoursePhaseConfigStore'
 import { useSelfEvaluationCategoryStore } from '../../../../../zustand/useSelfEvaluationCategoryStore'
 import { usePeerEvaluationCategoryStore } from '../../../../../zustand/usePeerEvaluationCategoryStore'
 import { useStudentAssessmentStore } from '../../../../../zustand/useStudentAssessmentStore'
-import { mapNumberToScoreLevel } from '../../../../../interfaces/scoreLevel'
+import { mapNumberToScoreLevel } from '@tumaet/prompt-shared-state'
 
 import { getWeightedScoreLevel } from '../../../../utils/getWeightedScoreLevel'
-import { StudentScoreBadge } from '../../../../components/StudentScoreBadge'
+import { GRADE_SELECT_OPTIONS } from '../../../../utils/gradeConfig'
+
+import { StudentScoreBadge } from '../../../../components/badges'
 
 interface GradeSuggestionProps {
   onGradeSuggestionChange: (value: string) => void
+  readOnly?: boolean
 }
 
-export const GradeSuggestion = ({ onGradeSuggestionChange }: GradeSuggestionProps) => {
+export const GradeSuggestion = ({
+  onGradeSuggestionChange,
+  readOnly = false,
+}: GradeSuggestionProps) => {
+  const { coursePhaseConfig } = useCoursePhaseConfigStore()
   const { selfEvaluationCategories } = useSelfEvaluationCategoryStore()
   const { peerEvaluationCategories } = usePeerEvaluationCategoryStore()
   const { studentScore, assessmentCompletion, selfEvaluations, peerEvaluations } =
     useStudentAssessmentStore()
+  const showAverages = !readOnly && (coursePhaseConfig?.evaluationResultsVisible ?? false)
+  const isCompleted = readOnly || (assessmentCompletion?.completed ?? false)
+  const gradeSuggestionValue =
+    assessmentCompletion?.gradeSuggestion && assessmentCompletion.gradeSuggestion > 0
+      ? assessmentCompletion.gradeSuggestion.toFixed(1)
+      : ''
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Grade Suggestion</CardTitle>
-        <p className='text-xs text-gray-500 dark:text-gray-400 mt-1'>
-          Will be shown to students after the deadline
-        </p>
+        <CardTitle className='mb-3'>Grade</CardTitle>
         {selfEvaluations &&
           selfEvaluations.length > 1 &&
           (() => {
@@ -69,9 +80,9 @@ export const GradeSuggestion = ({ onGradeSuggestionChange }: GradeSuggestionProp
               </div>
             )
           })()}
-        {studentScore && studentScore.scoreNumeric > 0 && (
+        {showAverages && studentScore && studentScore.scoreNumeric > 0 && (
           <div className='flex flex-row items-center gap-2'>
-            <p className='text-sm text-muted-foreground'>Platform recommendation:</p>
+            <p className='text-sm text-muted-foreground'>Your Assessment Average:</p>
             <StudentScoreBadge
               scoreLevel={studentScore.scoreLevel}
               scoreNumeric={studentScore.scoreNumeric}
@@ -81,26 +92,28 @@ export const GradeSuggestion = ({ onGradeSuggestionChange }: GradeSuggestionProp
         )}
       </CardHeader>
       <CardContent>
+        <p className='text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>
+          Your Grade Suggestion
+        </p>
+        {!readOnly && coursePhaseConfig?.gradeSuggestionVisible && (
+          <p className='text-xs text-gray-500 dark:text-gray-400 my-1'>
+            Your suggestion will be visible to the student once results are released.
+          </p>
+        )}
         <Select
-          value={assessmentCompletion?.gradeSuggestion.toFixed(1) ?? ''}
+          value={gradeSuggestionValue}
           onValueChange={onGradeSuggestionChange}
-          disabled={assessmentCompletion?.completed ?? false}
+          disabled={isCompleted}
         >
           <SelectTrigger>
             <SelectValue placeholder='Select a Grade Suggestion for this Student ...' />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value='1.0'>Very Good - 1.0</SelectItem>
-            <SelectItem value='1.3'>Very Good - 1.3</SelectItem>
-            <SelectItem value='1.7'>Good - 1.7</SelectItem>
-            <SelectItem value='2.0'>Good - 2.0</SelectItem>
-            <SelectItem value='2.3'>Good - 2.3</SelectItem>
-            <SelectItem value='2.7'>Satisfactory - 2.7</SelectItem>
-            <SelectItem value='3.0'>Satisfactory - 3.0</SelectItem>
-            <SelectItem value='3.3'>Satisfactory - 3.3</SelectItem>
-            <SelectItem value='3.7'>Sufficient - 3.7</SelectItem>
-            <SelectItem value='4.0'>Sufficient - 4.0</SelectItem>
-            <SelectItem value='5.0'>Fail - 5.0</SelectItem>
+            {GRADE_SELECT_OPTIONS.map((option) => (
+              <SelectItem key={option.value} value={option.value}>
+                {option.label}
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
       </CardContent>

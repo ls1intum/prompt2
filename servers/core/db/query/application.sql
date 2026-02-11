@@ -92,6 +92,8 @@ SELECT
     c.end_date,
     c.course_type, 
     c.ects,
+    c.short_description,
+    c.long_description,
     (cp.restricted_data->>'applicationEndDate')::text AS application_end_date,
     (cp.restricted_data->>'externalStudentsAllowed')::boolean AS external_students_allowed,
     (cp.restricted_data->>'universityLoginAvailable')::boolean AS university_login_available
@@ -117,6 +119,8 @@ SELECT
     c.end_date,
     c.course_type, 
     c.ects,
+    c.short_description,
+    c.long_description,
     (cp.restricted_data->>'applicationEndDate')::text AS application_end_date,
     (cp.restricted_data->>'externalStudentsAllowed')::boolean AS external_students_allowed,
     (cp.restricted_data->>'universityLoginAvailable')::boolean AS university_login_available

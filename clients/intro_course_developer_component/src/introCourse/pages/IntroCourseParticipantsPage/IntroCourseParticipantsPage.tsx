@@ -1,12 +1,12 @@
 import { ErrorPage, ManagementPageHeader } from '@tumaet/prompt-ui-components'
-import { CoursePhaseParticipationsTablePage } from '@/components/pages/CoursePhaseParticpationsTable/CoursePhaseParticipationsTablePage'
+import { CoursePhaseParticipationsTable } from '@/components/pages/CoursePhaseParticipationsTable/CoursePhaseParticipationsTable'
 import { getCoursePhaseParticipations } from '@/network/queries/getCoursePhaseParticipations'
 import { useQuery } from '@tanstack/react-query'
 import { CoursePhaseParticipationsWithResolution } from '@tumaet/prompt-shared-state'
 import { Loader2 } from 'lucide-react'
 import { useParams } from 'react-router-dom'
 
-export const IntroCourseParticipantsPage = (): JSX.Element => {
+export const IntroCourseParticipantsPage = () => {
   const { phaseId } = useParams<{ phaseId: string }>()
 
   const {
@@ -30,11 +30,9 @@ export const IntroCourseParticipantsPage = (): JSX.Element => {
       ) : (
         <>
           <ManagementPageHeader>Intro Course Participants</ManagementPageHeader>
-          <CoursePhaseParticipationsTablePage
+          <CoursePhaseParticipationsTable
+            phaseId={phaseId!}
             participants={coursePhaseParticipations?.participations ?? []}
-            prevDataKeys={[]}
-            restrictedDataKeys={[]}
-            studentReadableDataKeys={[]}
           />
         </>
       )}

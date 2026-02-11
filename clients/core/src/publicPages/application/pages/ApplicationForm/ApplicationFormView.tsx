@@ -45,7 +45,7 @@ export const ApplicationFormView = ({
   isInstructorView = false,
   allowEditUniversityData = false,
   onSubmit,
-}: ApplicationFormProps): JSX.Element => {
+}: ApplicationFormProps) => {
   const questions: (ApplicationQuestionText | ApplicationQuestionMultiSelect)[] = [
     ...questionsText,
     ...questionsMultiSelect,
@@ -58,12 +58,13 @@ export const ApplicationFormView = ({
   const [validationFailed, setValidationFailed] = useState(false)
 
   // correctly propagate student data changes
+  const hasInitialized = useRef(false)
+
   useEffect(() => {
-    if (student) {
+    if (!hasInitialized.current && student) {
       setStudentData(student)
-      if (studentRef.current) {
-        studentRef.current.rerender(student)
-      }
+      studentRef.current?.rerender(student)
+      hasInitialized.current = true
     }
   }, [student])
 
@@ -162,7 +163,9 @@ export const ApplicationFormView = ({
                         (a) => a.applicationQuestionID === question.id,
                       )?.answer ?? []
                     }
-                    ref={(el) => (questionMultiSelectRefs.current[index] = el)}
+                    ref={(el) => {
+                      questionMultiSelectRefs.current[index] = el
+                    }}
                     isInstructorView={isInstructorView}
                   />
                 ) : (
@@ -172,7 +175,9 @@ export const ApplicationFormView = ({
                       initialAnswersText?.find((a) => a.applicationQuestionID === question.id)
                         ?.answer ?? ''
                     }
-                    ref={(el) => (questionTextRefs.current[index] = el)}
+                    ref={(el) => {
+                      questionTextRefs.current[index] = el
+                    }}
                     isInstructorView={isInstructorView}
                   />
                 )}

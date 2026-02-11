@@ -2,11 +2,13 @@ package scoreLevelDTO
 
 import (
 	db "github.com/ls1intum/prompt2/servers/assessment/db/sqlc"
+	"github.com/ls1intum/prompt2/servers/assessment/utils"
 )
 
 type ScoreLevelWithParticipation struct {
 	CourseParticipationID string     `json:"courseParticipationID"`
 	ScoreLevel            ScoreLevel `json:"scoreLevel"`
+	ScoreNumeric          float64    `json:"scoreNumeric"`
 }
 
 func GetScoreLevelsFromDBScoreLevels(scoreLevels []db.GetAllScoreLevelsRow) []ScoreLevelWithParticipation {
@@ -15,6 +17,7 @@ func GetScoreLevelsFromDBScoreLevels(scoreLevels []db.GetAllScoreLevelsRow) []Sc
 		scoreLevelWithParticipation = append(scoreLevelWithParticipation, ScoreLevelWithParticipation{
 			CourseParticipationID: scoreLevel.CourseParticipationID.String(),
 			ScoreLevel:            MapDBScoreLevelToDTO(db.ScoreLevel(scoreLevel.ScoreLevel)),
+			ScoreNumeric:          utils.MapNumericToFloat64(scoreLevel.ScoreNumeric),
 		})
 	}
 	return scoreLevelWithParticipation

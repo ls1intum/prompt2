@@ -1,16 +1,19 @@
-import { ManagementPageHeader, ErrorPage } from '@tumaet/prompt-ui-components'
-import { getCoursePhaseParticipations } from '@/network/queries/getCoursePhaseParticipations'
-import { useQuery } from '@tanstack/react-query'
-import { CoursePhaseParticipationsWithResolution } from '@tumaet/prompt-shared-state'
-import { Loader2 } from 'lucide-react'
-import { useParams } from 'react-router-dom'
-import { CoursePhaseParticipationsTablePage } from '@/components/pages/CoursePhaseParticpationsTable/CoursePhaseParticipationsTablePage'
-import { Team } from '../../interfaces/team'
-import { getAllTeams } from '../../network/queries/getAllTeams'
 import { useMemo } from 'react'
-import { ExtraParticipationTableColumn } from '@/components/pages/CoursePhaseParticpationsTable/interfaces/ExtraParticipationTableColumn'
+import { useParams } from 'react-router-dom'
+import { Loader2 } from 'lucide-react'
+import { useQuery } from '@tanstack/react-query'
 
-export const SelfTeamAllocationParticipantsPage = (): JSX.Element => {
+import { ManagementPageHeader, ErrorPage } from '@tumaet/prompt-ui-components'
+import { CoursePhaseParticipationsWithResolution, Team } from '@tumaet/prompt-shared-state'
+
+import { getCoursePhaseParticipations } from '@/network/queries/getCoursePhaseParticipations'
+
+import { CoursePhaseParticipationsTable } from '@/components/pages/CoursePhaseParticipationsTable/CoursePhaseParticipationsTable'
+
+import { getAllTeams } from '../../network/queries/getAllTeams'
+import { ExtraParticipantColumn } from '@/components/pages/CoursePhaseParticipationsTable/table/participationRow'
+
+export const SelfTeamAllocationParticipantsPage = () => {
   const { phaseId } = useParams<{ phaseId: string }>()
 
   const {
@@ -33,17 +36,16 @@ export const SelfTeamAllocationParticipantsPage = (): JSX.Element => {
     queryFn: () => getAllTeams(phaseId ?? ''),
   })
 
-  const extraColumns: ExtraParticipationTableColumn[] = useMemo(() => {
+  const extraColumns: ExtraParticipantColumn<any>[] = useMemo(() => {
     if (!teams) return []
 
-    // Build a quick lookup so we don’t do an O(n²) “find” in the loop.
     const teamNameById = new Map(teams.map(({ id, name }) => [id, name]))
 
     const teamNameExtraData = teams.flatMap(({ id, members }) => {
       const teamName = teamNameById.get(id) ?? 'No Team'
 
       return members.map((member) => ({
-        courseParticipationID: member.courseParticipationID,
+        courseParticipationID: member.id || '',
         value: teamName,
         stringValue: teamName,
       }))
@@ -94,11 +96,9 @@ export const SelfTeamAllocationParticipantsPage = (): JSX.Element => {
         This table shows all participants and their allocated teams.
       </p>
       <div className='w-full'>
-        <CoursePhaseParticipationsTablePage
+        <CoursePhaseParticipationsTable
+          phaseId={phaseId!}
           participants={coursePhaseParticipations.participations ?? []}
-          prevDataKeys={[]}
-          restrictedDataKeys={[]}
-          studentReadableDataKeys={[]}
           extraColumns={extraColumns}
         />
       </div>

@@ -1,5 +1,5 @@
 # Stage 1: Build
-FROM golang:1.24-alpine AS build
+FROM golang:1.25-alpine AS build
 
 # Install dependencies
 RUN apk add --no-cache curl
@@ -21,10 +21,10 @@ RUN go mod download
 COPY . .
 
 # Build the Go app
-RUN go build -o main .
+RUN CGO_ENABLED=0 go build -o main .
 
 # Stage 2: Final (distroless)
-FROM gcr.io/distroless/base-debian11
+FROM gcr.io/distroless/static-debian12
 
 # Set the working directory
 WORKDIR /app
@@ -39,5 +39,3 @@ EXPOSE 8080
 
 # Run the application
 CMD ["/app/main"]
-
-

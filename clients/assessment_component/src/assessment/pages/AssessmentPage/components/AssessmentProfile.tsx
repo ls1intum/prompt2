@@ -5,9 +5,11 @@ import { Card, CardContent, CardHeader } from '@tumaet/prompt-ui-components'
 import { AssessmentParticipationWithStudent } from '../../../interfaces/assessmentParticipationWithStudent'
 import type { StudentAssessment } from '../../../interfaces/studentAssessment'
 
-import { StudentScoreBadge } from '../../components/StudentScoreBadge'
-import { GradeSuggestionBadge } from '../../components/GradeSuggestionBadge'
-import { AssessmentStatusBadge } from '../../components/AssessmentStatusBadge'
+import {
+  StudentScoreBadge,
+  AssessmentStatusBadge,
+  GradeSuggestionBadgeWithTooltip,
+} from '../../components/badges'
 
 interface AssessmentProfileProps {
   participant: AssessmentParticipationWithStudent
@@ -19,7 +21,7 @@ export const AssessmentProfile = ({
   participant,
   studentAssessment,
   remainingAssessments,
-}: AssessmentProfileProps): JSX.Element => {
+}: AssessmentProfileProps) => {
   return (
     <>
       <Card className='relative overflow-hidden'>
@@ -35,7 +37,7 @@ export const AssessmentProfile = ({
                 isFinalized={studentAssessment.assessmentCompletion.completed}
               />
               {studentAssessment.assessmentCompletion && (
-                <GradeSuggestionBadge
+                <GradeSuggestionBadgeWithTooltip
                   gradeSuggestion={studentAssessment.assessmentCompletion.gradeSuggestion}
                   text={true}
                 />

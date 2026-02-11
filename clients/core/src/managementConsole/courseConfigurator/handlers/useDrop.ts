@@ -38,7 +38,7 @@ export const useDrop = (reactFlowWrapper, setNodes, setIsModified) => {
         const coursePhase: CoursePhaseWithPosition = {
           id: id,
           courseID: courseId ?? 'no-valid-id',
-          name: `New ${coursePhaseType.name}`,
+          name: coursePhaseType.name,
           position: position,
           isInitialPhase: coursePhaseType.initialPhase,
           coursePhaseTypeID: coursePhaseType.id,
@@ -59,6 +59,14 @@ export const useDrop = (reactFlowWrapper, setNodes, setIsModified) => {
         setNodes((nds) => nds.concat(newNode))
       }
     },
-    [coursePhaseTypes, reactFlowWrapper, screenToFlowPosition, setNodes],
+    [
+      coursePhaseTypes,
+      reactFlowWrapper,
+      screenToFlowPosition,
+      setNodes,
+      appendCoursePhase,
+      courseId,
+      setIsModified,
+    ],
   )
 }

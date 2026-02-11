@@ -7,7 +7,7 @@ import {
   CardTitle,
 } from '@tumaet/prompt-ui-components'
 import { ClipboardList, GripVertical } from 'lucide-react'
-import type { Team } from '../../../interfaces/team'
+import type { Team } from '@tumaet/prompt-shared-state'
 import { DragDropContext, Droppable, Draggable, type DropResult } from '@hello-pangea/dnd'
 
 interface TeamRankingProps {
@@ -17,12 +17,7 @@ interface TeamRankingProps {
   disabled: boolean
 }
 
-export const TeamRanking = ({
-  teamRanking,
-  teams,
-  setTeamRanking,
-  disabled,
-}: TeamRankingProps): JSX.Element => {
+export const TeamRanking = ({ teamRanking, teams, setTeamRanking, disabled }: TeamRankingProps) => {
   const handleDragEnd = (result: DropResult) => {
     if (!result.destination) return
     const newOrder = Array.from(teamRanking)

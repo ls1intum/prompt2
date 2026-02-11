@@ -1,82 +1,70 @@
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@tumaet/prompt-ui-components'
-import { BarChart, Bar, LabelList, XAxis, YAxis, Rectangle } from 'recharts'
-import { useMemo } from 'react'
+import { BarChart, Bar, LabelList, XAxis, YAxis, Cell } from 'recharts'
 import { chartConfig } from './utils/chartConfig'
-import { getCornerRadius } from './utils/getCornerRadius'
-import { DataPoint } from './interfaces/DataPoint'
 
-import { ScoreLevel } from '../../../interfaces/scoreLevel'
+interface ScoreLevelDataPoint {
+  dataKey: string
+  count: number
+  total: number
+}
 
 interface BarChartWithScoreLevelProps {
-  data: DataPoint[]
+  data: ScoreLevelDataPoint[]
 }
 
-interface RoundedBarShapeProps {
-  x?: number
-  y?: number
-  width?: number
-  height?: number
-  payload?: DataPoint
-  fill?: string
-  [key: string]: unknown
-}
-
-const createRoundedBarShape = (segmentKey: string, stackKeys?: string[]) => {
-  const RoundedBarShape = (props: unknown) => {
-    const { x = 0, y = 0, width = 0, height = 0, payload } = props as RoundedBarShapeProps
-
-    if (!payload) return <Rectangle x={0} y={0} width={0} height={0} />
-
-    const radius = getCornerRadius(payload, segmentKey, stackKeys)
-    return (
-      <Rectangle
-        x={x}
-        y={y}
-        width={width}
-        height={height}
-        radius={radius}
-        fill={chartConfig[segmentKey]?.color}
-      />
-    )
+// Score level color mapping
+const getColorForScoreLevel = (scoreLevel: string): string => {
+  switch (scoreLevel) {
+    case 'Very Good':
+      return chartConfig.veryGood?.color || '#93c5fd'
+    case 'Good':
+      return chartConfig.good?.color || '#86efac'
+    case 'Ok':
+      return chartConfig.ok?.color || '#fde68a'
+    case 'Bad':
+      return chartConfig.bad?.color || '#f97316'
+    case 'Very Bad':
+      return chartConfig.veryBad?.color || '#fca5a5'
+    case 'Not Assessed':
+      return chartConfig.notAssessed?.color || '#d4d4d8'
+    default:
+      return '#d4d4d8'
   }
-  RoundedBarShape.displayName = `RoundedBarShape(${segmentKey})`
-  return RoundedBarShape
 }
 
 export const BarChartWithScoreLevel = ({ data }: BarChartWithScoreLevelProps) => {
-  const memoizedBarShapes = useMemo(() => {
-    return [...Object.values(ScoreLevel), 'notAssessed'].map((key) => ({
-      key,
-      shape: createRoundedBarShape(key),
-    }))
-  }, [])
-
   return (
     <ChartContainer config={chartConfig} className='mx-auto w-full h-[280px]'>
-      <BarChart data={data} margin={{ top: 30, right: 10, bottom: 0, left: 10 }}>
+      <BarChart data={data} margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
         <XAxis
           dataKey='dataKey'
           axisLine={false}
           tickLine={false}
-          tick={{ fontSize: 12 }}
+          tick={{ fontSize: 11 }}
           interval={0}
-          height={50}
-          tickFormatter={(value) => value.toLocaleString()}
+          height={60}
+          angle={-45}
+          textAnchor='end'
         />
         <YAxis hide />
-        <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
-
-        {memoizedBarShapes.map(({ key, shape }) => (
-          <Bar key={key} dataKey={key} shape={shape}>
-            <LabelList
-              dataKey={key}
-              position='top'
-              offset={10}
-              className='fill-foreground'
-              fontSize={12}
-            />
-          </Bar>
-        ))}
+        <ChartTooltip
+          cursor={false}
+          content={<ChartTooltipContent />}
+          labelFormatter={(label) => `Score Level: ${label}`}
+          formatter={(value) => [value, 'Students']}
+        />
+        <Bar dataKey='count' radius={[4, 4, 0, 0]}>
+          {data.map((entry, index) => (
+            <Cell key={`cell-${index}`} fill={getColorForScoreLevel(entry.dataKey)} />
+          ))}
+          <LabelList
+            dataKey='count'
+            position='top'
+            offset={10}
+            className='fill-foreground'
+            fontSize={12}
+          />
+        </Bar>
       </BarChart>
     </ChartContainer>
   )

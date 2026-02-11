@@ -3,25 +3,23 @@ import { useLocation, useNavigate } from 'react-router-dom'
 
 interface SidebarMenuItemProps {
   goToPath: string
-  icon: JSX.Element
+  icon
   title: string
 }
 
-export const InsideSidebarMenuItemBasic = (props: SidebarMenuItemProps): JSX.Element => {
+export const InsideSidebarMenuItemBasic = (props: SidebarMenuItemProps) => {
   const navigate = useNavigate()
   const location = useLocation()
 
   return (
     <SidebarMenuItem>
       <SidebarMenuButton
-        asChild
+        asChild={false}
         onClick={() => navigate(props.goToPath)}
         isActive={location.pathname === props.goToPath}
       >
-        <div>
-          {props.icon}
-          <span>{props.title}</span>
-        </div>
+        {props.icon}
+        <span>{props.title}</span>
       </SidebarMenuButton>
     </SidebarMenuItem>
   )

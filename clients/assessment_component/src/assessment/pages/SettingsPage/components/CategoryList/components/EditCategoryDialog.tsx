@@ -33,27 +33,41 @@ import { useUpdateCategory } from '../hooks/useUpdateCategory'
 
 const updateCategorySchema = z.object({
   id: z.string(),
-  name: z.string().min(1, 'Name is required'),
-  shortName: z.string().min(1, 'Short name is required'),
+  name: z.string().min(1, 'Name is required').optional(),
+  shortName: z.string().min(1, 'Short name is required').optional(),
   description: z.string().optional(),
-  weight: z.number().min(0, 'Weight must be positive').max(100, 'Weight cannot exceed 100'),
+  weight: z
+    .number()
+    .min(0, 'Weight must be positive')
+    .max(100, 'Weight cannot exceed 100')
+    .optional(),
+  assessmentSchemaID: z.string(),
 })
 
 interface EditCategoryDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   category?: CategoryWithCompetencies
-  assessmentTemplateID: string
+  assessmentSchemaID: string
 }
 
 export function EditCategoryDialog({
   open,
   onOpenChange,
   category,
-  assessmentTemplateID,
+  assessmentSchemaID,
 }: EditCategoryDialogProps) {
   const [error, setError] = useState<string | undefined>(undefined)
   const { mutate, isPending: isUpdating } = useUpdateCategory(setError)
+
+  const onSubmit = (data: UpdateCategoryRequest) => {
+    mutate(
+      { ...data, assessmentSchemaID },
+      {
+        onSuccess: () => onOpenChange(false),
+      },
+    )
+  }
 
   const form = useForm<UpdateCategoryRequest>({
     defaultValues: {
@@ -62,7 +76,7 @@ export function EditCategoryDialog({
       shortName: category?.shortName,
       description: category?.description,
       weight: category?.weight,
-      assessmentTemplateID: assessmentTemplateID,
+      assessmentSchemaID: assessmentSchemaID,
     },
     resolver: zodResolver(updateCategorySchema),
   })
@@ -75,23 +89,10 @@ export function EditCategoryDialog({
         shortName: category.shortName,
         description: category.description || '',
         weight: category.weight,
-        assessmentTemplateID: assessmentTemplateID,
+        assessmentSchemaID: assessmentSchemaID,
       })
     }
-  }, [category, form, assessmentTemplateID])
-
-  useEffect(() => {
-    if (!open || !category) return
-
-    const subscription = form.watch((value, { name, type }) => {
-      if (name && type === 'change') {
-        const data = form.getValues() as UpdateCategoryRequest
-        mutate(data)
-      }
-    })
-
-    return () => subscription.unsubscribe()
-  }, [form, mutate, open, category])
+  }, [category, form, assessmentSchemaID])
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -101,7 +102,7 @@ export function EditCategoryDialog({
           <DialogDescription>Update the category details below.</DialogDescription>
         </DialogHeader>
         <Form {...form}>
-          <div className='space-y-4'>
+          <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-4'>
             <FormField
               control={form.control}
               name='name'
@@ -171,11 +172,19 @@ export function EditCategoryDialog({
             )}
 
             <DialogFooter>
-              <Button type='button' variant='outline' onClick={() => onOpenChange(false)}>
-                {isUpdating ? 'Saving...' : 'Close'}
+              <Button
+                type='button'
+                variant='outline'
+                onClick={() => onOpenChange(false)}
+                disabled={isUpdating}
+              >
+                Cancel
+              </Button>
+              <Button type='submit' disabled={isUpdating}>
+                {isUpdating ? 'Saving...' : 'Save'}
               </Button>
             </DialogFooter>
-          </div>
+          </form>
         </Form>
       </DialogContent>
     </Dialog>

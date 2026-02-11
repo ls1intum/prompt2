@@ -1,17 +1,8 @@
 import { useState, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
-import { AlertCircle } from 'lucide-react'
 
 import { useAuthStore } from '@tumaet/prompt-shared-state'
-import {
-  Textarea,
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormMessage,
-  cn,
-} from '@tumaet/prompt-ui-components'
+import { Form, FormMessage } from '@tumaet/prompt-ui-components'
 
 import { useStudentAssessmentStore } from '../../../../zustand/useStudentAssessmentStore'
 import { useTeamStore } from '../../../../zustand/useTeamStore'
@@ -24,22 +15,27 @@ import {
   ScoreLevel,
   mapNumberToScoreLevel,
   mapScoreLevelToNumber,
-} from '../../../../interfaces/scoreLevel'
+} from '@tumaet/prompt-shared-state'
 
 import { CompetencyHeader } from '../../../components/CompetencyHeader'
 import { DeleteAssessmentDialog } from '../../../components/DeleteAssessmentDialog'
 import { ScoreLevelSelector } from '../../../components/ScoreLevelSelector'
 
 import { EvaluationScoreDescriptionBadge } from './components/EvaluationScoreDescriptionBadge'
+import { AssessmentTextField } from './components/AssessmentTextField'
 
 import { useCreateOrUpdateAssessment } from './hooks/useCreateOrUpdateAssessment'
 import { useDeleteAssessment } from './hooks/useDeleteAssessment'
+import { JSX } from 'react/jsx-runtime'
 
 interface AssessmentFormProps {
   courseParticipationID: string
   competency: Competency
   assessment?: Assessment
   completed?: boolean
+  peerEvaluationAverageScore?: number
+  selfEvaluationAverageScore?: number
+  hidePeerEvaluationDetails?: boolean
 }
 
 export const AssessmentForm = ({
@@ -47,6 +43,9 @@ export const AssessmentForm = ({
   competency,
   assessment,
   completed = false,
+  peerEvaluationAverageScore,
+  selfEvaluationAverageScore,
+  hidePeerEvaluationDetails = false,
 }: AssessmentFormProps) => {
   const [error, setError] = useState<string | undefined>(undefined)
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
@@ -56,6 +55,8 @@ export const AssessmentForm = ({
 
   const form = useForm<CreateOrUpdateAssessmentRequest>({
     mode: 'onChange',
+    criteriaMode: 'all',
+    reValidateMode: 'onChange',
     defaultValues: {
       courseParticipationID,
       competencyID: competency.id,
@@ -69,6 +70,9 @@ export const AssessmentForm = ({
   const { mutate: createOrUpdateAssessment } = useCreateOrUpdateAssessment(setError)
   const deleteAssessment = useDeleteAssessment(setError)
   const selectedScore = form.watch('scoreLevel')
+  const hasExample = (assessment?.examples ?? '').trim().length > 0
+  const hasComment = (assessment?.comment ?? '').trim().length > 0
+  const shouldHideCommentAndExample = completed && !hasExample && !hasComment
 
   useEffect(() => {
     form.reset({
@@ -81,24 +85,36 @@ export const AssessmentForm = ({
     })
   }, [form, courseParticipationID, competency.id, assessment, userName])
 
+  const saveAssessment = async () => {
+    if (completed) return
+
+    const isValid = await form.trigger()
+    if (!isValid) return
+
+    const data = form.getValues()
+    if (!data.scoreLevel) return
+
+    createOrUpdateAssessment(data)
+  }
+
   useEffect(() => {
     if (completed) return
 
     const subscription = form.watch(async (_, { name }) => {
-      if (name) {
-        const isValid = await form.trigger('comment')
-        if (isValid) {
-          const data = form.getValues()
-          createOrUpdateAssessment(data)
-        }
+      if (name === 'scoreLevel') {
+        await form.trigger(['comment', 'examples'])
       }
     })
-    return () => subscription.unsubscribe()
-  }, [form, createOrUpdateAssessment, completed])
 
-  const handleScoreChange = (value: ScoreLevel) => {
+    return () => {
+      subscription.unsubscribe()
+    }
+  }, [form, completed])
+
+  const handleScoreChange = async (value: ScoreLevel) => {
     if (completed) return
     form.setValue('scoreLevel', value, { shouldValidate: true })
+    await saveAssessment()
   }
 
   const handleDelete = () => {
@@ -140,9 +156,12 @@ export const AssessmentForm = ({
     t.members.map((m) => m.id).includes(courseParticipationID ?? ''),
   )?.members
 
-  const selfEvaluationScoreLevel = allSelfEvaluationsForThisStudent.find(
-    (se) => se.competencyID === selfEvaluationCompetency?.id,
-  )?.scoreLevel
+  const selfEvaluationScoreLevel =
+    selfEvaluationAverageScore !== undefined
+      ? mapNumberToScoreLevel(selfEvaluationAverageScore)
+      : allSelfEvaluationsForThisStudent.find(
+          (se) => se.competencyID === selfEvaluationCompetency?.id,
+        )?.scoreLevel
 
   const selfEvaluationStudentAnswers = [
     () => (
@@ -159,43 +178,42 @@ export const AssessmentForm = ({
     (pe) => pe.competencyID === peerEvaluationCompetency?.id,
   )
 
-  const peerEvaluationScore = peerEvaluations?.length
-    ? mapNumberToScoreLevel(
-        peerEvaluations.reduce((acc, pe) => acc + mapScoreLevelToNumber(pe.scoreLevel), 0) /
-          peerEvaluations.length,
-      )
-    : undefined
+  const peerEvaluationScore =
+    peerEvaluationAverageScore !== undefined
+      ? mapNumberToScoreLevel(peerEvaluationAverageScore)
+      : peerEvaluations?.length
+        ? mapNumberToScoreLevel(
+            peerEvaluations.reduce((acc, pe) => acc + mapScoreLevelToNumber(pe.scoreLevel), 0) /
+              peerEvaluations.length,
+          )
+        : undefined
 
-  const peerEvaluationStudentAnswers =
-    teamMembers
-      ?.map((member) => {
-        const memberScoreLevel = peerEvaluations.find(
-          (pe) => pe.authorCourseParticipationID === member.id,
-        )?.scoreLevel
+  const peerEvaluationStudentAnswers: (() => JSX.Element)[] | undefined = hidePeerEvaluationDetails
+    ? undefined
+    : teamMembers
+        ?.map((member) => {
+          const memberScoreLevel = peerEvaluations.find(
+            (pe) => pe.authorCourseParticipationID === member.id,
+          )?.scoreLevel
 
-        return memberScoreLevel !== undefined && peerEvaluationCompetency
-          ? () => (
-              <EvaluationScoreDescriptionBadge
-                key={member.id}
-                competency={peerEvaluationCompetency}
-                scoreLevel={memberScoreLevel}
-                name={`${member.firstName} ${member.lastName}`}
-              />
-            )
-          : undefined
-      })
-      .filter((item) => item !== undefined) ?? []
+          return memberScoreLevel !== undefined && peerEvaluationCompetency
+            ? () => (
+                <EvaluationScoreDescriptionBadge
+                  key={member.id}
+                  competency={peerEvaluationCompetency}
+                  scoreLevel={memberScoreLevel}
+                  name={`${member.firstName} ${member.lastName}`}
+                />
+              )
+            : undefined
+        })
+        .filter((item): item is () => JSX.Element => item !== undefined)
 
   return (
     <Form {...form}>
-      <div
-        className={cn(
-          'grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-7 gap-4 items-start p-4 border rounded-md',
-          completed ?? 'bg-gray-700 border-gray-700',
-        )}
-      >
+      <div className={'grid grid-cols-1 lg:grid-cols-2 gap-4 items-start p-4 border rounded-md'}>
         <CompetencyHeader
-          className='lg:col-span-2 2xl:col-span-1'
+          className='lg:col-span-2'
           competency={competency}
           competencyScore={assessment}
           completed={completed}
@@ -203,7 +221,7 @@ export const AssessmentForm = ({
         />
 
         <ScoreLevelSelector
-          className='lg:col-span-2 2xl:col-span-4 grid grid-cols-1 lg:grid-cols-5 gap-1'
+          className='lg:col-span-2 grid grid-cols-1 lg:grid-cols-5 gap-1'
           competency={competency}
           selectedScore={selectedScore}
           onScoreChange={handleScoreChange}
@@ -227,64 +245,29 @@ export const AssessmentForm = ({
           peerEvaluationStudentAnswers={peerEvaluationStudentAnswers}
         />
 
-        <div className='flex flex-col h-full'>
-          <FormField
-            control={form.control}
-            name='examples'
-            render={({ field }) => (
-              <FormItem className='flex flex-col flex-grow'>
-                <FormControl className='flex-grow'>
-                  <Textarea
-                    placeholder={completed ? '' : 'Example'}
-                    className={cn(
-                      'resize-none text-xs h-full',
-                      form.formState.errors.comment &&
-                        'border border-destructive focus-visible:ring-destructive',
-                      completed && 'bg-gray-100 dark:bg-gray-800 cursor-not-allowed opacity-80',
-                    )}
-                    disabled={completed}
-                    readOnly={completed}
-                    {...field}
-                  />
-                </FormControl>
-                {!completed && <FormMessage />}
-              </FormItem>
-            )}
-          />
-        </div>
+        {!shouldHideCommentAndExample && (
+          <>
+            <AssessmentTextField
+              control={form.control}
+              name='examples'
+              placeholder='Example'
+              completed={completed}
+              getScoreLevel={() => form.getValues('scoreLevel')}
+              onBlur={saveAssessment}
+            />
 
-        <div className='flex flex-col h-full'>
-          <FormField
-            control={form.control}
-            name='comment'
-            render={({ field }) => (
-              <FormItem className='flex flex-col flex-grow'>
-                <FormControl className='flex-grow'>
-                  <Textarea
-                    placeholder={completed ? '' : 'Additional comments'}
-                    className={cn(
-                      'resize-none text-xs h-full',
-                      form.formState.errors.comment &&
-                        'border border-destructive focus-visible:ring-destructive',
-                      completed && 'bg-gray-100 dark:bg-gray-800 cursor-not-allowed opacity-80',
-                    )}
-                    disabled={completed}
-                    readOnly={completed}
-                    {...field}
-                  />
-                </FormControl>
-                {!completed && <FormMessage />}
-              </FormItem>
-            )}
-          />
+            <AssessmentTextField
+              control={form.control}
+              name='comment'
+              placeholder='Additional comments'
+              completed={completed}
+              getScoreLevel={() => form.getValues('scoreLevel')}
+              onBlur={saveAssessment}
+            />
+          </>
+        )}
 
-          {error && !completed && (
-            <div className='flex items-center gap-2 text-destructive text-xs p-2 mt-2 bg-destructive/10 rounded-md'>
-              <AlertCircle className='h-3 w-3' />
-              <p>{error}</p>
-            </div>
-          )}
-        </div>
+        {error && !completed && <FormMessage className='mt-2'>{error}</FormMessage>}
 
         {assessment && (
           <DeleteAssessmentDialog

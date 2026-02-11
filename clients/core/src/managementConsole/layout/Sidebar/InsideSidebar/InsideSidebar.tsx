@@ -2,24 +2,17 @@ import { Sidebar, SidebarContent, SidebarHeader } from '@tumaet/prompt-ui-compon
 import { useLocation } from 'react-router-dom'
 import { InsideCourseSidebar } from './InsideCourseSidebar'
 import { InsideGeneralSidebar } from './InsideGeneralSidebar'
-import packageJSON from '../../../../../package.json'
+import { PromptLogo } from './components/PromptLogo'
 
-export const InsideSidebar = (): JSX.Element => {
-  const version = packageJSON.version
-
+export const InsideSidebar = () => {
   // set the correct header
   const location = useLocation()
-  const isCourseSidebar = location.pathname.startsWith('/management/course')
+  const isCourseSidebar = location.pathname.startsWith('/management/course/')
 
   return (
-    <Sidebar collapsible='none' className='flex'>
+    <Sidebar collapsible='none' className='flex max-w-sidebar'>
       <SidebarHeader className='flex h-14 border-b justify-center items-center'>
-        <div className='relative flex items-baseline'>
-          <span className='text-lg font-extrabold tracking-wide text-primary drop-shadow-sm'>
-            PROMPT
-          </span>
-          <span className='ml-1 text-xs font-normal text-gray-400'>{version}</span>
-        </div>
+        <PromptLogo />
       </SidebarHeader>
       <SidebarContent>
         {isCourseSidebar ? <InsideCourseSidebar /> : <InsideGeneralSidebar />}

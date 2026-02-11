@@ -1,7 +1,8 @@
 import { ExtendedRouteObject } from '@/interfaces/extendedRouteObject'
 import { Role } from '@tumaet/prompt-shared-state'
 import { ApplicationLandingPage } from '../../applicationAdministration/pages/ApplicationLandingPage/ApplicationLandingPage'
-import { ApplicationConfiguration } from '../../applicationAdministration/pages/ApplicationConfiguration/ApplicationConfiguration'
+import { ApplicationConfiguration } from '../../applicationAdministration/pages/ApplicationSettingsPage/ApplicationSettings'
+import { ApplicationQuestionConfig } from '../../applicationAdministration/pages/ApplicationQuestionConfigPage/ApplicationQuestionConfig'
 import { ExternalRoutes } from './ExternalRoutes'
 import { ApplicationParticipantsPage } from '../../applicationAdministration/pages/ApplicationParticipantsPage/ApplicationParticipantsPage'
 import { ApplicationMailingSettings } from '../../applicationAdministration/pages/Mailing/ApplicationMailingSettings'
@@ -18,10 +19,19 @@ const applicationRoutesObjects: ExtendedRouteObject[] = [
     requiredPermissions: [Role.PROMPT_ADMIN, Role.COURSE_LECTURER, Role.COURSE_EDITOR], // empty means no permissions required
   },
   {
-    path: '/configuration',
+    path: '/settings',
     element: (
       <ApplicationDataWrapper>
         <ApplicationConfiguration />
+      </ApplicationDataWrapper>
+    ),
+    requiredPermissions: [Role.PROMPT_ADMIN, Role.COURSE_LECTURER],
+  },
+  {
+    path: '/questions',
+    element: (
+      <ApplicationDataWrapper>
+        <ApplicationQuestionConfig />
       </ApplicationDataWrapper>
     ),
     requiredPermissions: [Role.PROMPT_ADMIN, Role.COURSE_LECTURER],
@@ -46,6 +56,6 @@ const applicationRoutesObjects: ExtendedRouteObject[] = [
   },
 ]
 
-export const ApplicationRoutes = (): JSX.Element => {
+export const ApplicationRoutes = () => {
   return <ExternalRoutes routes={applicationRoutesObjects} />
 }

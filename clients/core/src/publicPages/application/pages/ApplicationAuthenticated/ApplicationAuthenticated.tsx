@@ -19,7 +19,7 @@ import { CreateApplicationAnswerText } from '@core/interfaces/application/applic
 import { CreateApplicationAnswerMultiSelect } from '@core/interfaces/application/applicationAnswer/multiSelect/createApplicationAnswerMultiSelect'
 import { ApplicationFormWithDetails } from '@core/interfaces/application/applicationFormWithDetails'
 
-export const ApplicationAuthenticated = (): JSX.Element => {
+export const ApplicationAuthenticated = () => {
   const { phaseId } = useParams<{ phaseId: string }>()
   const { user, logout } = useAuthStore()
   const [showDialog, setShowDialog] = useState<'saving' | 'success' | 'error' | null>(null)
@@ -121,9 +121,12 @@ export const ApplicationAuthenticated = (): JSX.Element => {
     (application.status === 'applied' || application.status === 'not_applied') &&
     application.student
   ) {
-    student = application.student
-    // enforcing that student has university account
-    student.hasUniversityAccount = true
+    student = {
+      ...application.student,
+      firstName: user?.firstName ?? application.student.firstName ?? '',
+      lastName: user?.lastName ?? application.student.lastName ?? '',
+      hasUniversityAccount: true,
+    }
   }
 
   return (

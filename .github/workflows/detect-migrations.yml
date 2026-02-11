@@ -1,0 +1,69 @@
+name: Detect Migration Changes
+
+on:
+  workflow_call:
+
+jobs:
+  detect-migrations:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Detect migration changes
+        id: changes
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            migrations:
+              - 'servers/**/db/migration/**'
+          list-files: shell
+
+      - name: Check if migrations changed
+        id: check
+        run: |
+          # Check if migrations output contains actual files (not just "false")
+          if [ "${{ steps.changes.outputs.migrations }}" != "false" ] && [ -n "${{ steps.changes.outputs.migrations }}" ]; then
+            echo "changed=true" >> $GITHUB_OUTPUT
+          else
+            echo "changed=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Add or Remove Migration label
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const labels = ['Migration'];
+            const hasMigrations = '${{ steps.check.outputs.changed }}' === 'true';
+            const prNumber = context.payload.pull_request.number;
+            
+            if (hasMigrations) {
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: prNumber,
+                labels: labels
+              });
+              console.log('Added Migration label - migrations were changed');
+            } else {
+              try {
+                await github.rest.issues.removeLabel({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: prNumber,
+                  name: 'Migration'
+                });
+                console.log('Removed Migration label - no migrations changed');
+              } catch (error) {
+                // Label might not exist, which is fine
+                if (error.status !== 404) {
+                  console.error('Error removing label:', error);
+                }
+              }
+            }
+

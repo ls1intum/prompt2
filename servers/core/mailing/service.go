@@ -90,7 +90,8 @@ func SendStatusMailManualTrigger(ctx context.Context, coursePhaseID uuid.UUID, s
 	mailingInfo := mailingDTO.MailingInfo{}
 
 	// 1.) get mailing info for course phase
-	if status == db.PassStatusPassed {
+	switch status {
+	case db.PassStatusPassed:
 		infos, err := MailingServiceSingleton.queries.GetPassedMailingInformation(ctx, coursePhaseID)
 		if err != nil {
 			log.Error("failed to get mailing information: ", err)
@@ -98,7 +99,7 @@ func SendStatusMailManualTrigger(ctx context.Context, coursePhaseID uuid.UUID, s
 		}
 		mailingInfo = mailingDTO.GetMailingInfoFromPassedMailingInformation(infos)
 
-	} else if status == db.PassStatusFailed {
+	case db.PassStatusFailed:
 		infos, err := MailingServiceSingleton.queries.GetFailedMailingInformation(ctx, coursePhaseID)
 		if err != nil {
 			log.Error("failed to get mailing information: ", err)
@@ -106,7 +107,7 @@ func SendStatusMailManualTrigger(ctx context.Context, coursePhaseID uuid.UUID, s
 		}
 		mailingInfo = mailingDTO.GetMailingInfoFromFailedMailingInformation(infos)
 
-	} else {
+	default:
 		log.Error("invalid status")
 		return mailingDTO.MailingReport{}, fmt.Errorf("invalid pass status '%s': expected 'passed' or 'failed'", status)
 
@@ -204,18 +205,47 @@ func SendMail(courseMailingSettings mailingDTO.CourseMailingSettings, recipientA
 
 	// Set deadline for the entire SMTP operation
 	if err := conn.SetDeadline(time.Now().Add(15 * time.Second)); err != nil {
-		conn.Close()
+		_ = conn.Close()
 		log.Error("failed to set connection deadline: ", err)
 		return fmt.Errorf("failed to set SMTP connection timeout: %v", err)
 	}
 
 	client, err := smtp.NewClient(conn, MailingServiceSingleton.smtpHost)
 	if err != nil {
-		conn.Close()
+		_ = conn.Close()
 		log.Error("failed to create SMTP client: ", err.Error())
 		return fmt.Errorf("failed to create SMTP client for %s: %v", MailingServiceSingleton.smtpHost, err)
 	}
-	defer client.Close()
+	defer func() { _ = client.Close() }()
+
+	// Enable STARTTLS if the server supports it (required for port 587)
+	if ok, _ := client.Extension("STARTTLS"); ok {
+		log.Debug("STARTTLS is supported, enabling TLS")
+		config := &tls.Config{
+			ServerName: MailingServiceSingleton.smtpHost,
+			MinVersion: tls.VersionTLS12,
+		}
+		if err = client.StartTLS(config); err != nil {
+			log.Error("failed to start TLS: ", err)
+			return fmt.Errorf("failed to establish TLS connection with %s: %v", MailingServiceSingleton.smtpHost, err)
+		}
+		log.Debug("TLS connection established")
+	} else {
+		log.Debug("STARTTLS not supported by server")
+	}
+
+	// Use SMTP authentication if username and password are provided
+	if MailingServiceSingleton.smtpUsername != "" && MailingServiceSingleton.smtpPassword != "" {
+		log.Debug("Authenticating with SMTP server")
+		auth := smtp.PlainAuth("", MailingServiceSingleton.smtpUsername, MailingServiceSingleton.smtpPassword, MailingServiceSingleton.smtpHost)
+		if err := client.Auth(auth); err != nil {
+			log.Error("failed to authenticate with SMTP server: ", err)
+			return fmt.Errorf("SMTP authentication failed for user '%s' on server %s: %v", MailingServiceSingleton.smtpUsername, MailingServiceSingleton.smtpHost, err)
+		}
+		log.Debug("SMTP authentication successful")
+	} else {
+		log.Debug("No SMTP authentication configured")
+	}
 
 	// Enable STARTTLS if the server supports it (required for port 587)
 	if ok, _ := client.Extension("STARTTLS"); ok {
@@ -339,16 +369,16 @@ func generateMessageID() string {
 
 func buildMailHeader(message *strings.Builder, courseMailingSettings mailingDTO.CourseMailingSettings, recipient, subject string) {
 	// using this instead of map to get a nicely formatted Mailing Header
-	message.WriteString(fmt.Sprintf("From: %s\r\n", MailingServiceSingleton.senderEmail.String()))
-	message.WriteString(fmt.Sprintf("To: %s\r\n", recipient))
-	message.WriteString(fmt.Sprintf("Reply-To: %s\r\n", courseMailingSettings.ReplyTo.String()))
-	message.WriteString(fmt.Sprintf("Subject: %s\r\n", subject))
+	fmt.Fprintf(message, "From: %s\r\n", MailingServiceSingleton.senderEmail.String())
+	fmt.Fprintf(message, "To: %s\r\n", recipient)
+	fmt.Fprintf(message, "Reply-To: %s\r\n", courseMailingSettings.ReplyTo.String())
+	fmt.Fprintf(message, "Subject: %s\r\n", subject)
 
 	// Add Date header in RFC 2822 format
-	message.WriteString(fmt.Sprintf("Date: %s\r\n", time.Now().Format(time.RFC1123Z)))
+	fmt.Fprintf(message, "Date: %s\r\n", time.Now().Format(time.RFC1123Z))
 
 	// Add unique Message-ID header
-	message.WriteString(fmt.Sprintf("Message-ID: %s\r\n", generateMessageID()))
+	fmt.Fprintf(message, "Message-ID: %s\r\n", generateMessageID())
 
 	message.WriteString("MIME-Version: 1.0\r\n") // Improve Spam Score by setting explicit MIME-Version
 	message.WriteString("Content-Type: text/html; charset=\"UTF-8\"\r\n")
@@ -358,7 +388,7 @@ func buildMailHeader(message *strings.Builder, courseMailingSettings mailingDTO.
 		for _, cc := range courseMailingSettings.CC {
 			ccString += cc.String() + ","
 		}
-		message.WriteString(fmt.Sprintf("CC: %s\r\n", ccString))
+		fmt.Fprintf(message, "CC: %s\r\n", ccString)
 	}
 
 	// BCC are set in the client and not the header

@@ -1,6 +1,6 @@
 import type React from 'react'
-import { Users, UserPlus, LogOut, Trash2 } from 'lucide-react'
-import type { Team } from '../../../interfaces/team'
+import { Users, UserPlus, LogOut, Trash2, GraduationCap } from 'lucide-react'
+import type { Team } from '@tumaet/prompt-shared-state'
 import {
   Card,
   CardContent,
@@ -38,7 +38,7 @@ export const TeamCard: React.FC<TeamCardProps> = ({
   onDelete,
 }) => (
   <Card
-    className={`overflow-hidden transition-all duration-200 flex flex-col h-[280px] ${
+    className={`overflow-hidden transition-all duration-200 flex flex-col ${
       isMember ? 'ring-2 ring-primary shadow-md' : ''
     }`}
   >
@@ -55,32 +55,56 @@ export const TeamCard: React.FC<TeamCardProps> = ({
       </CardDescription>
     </CardHeader>
 
-    <CardContent className='pb-2 flex-1'>
-      {team.members.length > 0 ? (
-        <ul className='space-y-2 h-[120px] overflow-y-auto'>
-          {team.members.map((m, idx) => {
-            const isCurrent = m.courseParticipationID === courseParticipationID
-            return (
+    <CardContent className='pb-2 flex-1 space-y-3'>
+      {/* Members Section */}
+      <div>
+        <p className='text-sm font-medium mb-2'>Members:</p>
+        {team.members.length > 0 ? (
+          <ul className='space-y-1.5 max-h-[100px] overflow-y-auto'>
+            {team.members.map((m, idx) => {
+              const isCurrent = courseParticipationID && m.id === courseParticipationID
+              return (
+                <li
+                  key={idx}
+                  className={`flex items-center gap-2 p-1 rounded-md text-sm ${
+                    isCurrent ? 'bg-primary/10 font-medium text-primary' : 'text-muted-foreground'
+                  }`}
+                >
+                  <Users size={14} className={isCurrent ? 'text-primary' : ''} />
+                  <span className='truncate'>
+                    {m.firstName} {m.lastName}
+                  </span>
+                  {isCurrent && (
+                    <Badge variant='outline' className='ml-auto text-xs'>
+                      You
+                    </Badge>
+                  )}
+                </li>
+              )
+            })}
+          </ul>
+        ) : (
+          <p className='text-sm text-muted-foreground italic'>No members yet</p>
+        )}
+      </div>
+
+      {/* Tutors Section */}
+      {team.tutors && team.tutors.length > 0 && (
+        <div>
+          <p className='text-sm font-medium mb-2'>Tutors:</p>
+          <ul className='space-y-1.5 max-h-[80px] overflow-y-auto'>
+            {team.tutors.map((tutor, idx) => (
               <li
                 key={idx}
-                className={`flex items-center gap-2 p-1 rounded-md ${
-                  isCurrent ? 'bg-primary/10 font-medium text-primary' : 'text-muted-foreground'
-                }`}
+                className='flex items-center gap-2 p-1 rounded-md text-sm text-muted-foreground'
               >
-                <Users size={16} className={isCurrent ? 'text-primary' : ''} />
-                <span className='truncate'>{m.studentName}</span>
-                {isCurrent && (
-                  <Badge variant='outline' className='ml-auto text-xs'>
-                    You
-                  </Badge>
-                )}
+                <GraduationCap size={14} />
+                <span className='truncate'>
+                  {tutor.firstName} {tutor.lastName}
+                </span>
               </li>
-            )
-          })}
-        </ul>
-      ) : (
-        <div className='flex items-center justify-center h-[120px] text-muted-foreground italic bg-muted/30 rounded-md'>
-          <p>No members yet</p>
+            ))}
+          </ul>
         </div>
       )}
     </CardContent>

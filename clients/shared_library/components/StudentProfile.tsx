@@ -1,4 +1,3 @@
-import React from 'react'
 import {
   Student,
   PassStatus,
@@ -6,23 +5,29 @@ import {
   getStudyDegreeString,
 } from '@tumaet/prompt-shared-state'
 import { Mail, Flag, Book, GraduationCap, Calendar, Hash, Users, KeyRound } from 'lucide-react'
-import { Avatar, AvatarFallback, Card, CardContent, CardHeader } from '@tumaet/prompt-ui-components'
+import {
+  Avatar,
+  AvatarImage,
+  AvatarFallback,
+  Card,
+  CardContent,
+  CardHeader,
+} from '@tumaet/prompt-ui-components'
 import { getCountryName } from '@/lib/getCountries'
 import translations from '@/lib/translations.json'
-import { AvatarImage } from '@radix-ui/react-avatar'
 import { getGravatarUrl } from '@/lib/getGravatarUrl'
 import { getStatusColor } from '@/lib/getStatusColor'
 
 interface StudentProfileProps {
   student: Student
-  status: PassStatus
+  status?: PassStatus
 }
 
-export const StudentProfile = ({ student, status }: StudentProfileProps): JSX.Element => {
+export const StudentProfile = ({ student, status }: StudentProfileProps) => {
   return (
     <Card className='relative overflow-hidden'>
       {/* Status indicator */}
-      <div className={`h-16 ${getStatusColor(status)}`} />
+      <div className={`h-16 ${status ? getStatusColor(status) : 'bg-gray-100'}`} />
       <div className='mb-4'>
         <Avatar className='absolute w-24 h-24 border-4 border-background rounded-full transform left-3 -translate-y-1/2'>
           <AvatarImage src={getGravatarUrl(student.email)} alt={student.lastName} />
@@ -35,8 +40,8 @@ export const StudentProfile = ({ student, status }: StudentProfileProps): JSX.El
       <CardHeader>
         <div className='flex flex-col sm:flex-row items-center'>
           {/* Avatar */}
-          <div className='flex-1 text-center sm:text-left'>
-            <div className='flex flex-col items-center sm:items-start pt-6'>
+          <div className='flex-1 text-start sm:text-left'>
+            <div className='flex flex-col items-start sm:items-start pt-6'>
               <h1 className='text-2xl font-bold'>
                 {student.firstName} {student.lastName}
               </h1>

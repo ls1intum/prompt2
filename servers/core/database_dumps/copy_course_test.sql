@@ -173,7 +173,15 @@ CREATE TABLE course (
     ects integer,
     restricted_data jsonb,
     student_readable_data jsonb DEFAULT '{}'::jsonb,
-    CONSTRAINT check_end_date_after_start_date CHECK ((end_date > start_date))
+    template boolean NOT NULL DEFAULT FALSE,
+    short_description character varying(255),
+    long_description text,
+    archived boolean NOT NULL DEFAULT FALSE,
+    archived_on timestamp with time zone,
+    CONSTRAINT check_end_date_after_start_date CHECK (
+        template = true
+            OR end_date > start_date
+        )
 );
 
 
@@ -235,7 +243,8 @@ CREATE TABLE course_phase_type (
     id uuid NOT NULL,
     name text NOT NULL,
     initial_phase boolean DEFAULT false NOT NULL,
-    base_url text DEFAULT 'core'::text NOT NULL
+    base_url text DEFAULT 'core'::text NOT NULL,
+    description text
 );
 
 
@@ -383,7 +392,43 @@ INSERT INTO application_question_multi_select VALUES ('c20829f9-d1d2-4952-95ee-1
 -- Data for Name: course; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-INSERT INTO course VALUES ('c1f8060d-7381-4b64-a6ea-5ba8e8ac88dd', 'Master Test', '2025-05-19', '2025-06-30', 'ss25', 'practical course', 10, '{}', '{"icon": "school", "bg-color": "bg-teal-100"}');
+INSERT INTO course (id, name, start_date, end_date, semester_tag, course_type, ects, restricted_data, student_readable_data, template, short_description, long_description, archived, archived_on)
+VALUES
+    (
+        'c1f8060d-7381-4b64-a6ea-5ba8e8ac88dd',
+        'Master Test',
+        '2025-05-19',
+        '2025-06-30',
+        'ss25',
+        'practical course',
+        10,
+        '{}',
+        '{"icon": "school", "bg-color": "bg-teal-100"}',
+        FALSE,
+        'Hands-on master course',
+        'Detailed description for the Master Test course used in copy tests.',
+        FALSE,
+        NULL
+    );
+
+INSERT INTO course (id, name, start_date, end_date, semester_tag, course_type, ects, restricted_data, student_readable_data, template, short_description, long_description, archived, archived_on)
+VALUES
+    (
+        'c1f8060d-7381-4b64-a6ea-5ba8e8ac88ee',
+        'Template Test',
+        '2025-05-19',
+        '2025-08-30',
+        'ss25',
+        'practical course',
+        10,
+        '{}',
+        '{"icon": "school", "bg-color": "bg-teal-100"}',
+        TRUE,
+        'Template for future courses',
+        'Long-form description for the template course copy flow.',
+        FALSE,
+        NULL
+    );
 
 
 --
@@ -419,14 +464,14 @@ INSERT INTO course_phase_graph VALUES ('bd727106-2dc0-4c44-a804-2efde26101ae', '
 -- Data for Name: course_phase_type; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-INSERT INTO course_phase_type VALUES ('0542034b-87eb-4f91-ac90-b2e1536450de', 'Interview', false, 'core');
-INSERT INTO course_phase_type VALUES ('c313bd84-bc7b-4a5a-aca3-77a526e02f57', 'Matching', false, 'core');
-INSERT INTO course_phase_type VALUES ('8c97fd14-e1fe-4b12-bf7d-c542e620e8d8', 'IntroCourseDeveloper', false, 'http://localhost:8082/intro-course/api');
-INSERT INTO course_phase_type VALUES ('e0fe2692-4e06-47db-b80f-92817e9a7566', 'DevOpsChallenge', false, 'core');
-INSERT INTO course_phase_type VALUES ('613f8b0a-2200-4650-b0bb-6a26a0a140e8', 'Assessment', false, 'http://localhost:8084/assessment/api');
-INSERT INTO course_phase_type VALUES ('88ca3586-7748-4152-8c89-5fbb6e113587', 'Team Allocation', false, 'http://localhost:8083/team-allocation/api');
-INSERT INTO course_phase_type VALUES ('cc63d311-6992-4b08-9719-a83b92f45e8f', 'Self Team Allocation', false, 'http://localhost:8085/self-team-allocation/api');
-INSERT INTO course_phase_type VALUES ('3258275d-a76b-40f8-bb1a-95618299b8ac', 'Application', true, 'core');
+INSERT INTO course_phase_type VALUES ('0542034b-87eb-4f91-ac90-b2e1536450de', 'Interview', false, 'core', 'Test Description');
+INSERT INTO course_phase_type VALUES ('c313bd84-bc7b-4a5a-aca3-77a526e02f57', 'Matching', false, 'core', 'Test Description');
+INSERT INTO course_phase_type VALUES ('8c97fd14-e1fe-4b12-bf7d-c542e620e8d8', 'Intro Course Developer', false, 'http://localhost:8082/intro-course/api', 'Test Description');
+INSERT INTO course_phase_type VALUES ('e0fe2692-4e06-47db-b80f-92817e9a7566', 'DevOps Challenge', false, 'core', 'Test Description');
+INSERT INTO course_phase_type VALUES ('613f8b0a-2200-4650-b0bb-6a26a0a140e8', 'Assessment', false, 'http://localhost:8085/assessment/api', 'Test Description');
+INSERT INTO course_phase_type VALUES ('88ca3586-7748-4152-8c89-5fbb6e113587', 'Team Allocation', false, 'http://localhost:8083/team-allocation/api', 'Test Description');
+INSERT INTO course_phase_type VALUES ('cc63d311-6992-4b08-9719-a83b92f45e8f', 'Self Team Allocation', false, 'http://localhost:8084/self-team-allocation/api', 'Test Description');
+INSERT INTO course_phase_type VALUES ('3258275d-a76b-40f8-bb1a-95618299b8ac', 'Application', true, 'core', 'Test Description');
 
 
 --
@@ -488,7 +533,7 @@ INSERT INTO participation_data_dependency_graph VALUES ('0bf6eb6c-ff6f-40f4-af63
 -- Data for Name: schema_migrations; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-INSERT INTO schema_migrations VALUES (13, false);
+INSERT INTO schema_migrations VALUES (16, false);
 
 
 --

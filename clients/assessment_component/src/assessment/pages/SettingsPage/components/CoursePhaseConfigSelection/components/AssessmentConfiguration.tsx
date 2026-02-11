@@ -1,4 +1,4 @@
-import { format } from 'date-fns'
+import { startOfDay, endOfDay } from 'date-fns'
 import {
   Select,
   SelectContent,
@@ -6,70 +6,88 @@ import {
   SelectTrigger,
   SelectValue,
   Label,
-  DatePicker,
+  DatePickerWithRange,
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
 } from '@tumaet/prompt-ui-components'
-import { FileText, Calendar } from 'lucide-react'
+import { FileText, Calendar, Lock } from 'lucide-react'
 
-import { AssessmentTemplate } from '../../../../../interfaces/assessmentTemplate'
+import { AssessmentType } from '../../../../../interfaces/assessmentType'
+import { AssessmentSchema } from '../../../../../interfaces/assessmentSchema'
 
-import { AssessmentType } from '../../../interfaces/assessmentType'
-
-import { CreateAssessmentTemplateDialog } from './CreateAssessmentTemplateDialog'
+import { CreateAssessmentSchemaDialog } from './CreateAssessmentSchemaDialog'
 
 interface AsssessmentConfigurationProps {
   type: AssessmentType
-  assessmentTemplateId: string
-  setAssessmentTemplateId: (id: string) => void
+  assessmentSchemaId: string
+  setAssessmentSchemaId: (id: string) => void
   startDate: Date | undefined
   setStartDate: (date: Date | undefined) => void
   deadline: Date | undefined
   setDeadline: (date: Date | undefined) => void
-  templates: AssessmentTemplate[]
+  schemas: AssessmentSchema[]
   configMutation: any
   setError: (error: string | undefined) => void
+  hasAssessmentData?: boolean
 }
 
 export const AssessmentConfiguration = ({
   type,
-  assessmentTemplateId,
-  setAssessmentTemplateId,
+  assessmentSchemaId,
+  setAssessmentSchemaId,
   startDate,
   setStartDate,
   deadline,
   setDeadline,
-  templates,
+  schemas,
   configMutation,
   setError,
+  hasAssessmentData = false,
 }: AsssessmentConfigurationProps) => {
   return (
-    <div className='grid xl:grid-cols-4 gap-4'>
+    <div className='grid xl:grid-cols-3 gap-4'>
       <div className='xl:col-span-2 space-y-4'>
         <div className='flex items-center gap-2'>
           <FileText className='h-4 w-4' />
           <Label className='text-sm font-medium'>
-            {type === AssessmentType.SELF && 'Self Evaluation Template'}
-            {type === AssessmentType.PEER && 'Peer Evaluation Template'}
-            {type === AssessmentType.ASSESSMENT && 'Assessment Template'}
+            {type === AssessmentType.SELF && 'Self Evaluation Schema'}
+            {type === AssessmentType.PEER && 'Peer Evaluation Schema'}
+            {type === AssessmentType.TUTOR && 'Tutor Evaluation Schema'}
+            {type === AssessmentType.ASSESSMENT && 'Assessment Schema'}
           </Label>
+          {hasAssessmentData && (
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger>
+                  <Lock className='h-4 w-4 text-muted-foreground' />
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Cannot change schema - assessment or evaluation data exists</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          )}
         </div>
         <div className='flex gap-2'>
           <Select
-            value={assessmentTemplateId}
-            onValueChange={setAssessmentTemplateId}
-            disabled={configMutation.isPending}
+            value={assessmentSchemaId}
+            onValueChange={setAssessmentSchemaId}
+            disabled={configMutation.isPending || hasAssessmentData}
           >
             <SelectTrigger className='flex-1'>
-              <SelectValue placeholder='Select a template...' />
+              <SelectValue placeholder='Select a schema...' />
             </SelectTrigger>
             <SelectContent>
-              {templates?.map((template) => (
-                <SelectItem key={template.id} value={template.id}>
-                  {template.name}
+              {schemas?.map((schema) => (
+                <SelectItem key={schema.id} value={schema.id}>
+                  {schema.name}
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
-          <CreateAssessmentTemplateDialog onError={setError} />
+          <CreateAssessmentSchemaDialog onError={setError} disabled={hasAssessmentData} />
         </div>
       </div>
 
@@ -77,36 +95,22 @@ export const AssessmentConfiguration = ({
         <div className='flex items-center gap-2'>
           <Calendar className='h-4 w-4' />
           <Label className='text-sm font-medium'>
-            {type === AssessmentType.SELF && 'Self Evaluation Start'}
-            {type === AssessmentType.PEER && 'Peer Evaluation Start'}
-            {type === AssessmentType.ASSESSMENT && 'Assessment Start'}
+            {type === AssessmentType.SELF && 'Self Evaluation Timeframe'}
+            {type === AssessmentType.PEER && 'Peer Evaluation Timeframe'}
+            {type === AssessmentType.TUTOR && 'Tutor Evaluation Timeframe'}
+            {type === AssessmentType.ASSESSMENT && 'Assessment Timeframe'}
           </Label>
         </div>
         <div className='flex items-center gap-2'>
-          <DatePicker
-            date={startDate}
-            onSelect={(date) =>
-              setStartDate(date ? new Date(format(date, 'yyyy-MM-dd')) : undefined)
-            }
-          />
-        </div>
-      </div>
-
-      <div className='space-y-4'>
-        <div className='flex items-center gap-2'>
-          <Calendar className='h-4 w-4' />
-          <Label className='text-sm font-medium'>
-            {type === AssessmentType.SELF && 'Self Evaluation Deadline'}
-            {type === AssessmentType.PEER && 'Peer Evaluation Deadline'}
-            {type === AssessmentType.ASSESSMENT && 'Assessment Deadline'}
-          </Label>
-        </div>
-        <div className='flex items-center gap-2'>
-          <DatePicker
-            date={deadline}
-            onSelect={(date) =>
-              setDeadline(date ? new Date(format(date, 'yyyy-MM-dd')) : undefined)
-            }
+          <DatePickerWithRange
+            date={{
+              from: startDate,
+              to: deadline,
+            }}
+            setDate={(dateRange) => {
+              setStartDate(dateRange?.from ? startOfDay(dateRange.from) : undefined)
+              setDeadline(dateRange?.to ? endOfDay(dateRange.to) : undefined)
+            }}
           />
         </div>
       </div>

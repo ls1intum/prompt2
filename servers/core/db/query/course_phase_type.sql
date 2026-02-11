@@ -57,12 +57,9 @@ SELECT EXISTS (
     ) AS does_exist;
 
 -- name: TestIntroCourseDeveloperPhaseTypeExists :one
-SELECT EXISTS (
-        SELECT 1
-        FROM course_phase_type
-        WHERE
-            name = 'IntroCourseDeveloper'
-    ) AS does_exist;
+SELECT EXISTS (SELECT 1
+               FROM course_phase_type
+               WHERE name = 'Intro Course Developer') AS does_exist;
 
 -- name: TestIntroCourseTutorPhaseTypeExists :one
 SELECT EXISTS (
@@ -73,12 +70,9 @@ SELECT EXISTS (
     ) AS does_exist;
 
 -- name: TestDevOpsChallengeTypeExists :one
-SELECT EXISTS (
-        SELECT 1
-        FROM course_phase_type
-        WHERE
-            name = 'DevOpsChallenge'
-    ) AS does_exist;
+SELECT EXISTS (SELECT 1
+               FROM course_phase_type
+               WHERE name = 'DevOps Challenge') AS does_exist;
 
 -- name: TestAssessmentTypeExists :one
 SELECT EXISTS (
@@ -113,14 +107,8 @@ SELECT EXISTS (
     ) AS does_exist;
 
 -- name: CreateCoursePhaseType :exec
-INSERT INTO
-    course_phase_type (
-        id,
-        name,
-        initial_phase,
-        base_url
-    )
-VALUES ($1, $2, $3, $4);
+INSERT INTO course_phase_type (id, name, initial_phase, base_url, description)
+VALUES ($1, $2, $3, $4, $5);
 
 -- name: CreateCoursePhaseTypeRequiredInput :exec
 INSERT INTO
@@ -439,6 +427,33 @@ VALUES (gen_random_uuid(),
             "Good",
             "VeryGood"
           ]
+        }'::jsonb);
+
+-- name: InsertActionItemsOutput :exec
+INSERT INTO course_phase_type_participation_provided_output_dto (id, course_phase_type_id, dto_name, version_number,
+                                                                 endpoint_path, specification)
+VALUES (gen_random_uuid(),
+        $1,
+        'actionItems',
+        1,
+        '/student-assessment/action-item/action',
+        '{
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }'::jsonb);
+
+-- name: InsertGradeOutput :exec
+INSERT INTO course_phase_type_participation_provided_output_dto (id, course_phase_type_id, dto_name, version_number,
+                                                                 endpoint_path, specification)
+VALUES (gen_random_uuid(),
+        $1,
+        'grade',
+        1,
+        '/student-assessment/completed/grade',
+        '{
+          "type": "number"
         }'::jsonb);
 
 -- name: InsertAssessmentScoreRequiredInput :exec

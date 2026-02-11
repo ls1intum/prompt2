@@ -2,6 +2,7 @@ package assessmentCompletion
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 	"fmt"
 	"time"
@@ -13,6 +14,7 @@ import (
 	"github.com/ls1intum/prompt2/servers/assessment/assessments/assessmentCompletion/assessmentCompletionDTO"
 	"github.com/ls1intum/prompt2/servers/assessment/coursePhaseConfig"
 	db "github.com/ls1intum/prompt2/servers/assessment/db/sqlc"
+	"github.com/ls1intum/prompt2/servers/assessment/utils"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -83,6 +85,34 @@ func CountRemainingAssessmentsForStudent(ctx context.Context, courseParticipatio
 	return remainingAssessments, nil
 }
 
+func GetAllGrades(ctx context.Context, coursePhaseID uuid.UUID) ([]assessmentCompletionDTO.GradeWithParticipation, error) {
+	grades, err := AssessmentCompletionServiceSingleton.queries.GetAllGrades(ctx, coursePhaseID)
+	if err != nil {
+		log.Error("could not get grades by course phase: ", err)
+		return nil, errors.New("could not get grades by course phase")
+	}
+
+	return assessmentCompletionDTO.GetGradesWithParticipationFromDBGradesWithParticipation(grades), nil
+}
+
+func GetStudentGrade(ctx context.Context, courseParticipationID, coursePhaseID uuid.UUID) (float64, error) {
+	grade, err := AssessmentCompletionServiceSingleton.queries.GetStudentGrade(ctx, db.GetStudentGradeParams{
+		CourseParticipationID: courseParticipationID,
+		CoursePhaseID:         coursePhaseID,
+	})
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return 0, nil
+		}
+		log.Error("could not get student grade: ", err)
+		return 0, errors.New("could not get student grade")
+	}
+	if !grade.Valid {
+		return 0, nil
+	}
+	return utils.MapNumericToFloat64(grade), nil
+}
+
 func CreateOrUpdateAssessmentCompletion(ctx context.Context, req assessmentCompletionDTO.AssessmentCompletion) error {
 	err := CheckAssessmentIsEditable(ctx, &AssessmentCompletionServiceSingleton.queries, req.CourseParticipationID, req.CoursePhaseID)
 	if err != nil {
@@ -103,7 +133,7 @@ func CreateOrUpdateAssessmentCompletion(ctx context.Context, req assessmentCompl
 		CompletedAt:           pgtype.Timestamptz{Time: time.Now(), Valid: true},
 		Author:                req.Author,
 		Comment:               req.Comment,
-		GradeSuggestion:       assessmentCompletionDTO.MapFloat64ToNumeric(req.GradeSuggestion),
+		GradeSuggestion:       utils.MapFloat64ToNumeric(req.GradeSuggestion),
 		Completed:             req.Completed,
 	})
 	if err != nil {

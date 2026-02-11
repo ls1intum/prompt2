@@ -12,9 +12,9 @@ import { useCourseStore } from '@tumaet/prompt-shared-state'
 import { DisabledSidebarMenuItem } from './components/DisabledSidebarMenuItem'
 import { PhaseSidebarMapping } from '@managementConsole/PhaseMapping/PhaseSidebarMapping'
 import { CourseConfiguratorSidebar } from '@managementConsole/PhaseMapping/ExternalSidebars/CourseConfiguratorSidebar'
-import { MailingConfigSidebar } from '@managementConsole/PhaseMapping/ExternalSidebars/MailingConfigSidebar'
+import { CourseSettingsSidebar } from '@managementConsole/PhaseMapping/ExternalSidebars/CourseSettingsSidebar'
 
-export const InsideCourseSidebar = (): JSX.Element => {
+export const InsideCourseSidebar = () => {
   const { courseId } = useParams<{ courseId: string }>()
   const { courses } = useCourseStore()
 
@@ -35,7 +35,7 @@ export const InsideCourseSidebar = (): JSX.Element => {
         <SidebarGroupContent>
           <InsideSidebarMenuItem goToPath={rootPath} icon={<Gauge />} title='Overview' />
           <CourseConfiguratorSidebar rootPath={rootPath} title='Course Configurator' />
-          <MailingConfigSidebar rootPath={rootPath} title='Mailing Settings' />
+          <CourseSettingsSidebar rootPath={rootPath} title='Settings' />
         </SidebarGroupContent>
       </SidebarGroup>
 

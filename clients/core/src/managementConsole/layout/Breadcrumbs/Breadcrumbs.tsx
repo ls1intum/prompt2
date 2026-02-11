@@ -9,6 +9,7 @@ import {
 } from '@tumaet/prompt-ui-components'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useCourseStore } from '@tumaet/prompt-shared-state'
+import { useStudentStore } from '@core/managementConsole/shared/store/student.store'
 
 interface BreadcrumbProps {
   title: string
@@ -23,20 +24,38 @@ export const Breadcrumbs: React.FC = () => {
   const location = useLocation()
   const navigate = useNavigate()
   const { courses } = useCourseStore()
+  const { studentsById } = useStudentStore()
 
   const breadcrumbList = useMemo(() => {
     const pathSegments = location.pathname.split('/').filter(Boolean)
     const breadcrumbs: BreadcrumbProps[] = []
 
     if (pathSegments[0] === 'management') {
-      if (pathSegments[1] === 'general') {
-        breadcrumbs.push({ title: 'General', path: '/management/general' })
+      if (pathSegments[1] === 'courses') {
+        breadcrumbs.push({ title: 'Courses', path: '/management/courses' })
         pathSegments.slice(2).forEach((segment, index) => {
           breadcrumbs.push({
             title: segment.toUpperCase(),
-            path: `/management/general/${pathSegments.slice(2, index + 3).join('/')}`,
+            path: `/management/courses/${pathSegments.slice(2, index + 3).join('/')}`,
           })
         })
+      } else if (pathSegments[1] === 'course_templates') {
+        breadcrumbs.push({ title: 'Template Courses', path: '/management/course_templates' })
+      } else if (pathSegments[1] === 'course_archive') {
+        breadcrumbs.push({ title: 'Archived Courses', path: '/management/course_archive' })
+      } else if (pathSegments[1] === 'students') {
+        breadcrumbs.push({ title: 'Students', path: '/management/students' })
+        if (pathSegments.length > 2) {
+          if (studentsById[pathSegments[2]]) {
+            const s = studentsById[pathSegments[2]]
+            breadcrumbs.push({
+              title: s.firstName + ' ' + s.lastName,
+              path: '/management/students/' + pathSegments[2],
+            })
+          } else {
+            breadcrumbs.push({ title: 'Student', path: '/management/students/' + pathSegments[2] })
+          }
+        }
       } else if (pathSegments[1] === 'course' && pathSegments.length >= 3) {
         const courseId = pathSegments[2]
         const course = courses.find((c) => c.id === courseId)
@@ -59,10 +78,16 @@ export const Breadcrumbs: React.FC = () => {
             }
             pathSegments.slice(4).forEach((segment, index) => {
               // TODO: this might require a more sophisticated process in the future!
-              // we assume that longer items are ids
+              // we assume that longer items are courseParticipationIDs
               if (segment.length < 20) {
                 breadcrumbs.push({
                   title: capitalizeFirstLetter(segment),
+                  path: `/management/course/${courseId}/${phaseId}/${pathSegments.slice(4, index + 5).join('/')}`,
+                })
+              } else {
+                // This is likely a courseParticipationID (long UUID)
+                breadcrumbs.push({
+                  title: 'Participant',
                   path: `/management/course/${courseId}/${phaseId}/${pathSegments.slice(4, index + 5).join('/')}`,
                 })
               }

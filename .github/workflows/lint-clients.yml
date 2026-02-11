@@ -2,29 +2,27 @@ name: Lint Clients
 
 on:
   workflow_call:
+    inputs:
+      modules:
+        description: "JSON array of client modules to lint"
+        required: true
+        type: string
+
+permissions:
+  contents: read
 
 jobs:
-  set-matrix:
-    runs-on: ubuntu-latest
-    outputs:
-      modules: ${{ steps.set-matrix.outputs.modules }}
-    steps:
-      - uses: actions/checkout@v4
-      - id: set-matrix
-        run: echo "modules=$(find . -mindepth 1 -maxdepth 1 -type d -exec test -e '{}/eslint.config.mjs' \; -print | sed 's|^\./||' | jq -R -s -c 'split("\n")[:-1]')" >> "$GITHUB_OUTPUT"
-        working-directory: ./clients
-
   lint-client:
-    needs: set-matrix
+    if: inputs.modules != '[]'
     runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: ./clients
     strategy:
       matrix:
-        module: ${{ fromJson(needs.set-matrix.outputs.modules) }}
+        module: ${{ fromJson(inputs.modules) }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: ./.github/actions/setup-node
       - run: yarn install
       - name: Lint components in ${{ matrix.module }}

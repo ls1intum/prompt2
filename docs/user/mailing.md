@@ -1,3 +1,7 @@
+---
+sidebar_position: 5
+---
+
 # 📬 Mailing Configuration
 
 PROMPT supports customizable email communication. This guide explains how to configure mailing settings and use email templates effectively.
@@ -6,13 +10,9 @@ PROMPT supports customizable email communication. This guide explains how to con
 
 ## 🧩 Course-Wide Mailing Settings
 
-You can access the course-wide mailing settings via the **“Mailing Settings”** entry at the top of the course sidebar.
+You can access the course-wide mailing settings via the **"Mailing Settings"** entry at the top of the course sidebar.
 
-```{figure} ./images/mailing_1.png
----
-width: 400px
----
-````
+![Mailing Settings Sidebar](./images/mailing_1.png)
 
 ### ✉️ Reply-To Email Address (Required)
 
@@ -38,11 +38,7 @@ Each course phase that supports email communication (e.g., Application Phase) in
 * Trigger email delivery
 * Configure automatic mailing behavior
 
-```{figure} ./images/mailing_3.png
----
-width: 400px
----
-````
+![Course Phase Mailing](./images/mailing_3.png)
 
 ---
 
@@ -72,16 +68,12 @@ Examples (not exhaustive list):
 
 | Placeholder           | Replaced With              |
 | --------------------- | -------------------------- |
-| `{{firstName}}`       | Student’s first name       |
-| `{{lastName}}`        | Student’s last name        |
+| `{{firstName}}`       | Student's first name       |
+| `{{lastName}}`        | Student's last name        |
 | `{{courseName}}`      | Name of the current course |
 | `{{coursePhaseName}}` | Current phase name         |
 
-```{figure} ./images/mailing_2.png
----
-width: 400px
----
-````
+![Available Placeholders](./images/mailing_2.png)
 
 ---
 

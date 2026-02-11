@@ -15,11 +15,13 @@ import {
 import { CalendarDays, GraduationCap, Clock, Calendar } from 'lucide-react'
 import { CourseTypeDetails } from '@tumaet/prompt-shared-state'
 import { EditCourseDropdown } from './components/EditCourseDropdown'
+import { CourseStatusTag } from '../layout/Sidebar/CourseSwitchSidebar/components/CourseStatusTag'
+import type { Course } from '@tumaet/prompt-shared-state'
 
-export const CourseOverview = (): JSX.Element => {
+export const CourseOverview = () => {
   const { courses } = useCourseStore()
   const { courseId } = useParams<{ courseId: string }>()
-  const course = courses.find((c) => c.id === courseId)
+  const course = courses.find((c) => c.id === courseId) as Course | undefined
   const { permissions } = useAuthStore()
 
   const formatDate = (dateString: string): string => {
@@ -58,12 +60,22 @@ export const CourseOverview = (): JSX.Element => {
           <div className='flex justify-between items-center'>
             <div>
               <CardTitle className='text-3xl font-bold text-black'>{course.name}</CardTitle>
-              <CardDescription className='mt-2'>Instructor Dashboard</CardDescription>
+              <CardDescription className='mt-2 text-black'>
+                <CourseStatusTag course={course} />
+              </CardDescription>
             </div>
             {canEdit && <EditCourseDropdown />}
           </div>
         </CardHeader>
         <CardContent className='p-6'>
+          {course.shortDescription && (
+            <p className='mb-4 text-muted-foreground leading-relaxed'>{course.shortDescription}</p>
+          )}
+          {course.longDescription && (
+            <p className='mb-6 text-sm text-muted-foreground leading-relaxed border-l-2 border-border pl-3'>
+              {course.longDescription}
+            </p>
+          )}
           <div className='grid md:grid-cols-2 gap-6'>
             <div className='space-y-4'>
               <div className='flex items-center space-x-3'>
@@ -78,7 +90,9 @@ export const CourseOverview = (): JSX.Element => {
                 <div>
                   <p className='text-secondary-foreground'>Duration</p>
                   <p className='text-lg'>
-                    {`${formatDate(course.startDate.toString())} - ${formatDate(course.endDate.toString())}`}
+                    {course.startDate && course.endDate
+                      ? `${formatDate(course.startDate.toString())} - ${formatDate(course.endDate.toString())}`
+                      : 'N/A'}
                   </p>
                 </div>
               </div>

@@ -1,6 +1,6 @@
 import { ChartConfig } from '@tumaet/prompt-ui-components'
 
-import { ScoreLevel } from '../../../../interfaces/scoreLevel'
+import { ScoreLevel } from '@tumaet/prompt-shared-state'
 
 export const chartConfig: ChartConfig = {
   notAssessed: {

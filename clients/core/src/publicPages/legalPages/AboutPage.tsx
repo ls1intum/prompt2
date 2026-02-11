@@ -24,9 +24,11 @@ import {
 import { Link, useNavigate } from 'react-router-dom'
 import { ContributorList } from './components/ContributorList'
 import { env } from '@/env'
+import { useAuthStore } from '@tumaet/prompt-shared-state'
 
 export default function AboutPage() {
   const navigate = useNavigate()
+  const { user } = useAuthStore()
 
   const coreFeatures = [
     {
@@ -66,6 +68,12 @@ export default function AboutPage() {
       description:
         'Assign students to teams and projects, and manage project work throughout the course.',
     },
+    {
+      icon: UserCheck,
+      title: 'Assessment Phase',
+      description:
+        'Conduct structured peer, self, and instructor assessments using a configurable assessment framework.',
+    },
   ]
 
   return (
@@ -76,7 +84,7 @@ export default function AboutPage() {
             variant='ghost'
             size='icon'
             className='absolute left-4 top-4 hover:bg-gray-100 transition-colors'
-            onClick={() => navigate('/')}
+            onClick={() => navigate(user ? '/management' : '/')}
             aria-label='Go back'
           >
             <ArrowLeft className='h-5 w-5' />

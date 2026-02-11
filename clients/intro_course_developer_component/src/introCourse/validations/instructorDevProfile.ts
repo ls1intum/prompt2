@@ -4,28 +4,25 @@ export const instructorDevProfile = z.object({
   appleID: z.string().email('Invalid email address'),
   gitLabUsername: z.string(),
   hasMacBook: z.boolean(),
-  // Preprocess empty strings to undefined before validating UDID
-  iPhoneUDID: z.preprocess(
-    (a) => (a === '' ? undefined : a),
-    z
-      .string()
-      .regex(/^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{16}$/, 'Invalid iPhone UDID')
-      .optional(),
-  ),
-  iPadUDID: z.preprocess(
-    (a) => (a === '' ? undefined : a),
-    z
-      .string()
-      .regex(/^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{16}$/, 'Invalid iPad UDID')
-      .optional(),
-  ),
-  appleWatchUDID: z.preprocess(
-    (a) => (a === '' ? undefined : a),
-    z
-      .string()
-      .regex(/^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{16}$/, 'Invalid Apple Watch UDID')
-      .optional(),
-  ),
+  // Use union type to handle empty strings properly with correct TypeScript inference
+  iPhoneUDID: z
+    .string()
+    .regex(/^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{16}$/, 'Invalid iPhone UDID')
+    .or(z.literal(''))
+    .optional()
+    .transform((val) => (val === '' ? undefined : val)),
+  iPadUDID: z
+    .string()
+    .regex(/^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{16}$/, 'Invalid iPad UDID')
+    .or(z.literal(''))
+    .optional()
+    .transform((val) => (val === '' ? undefined : val)),
+  appleWatchUDID: z
+    .string()
+    .regex(/^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{16}$/, 'Invalid Apple Watch UDID')
+    .or(z.literal(''))
+    .optional()
+    .transform((val) => (val === '' ? undefined : val)),
 })
 
-export type InstructorDeveloperFormValues = z.infer<typeof instructorDevProfile>
+export type InstructorDeveloperFormValues = z.input<typeof instructorDevProfile>

@@ -1,5 +1,5 @@
 import { useParams } from 'react-router-dom'
-import { useState, useEffect, useCallback } from 'react'
+import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Plus, Loader2, AlertCircle } from 'lucide-react'
 
@@ -16,6 +16,7 @@ import {
 import type { ActionItem, UpdateActionItemRequest } from '../../../../../interfaces/actionItem'
 import { getAllActionItemsForStudentInPhase } from '../../../../../network/queries/getAllActionItemsForStudentInPhase'
 
+import { useCoursePhaseConfigStore } from '../../../../../zustand/useCoursePhaseConfigStore'
 import { useStudentAssessmentStore } from '../../../../../zustand/useStudentAssessmentStore'
 
 import { useCreateActionItem } from '../hooks/useCreateActionItem'
@@ -24,9 +25,15 @@ import { useDeleteActionItem } from '../hooks/useDeleteActionItem'
 import { DeleteActionItemDialog } from './DeleteActionItemDialog'
 import { ItemRow } from '../../../../components/ItemRow'
 
-export function ActionItemPanel() {
-  const { phaseId } = useParams<{
+interface ActionItemPanelProps {
+  readOnly?: boolean
+  actionItems?: ActionItem[]
+}
+
+export function ActionItemPanel({ readOnly = false, actionItems }: ActionItemPanelProps) {
+  const { phaseId, courseParticipationID } = useParams<{
     phaseId: string
+    courseParticipationID: string
   }>()
   const [error, setError] = useState<string | undefined>(undefined)
   const [savingItemId, setSavingItemId] = useState<string | undefined>(undefined)
@@ -34,18 +41,20 @@ export function ActionItemPanel() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [itemToDelete, setItemToDelete] = useState<string | undefined>(undefined)
 
-  const { courseParticipationID, assessmentCompletion } = useStudentAssessmentStore()
+  const { coursePhaseConfig } = useCoursePhaseConfigStore()
+  const { assessmentCompletion } = useStudentAssessmentStore()
 
-  const completed = assessmentCompletion?.completed ?? false
+  const completed = readOnly || assessmentCompletion?.completed
 
   const {
-    data: actionItems = [],
+    data: fetchedActionItems = [],
     isPending: isGetActionItemsPending,
     isError,
     refetch,
   } = useQuery<ActionItem[]>({
     queryKey: ['actionItems', phaseId, courseParticipationID],
-    queryFn: () => getAllActionItemsForStudentInPhase(phaseId ?? '', courseParticipationID ?? ' '),
+    queryFn: () => getAllActionItemsForStudentInPhase(phaseId ?? '', courseParticipationID ?? ''),
+    enabled: !readOnly,
   })
 
   const { mutate: createActionItem, isPending: isCreatePending } = useCreateActionItem(setError)
@@ -55,85 +64,48 @@ export function ActionItemPanel() {
   const { user } = useAuthStore()
   const userName = user ? `${user.firstName} ${user.lastName}` : 'Unknown User'
 
-  // Initialize item values when data loads
-  useEffect(() => {
-    const newValues: Record<string, string> = {}
-    actionItems.forEach((item) => {
-      if (!(item.id in itemValues)) {
-        newValues[item.id] = item.action
-      }
-    })
-    if (Object.keys(newValues).length > 0) {
-      setItemValues((prev) => ({ ...prev, ...newValues }))
-    }
-  }, [actionItems, itemValues])
+  const resolvedActionItems = readOnly ? (actionItems ?? []) : fetchedActionItems
 
-  const addActionItem = () => {
+  const handleAddActionItem = async () => {
     if (completed) return
 
-    const handleAddActionItem = async () => {
-      try {
-        await createActionItem(
-          {
-            coursePhaseID: phaseId ?? '',
-            courseParticipationID: courseParticipationID ?? '',
-            action: '',
-            author: userName,
-          },
-          {
-            onSuccess: () => {
-              refetch()
-            },
-          },
-        )
-      } catch (err) {
-        setError('An error occurred while creating the action item.')
-      }
-    }
-
-    handleAddActionItem()
+    await createActionItem({
+      coursePhaseID: phaseId ?? '',
+      courseParticipationID: courseParticipationID ?? '',
+      action: '',
+      author: userName,
+    })
   }
-
-  const debouncedSave = useCallback(
-    (item: ActionItem, text: string) => {
-      const timeoutId = setTimeout(() => {
-        if (completed) return
-
-        if (text.trim() !== item.action.trim()) {
-          setSavingItemId(item.id)
-
-          const updateRequest: UpdateActionItemRequest = {
-            id: item.id,
-            coursePhaseID: phaseId ?? '',
-            courseParticipationID: courseParticipationID ?? '',
-            action: text.trim(),
-            author: userName,
-          }
-
-          updateActionItem(updateRequest, {
-            onSuccess: () => {
-              setSavingItemId(undefined)
-              refetch()
-            },
-            onError: () => {
-              setSavingItemId(undefined)
-            },
-          })
-        }
-      }, 200) // 200 ms delay
-
-      return timeoutId
-    },
-    [phaseId, courseParticipationID, userName, updateActionItem, refetch, completed],
-  )
 
   const handleTextChange = (itemId: string, value: string) => {
     setItemValues((prev) => ({ ...prev, [itemId]: value }))
+  }
 
-    const item = actionItems.find((it) => it.id === itemId)
-    if (item) {
-      const timeoutId = debouncedSave(item, value)
-      return () => clearTimeout(timeoutId)
+  const handleTextBlur = (itemId: string) => {
+    if (completed) return
+
+    const item = resolvedActionItems.find((it) => it.id === itemId)
+    const value = itemValues[itemId]
+
+    if (item && value !== undefined && value.trim() !== item.action.trim()) {
+      setSavingItemId(item.id)
+
+      const updateRequest: UpdateActionItemRequest = {
+        id: item.id,
+        coursePhaseID: phaseId ?? '',
+        courseParticipationID: courseParticipationID ?? '',
+        action: value.trim(),
+        author: userName,
+      }
+
+      updateActionItem(updateRequest, {
+        onSuccess: () => {
+          setSavingItemId(undefined)
+        },
+        onError: () => {
+          setSavingItemId(undefined)
+        },
+      })
     }
   }
 
@@ -148,15 +120,7 @@ export function ActionItemPanel() {
     if (itemToDelete) {
       deleteActionItem(itemToDelete, {
         onSuccess: () => {
-          // Remove from local state
-          setItemValues((prev) => {
-            const newValues = { ...prev }
-            delete newValues[itemToDelete]
-            return newValues
-          })
-          refetch()
           setDeleteDialogOpen(false)
-          setItemToDelete(undefined)
         },
       })
     }
@@ -173,7 +137,7 @@ export function ActionItemPanel() {
     return <ErrorPage message='Error loading assessments' onRetry={refetch} />
   }
 
-  if (isGetActionItemsPending) {
+  if (isGetActionItemsPending && !readOnly) {
     return (
       <div className='flex justify-center items-center h-64'>
         <Loader2 className='h-12 w-12 animate-spin text-primary' />
@@ -186,43 +150,51 @@ export function ActionItemPanel() {
       <Card>
         <CardHeader>
           <CardTitle>Action Items</CardTitle>
-          <p className='text-xs text-gray-500 dark:text-gray-400 mt-1'>
-            Will be shown to students after the deadline
-          </p>
+          {coursePhaseConfig?.actionItemsVisible && !readOnly && (
+            <p className='text-xs text-gray-500 dark:text-gray-400 mt-1'>
+              These action items will be visible to the student once results are released.
+            </p>
+          )}
         </CardHeader>
         <CardContent className='space-y-2'>
-          {actionItems.map((item) => (
+          {readOnly && resolvedActionItems.length === 0 && (
+            <div className='text-sm text-muted-foreground'>No action items available.</div>
+          )}
+          {resolvedActionItems.map((item) => (
             <ItemRow
               key={item.id}
               type='action'
               item={item}
-              value={itemValues[item.id] || item.action}
+              value={itemValues[item.id] ?? item.action}
               onTextChange={handleTextChange}
+              onTextBlur={handleTextBlur}
               onDelete={openDeleteDialog}
               isSaving={savingItemId === item.id}
               isPending={isPending}
-              isDisabled={completed}
+              isDisabled={completed || readOnly}
             />
           ))}
 
-          <Button
-            variant='outline'
-            className='w-full border-dashed flex items-center justify-center p-6 hover:bg-muted/50 transition-colors'
-            onClick={addActionItem}
-            disabled={isPending || completed}
-            title={
-              completed
-                ? 'Assessment completed - cannot add new action items'
-                : 'Add new action item'
-            }
-          >
-            {isCreatePending ? (
-              <Loader2 className='h-5 w-5 mr-2 animate-spin text-muted-foreground' />
-            ) : (
-              <Plus className='h-5 w-5 mr-2 text-muted-foreground' />
-            )}
-            <span className='text-muted-foreground'>Add Action Item</span>
-          </Button>
+          {!completed && (
+            <Button
+              variant='outline'
+              className='w-full border-dashed flex items-center justify-center p-6 hover:bg-muted/50 transition-colors'
+              onClick={handleAddActionItem}
+              disabled={isPending || completed}
+              title={
+                completed
+                  ? 'Assessment completed - cannot add new action items'
+                  : 'Add new action item'
+              }
+            >
+              {isCreatePending ? (
+                <Loader2 className='h-5 w-5 mr-2 animate-spin text-muted-foreground' />
+              ) : (
+                <Plus className='h-5 w-5 mr-2 text-muted-foreground' />
+              )}
+              <span className='text-muted-foreground'>Add Action Item</span>
+            </Button>
+          )}
 
           {error && (
             <div className='flex items-center gap-2 text-destructive text-xs p-2 mt-2 bg-destructive/10 rounded-md'>

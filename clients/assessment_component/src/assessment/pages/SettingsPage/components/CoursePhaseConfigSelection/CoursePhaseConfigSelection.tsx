@@ -1,116 +1,110 @@
-import { useState, useEffect } from 'react'
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  Label,
-  ErrorPage,
-  Button,
-  Checkbox,
-} from '@tumaet/prompt-ui-components'
-import { AlertCircle, Loader2, Settings } from 'lucide-react'
+import { useState } from 'react'
+import { Card, CardContent, CardHeader, CardTitle, ErrorPage } from '@tumaet/prompt-ui-components'
+import { Loader2, Settings } from 'lucide-react'
 
-import { AssessmentType } from '../../interfaces/assessmentType'
+import { AssessmentType } from '../../../../interfaces/assessmentType'
 
 import { useCoursePhaseConfigStore } from '../../../../zustand/useCoursePhaseConfigStore'
-
-import { useGetAllAssessmentTemplates } from './hooks/useGetAllAssessmentTemplates'
+import { useGetAllAssessmentSchemas } from './hooks/useGetAllAssessmentSchemas'
 import { useCreateOrUpdateCoursePhaseConfig } from './hooks/useCreateOrUpdateCoursePhaseConfig'
-import { AssessmentConfiguration } from './components/AssessmentConfiguration'
+import { useCoursePhaseConfigForm } from './hooks/useCoursePhaseConfigForm'
+import { useEvaluationOptions } from './hooks/useEvaluationOptions'
 
-export const CoursePhaseConfigSelection = () => {
+import { AssessmentConfiguration } from './components/AssessmentConfiguration'
+import { ErrorDisplay } from './components/ErrorDisplay'
+import { EvaluationVisibilityToggle } from './components/EvaluationVisibilityToggle'
+import { StudentVisibilityToggles } from './components/StudentVisibilityToggles'
+import { EvaluationOptionSection } from './components/EvaluationOptionSection'
+import { SaveConfigurationSection } from './components/SaveConfigurationSection'
+
+interface CoursePhaseConfigSelectionProps {
+  hasAssessmentData?: boolean
+  hasSelfEvalData?: boolean
+  hasPeerEvalData?: boolean
+  hasTutorEvalData?: boolean
+}
+
+export const CoursePhaseConfigSelection = ({
+  hasAssessmentData = false,
+  hasSelfEvalData = false,
+  hasPeerEvalData = false,
+  hasTutorEvalData = false,
+}: CoursePhaseConfigSelectionProps) => {
   const [error, setError] = useState<string | undefined>(undefined)
 
-  const [assessmentTemplateId, setAssessmentTemplateId] = useState<string>('')
-  const [start, setStart] = useState<Date | undefined>(undefined)
-  const [deadline, setDeadline] = useState<Date | undefined>(undefined)
-  const [selfEvaluationEnabled, setSelfEvaluationEnabled] = useState<boolean>(false)
-  const [selfEvaluationTemplate, setSelfEvaluationTemplate] = useState<string>('')
-  const [selfEvaluationStart, setSelfEvaluationStart] = useState<Date | undefined>(undefined)
-  const [selfEvaluationDeadline, setSelfEvaluationDeadline] = useState<Date | undefined>(undefined)
-  const [peerEvaluationEnabled, setPeerEvaluationEnabled] = useState<boolean>(false)
-  const [peerEvaluationTemplate, setPeerEvaluationTemplate] = useState<string>('')
-  const [peerEvaluationStart, setPeerEvaluationStart] = useState<Date | undefined>(undefined)
-  const [peerEvaluationDeadline, setPeerEvaluationDeadline] = useState<Date | undefined>(undefined)
+  const { coursePhaseConfig: originalConfig } = useCoursePhaseConfigStore()
 
   const {
-    data: templates,
-    isPending: isTemplatesPending,
-    isError: isTemplatesError,
-  } = useGetAllAssessmentTemplates()
+    assessmentSchemaId,
+    setAssessmentSchemaId,
+    start,
+    setStart,
+    deadline,
+    setDeadline,
+    evaluationResultsVisible,
+    setEvaluationResultsVisible,
+    gradeSuggestionVisible,
+    setGradeSuggestionVisible,
+    actionItemsVisible,
+    setActionItemsVisible,
+    gradingSheetVisible,
+    setGradingSheetVisible,
+    mainConfigState,
+    hasMainConfigChanges,
+  } = useCoursePhaseConfigForm()
 
-  const { coursePhaseConfig: config } = useCoursePhaseConfigStore()
+  const {
+    selfEvaluationEnabled,
+    setSelfEvaluationEnabled,
+    selfEvaluationSchema,
+    setSelfEvaluationSchema,
+    selfEvaluationStart,
+    setSelfEvaluationStart,
+    selfEvaluationDeadline,
+    setSelfEvaluationDeadline,
+    peerEvaluationEnabled,
+    setPeerEvaluationEnabled,
+    peerEvaluationSchema,
+    setPeerEvaluationSchema,
+    peerEvaluationStart,
+    setPeerEvaluationStart,
+    peerEvaluationDeadline,
+    setPeerEvaluationDeadline,
+    tutorEvaluationEnabled,
+    setTutorEvaluationEnabled,
+    tutorEvaluationSchema,
+    setTutorEvaluationSchema,
+    tutorEvaluationStart,
+    setTutorEvaluationStart,
+    tutorEvaluationDeadline,
+    setTutorEvaluationDeadline,
+    evaluationOptions,
+    hasEvaluationChanges,
+  } = useEvaluationOptions()
+
+  const {
+    data: schemas,
+    isPending: isSchemasPending,
+    isError: isSchemasError,
+  } = useGetAllAssessmentSchemas()
+
   const configMutation = useCreateOrUpdateCoursePhaseConfig(setError)
 
-  useEffect(() => {
-    if (config) {
-      setAssessmentTemplateId(config.assessmentTemplateID || '')
-      setStart(config.start ? new Date(config.start) : undefined)
-      setDeadline(config.deadline ? new Date(config.deadline) : undefined)
-      setSelfEvaluationEnabled(config.selfEvaluationEnabled || false)
-      setSelfEvaluationTemplate(config.selfEvaluationTemplate || '')
-      setSelfEvaluationStart(
-        config.selfEvaluationStart ? new Date(config.selfEvaluationStart) : undefined,
-      )
-      setSelfEvaluationDeadline(
-        config.selfEvaluationDeadline ? new Date(config.selfEvaluationDeadline) : undefined,
-      )
-      setPeerEvaluationEnabled(config.peerEvaluationEnabled || false)
-      setPeerEvaluationTemplate(config.peerEvaluationTemplate || '')
-      setPeerEvaluationStart(
-        config.peerEvaluationStart ? new Date(config.peerEvaluationStart) : undefined,
-      )
-      setPeerEvaluationDeadline(
-        config.peerEvaluationDeadline ? new Date(config.peerEvaluationDeadline) : undefined,
-      )
-    }
-  }, [config])
-
-  if (isTemplatesError) return <ErrorPage />
-  if (isTemplatesPending)
+  if (isSchemasError) return <ErrorPage />
+  if (isSchemasPending)
     return (
       <div className='flex justify-center items-center h-64'>
         <Loader2 className='h-12 w-12 animate-spin text-primary' />
       </div>
     )
 
-  const handleSaveConfig = () => {
-    configMutation.mutate({
-      assessmentTemplateId,
-      start,
-      deadline,
-      selfEvaluationEnabled,
-      selfEvaluationTemplate: selfEvaluationTemplate,
-      selfEvaluationStart: selfEvaluationStart,
-      selfEvaluationDeadline: selfEvaluationDeadline,
-      peerEvaluationEnabled,
-      peerEvaluationTemplate: peerEvaluationTemplate,
-      peerEvaluationStart: peerEvaluationStart,
-      peerEvaluationDeadline: peerEvaluationDeadline,
-    })
-  }
-
   const hasChanges =
-    assessmentTemplateId !== (config?.assessmentTemplateID || '') ||
-    start?.getTime() !== (config?.start ? new Date(config.start).getTime() : undefined) ||
-    deadline?.getTime() !== (config?.deadline ? new Date(config.deadline).getTime() : undefined) ||
-    selfEvaluationEnabled !== (config?.selfEvaluationEnabled || false) ||
-    selfEvaluationTemplate !== (config?.selfEvaluationTemplate || '') ||
-    selfEvaluationStart?.getTime() !==
-      (config?.selfEvaluationStart ? new Date(config.selfEvaluationStart).getTime() : undefined) ||
-    selfEvaluationDeadline?.getTime() !==
-      (config?.selfEvaluationDeadline
-        ? new Date(config.selfEvaluationDeadline).getTime()
-        : undefined) ||
-    peerEvaluationEnabled !== (config?.peerEvaluationEnabled || false) ||
-    peerEvaluationTemplate !== (config?.peerEvaluationTemplate || '') ||
-    peerEvaluationStart?.getTime() !==
-      (config?.peerEvaluationStart ? new Date(config.peerEvaluationStart).getTime() : undefined) ||
-    peerEvaluationDeadline?.getTime() !==
-      (config?.peerEvaluationDeadline
-        ? new Date(config.peerEvaluationDeadline).getTime()
-        : undefined)
+    originalConfig === undefined ||
+    hasMainConfigChanges(originalConfig) ||
+    hasEvaluationChanges(originalConfig)
+  const handleSaveConfig = (configRequest: Parameters<typeof configMutation.mutate>[0]) => {
+    configMutation.mutate(configRequest)
+  }
 
   return (
     <Card>
@@ -122,106 +116,103 @@ export const CoursePhaseConfigSelection = () => {
       </CardHeader>
       <CardContent>
         <div className='grid grid-cols-1 space-y-4'>
-          {error && (
-            <div className='flex items-center gap-2 text-red-600 bg-red-50 p-3 rounded-lg'>
-              <AlertCircle className='h-4 w-4' />
-              <span className='text-sm'>{error}</span>
-            </div>
-          )}
+          <ErrorDisplay error={error} />
 
           <AssessmentConfiguration
             type={AssessmentType.ASSESSMENT}
-            assessmentTemplateId={assessmentTemplateId}
-            setAssessmentTemplateId={setAssessmentTemplateId}
+            assessmentSchemaId={assessmentSchemaId}
+            setAssessmentSchemaId={setAssessmentSchemaId}
             startDate={start}
             setStartDate={setStart}
             deadline={deadline}
             setDeadline={setDeadline}
-            templates={templates ?? []}
+            schemas={schemas ?? []}
             configMutation={configMutation}
             setError={setError}
+            hasAssessmentData={hasAssessmentData}
+          />
+
+          <EvaluationVisibilityToggle
+            checked={evaluationResultsVisible}
+            onCheckedChange={setEvaluationResultsVisible}
+            disabled={configMutation.isPending}
+          />
+
+          <StudentVisibilityToggles
+            gradeSuggestionVisible={gradeSuggestionVisible}
+            onGradeSuggestionVisibleChange={setGradeSuggestionVisible}
+            actionItemsVisible={actionItemsVisible}
+            onActionItemsVisibleChange={setActionItemsVisible}
+            gradingSheetVisible={gradingSheetVisible}
+            onGradingSheetVisibleChange={setGradingSheetVisible}
+            disabled={configMutation.isPending}
           />
 
           <div className='space-y-4'>
-            <div className='flex items-center space-x-2'>
-              <Checkbox
-                id='self-assessment-enabled'
-                checked={selfEvaluationEnabled}
-                onCheckedChange={(checked) => setSelfEvaluationEnabled(checked as boolean)}
-                disabled={configMutation.isPending}
-              />
-              <Label htmlFor='self-assessment-enabled' className='text-sm font-medium'>
-                Enable Self Evaluation
-              </Label>
-            </div>
-
-            {selfEvaluationEnabled && (
-              <AssessmentConfiguration
-                type={AssessmentType.SELF}
-                assessmentTemplateId={selfEvaluationTemplate}
-                setAssessmentTemplateId={setSelfEvaluationTemplate}
-                startDate={selfEvaluationStart}
-                setStartDate={setSelfEvaluationStart}
-                deadline={selfEvaluationDeadline}
-                setDeadline={setSelfEvaluationDeadline}
-                templates={templates ?? []}
-                configMutation={configMutation}
-                setError={setError}
-              />
-            )}
+            <h3 className='text-sm font-semibold text-gray-700 dark:text-gray-300'>
+              Evaluation Settings
+            </h3>
           </div>
 
-          <div className='space-y-4'>
-            <div className='flex items-center space-x-2'>
-              <Checkbox
-                id='peer-assessment-enabled'
-                checked={peerEvaluationEnabled}
-                onCheckedChange={(checked) => setPeerEvaluationEnabled(checked as boolean)}
-                disabled={configMutation.isPending}
-              />
-              <Label htmlFor='peer-assessment-enabled' className='text-sm font-medium'>
-                Enable Peer Evaluation
-              </Label>
-            </div>
+          <EvaluationOptionSection
+            type={AssessmentType.SELF}
+            enabled={selfEvaluationEnabled}
+            onEnabledChange={setSelfEvaluationEnabled}
+            schemaId={selfEvaluationSchema}
+            onSchemaIdChange={setSelfEvaluationSchema}
+            startDate={selfEvaluationStart}
+            onStartDateChange={setSelfEvaluationStart}
+            deadline={selfEvaluationDeadline}
+            onDeadlineChange={setSelfEvaluationDeadline}
+            schemas={schemas ?? []}
+            configMutation={configMutation}
+            setError={setError}
+            disabled={configMutation.isPending}
+            hasAssessmentData={hasSelfEvalData}
+          />
 
-            {peerEvaluationEnabled && (
-              <AssessmentConfiguration
-                type={AssessmentType.PEER}
-                assessmentTemplateId={peerEvaluationTemplate}
-                setAssessmentTemplateId={setPeerEvaluationTemplate}
-                startDate={peerEvaluationStart}
-                setStartDate={setPeerEvaluationStart}
-                deadline={peerEvaluationDeadline}
-                setDeadline={setPeerEvaluationDeadline}
-                templates={templates ?? []}
-                configMutation={configMutation}
-                setError={setError}
-              />
-            )}
-          </div>
+          <EvaluationOptionSection
+            type={AssessmentType.PEER}
+            enabled={peerEvaluationEnabled}
+            onEnabledChange={setPeerEvaluationEnabled}
+            schemaId={peerEvaluationSchema}
+            onSchemaIdChange={setPeerEvaluationSchema}
+            startDate={peerEvaluationStart}
+            onStartDateChange={setPeerEvaluationStart}
+            deadline={peerEvaluationDeadline}
+            onDeadlineChange={setPeerEvaluationDeadline}
+            schemas={schemas ?? []}
+            configMutation={configMutation}
+            setError={setError}
+            disabled={configMutation.isPending}
+            hasAssessmentData={hasPeerEvalData}
+          />
 
-          <div className='flex justify-end pt-4'>
-            <Button
-              onClick={handleSaveConfig}
-              disabled={!hasChanges || configMutation.isPending || !assessmentTemplateId}
-              className='min-w-[120px]'
-            >
-              {configMutation.isPending ? (
-                <>
-                  <Loader2 className='h-4 w-4 animate-spin mr-2' />
-                  Saving...
-                </>
-              ) : (
-                'Save Configuration'
-              )}
-            </Button>
-          </div>
+          <EvaluationOptionSection
+            type={AssessmentType.TUTOR}
+            enabled={tutorEvaluationEnabled}
+            onEnabledChange={setTutorEvaluationEnabled}
+            schemaId={tutorEvaluationSchema}
+            onSchemaIdChange={setTutorEvaluationSchema}
+            startDate={tutorEvaluationStart}
+            onStartDateChange={setTutorEvaluationStart}
+            deadline={tutorEvaluationDeadline}
+            onDeadlineChange={setTutorEvaluationDeadline}
+            schemas={schemas ?? []}
+            configMutation={configMutation}
+            setError={setError}
+            disabled={configMutation.isPending}
+            hasAssessmentData={hasTutorEvalData}
+          />
 
-          {configMutation.isSuccess && !hasChanges && (
-            <div className='text-green-600 text-sm text-center'>
-              Configuration saved successfully!
-            </div>
-          )}
+          <SaveConfigurationSection
+            mainConfigState={mainConfigState}
+            evaluationOptions={evaluationOptions}
+            hasChanges={hasChanges}
+            configMutation={configMutation}
+            onSave={handleSaveConfig}
+            disabled={configMutation.isPending}
+          />
         </div>
       </CardContent>
     </Card>

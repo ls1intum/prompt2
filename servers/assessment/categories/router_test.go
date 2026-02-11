@@ -10,6 +10,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"github.com/ls1intum/prompt2/servers/assessment/assessmentSchemas"
 	"github.com/ls1intum/prompt2/servers/assessment/categories/categoryDTO"
 	"github.com/ls1intum/prompt2/servers/assessment/coursePhaseConfig"
 	"github.com/ls1intum/prompt2/servers/assessment/testutils"
@@ -22,6 +23,7 @@ type CategoryRouterTestSuite struct {
 	router          *gin.Engine
 	suiteCtx        context.Context
 	cleanup         func()
+	mockCoreCleanup func()
 	categoryService CategoryService
 }
 
@@ -32,14 +34,21 @@ func (suite *CategoryRouterTestSuite) SetupSuite() {
 		suite.T().Fatalf("Failed to set up test database: %v", err)
 	}
 	suite.cleanup = cleanup
+
+	// Set up mock core service
+	_, mockCleanup := testutils.SetupMockCoreService()
+	suite.mockCoreCleanup = mockCleanup
+
 	suite.categoryService = CategoryService{
 		queries: *testDB.Queries,
 		conn:    testDB.Conn,
 	}
 	CategoryServiceSingleton = &suite.categoryService
 
-	// Initialize CoursePhaseConfigSingleton to prevent nil pointer dereference
-	coursePhaseConfig.CoursePhaseConfigSingleton = coursePhaseConfig.NewCoursePhaseConfigService(*testDB.Queries, testDB.Conn)
+	// Initialize service modules needed for schema copy logic
+	group := gin.New().Group("")
+	assessmentSchemas.InitAssessmentSchemaModule(group, *testDB.Queries, testDB.Conn)
+	coursePhaseConfig.InitCoursePhaseConfigModule(group, *testDB.Queries, testDB.Conn)
 
 	suite.router = gin.Default()
 	api := suite.router.Group("/api/course_phase/:coursePhaseID")
@@ -50,6 +59,9 @@ func (suite *CategoryRouterTestSuite) SetupSuite() {
 }
 
 func (suite *CategoryRouterTestSuite) TearDownSuite() {
+	if suite.mockCoreCleanup != nil {
+		suite.mockCoreCleanup()
+	}
 	if suite.cleanup != nil {
 		suite.cleanup()
 	}
@@ -74,11 +86,11 @@ func (suite *CategoryRouterTestSuite) TestCreateCategory() {
 	coursePhaseID := "4179d58a-d00d-4fa7-94a5-397bc69fab02" // Dev Application phase from test data
 
 	createReq := categoryDTO.CreateCategoryRequest{
-		Name:                 "Router Test Category",
-		ShortName:            "RTC",
-		Description:          "Testing create via router",
-		Weight:               3,
-		AssessmentTemplateID: uuid.MustParse("550e8400-e29b-41d4-a716-446655440000"), // From test data
+		Name:               "Router Test Category",
+		ShortName:          "RTC",
+		Description:        "Testing create via router",
+		Weight:             3,
+		AssessmentSchemaID: uuid.MustParse("550e8400-e29b-41d4-a716-446655440000"), // From test data
 	}
 	body, _ := json.Marshal(createReq)
 	req, _ := http.NewRequest("POST", "/api/course_phase/"+coursePhaseID+"/category", bytes.NewBuffer(body))
@@ -110,11 +122,11 @@ func (suite *CategoryRouterTestSuite) TestUpdateCategory() {
 	id := uuid.MustParse("25f1c984-ba31-4cf2-aa8e-5662721bf44e")
 
 	updateReq := categoryDTO.UpdateCategoryRequest{
-		Name:                 "Router Updated",
-		ShortName:            "RU",
-		Description:          "Router update description",
-		Weight:               2,
-		AssessmentTemplateID: uuid.MustParse("550e8400-e29b-41d4-a716-446655440000"), // From test data
+		Name:               "Router Updated",
+		ShortName:          "RU",
+		Description:        "Router update description",
+		Weight:             2,
+		AssessmentSchemaID: uuid.MustParse("550e8400-e29b-41d4-a716-446655440000"), // From test data
 	}
 	body, _ := json.Marshal(updateReq)
 	req, _ := http.NewRequest("PUT", "/api/course_phase/"+coursePhaseID+"/category/"+id.String(), bytes.NewBuffer(body))
@@ -130,11 +142,11 @@ func (suite *CategoryRouterTestSuite) TestDeleteCategory() {
 
 	// create category to delete via service
 	createReq := categoryDTO.CreateCategoryRequest{
-		Name:                 "RouterDelete",
-		ShortName:            "RD",
-		Description:          "To delete via router",
-		Weight:               1,
-		AssessmentTemplateID: uuid.MustParse("550e8400-e29b-41d4-a716-446655440000"), // From test data
+		Name:               "RouterDelete",
+		ShortName:          "RD",
+		Description:        "To delete via router",
+		Weight:             1,
+		AssessmentSchemaID: uuid.MustParse("550e8400-e29b-41d4-a716-446655440000"), // From test data
 	}
 	err := CreateCategory(suite.suiteCtx, coursePhaseID, createReq)
 	assert.NoError(suite.T(), err)
@@ -170,7 +182,7 @@ func (suite *CategoryRouterTestSuite) TestDeleteCategoryInvalidID() {
 
 func (suite *CategoryRouterTestSuite) TestGetCategoriesWithCompetencies() {
 	coursePhaseID := "4179d58a-d00d-4fa7-94a5-397bc69fab02" // Dev Application phase from test data
-	req, _ := http.NewRequest("GET", "/api/course_phase/"+coursePhaseID+"/category/with-competencies", nil)
+	req, _ := http.NewRequest("GET", "/api/course_phase/"+coursePhaseID+"/category/assessment/with-competencies", nil)
 	resp := httptest.NewRecorder()
 
 	suite.router.ServeHTTP(resp, req)

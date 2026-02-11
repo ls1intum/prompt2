@@ -1,6 +1,8 @@
 package courseDTO
 
 import (
+	"time"
+
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 	db "github.com/ls1intum/prompt2/servers/core/db/sqlc"
@@ -16,8 +18,13 @@ type Course struct {
 	SemesterTag         pgtype.Text   `json:"semesterTag" swaggertype:"string"`
 	Ects                pgtype.Int4   `json:"ects" swaggertype:"integer"`
 	CourseType          string        `json:"courseType"`
+	ShortDescription    pgtype.Text   `json:"shortDescription" swaggertype:"string"`
+	LongDescription     pgtype.Text   `json:"longDescription" swaggertype:"string"`
 	RestrictedData      meta.MetaData `json:"restrictedData"`
 	StudentReadableData meta.MetaData `json:"studentReadableData"`
+	Template            bool          `json:"template"`
+	Archived            bool          `json:"archived"`
+	ArchivedOn          *time.Time    `json:"archivedOn,omitempty"`
 }
 
 func GetCourseDTOFromDBModel(model db.Course) (Course, error) {
@@ -33,7 +40,7 @@ func GetCourseDTOFromDBModel(model db.Course) (Course, error) {
 		return Course{}, err
 	}
 
-	return Course{
+	dto := Course{
 		ID:                  model.ID,
 		Name:                model.Name,
 		StartDate:           model.StartDate,
@@ -41,7 +48,18 @@ func GetCourseDTOFromDBModel(model db.Course) (Course, error) {
 		SemesterTag:         model.SemesterTag,
 		Ects:                model.Ects,
 		CourseType:          string(model.CourseType),
+		ShortDescription:    model.ShortDescription,
+		LongDescription:     model.LongDescription,
 		RestrictedData:      restrictedData,
 		StudentReadableData: studentReadableData,
-	}, nil
+		Template:            model.Template,
+		Archived:            model.Archived,
+	}
+
+	if model.ArchivedOn.Valid {
+		t := model.ArchivedOn.Time
+		dto.ArchivedOn = &t
+	}
+
+	return dto, nil
 }

@@ -6,11 +6,16 @@ import (
 	"os"
 	"os/exec"
 	"strings"
+	"time"
 
+	"github.com/getsentry/sentry-go"
+	sentrygin "github.com/getsentry/sentry-go/gin"
+	sentrylogrus "github.com/getsentry/sentry-go/logrus"
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5/pgxpool"
 	promptSDK "github.com/ls1intum/prompt-sdk"
 	"github.com/ls1intum/prompt2/servers/team_allocation/allocation"
+	"github.com/ls1intum/prompt2/servers/team_allocation/config"
 	"github.com/ls1intum/prompt2/servers/team_allocation/copy"
 	db "github.com/ls1intum/prompt2/servers/team_allocation/db/sqlc"
 	"github.com/ls1intum/prompt2/servers/team_allocation/skills"
@@ -33,6 +38,18 @@ func getDatabaseURL() string {
 	return fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=%s&TimeZone=%s", dbUser, dbPassword, dbHost, dbPort, dbName, sslMode, timeZone)
 }
 
+// @title           PROMPT Team Allocation API
+// @version         1.0
+// @description     This is the team allocation server of PROMPT.
+// @host            localhost:8083
+// @BasePath        /team-allocation/api
+// @externalDocs.description  PROMPT Documentation
+// @externalDocs.url          https://ls1intum.github.io/prompt2/
+// @securityDefinitions.apikey ApiKeyAuth
+// @in header
+// @name Authorization
+// @description Bearer token authentication. Use format: Bearer {token}
+
 func runMigrations(databaseURL string) {
 	cmd := exec.Command("migrate", "-path", "./db/migration", "-database", databaseURL, "up")
 	cmd.Stdout = os.Stdout
@@ -40,6 +57,58 @@ func runMigrations(databaseURL string) {
 	if err := cmd.Run(); err != nil {
 		log.Fatalf("Failed to run migrations: %v", err)
 	}
+}
+
+func initSentry() {
+	sentryDsn := promptSDK.GetEnv("SENTRY_DSN_TEAM_ALLOCATION", "")
+	if sentryDsn == "" {
+		log.Info("Sentry DSN not configured, skipping initialization")
+		return
+	}
+
+	transport := sentry.NewHTTPTransport()
+	transport.Timeout = 2 * time.Second
+
+	if err := sentry.Init(sentry.ClientOptions{
+		Dsn:              sentryDsn,
+		Environment:      promptSDK.GetEnv("ENVIRONMENT", "development"),
+		Debug:            false,
+		Transport:        transport,
+		EnableLogs:       true,
+		AttachStacktrace: true,
+		SendDefaultPII:   true,
+		EnableTracing:    true,
+		TracesSampleRate: 1.0,
+	}); err != nil {
+		log.Errorf("Sentry initialization failed: %v", err)
+		return
+	}
+
+	client := sentry.CurrentHub().Client()
+	if client == nil {
+		log.Error("Sentry client is nil")
+		return
+	}
+
+	logHook := sentrylogrus.NewLogHookFromClient(
+		[]log.Level{log.InfoLevel, log.WarnLevel},
+		client,
+	)
+
+	eventHook := sentrylogrus.NewEventHookFromClient(
+		[]log.Level{log.ErrorLevel, log.FatalLevel, log.PanicLevel},
+		client,
+	)
+
+	log.AddHook(logHook)
+	log.AddHook(eventHook)
+
+	log.RegisterExitHandler(func() {
+		eventHook.Flush(5 * time.Second)
+		logHook.Flush(5 * time.Second)
+	})
+
+	log.Info("Sentry initialized successfully")
 }
 
 func initKeycloak(queries db.Queries) {
@@ -59,14 +128,14 @@ func initKeycloak(queries db.Queries) {
 }
 
 func main() {
-	// establish database connection
+	initSentry()
+	defer sentry.Flush(2 * time.Second)
+
 	databaseURL := getDatabaseURL()
 	log.Debug("Connecting to database at:", databaseURL)
 
-	// run migrations
 	runMigrations(databaseURL)
 
-	// establish db connection
 	conn, err := pgxpool.New(context.Background(), databaseURL)
 	if err != nil {
 		log.Fatalf("Unable to create connection pool: %v\n", err)
@@ -79,15 +148,13 @@ func main() {
 	clientHost := promptSDK.GetEnv("CORE_HOST", "http://localhost:3000")
 
 	router := gin.Default()
+	router.Use(sentrygin.New(sentrygin.Options{}))
 	router.Use(promptSDK.CORSMiddleware(clientHost))
 
 	api := router.Group("team-allocation/api/course_phase/:coursePhaseID")
 	initKeycloak(*query)
 
-	api.GET("/hello", func(c *gin.Context) {
-		c.JSON(200, gin.H{
-			"message": "Hello from team allocation service"})
-	})
+	// No health endpoint; health checks are handled externally.
 
 	skills.InitSkillModule(api, *query, conn)
 	teams.InitTeamModule(api, *query, conn)
@@ -99,7 +166,10 @@ func main() {
 	copyApi := router.Group("team-allocation/api")
 	copy.InitCopyModule(copyApi, *query, conn)
 
+	config.InitConfigModule(api, *query, conn)
+
 	serverAddress := promptSDK.GetEnv("SERVER_ADDRESS", "localhost:8083")
+	log.Info("Team Allocation Server started")
 	err = router.Run(serverAddress)
 	if err != nil {
 		log.Fatalf("Failed to start server: %v", err)

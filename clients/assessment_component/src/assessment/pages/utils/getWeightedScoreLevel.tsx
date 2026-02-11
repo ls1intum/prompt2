@@ -1,6 +1,6 @@
 import { CompetencyScore } from '../../interfaces/competencyScore'
 import { CategoryWithCompetencies } from '../../interfaces/category'
-import { mapScoreLevelToNumber } from '../../interfaces/scoreLevel'
+import { mapScoreLevelToNumber } from '@tumaet/prompt-shared-state'
 
 export function getWeightedScoreLevel(
   competencyScores: CompetencyScore[],

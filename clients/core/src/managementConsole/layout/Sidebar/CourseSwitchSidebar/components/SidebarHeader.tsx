@@ -7,6 +7,7 @@ import {
   useSidebar,
 } from '@tumaet/prompt-ui-components'
 import { useLocation, useNavigate } from 'react-router-dom'
+import { House } from 'lucide-react'
 
 const SidebarHeaderComponent = () => {
   const { setOpen } = useSidebar()
@@ -14,7 +15,7 @@ const SidebarHeaderComponent = () => {
   const location = useLocation()
   const navigate = useNavigate()
 
-  const isActive = location.pathname.startsWith('/management/general')
+  const isActive = location.pathname.startsWith('/management/courses')
 
   return (
     <SidebarHeader>
@@ -30,7 +31,7 @@ const SidebarHeaderComponent = () => {
             }}
             onClick={() => {
               setOpen(true)
-              navigate('/management/general')
+              navigate('/management/courses')
             }}
             isActive={isActive}
           >
@@ -47,7 +48,7 @@ const SidebarHeaderComponent = () => {
                   ${isActive ? 'size-12' : 'size-10'}
                   `}
               >
-                <img src='/prompt_logo.svg' alt='Home' className='size-10' />
+                <House className='text-black dark:text-white' />
               </div>
             </div>
           </SidebarMenuButton>

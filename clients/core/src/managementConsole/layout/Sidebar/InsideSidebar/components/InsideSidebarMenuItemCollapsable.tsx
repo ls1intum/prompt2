@@ -15,7 +15,7 @@ import { useLocation, useNavigate } from 'react-router-dom'
 
 interface CollapsableSidebarMenuItemProps {
   goToPath: string
-  icon: JSX.Element
+  icon
   title: string
   subitems?: {
     goToPath: string
@@ -23,9 +23,7 @@ interface CollapsableSidebarMenuItemProps {
   }[]
 }
 
-export const InsideSidebarMenuItemCollapsable = (
-  props: CollapsableSidebarMenuItemProps,
-): JSX.Element => {
+export const InsideSidebarMenuItemCollapsable = (props: CollapsableSidebarMenuItemProps) => {
   const navigate = useNavigate()
   const [isOpen, setIsOpen] = useState(false)
   const pathname = useLocation().pathname
@@ -58,15 +56,16 @@ export const InsideSidebarMenuItemCollapsable = (
           </CollapsibleTrigger>
         </div>
         <CollapsibleContent>
-          <SidebarMenuSub>
+          <SidebarMenuSub className='mr-0 pr-0'>
             {props.subitems?.map((subitem) => (
               <SidebarMenuSubItem key={subitem.title}>
                 <SidebarMenuSubButton
                   asChild
                   onClick={() => navigate(subitem.goToPath)}
                   isActive={subitem.goToPath === pathname}
+                  className='cursor-pointer'
                 >
-                  <span>{subitem.title}</span>
+                  <span className='truncate block'>{subitem.title}</span>
                 </SidebarMenuSubButton>
               </SidebarMenuSubItem>
             ))}

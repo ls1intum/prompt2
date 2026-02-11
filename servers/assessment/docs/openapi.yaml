@@ -1,7 +1,9 @@
 openapi: 3.0.3
 info:
   title: Prompt Assessment Service
-  description: API for managing categories, competencies, and assessments for course phases.
+  description: |
+    API for managing assessment schemas, categories, competencies, assessments,
+    evaluation items and course phase configuration for a course phase.
   version: 1.0.0
 
 servers:
@@ -9,20 +11,174 @@ servers:
     variables:
       assessmentServerURL:
         description: URL of the assessment server
-        default: localhost:8084
+        default: localhost:8085
       coursePhaseID:
         description: ID of the course phase
         default: example-course-phase-id
 
 tags:
+  - name: Health
+    description: Basic health endpoint
   - name: Category
-    description: Categories to group competencies
+    description: Categories used to group competencies
   - name: Competency
     description: Competency definitions and CRUD
   - name: Assessment
-    description: Tutor or peer evaluations for competencies
+    description: Tutor, peer or self assessments for competencies
+  - name: AssessmentCompletion
+    description: Completion state and grading for assessments
+  - name: ActionItem
+    description: Follow-up action items for assessments
+  - name: ScoreLevel
+    description: Aggregated score levels per student
+  - name: AssessmentSchema
+    description: Schemas describing category/competency structures
+  - name: CoursePhaseConfig
+    description: Configuration for an assessment course phase
+  - name: Evaluation
+    description: Peer/self/tutor evaluation records
+  - name: EvaluationCompletion
+    description: Completion tracking for evaluations
+  - name: FeedbackItem
+    description: Free-form feedback items attached to evaluations
 
 paths:
+  /hello:
+    get:
+      summary: Health check
+      tags: [Health]
+      responses:
+        "200":
+          description: Service is reachable
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+
+  ############################
+  # Assessment Schemas
+  ############################
+  /assessment-schema:
+    get:
+      summary: List all assessment schemas
+      tags: [AssessmentSchema]
+      responses:
+        "200":
+          description: Assessment schemas
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AssessmentSchema"
+    post:
+      summary: Create an assessment schema
+      tags: [AssessmentSchema]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateAssessmentSchemaRequest"
+      responses:
+        "201":
+          description: Assessment schema created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AssessmentSchema"
+  /assessment-schema/{schemaID}:
+    get:
+      summary: Get an assessment schema
+      tags: [AssessmentSchema]
+      parameters:
+        - $ref: "#/components/parameters/SchemaID"
+      responses:
+        "200":
+          description: Assessment schema
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AssessmentSchema"
+    put:
+      summary: Update an assessment schema
+      tags: [AssessmentSchema]
+      parameters:
+        - $ref: "#/components/parameters/SchemaID"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateAssessmentSchemaRequest"
+      responses:
+        "200":
+          description: Assessment schema updated
+    delete:
+      summary: Delete an assessment schema
+      tags: [AssessmentSchema]
+      parameters:
+        - $ref: "#/components/parameters/SchemaID"
+      responses:
+        "200":
+          description: Assessment schema deleted
+
+  ############################
+  # Course phase configuration
+  ############################
+  /config:
+    get:
+      summary: Get course phase configuration
+      tags: [CoursePhaseConfig]
+      responses:
+        "200":
+          description: Course phase configuration
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CoursePhaseConfig"
+    put:
+      summary: Create or update course phase configuration
+      tags: [CoursePhaseConfig]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateOrUpdateCoursePhaseConfigRequest"
+      responses:
+        "200":
+          description: Course phase configuration saved
+  /config/participations:
+    get:
+      summary: List participations enriched with students
+      tags: [CoursePhaseConfig]
+      responses:
+        "200":
+          description: Participations for a course phase
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AssessmentParticipationWithStudent"
+  /config/teams:
+    get:
+      summary: List teams for a course phase
+      tags: [CoursePhaseConfig]
+      responses:
+        "200":
+          description: Teams defined for the course phase
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Team"
+
   ############################
   # Category Endpoints
   ############################
@@ -51,35 +207,12 @@ paths:
       responses:
         "201":
           description: Category created
-
   /category/{categoryID}:
-    get:
-      summary: Get a category by ID
-      tags: [Category]
-      parameters:
-        - name: categoryID
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-      responses:
-        "200":
-          description: The requested category
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Category"
     put:
       summary: Update a category
       tags: [Category]
       parameters:
-        - name: categoryID
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
+        - $ref: "#/components/parameters/CategoryID"
       requestBody:
         required: true
         content:
@@ -93,23 +226,56 @@ paths:
       summary: Delete a category
       tags: [Category]
       parameters:
-        - name: categoryID
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
+        - $ref: "#/components/parameters/CategoryID"
       responses:
         "200":
           description: Category deleted
-
-  /category/with-competencies:
+  /category/assessment/with-competencies:
     get:
-      summary: List categories joined with their competencies
+      summary: List assessment categories with competencies for the configured schema
       tags: [Category]
       responses:
         "200":
-          description: Returns categories, each with a list of competencies
+          description: Categories including mapped competencies
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/CategoryWithCompetencies"
+  /category/self/with-competencies:
+    get:
+      summary: List self-evaluation categories with competencies
+      tags: [Category]
+      responses:
+        "200":
+          description: Categories for self evaluations
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/CategoryWithCompetencies"
+  /category/peer/with-competencies:
+    get:
+      summary: List peer-evaluation categories with competencies
+      tags: [Category]
+      responses:
+        "200":
+          description: Categories for peer evaluations
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/CategoryWithCompetencies"
+  /category/tutor/with-competencies:
+    get:
+      summary: List tutor-evaluation categories with competencies
+      tags: [Category]
+      responses:
+        "200":
+          description: Categories for tutor evaluations
           content:
             application/json:
               schema:
@@ -145,18 +311,12 @@ paths:
       responses:
         "201":
           description: Competency created
-
   /competency/{competencyID}:
     get:
       summary: Get a competency by ID
       tags: [Competency]
       parameters:
-        - name: competencyID
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
+        - $ref: "#/components/parameters/CompetencyID"
       responses:
         "200":
           description: The requested competency
@@ -168,12 +328,7 @@ paths:
       summary: Update a competency
       tags: [Competency]
       parameters:
-        - name: competencyID
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
+        - $ref: "#/components/parameters/CompetencyID"
       requestBody:
         required: true
         content:
@@ -187,27 +342,16 @@ paths:
       summary: Delete a competency
       tags: [Competency]
       parameters:
-        - name: competencyID
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
+        - $ref: "#/components/parameters/CompetencyID"
       responses:
         "200":
           description: Competency deleted
-
   /competency/category/{categoryID}:
     get:
       summary: Get all competencies for a particular category
       tags: [Competency]
       parameters:
-        - name: categoryID
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
+        - $ref: "#/components/parameters/CategoryID"
       responses:
         "200":
           description: List of competencies
@@ -223,18 +367,11 @@ paths:
   ############################
   /student-assessment:
     get:
-      summary: Get all assessments in a course phase
+      summary: List all assessments in the course phase
       tags: [Assessment]
-      parameters:
-        - name: coursePhaseID
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
       responses:
         "200":
-          description: List of assessments in the specified course phase
+          description: List of assessments
           content:
             application/json:
               schema:
@@ -242,21 +379,7 @@ paths:
                 items:
                   $ref: "#/components/schemas/Assessment"
     post:
-      summary: Create an assessment
-      description: Creates a new assessment.
-      tags: [Assessment]
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/CreateOrUpdateAssessmentRequest"
-      responses:
-        "201":
-          description: Assessment created
-    put:
-      summary: Update an assessment
-      description: Creates a new assessment if none exists for the specified combination; otherwise updates the existing one.
+      summary: Create or update an assessment
       tags: [Assessment]
       requestBody:
         required: true
@@ -267,136 +390,71 @@ paths:
       responses:
         "200":
           description: Assessment created or updated
-
-  /student-assessment/{courseParticipationID}:
-    get:
-      summary: Get the student assessment fo an object in a course phase
-      tags: [Assessment]
-      parameters:
-        - name: courseParticipationID
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-      responses:
-        "200":
-          description: The requested assessment
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/StudentAssessment"
-
-  /student-assessment/{assessmentID}:
-    delete:
-      summary: Delete an assessment
-      tags: [Assessment]
-      parameters:
-        - name: assessmentID
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-      responses:
-        "200":
-          description: Assessment deleted
-
-  /student-assessment/course-participation/{courseParticipationID}:
-    get:
-      summary: Get all assessments for a student in a particular course phase
-      tags: [Assessment]
-      parameters:
-        - name: courseParticipationID
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-      responses:
-        "200":
-          description: List of assessments for the specified student in the specified course phase
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/Assessment"
-
-  /student-assessment/competency/{competencyID}:
-    get:
-      summary: Get all assessments for a competency
-      tags: [Assessment]
-      parameters:
-        - name: competencyID
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-      responses:
-        "200":
-          description: List of assessments for the specified competency
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/Assessment"
-
-  /student-assessment/category/{categoryID}:
-    get:
-      summary: Get all assessments for a category
-      tags: [Assessment]
-      parameters:
-        - name: categoryID
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-      responses:
-        "200":
-          description: List of assessments for the specified category
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/Assessment"
-
-  /student-assessment/remaining/{courseParticipationID}:
-    get:
-      summary: Get count of remaining assessments for a student
-      tags: [Assessment]
-      parameters:
-        - name: coursePhaseID
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-        - name: courseParticipationID
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-      responses:
-        "200":
-          description: Count of remaining assessments
           content:
             application/json:
               schema:
                 type: object
                 properties:
-                  remainingAssessments:
-                    $ref: "#/components/schemas/RemainingAssessments"
-
-  /student-assessment/completed:
-    post:
-      summary: Mark an Assessment of a student as completed
+                  message:
+                    type: string
+  /student-assessment/{id}:
+    get:
+      summary: Get assessment details for a student
+      description: Pass the student's courseParticipationID as the path value.
       tags: [Assessment]
+      parameters:
+        - $ref: "#/components/parameters/GenericUUID"
+      responses:
+        "200":
+          description: Assessments, completions and scores for the student
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StudentAssessment"
+    delete:
+      summary: Delete an assessment
+      description: Pass the assessmentID as the path value.
+      tags: [Assessment]
+      parameters:
+        - $ref: "#/components/parameters/GenericUUID"
+      responses:
+        "200":
+          description: Assessment deleted
+  /student-assessment/course-participation/{courseParticipationID}:
+    get:
+      summary: Get all assessments for a student in the course phase
+      tags: [Assessment]
+      parameters:
+        - $ref: "#/components/parameters/CourseParticipationID"
+      responses:
+        "200":
+          description: Assessments for the specified student
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Assessment"
+
+  ############################
+  # Assessment completions & grading
+  ############################
+  /student-assessment/completed:
+    get:
+      summary: List assessment completions in the course phase
+      tags: [AssessmentCompletion]
+      responses:
+        "200":
+          description: Assessment completions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AssessmentCompletion"
+    post:
+      summary: Create or update assessment completion
+      tags: [AssessmentCompletion]
       requestBody:
         required: true
         content:
@@ -404,79 +462,576 @@ paths:
             schema:
               $ref: "#/components/schemas/AssessmentCompletion"
       responses:
-        "201":
-          description: Assessment marked as completed
-
-  /student-assessment/completed/course-participation/{courseParticipationID}:
-    get:
-      summary: Get AssessmentCompletion for a student, if it exists
-      tags: [Assessment]
-      parameters:
-        - name: courseParticipationID
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
+        "200":
+          description: Completion saved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+    put:
+      summary: Update an assessment completion
+      tags: [AssessmentCompletion]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AssessmentCompletion"
       responses:
         "200":
-          description: AssessmentCompletion for the specified student
+          description: Completion updated
+  /student-assessment/completed/mark-complete:
+    post:
+      summary: Mark assessments as completed for a student
+      tags: [AssessmentCompletion]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AssessmentCompletion"
+      responses:
+        "200":
+          description: Assessments marked as completed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+  /student-assessment/completed/course-participation/{courseParticipationID}:
+    get:
+      summary: Get assessment completion for a student
+      tags: [AssessmentCompletion]
+      parameters:
+        - $ref: "#/components/parameters/CourseParticipationID"
+      responses:
+        "200":
+          description: Assessment completion details
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/AssessmentCompletion"
-    delete:
-      summary: Unmark an AssessmentCompletion of a student
-      tags: [Assessment]
+    put:
+      summary: Unmark an assessment completion
+      tags: [AssessmentCompletion]
       parameters:
-        - name: courseParticipationID
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
+        - $ref: "#/components/parameters/CourseParticipationID"
       responses:
         "200":
-          description: AssessmentCompletion deleted
-
-  /student-assessment/score-level:
+          description: Completion unmarked
+    delete:
+      summary: Delete an assessment completion
+      tags: [AssessmentCompletion]
+      parameters:
+        - $ref: "#/components/parameters/CourseParticipationID"
+      responses:
+        "200":
+          description: Completion deleted
+  /student-assessment/completed/grade:
     get:
-      summary: Get all score levels in a phase
-      tags: [Assessment]
+      summary: List grade suggestions for the course phase
+      tags: [AssessmentCompletion]
       responses:
         "200":
-          description: List of score levels in the specified course phase
+          description: Grade suggestions per course participation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/GradeWithParticipation"
+  /student-assessment/completed/grade/course-participation/{courseParticipationID}:
+    get:
+      summary: Get grade suggestion for a student
+      tags: [AssessmentCompletion]
+      parameters:
+        - $ref: "#/components/parameters/CourseParticipationID"
+      responses:
+        "200":
+          description: Grade suggestion (may be empty when not available)
+          content:
+            application/json:
+              schema:
+                type: number
+  /student-assessment/completed/my-grade-suggestion:
+    get:
+      summary: Get the calling student's grade suggestion when visible
+      tags: [AssessmentCompletion]
+      responses:
+        "200":
+          description: Grade suggestion returned when available after deadline
+          content:
+            application/json:
+              schema:
+                type: number
+        "204":
+          description: No grade suggestion available yet
+
+  ############################
+  # Action items
+  ############################
+  /student-assessment/action-item/action:
+    get:
+      summary: List all action items for course phase communication
+      tags: [ActionItem]
+      responses:
+        "200":
+          description: Action items for the course phase
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ActionItem"
+  /student-assessment/action-item/action/course-participation/{courseParticipationID}:
+    get:
+      summary: List action items for a student for communication
+      tags: [ActionItem]
+      parameters:
+        - $ref: "#/components/parameters/CourseParticipationID"
+      responses:
+        "200":
+          description: Action items for the student
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ActionItem"
+  /student-assessment/action-item:
+    post:
+      summary: Create an action item
+      tags: [ActionItem]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateActionItemRequest"
+      responses:
+        "201":
+          description: Action item created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+  /student-assessment/action-item/{id}:
+    put:
+      summary: Update an action item
+      tags: [ActionItem]
+      parameters:
+        - $ref: "#/components/parameters/GenericUUID"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateActionItemRequest"
+      responses:
+        "200":
+          description: Action item updated
+    delete:
+      summary: Delete an action item
+      tags: [ActionItem]
+      parameters:
+        - $ref: "#/components/parameters/GenericUUID"
+      responses:
+        "200":
+          description: Action item deleted
+  /student-assessment/action-item/course-participation/{courseParticipationID}:
+    get:
+      summary: List action items for a student
+      tags: [ActionItem]
+      parameters:
+        - $ref: "#/components/parameters/CourseParticipationID"
+      responses:
+        "200":
+          description: Action items for the student
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ActionItem"
+  /student-assessment/action-item/my-action-items:
+    get:
+      summary: List action items for the current student
+      tags: [ActionItem]
+      responses:
+        "200":
+          description: Action items visible to the student
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ActionItem"
+        "204":
+          description: No action items visible
+
+  ############################
+  # Score levels
+  ############################
+  /student-assessment/scoreLevel:
+    get:
+      summary: Get all score levels in the course phase
+      tags: [ScoreLevel]
+      responses:
+        "200":
+          description: Score levels per student
           content:
             application/json:
               schema:
                 type: array
                 items:
                   $ref: "#/components/schemas/ScoreLevelWithParticipation"
-
-  /student-assessment/score-level/{courseParticipationID}:
+  /student-assessment/scoreLevel/{courseParticipationID}:
     get:
       summary: Get the score level for a student
-      tags: [Assessment]
+      tags: [ScoreLevel]
       parameters:
-        - name: courseParticipationID
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
+        - $ref: "#/components/parameters/CourseParticipationID"
       responses:
         "200":
-          description: The score level for the specified student
+          description: Score level for the specified student
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ScoreLevelWithParticipation"
 
+  ############################
+  # Evaluations
+  ############################
+  /evaluation:
+    get:
+      summary: List evaluations for the course phase
+      tags: [Evaluation]
+      responses:
+        "200":
+          description: Evaluations
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Evaluation"
+    post:
+      summary: Create or update an evaluation
+      tags: [Evaluation]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateOrUpdateEvaluationRequest"
+      responses:
+        "201":
+          description: Evaluation created or updated
+  /evaluation/{evaluationID}:
+    delete:
+      summary: Delete an evaluation
+      tags: [Evaluation]
+      parameters:
+        - $ref: "#/components/parameters/EvaluationID"
+      responses:
+        "200":
+          description: Evaluation deleted
+  /evaluation/tutor/{courseParticipationID}:
+    get:
+      summary: List evaluations for a tutor in the course phase
+      tags: [Evaluation]
+      parameters:
+        - $ref: "#/components/parameters/CourseParticipationID"
+      responses:
+        "200":
+          description: Evaluations for the tutor
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Evaluation"
+  /evaluation/my-evaluations:
+    get:
+      summary: List evaluations authored by the current student
+      tags: [Evaluation]
+      responses:
+        "200":
+          description: Evaluations authored by caller
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Evaluation"
+
+  ############################
+  # Evaluation completions
+  ############################
+  /evaluation/completed:
+    get:
+      summary: List evaluation completions for the course phase
+      tags: [EvaluationCompletion]
+      responses:
+        "200":
+          description: Evaluation completions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/EvaluationCompletion"
+  /evaluation/completed/my-completion:
+    post:
+      summary: Create or update the caller's evaluation completion
+      tags: [EvaluationCompletion]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EvaluationCompletion"
+      responses:
+        "200":
+          description: Completion saved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+    put:
+      summary: Update the caller's evaluation completion
+      tags: [EvaluationCompletion]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EvaluationCompletion"
+      responses:
+        "200":
+          description: Completion updated
+  /evaluation/completed/my-completion/mark-complete:
+    post:
+      summary: Mark the caller's evaluation as completed
+      tags: [EvaluationCompletion]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EvaluationCompletion"
+      responses:
+        "200":
+          description: Evaluation marked as completed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+  /evaluation/completed/my-completion/unmark:
+    put:
+      summary: Unmark the caller's evaluation completion
+      tags: [EvaluationCompletion]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UnmarkEvaluationRequest"
+      responses:
+        "200":
+          description: Completion unmarked
+  /evaluation/completed/my-completions:
+    get:
+      summary: List the caller's evaluation completions
+      tags: [EvaluationCompletion]
+      responses:
+        "200":
+          description: Evaluation completions for the caller
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/EvaluationCompletion"
+
+  ############################
+  # Feedback items
+  ############################
+  /evaluation/feedback-items:
+    get:
+      summary: List feedback items for the course phase
+      tags: [FeedbackItem]
+      responses:
+        "200":
+          description: Feedback items
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/FeedbackItem"
+    post:
+      summary: Create a feedback item
+      tags: [FeedbackItem]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateFeedbackItemRequest"
+      responses:
+        "201":
+          description: Feedback item created
+  /evaluation/feedback-items/{feedbackItemID}:
+    put:
+      summary: Update a feedback item
+      tags: [FeedbackItem]
+      parameters:
+        - $ref: "#/components/parameters/FeedbackItemID"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateFeedbackItemRequest"
+      responses:
+        "200":
+          description: Feedback item updated
+    delete:
+      summary: Delete a feedback item
+      tags: [FeedbackItem]
+      parameters:
+        - $ref: "#/components/parameters/FeedbackItemID"
+      responses:
+        "200":
+          description: Feedback item deleted
+  /evaluation/feedback-items/course-participation/{courseParticipationID}:
+    get:
+      summary: List feedback items for a participant
+      tags: [FeedbackItem]
+      parameters:
+        - $ref: "#/components/parameters/CourseParticipationID"
+      responses:
+        "200":
+          description: Feedback items for the student
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/FeedbackItem"
+  /evaluation/feedback-items/tutor/{courseParticipationID}:
+    get:
+      summary: List feedback items authored for a tutor
+      tags: [FeedbackItem]
+      parameters:
+        - $ref: "#/components/parameters/CourseParticipationID"
+      responses:
+        "200":
+          description: Feedback items for the tutor
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/FeedbackItem"
+  /evaluation/feedback-items/my-feedback:
+    get:
+      summary: List feedback items created by the current student
+      tags: [FeedbackItem]
+      responses:
+        "200":
+          description: Feedback items authored by the caller
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/FeedbackItem"
+
 components:
+  parameters:
+    CategoryID:
+      name: categoryID
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    CompetencyID:
+      name: competencyID
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    CourseParticipationID:
+      name: courseParticipationID
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    SchemaID:
+      name: schemaID
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    GenericUUID:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    EvaluationID:
+      name: evaluationID
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    FeedbackItemID:
+      name: feedbackItemID
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+
   schemas:
-    ################################
+    ############################
+    # Shared enums
+    ############################
+    AssessmentType:
+      type: string
+      enum: [self, peer, tutor, assessment]
+    ScoreLevel:
+      type: string
+      enum: [veryBad, bad, ok, good, veryGood]
+    FeedbackType:
+      type: string
+      enum: [positive, negative]
+
+    ############################
     # Category Schemas
-    ################################
+    ############################
     Category:
       type: object
       properties:
@@ -485,32 +1040,45 @@ components:
           format: uuid
         name:
           type: string
+        shortName:
+          type: string
         description:
           type: string
         weight:
           type: integer
-
+        assessmentSchemaID:
+          type: string
+          format: uuid
     CreateCategoryRequest:
       type: object
-      required: [name]
+      required: [name, assessmentSchemaID]
       properties:
         name:
+          type: string
+        shortName:
           type: string
         description:
           type: string
         weight:
           type: integer
-
+        assessmentSchemaID:
+          type: string
+          format: uuid
     UpdateCategoryRequest:
       type: object
+      required: [assessmentSchemaID]
       properties:
         name:
+          type: string
+        shortName:
           type: string
         description:
           type: string
         weight:
           type: integer
-
+        assessmentSchemaID:
+          type: string
+          format: uuid
     CategoryWithCompetencies:
       type: object
       properties:
@@ -519,6 +1087,8 @@ components:
           format: uuid
         name:
           type: string
+        shortName:
+          type: string
         description:
           type: string
         weight:
@@ -526,20 +1096,11 @@ components:
         competencies:
           type: array
           items:
-            $ref: "#/components/schemas/Competency"
+            $ref: "#/components/schemas/CompetencyWithMappedCompetencies"
 
-    CategoryWithRemainingAssessments:
-      type: object
-      properties:
-        categoryID:
-          type: string
-          format: uuid
-        remainingAssessments:
-          type: integer
-
-    ################################
+    ############################
     # Competency Schemas
-    ################################
+    ############################
     Competency:
       type: object
       properties:
@@ -551,69 +1112,94 @@ components:
           format: uuid
         name:
           type: string
+        shortName:
+          type: string
         description:
           type: string
-        novice:
+        descriptionVeryBad:
           type: string
-        intermediate:
+        descriptionBad:
           type: string
-        advanced:
+        descriptionOk:
           type: string
-        expert:
+        descriptionGood:
+          type: string
+        descriptionVeryGood:
           type: string
         weight:
           type: integer
-
+    CompetencyWithMappedCompetencies:
+      allOf:
+        - $ref: "#/components/schemas/Competency"
+        - type: object
+          properties:
+            mappedFromCompetencies:
+              type: array
+              items:
+                type: string
     CreateCompetencyRequest:
       type: object
+      required:
+        [
+          categoryID,
+          name,
+          descriptionVeryBad,
+          descriptionBad,
+          descriptionOk,
+          descriptionGood,
+          descriptionVeryGood,
+        ]
       properties:
         categoryID:
           type: string
           format: uuid
         name:
           type: string
+        shortName:
+          type: string
         description:
           type: string
-        novice:
+        descriptionVeryBad:
           type: string
-        intermediate:
+        descriptionBad:
           type: string
-        advanced:
+        descriptionOk:
           type: string
-        expert:
+        descriptionGood:
+          type: string
+        descriptionVeryGood:
           type: string
         weight:
           type: integer
-
     UpdateCompetencyRequest:
       type: object
+      required: [categoryID]
       properties:
         name:
           type: string
+        shortName:
+          type: string
+        categoryID:
+          type: string
+          format: uuid
         description:
           type: string
-        novice:
+        descriptionVeryBad:
           type: string
-        intermediate:
+        descriptionBad:
           type: string
-        advanced:
+        descriptionOk:
           type: string
-        expert:
+        descriptionGood:
+          type: string
+        descriptionVeryGood:
           type: string
         weight:
           type: integer
 
-    ################################
+    ############################
     # Assessment Schemas
-    ################################
-    ScoreLevel:
-      type: string
-      enum:
-        - novice
-        - intermediate
-        - advanced
-        - expert
-
+    ############################
     Assessment:
       type: object
       properties:
@@ -629,17 +1215,21 @@ components:
         competencyID:
           type: string
           format: uuid
-        score:
+        scoreLevel:
           $ref: "#/components/schemas/ScoreLevel"
         comment:
           type: string
+        examples:
+          type: string
         assessedAt:
           type: string
+          format: date-time
         author:
           type: string
-
     CreateOrUpdateAssessmentRequest:
       type: object
+      required:
+        [courseParticipationID, coursePhaseID, competencyID, scoreLevel, author]
       properties:
         courseParticipationID:
           type: string
@@ -650,37 +1240,25 @@ components:
         competencyID:
           type: string
           format: uuid
-        score:
-          type: string
-          enum:
-            - novice
-            - intermediate
-            - advanced
-            - expert
+        scoreLevel:
+          $ref: "#/components/schemas/ScoreLevel"
         comment:
+          type: string
+        examples:
           type: string
         assessedAt:
           type: string
+          format: date-time
+          nullable: true
         author:
           type: string
-
-    RemainingAssessments:
-      type: object
-      properties:
-        remainingAssessments:
-          type: integer
-        categories:
-          type: array
-          items:
-            $ref: "#/components/schemas/CategoryWithRemainingAssessments"
-
     AssessmentCompletion:
       type: object
       properties:
-        coursePhaseID:
+        courseParticipationID:
           type: string
           format: uuid
-        courseParticipationID:
+        coursePhaseID:
           type: string
           format: uuid
         completedAt:
@@ -690,7 +1268,94 @@ components:
           type: string
         completed:
           type: boolean
+        comment:
+          type: string
+        gradeSuggestion:
+          type: number
+    GradeWithParticipation:
+      type: object
+      properties:
+        courseParticipationID:
+          type: string
+          format: uuid
+        grade:
+          type: number
+    StudentScore:
+      type: object
+      properties:
+        scoreLevel:
+          $ref: "#/components/schemas/ScoreLevel"
+        scoreNumeric:
+          type: number
+          nullable: true
+    StudentAssessment:
+      type: object
+      properties:
+        courseParticipationID:
+          type: string
+          format: uuid
+        assessments:
+          type: array
+          items:
+            $ref: "#/components/schemas/Assessment"
+        assessmentCompletion:
+          $ref: "#/components/schemas/AssessmentCompletion"
+        studentScore:
+          $ref: "#/components/schemas/StudentScore"
+        evaluations:
+          type: array
+          items:
+            $ref: "#/components/schemas/Evaluation"
 
+    ############################
+    # Action item Schemas
+    ############################
+    ActionItem:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        coursePhaseID:
+          type: string
+          format: uuid
+        courseParticipationID:
+          type: string
+          format: uuid
+        action:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        author:
+          type: string
+    CreateActionItemRequest:
+      type: object
+      required: [coursePhaseID, courseParticipationID, action, author]
+      properties:
+        coursePhaseID:
+          type: string
+          format: uuid
+        courseParticipationID:
+          type: string
+          format: uuid
+        action:
+          type: string
+        author:
+          type: string
+    UpdateActionItemRequest:
+      allOf:
+        - $ref: "#/components/schemas/CreateActionItemRequest"
+        - type: object
+          required: [id]
+          properties:
+            id:
+              type: string
+              format: uuid
+
+    ############################
+    # Score level Schemas
+    ############################
     ScoreLevelWithParticipation:
       type: object
       properties:
@@ -699,31 +1364,393 @@ components:
           format: uuid
         scoreLevel:
           $ref: "#/components/schemas/ScoreLevel"
-
-    StudentScore:
-      type: object
-      properties:
-        scoreLevel:
-          $ref: "#/components/schemas/ScoreLevel"
-        score:
+        scoreNumeric:
           type: number
 
-    StudentAssessment:
+    ############################
+    # Assessment schema Schemas
+    ############################
+    AssessmentSchema:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        description:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    CreateAssessmentSchemaRequest:
+      type: object
+      required: [name]
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+    UpdateAssessmentSchemaRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+
+    ############################
+    # Course phase configuration Schemas
+    ############################
+    CoursePhaseConfig:
       type: object
       properties:
         coursePhaseID:
           type: string
           format: uuid
+        assessmentSchemaID:
+          type: string
+          format: uuid
+        start:
+          type: string
+          format: date-time
+        deadline:
+          type: string
+          format: date-time
+        selfEvaluationEnabled:
+          type: boolean
+        selfEvaluationSchema:
+          type: string
+          format: uuid
+        selfEvaluationStart:
+          type: string
+          format: date-time
+        selfEvaluationDeadline:
+          type: string
+          format: date-time
+        peerEvaluationEnabled:
+          type: boolean
+        peerEvaluationSchema:
+          type: string
+          format: uuid
+        peerEvaluationStart:
+          type: string
+          format: date-time
+        peerEvaluationDeadline:
+          type: string
+          format: date-time
+        tutorEvaluationEnabled:
+          type: boolean
+        tutorEvaluationSchema:
+          type: string
+          format: uuid
+        tutorEvaluationStart:
+          type: string
+          format: date-time
+        tutorEvaluationDeadline:
+          type: string
+          format: date-time
+        evaluationResultsVisible:
+          type: boolean
+        gradeSuggestionVisible:
+          type: boolean
+        actionItemsVisible:
+          type: boolean
+        gradingSheetVisible:
+          type: boolean
+    CreateOrUpdateCoursePhaseConfigRequest:
+      type: object
+      required:
+        - assessmentSchemaId
+        - coursePhaseId
+        - start
+        - deadline
+      properties:
+        assessmentSchemaId:
+          type: string
+          format: uuid
+        coursePhaseId:
+          type: string
+          format: uuid
+        start:
+          type: string
+          format: date-time
+        deadline:
+          type: string
+          format: date-time
+        selfEvaluationEnabled:
+          type: boolean
+        selfEvaluationSchema:
+          type: string
+          format: uuid
+        selfEvaluationStart:
+          type: string
+          format: date-time
+        selfEvaluationDeadline:
+          type: string
+          format: date-time
+        peerEvaluationEnabled:
+          type: boolean
+        peerEvaluationSchema:
+          type: string
+          format: uuid
+        peerEvaluationStart:
+          type: string
+          format: date-time
+        peerEvaluationDeadline:
+          type: string
+          format: date-time
+        tutorEvaluationEnabled:
+          type: boolean
+        tutorEvaluationSchema:
+          type: string
+          format: uuid
+        tutorEvaluationStart:
+          type: string
+          format: date-time
+        tutorEvaluationDeadline:
+          type: string
+          format: date-time
+        evaluationResultsVisible:
+          type: boolean
+        gradeSuggestionVisible:
+          type: boolean
+          nullable: true
+        actionItemsVisible:
+          type: boolean
+        gradingSheetVisible:
+          type: boolean
+          nullable: true
+    AssessmentParticipationWithStudent:
+      type: object
+      properties:
+        coursePhaseID:
+          type: string
+          format: uuid
+        passStatus:
+          type: string
         courseParticipationID:
           type: string
           format: uuid
-        assessments:
+        restrictedData:
+          type: object
+          additionalProperties: true
+        studentReadableData:
+          type: object
+          additionalProperties: true
+        prevData:
+          type: object
+          additionalProperties: true
+        student:
+          $ref: "#/components/schemas/Student"
+        teamID:
+          type: string
+          format: uuid
+          nullable: true
+    Team:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        members:
           type: array
           items:
-            $ref: "#/components/schemas/Assessment"
-        remainingAssessments:
-          $ref: "#/components/schemas/RemainingAssessments"
-        assessmentCompletion:
-          $ref: "#/components/schemas/AssessmentCompletion"
-        studentScore:
-          $ref: "#/components/schemas/StudentScore"
+            $ref: "#/components/schemas/Person"
+        tutors:
+          type: array
+          items:
+            $ref: "#/components/schemas/Person"
+    Person:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        firstName:
+          type: string
+        lastName:
+          type: string
+    Student:
+      allOf:
+        - $ref: "#/components/schemas/Person"
+        - type: object
+          properties:
+            email:
+              type: string
+              format: email
+            matriculationNumber:
+              type: string
+            universityLogin:
+              type: string
+            hasUniversityAccount:
+              type: boolean
+            gender:
+              type: string
+            nationality:
+              type: string
+            studyDegree:
+              type: string
+              enum: [bachelor, master]
+            studyProgram:
+              type: string
+            currentSemester:
+              type: integer
+              nullable: true
+
+    ############################
+    # Evaluation Schemas
+    ############################
+    Evaluation:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        courseParticipationID:
+          type: string
+          format: uuid
+        coursePhaseID:
+          type: string
+          format: uuid
+        competencyID:
+          type: string
+          format: uuid
+        scoreLevel:
+          $ref: "#/components/schemas/ScoreLevel"
+        authorCourseParticipationID:
+          type: string
+          format: uuid
+        evaluatedAt:
+          type: string
+          format: date-time
+        type:
+          $ref: "#/components/schemas/AssessmentType"
+    CreateOrUpdateEvaluationRequest:
+      type: object
+      required:
+        [
+          courseParticipationID,
+          competencyID,
+          scoreLevel,
+          authorCourseParticipationID,
+          type,
+        ]
+      properties:
+        courseParticipationID:
+          type: string
+          format: uuid
+        competencyID:
+          type: string
+          format: uuid
+        scoreLevel:
+          $ref: "#/components/schemas/ScoreLevel"
+        authorCourseParticipationID:
+          type: string
+          format: uuid
+        type:
+          $ref: "#/components/schemas/AssessmentType"
+    EvaluationCompletion:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        courseParticipationID:
+          type: string
+          format: uuid
+        coursePhaseID:
+          type: string
+          format: uuid
+        authorCourseParticipationID:
+          type: string
+          format: uuid
+        completedAt:
+          type: string
+          format: date-time
+        completed:
+          type: boolean
+        type:
+          $ref: "#/components/schemas/AssessmentType"
+    UnmarkEvaluationRequest:
+      type: object
+      required:
+        [courseParticipationID, coursePhaseID, authorCourseParticipationID]
+      properties:
+        courseParticipationID:
+          type: string
+          format: uuid
+        coursePhaseID:
+          type: string
+          format: uuid
+        authorCourseParticipationID:
+          type: string
+          format: uuid
+
+    ############################
+    # Feedback item Schemas
+    ############################
+    FeedbackItem:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        feedbackType:
+          $ref: "#/components/schemas/FeedbackType"
+        feedbackText:
+          type: string
+        courseParticipationID:
+          type: string
+          format: uuid
+        coursePhaseID:
+          type: string
+          format: uuid
+        authorCourseParticipationID:
+          type: string
+          format: uuid
+        createdAt:
+          type: string
+          format: date-time
+        type:
+          $ref: "#/components/schemas/AssessmentType"
+    CreateFeedbackItemRequest:
+      type: object
+      required:
+        [
+          feedbackType,
+          courseParticipationID,
+          coursePhaseID,
+          authorCourseParticipationID,
+          type,
+        ]
+      properties:
+        feedbackType:
+          $ref: "#/components/schemas/FeedbackType"
+        feedbackText:
+          type: string
+        courseParticipationID:
+          type: string
+          format: uuid
+        coursePhaseID:
+          type: string
+          format: uuid
+        authorCourseParticipationID:
+          type: string
+          format: uuid
+        type:
+          $ref: "#/components/schemas/AssessmentType"
+    UpdateFeedbackItemRequest:
+      allOf:
+        - $ref: "#/components/schemas/CreateFeedbackItemRequest"
+        - type: object
+          required: [id, feedbackText]
+          properties:
+            id:
+              type: string
+              format: uuid

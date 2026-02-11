@@ -7,24 +7,27 @@ import {
   TooltipTrigger,
 } from '@tumaet/prompt-ui-components'
 
+import { AssessmentType } from '../../interfaces/assessmentType'
 import { Competency } from '../../interfaces/competency'
-import { ScoreLevel } from '../../interfaces/scoreLevel'
+import { ScoreLevel } from '@tumaet/prompt-shared-state'
+
+import { useCoursePhaseConfigStore } from '../../zustand/useCoursePhaseConfigStore'
 
 import { getLevelConfig } from '../utils/getLevelConfig'
 
 interface ScoreLevelSelectorProps {
-  className: string
+  className?: string
   competency: Competency
   selectedScore?: ScoreLevel
   onScoreChange: (value: ScoreLevel) => void
   completed: boolean
-  isEvaluation?: boolean
+  assessmentType?: AssessmentType
   selfEvaluationCompetency?: Competency
   selfEvaluationScoreLevel?: ScoreLevel
-  selfEvaluationStudentAnswers?: (() => JSX.Element)[]
+  selfEvaluationStudentAnswers?: (() => React.ReactNode)[]
   peerEvaluationCompetency?: Competency
   peerEvaluationScoreLevel?: ScoreLevel
-  peerEvaluationStudentAnswers?: (() => JSX.Element)[]
+  peerEvaluationStudentAnswers?: (() => React.ReactNode)[]
 }
 
 export const ScoreLevelSelector = ({
@@ -33,7 +36,7 @@ export const ScoreLevelSelector = ({
   selectedScore,
   onScoreChange,
   completed,
-  isEvaluation = false,
+  assessmentType = AssessmentType.ASSESSMENT,
   selfEvaluationCompetency,
   selfEvaluationScoreLevel,
   selfEvaluationStudentAnswers,
@@ -41,6 +44,8 @@ export const ScoreLevelSelector = ({
   peerEvaluationScoreLevel,
   peerEvaluationStudentAnswers,
 }: ScoreLevelSelectorProps) => {
+  const { coursePhaseConfig } = useCoursePhaseConfigStore()
+
   return (
     <div className={className}>
       {Object.values(ScoreLevel).map((level) => {
@@ -53,57 +58,63 @@ export const ScoreLevelSelector = ({
             key={level}
             className={cn('relative', selectedScore && !isSelected && 'hidden lg:flex')}
           >
-            <div className='absolute -top-6 left-0 w-full'>
-              <div className='flex justify-center items-center text-left gap-2'>
-                {selfEvaluationCompetency &&
-                  selfEvaluationScoreLevel &&
-                  level === selfEvaluationScoreLevel && (
-                    <TooltipProvider key={`self-evaluation-${level}-${competency.id}`}>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <User size={20} className='text-blue-500 dark:text-blue-300' />
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <div className='font-semibold'>Self Evaluation Results</div>
-                          <div className='text-sm text-muted-foreground'>
-                            <span className='font-semibold'>Statement:</span>{' '}
-                            {selfEvaluationCompetency.name}
-                          </div>
-                          {selfEvaluationStudentAnswers &&
-                          selfEvaluationStudentAnswers.length > 0 ? (
-                            <div className='mt-2 space-y-1'>
-                              {selfEvaluationStudentAnswers.map((studentAnswer, index) => (
-                                <div key={index}>{studentAnswer()}</div>
-                              ))}
+            {(coursePhaseConfig?.evaluationResultsVisible || completed) && (
+              <div className='absolute -top-6 left-0 w-full z-10'>
+                <div className='flex justify-center items-center text-left gap-2'>
+                  {selfEvaluationCompetency &&
+                    selfEvaluationScoreLevel &&
+                    level === selfEvaluationScoreLevel && (
+                      <TooltipProvider key={`self-evaluation-${level}-${competency.id}`}>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <User size={20} className='text-blue-500 dark:text-blue-300' />
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <div className='font-semibold'>Self Evaluation Results</div>
+                            <div className='text-sm text-muted-foreground'>
+                              <span className='font-semibold'>Statement:</span>{' '}
+                              {selfEvaluationCompetency.name}
                             </div>
-                          ) : null}
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                  )}
-                {peerEvaluationCompetency &&
-                  peerEvaluationScoreLevel &&
-                  level === peerEvaluationScoreLevel && (
-                    <TooltipProvider key={`peer-evaluation-${level}-${competency.id}`}>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Users size={20} className='text-green-500 dark:text-green-300' />
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <div className='font-semibold'>Peer Evaluation Results</div>
-                          <div className='text-sm text-muted-foreground'>
-                            <span className='font-semibold'>Statement:</span>{' '}
-                            {peerEvaluationCompetency.name}
-                          </div>
-                          {peerEvaluationStudentAnswers && peerEvaluationStudentAnswers.length > 0
-                            ? peerEvaluationStudentAnswers.map((studentAnswer) => studentAnswer())
-                            : undefined}
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                  )}
+                            {selfEvaluationStudentAnswers &&
+                            selfEvaluationStudentAnswers.length > 0 ? (
+                              <div className='mt-2 space-y-1'>
+                                {selfEvaluationStudentAnswers.map((studentAnswer, index) => (
+                                  <div key={index}>{studentAnswer()}</div>
+                                ))}
+                              </div>
+                            ) : null}
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    )}
+                  {peerEvaluationCompetency &&
+                    peerEvaluationScoreLevel &&
+                    level === peerEvaluationScoreLevel && (
+                      <TooltipProvider key={`peer-evaluation-${level}-${competency.id}`}>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Users size={20} className='text-green-500 dark:text-green-300' />
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            {assessmentType !== AssessmentType.TUTOR ? (
+                              <div>
+                                <div className='font-semibold'>Peer Evaluation Results</div>
+                                <div className='text-sm text-muted-foreground'>
+                                  <span className='font-semibold'>Statement:</span>{' '}
+                                  {peerEvaluationCompetency.name}
+                                </div>
+                              </div>
+                            ) : null}
+                            {peerEvaluationStudentAnswers && peerEvaluationStudentAnswers.length > 0
+                              ? peerEvaluationStudentAnswers.map((studentAnswer) => studentAnswer())
+                              : undefined}
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    )}
+                </div>
               </div>
-            </div>
+            )}
 
             <button
               type='button'
@@ -126,9 +137,7 @@ export const ScoreLevelSelector = ({
               )}
             >
               <div className='flex justify-between mb-1'>
-                <span className='font-semibold'>
-                  {isEvaluation ? config.evaluationTitle : config.title}
-                </span>
+                <span className='font-semibold'>{config.title}</span>
 
                 {completed && isSelected && (
                   <span className='flex items-center gap-1'>

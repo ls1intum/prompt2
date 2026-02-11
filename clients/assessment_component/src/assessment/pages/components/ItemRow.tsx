@@ -8,6 +8,7 @@ import type { FeedbackItem } from '../../interfaces/feedbackItem'
 interface BaseItemRowProps {
   value: string
   onTextChange: (itemId: string, value: string) => void
+  onTextBlur?: (itemId: string) => void
   onDelete: (itemId: string) => void
   isSaving: boolean
   isPending: boolean
@@ -32,6 +33,7 @@ export function ItemRow({
   item,
   value,
   onTextChange,
+  onTextBlur,
   onDelete,
   isPending,
   isDisabled = false,
@@ -74,22 +76,28 @@ export function ItemRow({
               return cleanup
             }
           }}
+          onBlur={() => {
+            if (!isDisabled && onTextBlur) {
+              onTextBlur(item.id)
+            }
+          }}
           placeholder={getDefaultPlaceholder()}
-          disabled={isDisabled}
           readOnly={isDisabled}
         />
       </div>
 
-      <Button
-        variant='ghost'
-        size='icon'
-        className=''
-        onClick={() => !isDisabled && onDelete(item.id)}
-        disabled={isPending || isDisabled}
-        title={getDeleteTitle()}
-      >
-        <Trash2 className='h-4 w-4 text-destructive' />
-      </Button>
+      {!isDisabled && (
+        <Button
+          variant='ghost'
+          size='icon'
+          className=''
+          onClick={() => onDelete(item.id)}
+          disabled={isPending}
+          title={getDeleteTitle()}
+        >
+          <Trash2 className='h-4 w-4 text-destructive' />
+        </Button>
+      )}
     </div>
   )
 }

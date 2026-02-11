@@ -11,15 +11,17 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+// setupEvaluationRouter sets up evaluation endpoints.
+// @Summary Evaluation Endpoints
+// @Description Manage evaluations for course participations.
+// @Tags evaluations
+// @Security BearerAuth
 func setupEvaluationRouter(routerGroup *gin.RouterGroup, authMiddleware func(allowedRoles ...string) gin.HandlerFunc) {
 	evaluationRouter := routerGroup.Group("/evaluation")
 
 	// Admin/Lecturer/Editor endpoints - overview of all evaluations
-	evaluationRouter.GET("", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), getAllEvaluationsByPhase)
-	evaluationRouter.GET("/self", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), getSelfEvaluationsByPhase)
-	evaluationRouter.GET("/peer", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), getPeerEvaluationsByPhase)
-	evaluationRouter.GET("/self/course-participation/:courseParticipationID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), getSelfEvaluationsForParticipant)
-	evaluationRouter.GET("/peer/course-participation/:courseParticipationID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), getPeerEvaluationsForParticipant)
+	evaluationRouter.GET("", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), getAllEvaluationsByPhase)
+	evaluationRouter.GET("/tutor/:courseParticipationID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), getEvaluationsForTutorInPhase)
 
 	// Student endpoints - access to own evaluations only
 	evaluationRouter.GET("/my-evaluations", authMiddleware(promptSDK.CourseStudent), getMyEvaluations)
@@ -27,6 +29,16 @@ func setupEvaluationRouter(routerGroup *gin.RouterGroup, authMiddleware func(all
 	evaluationRouter.DELETE("/:evaluationID", authMiddleware(promptSDK.CourseStudent), deleteEvaluation)
 }
 
+// getAllEvaluationsByPhase godoc
+// @Summary List evaluations by course phase
+// @Description List evaluations for a course phase.
+// @Tags evaluations
+// @Produce json
+// @Param coursePhaseID path string true "Course phase ID"
+// @Success 200 {array} evaluationDTO.Evaluation
+// @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /course_phase/{coursePhaseID}/evaluation [get]
 func getAllEvaluationsByPhase(c *gin.Context) {
 	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
 	if err != nil {
@@ -42,80 +54,48 @@ func getAllEvaluationsByPhase(c *gin.Context) {
 	c.JSON(http.StatusOK, evaluations)
 }
 
-func getSelfEvaluationsByPhase(c *gin.Context) {
+// getEvaluationsForTutorInPhase godoc
+// @Summary List evaluations for tutor in phase
+// @Description List evaluations for a tutor in a course phase.
+// @Tags evaluations
+// @Produce json
+// @Param coursePhaseID path string true "Course phase ID"
+// @Param courseParticipationID path string true "Tutor course participation ID"
+// @Success 200 {array} evaluationDTO.Evaluation
+// @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /course_phase/{coursePhaseID}/evaluation/tutor/{courseParticipationID} [get]
+func getEvaluationsForTutorInPhase(c *gin.Context) {
 	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
 	if err != nil {
 		handleError(c, http.StatusBadRequest, err)
 		return
 	}
+	tutorID, err := uuid.Parse(c.Param("courseParticipationID"))
+	if err != nil {
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
 
-	evaluations, err := GetSelfEvaluationsByPhase(c, coursePhaseID)
+	evaluations, err := GetEvaluationsForTutorInPhase(c, tutorID, coursePhaseID)
 	if err != nil {
 		handleError(c, http.StatusInternalServerError, err)
 		return
 	}
+
 	c.JSON(http.StatusOK, evaluations)
 }
 
-func getPeerEvaluationsByPhase(c *gin.Context) {
-	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
-	if err != nil {
-		handleError(c, http.StatusBadRequest, err)
-		return
-	}
-
-	evaluations, err := GetPeerEvaluationsByPhase(c, coursePhaseID)
-	if err != nil {
-		handleError(c, http.StatusInternalServerError, err)
-		return
-	}
-	c.JSON(http.StatusOK, evaluations)
-}
-
-func getSelfEvaluationsForParticipant(c *gin.Context) {
-	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
-	if err != nil {
-		handleError(c, http.StatusBadRequest, err)
-		return
-	}
-
-	courseParticipationID, err := uuid.Parse(c.Param("courseParticipationID"))
-	if err != nil {
-		log.Error("Error parsing courseParticipationID: ", err)
-		handleError(c, http.StatusBadRequest, err)
-		return
-	}
-
-	evaluations, err := GetSelfEvaluationsForParticipantInPhase(c, courseParticipationID, coursePhaseID)
-	if err != nil {
-		handleError(c, http.StatusInternalServerError, err)
-		return
-	}
-	c.JSON(http.StatusOK, evaluations)
-}
-
-func getPeerEvaluationsForParticipant(c *gin.Context) {
-	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
-	if err != nil {
-		handleError(c, http.StatusBadRequest, err)
-		return
-	}
-
-	courseParticipationID, err := uuid.Parse(c.Param("courseParticipationID"))
-	if err != nil {
-		log.Error("Error parsing courseParticipationID: ", err)
-		handleError(c, http.StatusBadRequest, err)
-		return
-	}
-
-	evaluations, err := GetPeerEvaluationsForParticipantInPhase(c, courseParticipationID, coursePhaseID)
-	if err != nil {
-		handleError(c, http.StatusInternalServerError, err)
-		return
-	}
-	c.JSON(http.StatusOK, evaluations)
-}
-
+// getMyEvaluations godoc
+// @Summary List my evaluations
+// @Description List evaluations authored by the current student.
+// @Tags evaluations
+// @Produce json
+// @Param coursePhaseID path string true "Course phase ID"
+// @Success 200 {array} evaluationDTO.Evaluation
+// @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /course_phase/{coursePhaseID}/evaluation/my-evaluations [get]
 func getMyEvaluations(c *gin.Context) {
 	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
 	if err != nil {
@@ -138,6 +118,18 @@ func getMyEvaluations(c *gin.Context) {
 	c.JSON(http.StatusOK, evaluations)
 }
 
+// createOrUpdateEvaluation godoc
+// @Summary Create or update evaluation
+// @Description Create or update an evaluation for the current student.
+// @Tags evaluations
+// @Accept json
+// @Param coursePhaseID path string true "Course phase ID"
+// @Param evaluation body evaluationDTO.CreateOrUpdateEvaluationRequest true "Evaluation payload"
+// @Success 201 {string} string "Created"
+// @Failure 400 {object} map[string]string
+// @Failure 403 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /course_phase/{coursePhaseID}/evaluation [post]
 func createOrUpdateEvaluation(c *gin.Context) {
 	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
 	if err != nil {
@@ -152,7 +144,6 @@ func createOrUpdateEvaluation(c *gin.Context) {
 		return
 	}
 
-	// TODO also check if the assessee is the same as the author or a team member
 	statusCode, err := utils.ValidateStudentOwnership(c, request.AuthorCourseParticipationID)
 	if err != nil {
 		c.JSON(statusCode, gin.H{"error": "Students can only create evaluations as the author"})
@@ -167,6 +158,17 @@ func createOrUpdateEvaluation(c *gin.Context) {
 	c.Status(http.StatusCreated)
 }
 
+// deleteEvaluation godoc
+// @Summary Delete evaluation
+// @Description Delete an evaluation by ID.
+// @Tags evaluations
+// @Param coursePhaseID path string true "Course phase ID"
+// @Param evaluationID path string true "Evaluation ID"
+// @Success 200 {string} string "OK"
+// @Failure 400 {object} map[string]string
+// @Failure 403 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /course_phase/{coursePhaseID}/evaluation/{evaluationID} [delete]
 func deleteEvaluation(c *gin.Context) {
 	evaluationID, err := uuid.Parse(c.Param("evaluationID"))
 	if err != nil {

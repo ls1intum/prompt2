@@ -1,5 +1,5 @@
 import { useParams } from 'react-router-dom'
-import type { Team } from '../../../interfaces/team'
+import type { Team } from '@tumaet/prompt-shared-state'
 import { createTeams } from '../../../network/mutations/createTeams'
 import { deleteTeam } from '../../../network/mutations/deleteTeam'
 import { updateTeam } from '../../../network/mutations/updateTeam'
@@ -10,7 +10,7 @@ interface TeamSettingsProps {
   teams: Team[]
 }
 
-export const TeamSettings = ({ teams }: TeamSettingsProps): JSX.Element => {
+export const TeamSettings = ({ teams }: TeamSettingsProps) => {
   // Use the same phaseId context if needed (or adjust as appropriate)
   const phaseId = useParams<{ phaseId: string }>().phaseId ?? ''
 

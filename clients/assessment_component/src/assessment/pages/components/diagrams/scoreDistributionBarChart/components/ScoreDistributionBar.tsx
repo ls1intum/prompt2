@@ -1,6 +1,6 @@
 import { Rectangle } from 'recharts'
 
-import { mapNumberToScoreLevel, ScoreLevel } from '../../../../../interfaces/scoreLevel'
+import { mapNumberToScoreLevel, ScoreLevel } from '@tumaet/prompt-shared-state'
 
 import { getBarColor } from '../../utils/chartConfig'
 
@@ -45,7 +45,7 @@ export const ScoreDistributionBar = (props: any) => {
         y1={averageY}
         x2={x + width}
         y2={averageY}
-        stroke='#ffffff' /* Light grey color */
+        stroke='#ffffff'
         strokeWidth={2}
         strokeOpacity={0.8}
       />

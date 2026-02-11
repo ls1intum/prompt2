@@ -103,9 +103,9 @@ services:
       retries: 5
     networks:
       - prompt-network
-  
+
   keycloak:
-    image: quay.io/keycloak/keycloak:21.0
+    image: quay.io/keycloak/keycloak:26.4.7
     container_name: prompt-keycloak
     labels:
       - "traefik.enable=true"
@@ -136,9 +136,8 @@ services:
       test:
         [
           "CMD-SHELL",
-          'exec 3<>/dev/tcp/localhost/8080; echo -e "GET /health/ready HTTP/1.1\nhost: localhost:8080\n" >&3; timeout --preserve-status 1 cat <&3 | grep -m 1 status | grep -m 1 UP; ERROR=$?; exec 3<&-; exec 3>&-; exit $ERROR'
+          'exec 3<>/dev/tcp/localhost/8080; echo -e "GET /health/ready HTTP/1.1\nhost: localhost:8080\n" >&3; timeout --preserve-status 1 cat <&3 | grep -m 1 status | grep -m 1 UP; ERROR=$?; exec 3<&-; exec 3>&-; exit $ERROR',
         ]
-
 
   client-interview-component:
     image: "ghcr.io/ls1intum/prompt2/prompt-clients-interview-component:${INTERVIEW_IMAGE_TAG}"
@@ -190,6 +189,9 @@ services:
       - KEYCLOAK_REALM_NAME
       - CHAIR_NAME_SHORT
       - CHAIR_NAME_LONG
+      - GITHUB_SHA
+      - GITHUB_REF
+      - SERVER_CORE_IMAGE_TAG
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.core.rule=Host(`${CORE_HOST}`)"
@@ -208,7 +210,6 @@ services:
       - ./chair-logo.jpeg:/usr/share/nginx/html/chair-logo.jpeg:ro
     networks:
       - prompt-network
-
 
 networks:
   prompt-network:

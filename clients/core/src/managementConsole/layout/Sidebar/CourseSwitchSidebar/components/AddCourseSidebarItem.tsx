@@ -1,15 +1,16 @@
-import { SidebarMenuButton, SidebarMenuItem } from '@tumaet/prompt-ui-components'
+import { SidebarMenuItem } from '@tumaet/prompt-ui-components'
 import { Plus } from 'lucide-react'
-import { AddCourseDialog } from '../../../../courseOverview/AddingCourse/AddCourseDialog'
+import { CourseCreationChoiceDialog } from '@managementConsole/courseOverview/AddingCourse/components/CourseCreationChoiceDialog'
+import { SidebarMenuButton } from '@tumaet/prompt-ui-components'
 
-export const AddCourseButton = (): JSX.Element => {
+export const AddCourseButton = () => {
   return (
     <SidebarMenuItem>
-      <AddCourseDialog>
+      <CourseCreationChoiceDialog>
         <SidebarMenuButton
           size='lg'
           tooltip={{
-            children: 'Add a new course',
+            children: 'Add new course or template',
             hidden: false,
           }}
           className='min-w-12 min-h-12 p-0'
@@ -20,7 +21,7 @@ export const AddCourseButton = (): JSX.Element => {
             </div>
           </div>
         </SidebarMenuButton>
-      </AddCourseDialog>
+      </CourseCreationChoiceDialog>
     </SidebarMenuItem>
   )
 }

@@ -3,24 +3,28 @@ INSERT INTO evaluation_completion (course_participation_id,
                                    course_phase_id,
                                    author_course_participation_id,
                                    completed_at,
-                                   completed)
-VALUES ($1, $2, $3, $4, $5)
+                                   completed,
+                                   type)
+VALUES ($1, $2, $3, $4, $5, $6)
 ON CONFLICT (course_participation_id, course_phase_id, author_course_participation_id)
     DO UPDATE
     SET completed_at = EXCLUDED.completed_at,
-        completed    = EXCLUDED.completed;
+        completed    = EXCLUDED.completed,
+        type         = EXCLUDED.type;
 
 -- name: MarkEvaluationAsFinished :exec
 INSERT INTO evaluation_completion (course_participation_id,
                    course_phase_id,
                    author_course_participation_id,
                    completed_at,
-                   completed)
-VALUES ($1, $2, $3, $4, true)
+                   completed,
+                   type)
+VALUES ($1, $2, $3, $4, true, $5)
 ON CONFLICT (course_participation_id, course_phase_id, author_course_participation_id)
   DO UPDATE
   SET completed_at = EXCLUDED.completed_at,
-    completed    = true;
+    completed    = true,
+    type         = EXCLUDED.type;
 
 -- name: UnmarkEvaluationAsFinished :exec
 UPDATE evaluation_completion
@@ -55,34 +59,22 @@ SELECT EXISTS (SELECT 1
                  AND course_phase_id = $2
                  AND author_course_participation_id = $3);
 
--- name: GetSelfEvaluationCompletionsByCoursePhase :many
-SELECT *
-FROM evaluation_completion
-WHERE course_phase_id = $1
-  AND course_participation_id = author_course_participation_id;
-
--- name: GetPeerEvaluationCompletionsByCoursePhase :many
-SELECT *
-FROM evaluation_completion
-WHERE course_phase_id = $1
-  AND course_participation_id != author_course_participation_id;
-
 -- name: GetEvaluationCompletionsForParticipantInPhase :many
 SELECT *
 FROM evaluation_completion
 WHERE course_participation_id = $1
   AND course_phase_id = $2;
 
--- name: GetPeerEvaluationCompletionsForAuthorInPhase :many
+-- name: GetEvaluationCompletionsForAuthorInPhase :many
 SELECT *
 FROM evaluation_completion
 WHERE author_course_participation_id = $1
-  AND author_course_participation_id != course_participation_id
   AND course_phase_id = $2;
 
--- name: GetPeerEvaluationCompletionsForParticipantInPhase :many
+-- name: GetEvaluationCompletionByType :one
 SELECT *
 FROM evaluation_completion
 WHERE course_participation_id = $1
   AND course_phase_id = $2
-  AND course_participation_id != author_course_participation_id;
+  AND author_course_participation_id = $3
+  AND type = $4;

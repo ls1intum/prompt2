@@ -17,7 +17,7 @@ interface IntroCourseDataShellProps {
   children: React.ReactNode
 }
 
-export const IntroCourseDataShell = ({ children }: IntroCourseDataShellProps): JSX.Element => {
+export const IntroCourseDataShell = ({ children }: IntroCourseDataShellProps) => {
   const { isStudentOfCourse } = useCourseStore()
   const { courseId, phaseId } = useParams<{ courseId: string; phaseId: string }>()
   const isStudent = isStudentOfCourse(courseId ?? '')

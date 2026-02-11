@@ -10,51 +10,68 @@ import {
 import { ParticipationWithAssessment } from './interfaces/ParticipationWithAssessment'
 
 import { ScoreDistributionBarChart } from './scoreDistributionBarChart/ScoreDistributionBarChart'
+import { GradeDistributionBarChart } from './gradeDistributionBarChart/GradeDistributionBarChart'
+
 import { createScoreDistributionDataPoint } from './scoreDistributionBarChart/utils/createScoreDistributionDataPoint'
+import { createGradeDistributionDataPoint } from './gradeDistributionBarChart/utils/createGradeDistributionDataPoint'
 
 interface GenderDiagramProps {
   participationsWithAssessment: ParticipationWithAssessment[]
+  showGrade?: boolean
 }
 
 export const GenderDiagram = ({
   participationsWithAssessment,
-}: GenderDiagramProps): JSX.Element => {
-  const groupByGender = (gender: Gender | Gender[]) => {
-    const participationsWithAssessmentFiltered = participationsWithAssessment.filter((p) =>
-      Array.isArray(gender)
-        ? p.participation.student.gender !== undefined &&
-          gender.includes(p.participation.student.gender)
-        : p.participation.student.gender === gender,
+  showGrade = false,
+}: GenderDiagramProps) => {
+  const data = Object.values(Gender).map((gender) => {
+    const genderLabel =
+      gender === Gender.PREFER_NOT_TO_SAY
+        ? 'Unknown'
+        : gender.replace(/_/g, ' ').charAt(0).toUpperCase() + gender.replace(/_/g, ' ').slice(1)
+
+    const participationWithAssessment = participationsWithAssessment.filter(
+      (p) => p.participation.student.gender === gender,
     )
 
     return {
-      scores: participationsWithAssessmentFiltered
-        .map((p) => p.assessments.map((a) => a.scoreLevel))
-        .flat(),
-      scoreLevels: participationsWithAssessmentFiltered
-        .map((p) => p.scoreLevel)
-        .filter((scoreLevel) => scoreLevel !== undefined),
+      shortLabel: genderLabel,
+      label: genderLabel,
+      participationWithAssessment: participationWithAssessment,
     }
-  }
-
-  const females = groupByGender(Gender.FEMALE)
-  const males = groupByGender(Gender.MALE)
-  const diverse = groupByGender([Gender.DIVERSE, Gender.PREFER_NOT_TO_SAY])
-
-  const data = [
-    createScoreDistributionDataPoint('Female', 'Female', females.scores, females.scoreLevels),
-    createScoreDistributionDataPoint('Male', 'Male', males.scores, males.scoreLevels),
-    createScoreDistributionDataPoint('Diverse', 'Diverse', diverse.scores, diverse.scoreLevels),
-  ]
+  })
 
   return (
     <Card className='flex flex-col'>
-      <CardHeader className='items-center pb-0'>
-        <CardTitle>Gender Distribution</CardTitle>
+      <CardHeader className='items-center'>
+        <CardTitle>Gender Distribution </CardTitle>
         <CardDescription>Scores</CardDescription>
       </CardHeader>
-      <CardContent className='flex-1 pb-0'>
-        <ScoreDistributionBarChart data={data} />
+      <CardContent className='flex-1'>
+        {showGrade ? (
+          <GradeDistributionBarChart
+            data={data.map((d) =>
+              createGradeDistributionDataPoint(
+                d.shortLabel,
+                d.label,
+                d.participationWithAssessment
+                  .map((p) => p.assessmentCompletion?.gradeSuggestion)
+                  .filter((grade): grade is number => grade !== undefined),
+              ),
+            )}
+          />
+        ) : (
+          <ScoreDistributionBarChart
+            data={data.map((d) =>
+              createScoreDistributionDataPoint(
+                d.shortLabel,
+                d.label,
+                d.participationWithAssessment.map((p) => p.scoreNumeric),
+                d.participationWithAssessment.map((p) => p.scoreLevel),
+              ),
+            )}
+          />
+        )}
       </CardContent>
     </Card>
   )

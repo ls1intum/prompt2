@@ -52,6 +52,13 @@ on:
     secrets:
       VM_SSH_PRIVATE_KEY:
         required: true
+      SMTP_USERNAME:
+        required: true
+      SMTP_PASSWORD:
+        required: true
+
+permissions:
+  contents: read
 
 jobs:
   deploy:
@@ -62,7 +69,7 @@ jobs:
     steps:
       - name: SSH to VM and Execute Docker-Compose Down
         continue-on-error: true
-        uses: appleboy/ssh-action@v1.0.3
+        uses: appleboy/ssh-action@v1.2.5
         with:
           host: ${{ vars.VM_HOST }}
           username: ${{ vars.VM_USERNAME }}
@@ -73,10 +80,20 @@ jobs:
           proxy_key: ${{ secrets.DEPLOYMENT_GATEWAY_SSH_KEY }}
           proxy_port: ${{ vars.DEPLOYMENT_GATEWAY_PORT }}
           script: |
-            docker compose -f docker-compose.prod.yml --env-file=.env.prod down --remove-orphans --rmi all
+            # Define services to stop/remove (all except reverse-proxy and maintenance)
+            SERVICES="server-core server-intro-course server-team-allocation server-self-team-allocation server-assessment client-core client-assessment-component client-devops-challenge-component client-intro-course-developer-component client-interview-component client-matching-component client-team-allocation-component client-self-team-allocation-component client-template-component"
+            # Stop all services except reverse-proxy and maintenance (keep fallback active)
+            docker compose -f docker-compose.prod.yml --env-file=.env.prod stop $SERVICES
+            # Remove stopped containers
+            docker compose -f docker-compose.prod.yml --env-file=.env.prod rm -f $SERVICES
 
       - name: checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
+
+      - name: Package maintenance assets
+        run: |
+          tar czf maintenance.tar.gz maintenance
+          sha256sum maintenance.tar.gz > maintenance.tar.gz.sha256
 
       - name: Copy file to VM Host
         uses: appleboy/scp-action@v0.1.7
@@ -92,6 +109,21 @@ jobs:
           #####################
           source: "./docker-compose.prod.yml"
           target: /home/${{ vars.VM_USERNAME }}
+
+      - name: Copy maintenance tarball to VM Host
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ vars.VM_HOST }}
+          username: ${{ vars.VM_USERNAME }}
+          key: ${{ secrets.VM_SSH_PRIVATE_KEY }}
+          # Defined in the Org
+          proxy_host: ${{ vars.DEPLOYMENT_GATEWAY_HOST }}
+          proxy_username: ${{ vars.DEPLOYMENT_GATEWAY_USER }}
+          proxy_key: ${{ secrets.DEPLOYMENT_GATEWAY_SSH_KEY }}
+          proxy_port: ${{ vars.DEPLOYMENT_GATEWAY_PORT }}
+          #####################
+          source: "maintenance.tar.gz*"
+          target: /home/${{ vars.VM_USERNAME }}/
 
       - name: "Create main.cf and master.cf file"
         run: |
@@ -128,8 +160,25 @@ jobs:
           source: "master.cf"
           target: /home/${{ vars.VM_USERNAME }}/postfix-config/
 
+      - name: Verify and extract maintenance assets on VM
+        uses: appleboy/ssh-action@v1.2.5
+        with:
+          host: ${{ vars.VM_HOST }}
+          username: ${{ vars.VM_USERNAME }}
+          key: ${{ secrets.VM_SSH_PRIVATE_KEY }}
+          # Defined in the Org
+          proxy_host: ${{ vars.DEPLOYMENT_GATEWAY_HOST }}
+          proxy_username: ${{ vars.DEPLOYMENT_GATEWAY_USER }}
+          proxy_key: ${{ secrets.DEPLOYMENT_GATEWAY_SSH_KEY }}
+          proxy_port: ${{ vars.DEPLOYMENT_GATEWAY_PORT }}
+          script: |
+            cd /home/${{ vars.VM_USERNAME }}
+            mkdir -p maintenance
+            sha256sum -c maintenance.tar.gz.sha256
+            tar xzf maintenance.tar.gz -C /home/${{ vars.VM_USERNAME }}
+
       - name: SSH to VM and create .env.prod file
-        uses: appleboy/ssh-action@v1.0.3
+        uses: appleboy/ssh-action@v1.2.5
         with:
           host: ${{ vars.VM_HOST }}
           username: ${{ vars.VM_USERNAME }}
@@ -141,7 +190,7 @@ jobs:
           proxy_port: ${{ vars.DEPLOYMENT_GATEWAY_PORT }}
           script: |
             touch .env.prod 
-            echo "ENVIRONMENT=production" > .env.prod
+            echo "ENVIRONMENT=${{ inputs.environment }}" > .env.prod
             echo "CORE_HOST=${{ vars.CORE_HOST }}" >> .env.prod
             echo "SERVER_CORE_HOST=${{ vars.SERVER_CORE_HOST }}" >> .env.prod
             echo "INTRO_COURSE_HOST=${{ vars.INTRO_COURSE_HOST }}" >> .env.prod
@@ -174,7 +223,7 @@ jobs:
             echo "KEYCLOAK_AUTHORIZED_PARTY=${{ vars.KEYCLOAK_AUTHORIZED_PARTY }}" >> .env.prod
 
             echo "GITHUB_SHA=${{ github.sha }}" >> .env.prod
-            echo "GITHUB_REF=${{ github.head_ref }}" >> .env.prod
+            echo "GITHUB_REF=${{ github.ref != '' && github.ref || github.head_ref }}" >> .env.prod
             echo "SERVER_CORE_IMAGE_TAG=${{ inputs.server_core_image_tag }}" >> .env.prod
             echo "SERVER_INTRO_COURSE_IMAGE_TAG=${{ inputs.server_intro_course_image_tag }}" >> .env.prod
             echo "SERVER_TEAM_ALLOCATION_IMAGE_TAG=${{ inputs.server_team_allocation_image_tag }}" >> .env.prod
@@ -196,13 +245,19 @@ jobs:
             echo "SENDER_NAME=${{ vars.SENDER_EMAIL_NAME }}" >> .env.prod
             echo "SMTP_HOST=${{ vars.SMTP_HOST }}" >> .env.prod
             echo "SMTP_PORT=${{ vars.SMTP_PORT }}" >> .env.prod
-            echo "SMTP_USERNAME=${{ vars.SMTP_USERNAME }}" >> .env.prod
+            echo "SMTP_USERNAME=${{ secrets.SMTP_USERNAME }}" >> .env.prod
             echo "SMTP_PASSWORD=${{ secrets.SMTP_PASSWORD }}" >> .env.prod
+
+            echo "SENTRY_DSN_CORE=${{ vars.SENTRY_DSN_CORE }}" >> .env.prod
+            echo "SENTRY_DSN_INTRO_COURSE=${{ vars.SENTRY_DSN_INTRO_COURSE }}" >> .env.prod
+            echo "SENTRY_DSN_TEAM_ALLOCATION=${{ vars.SENTRY_DSN_TEAM_ALLOCATION }}" >> .env.prod
+            echo "SENTRY_DSN_SELF_TEAM_ALLOCATION=${{ vars.SENTRY_DSN_SELF_TEAM_ALLOCATION }}" >> .env.prod
+            echo "SENTRY_DSN_ASSESSMENT=${{ vars.SENTRY_DSN_ASSESSMENT }}" >> .env.prod
 
             echo "GITLAB_ACCESS_TOKEN=${{ vars.GITLAB_ACCESS_TOKEN }}" >> .env.prod
 
       - name: SSH to VM and Execute Docker-Compose Up
-        uses: appleboy/ssh-action@v1.0.3
+        uses: appleboy/ssh-action@v1.2.5
         with:
           host: ${{ vars.VM_HOST }}
           username: ${{ vars.VM_USERNAME }}
@@ -213,3 +268,5 @@ jobs:
           proxy_port: ${{ vars.DEPLOYMENT_GATEWAY_PORT }}
           script: |
             docker compose -f docker-compose.prod.yml --env-file=.env.prod up --pull=always -d
+            # Clean up old/unused images after successful deployment
+            docker image prune -a -f --filter "until=24h"

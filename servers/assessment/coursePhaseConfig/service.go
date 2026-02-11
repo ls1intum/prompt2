@@ -9,6 +9,7 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
 	promptSDK "github.com/ls1intum/prompt-sdk"
+	"github.com/ls1intum/prompt2/servers/assessment/assessmentSchemas"
 	"github.com/ls1intum/prompt2/servers/assessment/coursePhaseConfig/coursePhaseConfigDTO"
 	db "github.com/ls1intum/prompt2/servers/assessment/db/sqlc"
 	log "github.com/sirupsen/logrus"
@@ -16,6 +17,7 @@ import (
 
 var ErrNotStarted = errors.New("assessment has not started yet")
 var ErrDeadlinePassed = errors.New("deadline has passed")
+var ErrCannotChangeSchemaWithData = errors.New("cannot change assessment schema when assessment or evaluation data exists")
 
 type CoursePhaseConfigService struct {
 	queries db.Queries
@@ -31,12 +33,35 @@ func NewCoursePhaseConfigService(queries db.Queries, conn *pgxpool.Pool) *Course
 	}
 }
 
-func GetCoursePhaseConfig(ctx context.Context, coursePhaseID uuid.UUID) (db.CoursePhaseConfig, error) {
+func validateSchemaChange(ctx context.Context, coursePhaseID, oldSchemaID, newSchemaID uuid.UUID, schemaType string) error {
+	if oldSchemaID == newSchemaID {
+		return nil // No change, no validation needed
+	}
+
+	hasData, err := assessmentSchemas.CheckPhaseHasAssessmentData(ctx, coursePhaseID, oldSchemaID)
+	if err != nil {
+		return err
+	}
+
+	if hasData {
+		log.WithFields(log.Fields{
+			"coursePhaseID": coursePhaseID,
+			"oldSchemaID":   oldSchemaID,
+			"newSchemaID":   newSchemaID,
+			"schemaType":    schemaType,
+		}).Errorf("Cannot change %s schema - data exists", schemaType)
+		return ErrCannotChangeSchemaWithData
+	}
+
+	return nil
+}
+
+func GetCoursePhaseConfig(ctx context.Context, coursePhaseID uuid.UUID) (coursePhaseConfigDTO.CoursePhaseConfig, error) {
 	config, err := CoursePhaseConfigSingleton.queries.GetCoursePhaseConfig(ctx, coursePhaseID)
 	if err != nil && errors.Is(err, sql.ErrNoRows) {
 		tx, err := CoursePhaseConfigSingleton.conn.Begin(ctx)
 		if err != nil {
-			return db.CoursePhaseConfig{}, err
+			return coursePhaseConfigDTO.CoursePhaseConfig{}, err
 		}
 		defer promptSDK.DeferDBRollback(tx, ctx)
 
@@ -45,23 +70,48 @@ func GetCoursePhaseConfig(ctx context.Context, coursePhaseID uuid.UUID) (db.Cour
 		err = qtx.CreateDefaultCoursePhaseConfig(ctx, coursePhaseID)
 		if err != nil {
 			log.WithError(err).Error("Failed to create or update course phase config")
-			return db.CoursePhaseConfig{}, err
+			return coursePhaseConfigDTO.CoursePhaseConfig{}, err
 		}
 
 		err = tx.Commit(ctx)
 		if err != nil {
 			log.WithError(err).Error("Failed to commit transaction for course phase config creation")
-			return db.CoursePhaseConfig{}, err
+			return coursePhaseConfigDTO.CoursePhaseConfig{}, err
 		}
 	} else if err != nil {
 		log.Error("could not get course phase config: ", err)
-		return db.CoursePhaseConfig{}, errors.New("could not get course phase config")
+		return coursePhaseConfigDTO.CoursePhaseConfig{}, errors.New("could not get course phase config")
 	}
 
-	return config, nil
+	return coursePhaseConfigDTO.MapDBCoursePhaseConfigToDTOCoursePhaseConfig(config), nil
 }
 
 func CreateOrUpdateCoursePhaseConfig(ctx context.Context, coursePhaseID uuid.UUID, req coursePhaseConfigDTO.CreateOrUpdateCoursePhaseConfigRequest) error {
+	existingConfig, err := CoursePhaseConfigSingleton.queries.GetCoursePhaseConfig(ctx, coursePhaseID)
+	if err != nil && !errors.Is(err, sql.ErrNoRows) {
+		log.WithError(err).Error("Failed to get existing course phase config")
+		return err
+	}
+
+	// If config exists, validate schema changes
+	if err == nil {
+		schemasToValidate := []struct {
+			old, new   uuid.UUID
+			schemaType string
+		}{
+			{existingConfig.AssessmentSchemaID, req.AssessmentSchemaID, "assessment"},
+			{existingConfig.SelfEvaluationSchema, req.SelfEvaluationSchema, "self evaluation"},
+			{existingConfig.PeerEvaluationSchema, req.PeerEvaluationSchema, "peer evaluation"},
+			{existingConfig.TutorEvaluationSchema, req.TutorEvaluationSchema, "tutor evaluation"},
+		}
+
+		for _, schema := range schemasToValidate {
+			if err := validateSchemaChange(ctx, coursePhaseID, schema.old, schema.new, schema.schemaType); err != nil {
+				return err
+			}
+		}
+	}
+
 	tx, err := CoursePhaseConfigSingleton.conn.Begin(ctx)
 	if err != nil {
 		return err
@@ -70,19 +120,50 @@ func CreateOrUpdateCoursePhaseConfig(ctx context.Context, coursePhaseID uuid.UUI
 
 	qtx := CoursePhaseConfigSingleton.queries.WithTx(tx)
 
+	gradeSuggestionVisible := pgtype.Bool{}
+	if req.GradeSuggestionVisible != nil {
+		gradeSuggestionVisible = pgtype.Bool{Bool: *req.GradeSuggestionVisible, Valid: true}
+	}
+
+	actionItemsVisible := pgtype.Bool{}
+	if req.ActionItemsVisible != nil {
+		actionItemsVisible = pgtype.Bool{Bool: *req.ActionItemsVisible, Valid: true}
+	}
+
+	gradingSheetVisible := pgtype.Bool{}
+	if req.GradingSheetVisible != nil {
+		gradingSheetVisible = pgtype.Bool{Bool: *req.GradingSheetVisible, Valid: true}
+	}
+
+	// Preserve existing ResultsReleased value on update, default to false for new creates
+	resultsReleased := pgtype.Bool{Bool: false, Valid: true}
+	if err == nil {
+		// Config exists - preserve the existing ResultsReleased value
+		resultsReleased = pgtype.Bool{Bool: existingConfig.ResultsReleased, Valid: true}
+	}
+
 	params := db.CreateOrUpdateCoursePhaseConfigParams{
-		AssessmentTemplateID:   req.AssessmentTemplateID,
-		CoursePhaseID:          coursePhaseID,
-		Start:                  pgtype.Timestamptz{Time: req.Start, Valid: !req.Start.IsZero()},
-		Deadline:               pgtype.Timestamptz{Time: req.Deadline, Valid: !req.Deadline.IsZero()},
-		SelfEvaluationEnabled:  req.SelfEvaluationEnabled,
-		SelfEvaluationTemplate: req.SelfEvaluationTemplate,
-		SelfEvaluationStart:    pgtype.Timestamptz{Time: req.SelfEvaluationStart, Valid: !req.SelfEvaluationStart.IsZero()},
-		SelfEvaluationDeadline: pgtype.Timestamptz{Time: req.SelfEvaluationDeadline, Valid: !req.SelfEvaluationDeadline.IsZero()},
-		PeerEvaluationEnabled:  req.PeerEvaluationEnabled,
-		PeerEvaluationTemplate: req.PeerEvaluationTemplate,
-		PeerEvaluationStart:    pgtype.Timestamptz{Time: req.PeerEvaluationStart, Valid: !req.PeerEvaluationStart.IsZero()},
-		PeerEvaluationDeadline: pgtype.Timestamptz{Time: req.PeerEvaluationDeadline, Valid: !req.PeerEvaluationDeadline.IsZero()},
+		AssessmentSchemaID:       req.AssessmentSchemaID,
+		CoursePhaseID:            coursePhaseID,
+		Start:                    pgtype.Timestamptz{Time: req.Start, Valid: !req.Start.IsZero()},
+		Deadline:                 pgtype.Timestamptz{Time: req.Deadline, Valid: !req.Deadline.IsZero()},
+		SelfEvaluationEnabled:    req.SelfEvaluationEnabled,
+		SelfEvaluationSchema:     req.SelfEvaluationSchema,
+		SelfEvaluationStart:      pgtype.Timestamptz{Time: req.SelfEvaluationStart, Valid: !req.SelfEvaluationStart.IsZero()},
+		SelfEvaluationDeadline:   pgtype.Timestamptz{Time: req.SelfEvaluationDeadline, Valid: !req.SelfEvaluationDeadline.IsZero()},
+		PeerEvaluationEnabled:    req.PeerEvaluationEnabled,
+		PeerEvaluationSchema:     req.PeerEvaluationSchema,
+		PeerEvaluationStart:      pgtype.Timestamptz{Time: req.PeerEvaluationStart, Valid: !req.PeerEvaluationStart.IsZero()},
+		PeerEvaluationDeadline:   pgtype.Timestamptz{Time: req.PeerEvaluationDeadline, Valid: !req.PeerEvaluationDeadline.IsZero()},
+		TutorEvaluationEnabled:   req.TutorEvaluationEnabled,
+		TutorEvaluationSchema:    req.TutorEvaluationSchema,
+		TutorEvaluationStart:     pgtype.Timestamptz{Time: req.TutorEvaluationStart, Valid: !req.TutorEvaluationStart.IsZero()},
+		TutorEvaluationDeadline:  pgtype.Timestamptz{Time: req.TutorEvaluationDeadline, Valid: !req.TutorEvaluationDeadline.IsZero()},
+		EvaluationResultsVisible: req.EvaluationResultsVisible,
+		GradeSuggestionVisible:   gradeSuggestionVisible,
+		ActionItemsVisible:       actionItemsVisible,
+		ResultsReleased:          resultsReleased,
+		GradingSheetVisible:      gradingSheetVisible,
 	}
 
 	err = qtx.CreateOrUpdateCoursePhaseConfig(ctx, params)
@@ -146,4 +227,141 @@ func IsPeerEvaluationDeadlinePassed(ctx context.Context, coursePhaseID uuid.UUID
 		return false, errors.New("could not check if peer evaluation deadline has passed")
 	}
 	return deadlinePassed, nil
+}
+
+func IsTutorEvaluationOpen(ctx context.Context, coursePhaseID uuid.UUID) (bool, error) {
+	open, err := CoursePhaseConfigSingleton.queries.IsTutorEvaluationOpen(ctx, coursePhaseID)
+	if err != nil {
+		log.Error("could not check if tutor evaluation is open: ", err)
+		return false, errors.New("could not check if tutor evaluation is open")
+	}
+	return open, nil
+}
+
+func IsTutorEvaluationDeadlinePassed(ctx context.Context, coursePhaseID uuid.UUID) (bool, error) {
+	deadlinePassed, err := CoursePhaseConfigSingleton.queries.IsTutorEvaluationDeadlinePassed(ctx, coursePhaseID)
+	if err != nil {
+		log.Error("could not check if tutor evaluation deadline has passed: ", err)
+		return false, errors.New("could not check if tutor evaluation deadline has passed")
+	}
+	return deadlinePassed, nil
+}
+
+func ReleaseResults(ctx context.Context, coursePhaseID uuid.UUID) error {
+	config, err := CoursePhaseConfigSingleton.queries.GetCoursePhaseConfig(ctx, coursePhaseID)
+	if err != nil {
+		log.WithError(err).Error("Failed to get course phase config")
+		return errors.New("failed to get course phase config")
+	}
+
+	if config.ResultsReleased {
+		log.WithField("coursePhaseID", coursePhaseID).Info("Results already released")
+		return nil
+	}
+
+	tx, err := CoursePhaseConfigSingleton.conn.Begin(ctx)
+	if err != nil {
+		return err
+	}
+	defer promptSDK.DeferDBRollback(tx, ctx)
+
+	qtx := CoursePhaseConfigSingleton.queries.WithTx(tx)
+
+	params := db.CreateOrUpdateCoursePhaseConfigParams{
+		AssessmentSchemaID:       config.AssessmentSchemaID,
+		CoursePhaseID:            coursePhaseID,
+		Start:                    config.Start,
+		Deadline:                 config.Deadline,
+		SelfEvaluationEnabled:    config.SelfEvaluationEnabled,
+		SelfEvaluationSchema:     config.SelfEvaluationSchema,
+		SelfEvaluationStart:      config.SelfEvaluationStart,
+		SelfEvaluationDeadline:   config.SelfEvaluationDeadline,
+		PeerEvaluationEnabled:    config.PeerEvaluationEnabled,
+		PeerEvaluationSchema:     config.PeerEvaluationSchema,
+		PeerEvaluationStart:      config.PeerEvaluationStart,
+		PeerEvaluationDeadline:   config.PeerEvaluationDeadline,
+		TutorEvaluationEnabled:   config.TutorEvaluationEnabled,
+		TutorEvaluationSchema:    config.TutorEvaluationSchema,
+		TutorEvaluationStart:     config.TutorEvaluationStart,
+		TutorEvaluationDeadline:  config.TutorEvaluationDeadline,
+		EvaluationResultsVisible: config.EvaluationResultsVisible,
+		GradeSuggestionVisible:   pgtype.Bool{Bool: config.GradeSuggestionVisible, Valid: true},
+		ActionItemsVisible:       pgtype.Bool{Bool: config.ActionItemsVisible, Valid: true},
+		ResultsReleased:          pgtype.Bool{Bool: true, Valid: true},
+		GradingSheetVisible:      pgtype.Bool{Bool: config.GradingSheetVisible, Valid: true},
+	}
+
+	err = qtx.CreateOrUpdateCoursePhaseConfig(ctx, params)
+	if err != nil {
+		log.WithError(err).Error("Failed to release results")
+		return err
+	}
+
+	log.WithField("coursePhaseID", coursePhaseID).Info("Results released successfully")
+	return tx.Commit(ctx)
+}
+
+func UpdateCoursePhaseConfigAssessmentSchema(ctx context.Context, coursePhaseID uuid.UUID, oldSchemaID uuid.UUID, newSchemaID uuid.UUID) error {
+	hasData, err := assessmentSchemas.CheckPhaseHasAssessmentData(ctx, coursePhaseID, oldSchemaID)
+	if err != nil {
+		return err
+	}
+	if hasData {
+		log.WithFields(log.Fields{
+			"coursePhaseID": coursePhaseID,
+			"oldSchemaID":   oldSchemaID,
+			"newSchemaID":   newSchemaID,
+		}).Error("Cannot change schema - assessment or evaluation data exists")
+		return ErrCannotChangeSchemaWithData
+	}
+
+	tx, err := CoursePhaseConfigSingleton.conn.Begin(ctx)
+	if err != nil {
+		return err
+	}
+	defer promptSDK.DeferDBRollback(tx, ctx)
+
+	qtx := CoursePhaseConfigSingleton.queries.WithTx(tx)
+
+	// Get current config to determine which schema field to update
+	config, err := qtx.GetCoursePhaseConfig(ctx, coursePhaseID)
+	if err != nil {
+		log.WithError(err).Error("Failed to get course phase config")
+		return errors.New("failed to get course phase config")
+	}
+	switch oldSchemaID {
+	case config.AssessmentSchemaID:
+		err = qtx.UpdateCoursePhaseConfigAssessmentSchema(ctx, db.UpdateCoursePhaseConfigAssessmentSchemaParams{
+			CoursePhaseID:      coursePhaseID,
+			AssessmentSchemaID: newSchemaID,
+		})
+	case config.SelfEvaluationSchema:
+		err = qtx.UpdateCoursePhaseConfigSelfEvaluationSchema(ctx, db.UpdateCoursePhaseConfigSelfEvaluationSchemaParams{
+			CoursePhaseID:        coursePhaseID,
+			SelfEvaluationSchema: newSchemaID,
+		})
+	case config.PeerEvaluationSchema:
+		err = qtx.UpdateCoursePhaseConfigPeerEvaluationSchema(ctx, db.UpdateCoursePhaseConfigPeerEvaluationSchemaParams{
+			CoursePhaseID:        coursePhaseID,
+			PeerEvaluationSchema: newSchemaID,
+		})
+	case config.TutorEvaluationSchema:
+		err = qtx.UpdateCoursePhaseConfigTutorEvaluationSchema(ctx, db.UpdateCoursePhaseConfigTutorEvaluationSchemaParams{
+			CoursePhaseID:         coursePhaseID,
+			TutorEvaluationSchema: newSchemaID,
+		})
+	default:
+		log.WithFields(log.Fields{
+			"oldSchemaID":   oldSchemaID,
+			"coursePhaseID": coursePhaseID,
+		}).Error("Old schema ID does not match any schema field in course phase config")
+		return errors.New("old schema ID does not match any schema field in course phase config")
+	}
+
+	if err != nil {
+		log.WithError(err).Error("Failed to update course phase config schema")
+		return err
+	}
+
+	return tx.Commit(ctx)
 }

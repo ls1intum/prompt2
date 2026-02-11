@@ -6,11 +6,12 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/ls1intum/prompt2/servers/core/course/copy/courseCopyDTO"
 	"github.com/ls1intum/prompt2/servers/core/course/courseDTO"
 	db "github.com/ls1intum/prompt2/servers/core/db/sqlc"
 	"github.com/ls1intum/prompt2/servers/core/meta"
-	"github.com/ls1intum/prompt2/servers/core/utils"
+	promptSDK "github.com/ls1intum/prompt-sdk"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -24,6 +25,16 @@ func copyCourseInternal(c *gin.Context, sourceCourseID uuid.UUID, courseVariable
 		return courseDTO.Course{}, fmt.Errorf("failed to fetch source course: %w", err)
 	}
 
+	shortDescription := sourceCourse.ShortDescription
+	if courseVariables.ShortDescription.Valid {
+		shortDescription = courseVariables.ShortDescription
+	}
+
+	longDescription := sourceCourse.LongDescription
+	if courseVariables.LongDescription.Valid {
+		longDescription = courseVariables.LongDescription
+	}
+
 	restrictedData, err := meta.GetMetaDataDTOFromDBModel(sourceCourse.RestrictedData)
 	if err != nil {
 		return courseDTO.Course{}, fmt.Errorf("failed to convert restricted data: %w", err)
@@ -33,22 +44,40 @@ func copyCourseInternal(c *gin.Context, sourceCourseID uuid.UUID, courseVariable
 		return courseDTO.Course{}, fmt.Errorf("failed to convert student readable data: %w", err)
 	}
 
-	newCourse := courseDTO.CreateCourse{
-		Name:                courseVariables.Name,
-		StartDate:           courseVariables.StartDate,
-		EndDate:             courseVariables.EndDate,
-		SemesterTag:         courseVariables.SemesterTag,
-		RestrictedData:      restrictedData,
-		StudentReadableData: studentReadableData,
-		CourseType:          sourceCourse.CourseType,
-		Ects:                sourceCourse.Ects,
+	var newCourse courseDTO.CreateCourse
+	if courseVariables.Template {
+		newCourse = courseDTO.CreateCourse{
+			Name:                courseVariables.Name,
+			StartDate:           pgtype.Date{Valid: false},
+			EndDate:             pgtype.Date{Valid: false},
+			SemesterTag:         courseVariables.SemesterTag,
+			RestrictedData:      restrictedData,
+			StudentReadableData: studentReadableData,
+			ShortDescription:    shortDescription,
+			LongDescription:     longDescription,
+			CourseType:          sourceCourse.CourseType,
+			Ects:                sourceCourse.Ects,
+		}
+	} else {
+		newCourse = courseDTO.CreateCourse{
+			Name:                courseVariables.Name,
+			StartDate:           courseVariables.StartDate,
+			EndDate:             courseVariables.EndDate,
+			SemesterTag:         courseVariables.SemesterTag,
+			RestrictedData:      restrictedData,
+			StudentReadableData: studentReadableData,
+			ShortDescription:    shortDescription,
+			LongDescription:     longDescription,
+			CourseType:          sourceCourse.CourseType,
+			Ects:                sourceCourse.Ects,
+		}
 	}
 
 	tx, err := CourseCopyServiceSingleton.conn.Begin(c)
 	if err != nil {
 		return courseDTO.Course{}, fmt.Errorf("failed to begin transaction: %w", err)
 	}
-	defer utils.DeferRollback(tx, c)
+	defer promptSDK.DeferDBRollback(tx, c)
 	qtx := CourseCopyServiceSingleton.queries.WithTx(tx)
 
 	createCourseParams, err := newCourse.GetDBModel()
@@ -60,6 +89,13 @@ func copyCourseInternal(c *gin.Context, sourceCourseID uuid.UUID, courseVariable
 	createdCourse, err := qtx.CreateCourse(c, createCourseParams)
 	if err != nil {
 		return courseDTO.Course{}, fmt.Errorf("failed to create course in DB: %w", err)
+	}
+
+	if courseVariables.Template {
+		err := qtx.MarkCourseAsTemplate(c, createdCourse.ID)
+		if err != nil {
+			return courseDTO.Course{}, fmt.Errorf("failed to mark course as template: %w", err)
+		}
 	}
 
 	phaseIDMap, err := copyCoursePhases(c, qtx, sourceCourseID, createdCourse.ID)

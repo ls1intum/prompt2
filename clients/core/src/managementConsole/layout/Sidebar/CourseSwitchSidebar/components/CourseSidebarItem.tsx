@@ -1,50 +1,36 @@
 import { SidebarMenuButton, SidebarMenuItem, useSidebar } from '@tumaet/prompt-ui-components'
-import { Course } from '@tumaet/prompt-shared-state'
-import DynamicIcon from '@/components/DynamicIcon'
-import { useMemo } from 'react'
+import type { Course } from '@tumaet/prompt-shared-state'
 import { useNavigate, useParams } from 'react-router-dom'
-
-// Todo move somewhere else
-const subtleColors = [
-  'bg-red-100',
-  'bg-yellow-100',
-  'bg-green-100',
-  'bg-blue-100',
-  'bg-indigo-100',
-  'bg-purple-100',
-  'bg-pink-100',
-  'bg-orange-100',
-  'bg-teal-100',
-  'bg-cyan-100',
-]
+import { CourseSidebarItemTooltip } from './CourseSidebarItemTooltip'
+import { CourseAvatar } from './CourseAvatar'
 
 interface CourseSidebarItemProps {
   course: Course
 }
 
-export const CourseSidebarItem = ({ course }: CourseSidebarItemProps): JSX.Element => {
+export const CourseSidebarItem = ({ course }: CourseSidebarItemProps) => {
   const { setOpen } = useSidebar()
   const navigate = useNavigate()
   const { courseId } = useParams<{ courseId: string }>()
 
   const isActive = course.id === courseId
-  const bgColor = course.studentReadableData?.['bg-color'] || subtleColors['bg-grey-100']
+  const bgColor = course.studentReadableData?.['bg-color'] || 'bg-gray-100'
   const iconName = course.studentReadableData?.['icon'] || 'graduation-cap'
 
-  const MemoizedIcon = useMemo(() => {
-    return (
-      <div className='size-6'>
-        <DynamicIcon name={iconName} />
-      </div>
-    )
-  }, [iconName])
+  const containerRing = isActive
+    ? course.template
+      ? 'after:absolute after:inset-0 after:rounded-lg after:border-2 after:border-dashed after:border-black'
+      : course.archived
+        ? 'after:absolute after:inset-0 after:rounded-lg after:border-2 after:border-muted-foreground'
+        : 'after:absolute after:inset-0 after:rounded-lg after:border-2 after:border-primary'
+    : ''
 
   return (
     <SidebarMenuItem key={course.id}>
       <SidebarMenuButton
         size='lg'
         tooltip={{
-          children: `${course.name} (${course.semesterTag})`,
+          children: <CourseSidebarItemTooltip course={course} />,
           hidden: false,
         }}
         onClick={() => {
@@ -55,21 +41,9 @@ export const CourseSidebarItem = ({ course }: CourseSidebarItemProps): JSX.Eleme
         className='min-w-12 min-h-12 p-0'
       >
         <div
-          className={`relative flex aspect-square size-12 items-center justify-center ${
-            isActive
-              ? 'after:absolute after:inset-0 after:rounded-lg after:border-2 after:border-primary'
-              : ''
-          }`}
+          className={`relative flex aspect-square size-12 items-center justify-center ${containerRing} ${course.archived ? 'opacity-60' : ''}`}
         >
-          <div
-            className={`
-                flex aspect-square items-center justify-center rounded-lg  text-gray-800
-                ${isActive ? 'size-12' : 'size-10'} 
-                ${bgColor}
-            `}
-          >
-            <div className='size-6'>{MemoizedIcon}</div>
-          </div>
+          <CourseAvatar bgColor={bgColor} iconName={iconName} isActive={isActive} />
         </div>
       </SidebarMenuButton>
     </SidebarMenuItem>

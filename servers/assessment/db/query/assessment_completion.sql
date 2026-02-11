@@ -1,3 +1,16 @@
+-- name: GetAllGrades :many
+SELECT course_participation_id, grade_suggestion
+FROM assessment_completion
+WHERE course_phase_id = $1
+  AND completed = true;
+
+-- name: GetStudentGrade :one
+SELECT grade_suggestion
+FROM assessment_completion
+WHERE course_participation_id = $1
+  AND course_phase_id = $2
+  AND completed = true;
+
 -- name: CreateOrUpdateAssessmentCompletion :exec
 INSERT INTO assessment_completion (course_participation_id,
                                    course_phase_id,

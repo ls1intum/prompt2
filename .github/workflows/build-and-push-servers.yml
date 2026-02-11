@@ -24,9 +24,13 @@ on:
         description: "The tag of the image that was built"
         value: ${{ jobs.self-team-allocation.outputs.image_tag }}
 
+permissions:
+  contents: read
+  packages: write
+
 jobs:
   core:
-    uses: ls1intum/.github/.github/workflows/build-and-push-docker-image.yml@v1.1.0
+    uses: ls1intum/.github/.github/workflows/build-and-push-docker-image.yml@v1.1.1
     with:
       image-name: ghcr.io/ls1intum/prompt2/prompt-server-core # Defaults to the repository name
       docker-file: servers/Dockerfile # Defaults to Dockerfile
@@ -34,7 +38,7 @@ jobs:
       tags: ${{ inputs.release_tag }}
     secrets: inherit
   intro-course:
-    uses: ls1intum/.github/.github/workflows/build-and-push-docker-image.yml@v1.1.0
+    uses: ls1intum/.github/.github/workflows/build-and-push-docker-image.yml@v1.1.1
     with:
       image-name: ghcr.io/ls1intum/prompt2/prompt-server-intro-course
       docker-file: servers/Dockerfile
@@ -42,7 +46,7 @@ jobs:
       tags: ${{ inputs.release_tag }}
     secrets: inherit
   team-allocation:
-    uses: ls1intum/.github/.github/workflows/build-and-push-docker-image.yml@v1.1.0
+    uses: ls1intum/.github/.github/workflows/build-and-push-docker-image.yml@v1.1.1
     with:
       image-name: ghcr.io/ls1intum/prompt2/prompt-server-team-allocation
       docker-file: servers/Dockerfile
@@ -50,7 +54,7 @@ jobs:
       tags: ${{ inputs.release_tag }}
     secrets: inherit
   assessment:
-    uses: ls1intum/.github/.github/workflows/build-and-push-docker-image.yml@v1.1.0
+    uses: ls1intum/.github/.github/workflows/build-and-push-docker-image.yml@v1.1.1
     with:
       image-name: ghcr.io/ls1intum/prompt2/prompt-server-assessment
       docker-file: servers/Dockerfile
@@ -58,7 +62,7 @@ jobs:
       tags: ${{ inputs.release_tag }}
     secrets: inherit
   self-team-allocation:
-      uses: ls1intum/.github/.github/workflows/build-and-push-docker-image.yml@v1.1.0
+      uses: ls1intum/.github/.github/workflows/build-and-push-docker-image.yml@v1.1.1
       with:
         image-name: ghcr.io/ls1intum/prompt2/prompt-server-self-team-allocation
         docker-file: servers/Dockerfile

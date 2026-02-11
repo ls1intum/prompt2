@@ -24,28 +24,33 @@ import {
   SelectTrigger,
   SelectValue,
   Input,
+  Textarea,
   useToast,
 } from '@tumaet/prompt-ui-components'
-import {
-  CourseType,
-  CourseTypeDetails,
-  UpdateCourseData,
-  useCourseStore,
-} from '@tumaet/prompt-shared-state'
+import { CourseType, CourseTypeDetails, useCourseStore } from '@tumaet/prompt-shared-state'
 import { EditCourseFormValues, editCourseSchema } from '@core/validations/editCourse'
 import { updateCourseData } from '@core/network/mutations/updateCourseData'
+import type { Course, UpdateCourseData } from '@tumaet/prompt-shared-state'
+import { IconSelector } from '../AddingCourse/components/IconSelector'
+import {
+  DEFAULT_COURSE_COLOR,
+  DEFAULT_COURSE_ICON,
+  courseAppearanceColors,
+} from '@core/managementConsole/courseOverview/constants/courseAppearance'
 
 interface CourseEditDialogProps {
   isOpen: boolean
   onClose: () => void
 }
 
-export const EditCourseDialog = ({ isOpen, onClose }: CourseEditDialogProps): JSX.Element => {
+export const EditCourseDialog = ({ isOpen, onClose }: CourseEditDialogProps) => {
   const { courseId } = useParams<{ courseId: string }>()
   const { courses } = useCourseStore()
-  const course = courses.find((c) => c.id === courseId)
+  const course = courses.find((c) => c.id === courseId) as Course | undefined
   const { toast } = useToast()
   const queryClient = useQueryClient()
+  const initialColor = (course?.studentReadableData?.['bg-color'] as string) || DEFAULT_COURSE_COLOR
+  const initialIcon = (course?.studentReadableData?.['icon'] as string) || DEFAULT_COURSE_ICON
 
   const form = useForm<EditCourseFormValues>({
     resolver: zodResolver(editCourseSchema),
@@ -56,6 +61,10 @@ export const EditCourseDialog = ({ isOpen, onClose }: CourseEditDialogProps): JS
       },
       courseType: course?.courseType,
       ects: course?.ects ?? 0,
+      shortDescription: course?.shortDescription || '',
+      longDescription: course?.longDescription || '',
+      color: initialColor,
+      icon: initialIcon,
     },
   })
 
@@ -94,80 +103,197 @@ export const EditCourseDialog = ({ isOpen, onClose }: CourseEditDialogProps): JS
       endDate: data.dateRange.to,
       courseType: data.courseType,
       ects: data.ects,
+      shortDescription: data.shortDescription,
+      longDescription: data.longDescription,
+      studentReadableData: {
+        icon: data.icon,
+        'bg-color': data.color,
+      },
     }
     mutateCourse(updateData)
     onClose()
   }
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose} aria-hidden='true'>
-      <DialogContent className='max-w-md'>
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className='max-w-2xl max-h-[90vh] overflow-y-auto'>
         <DialogHeader>
-          <DialogTitle>Edit {course?.name}</DialogTitle>
+          <DialogTitle className='text-2xl'>Edit {course?.name}</DialogTitle>
           <DialogDescription>The course name and semester tag cannot be changed.</DialogDescription>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-6'>
-            <FormField
-              control={form.control}
-              name='dateRange'
-              render={({ field }) => (
-                <FormItem className='flex flex-col'>
-                  <FormLabel>Course Duration</FormLabel>
-                  <DatePickerWithRange date={field.value} setDate={field.onChange} />
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name='courseType'
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Course Type</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder='Select a course type' />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {Object.values(CourseType).map((type) => (
-                        <SelectItem key={type} value={type}>
-                          {CourseTypeDetails[type as CourseType].name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name='ects'
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>ECTS</FormLabel>
-                  <FormControl>
-                    <Input
-                      type='number'
-                      placeholder='Enter ECTS'
-                      {...field}
-                      onChange={(e) => {
-                        const value = e.target.value
-                        field.onChange(value === '' ? '' : Number(value))
-                      }}
-                      value={field.value === 0 && !isEctsDisabled ? '' : field.value}
-                      disabled={isEctsDisabled}
-                      className='w-full'
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <DialogFooter>
+            {/* Course Basics Section */}
+            <div className='space-y-6'>
+              <div className='space-y-4'>
+                <div>
+                  <h3 className='text-sm font-semibold text-foreground'>Course Details</h3>
+                  <p className='text-sm text-muted-foreground mt-1'>
+                    Customize the basic information about this course
+                  </p>
+                </div>
+
+                <FormField
+                  control={form.control}
+                  name='dateRange'
+                  render={({ field }) => (
+                    <FormItem className='flex flex-col'>
+                      <FormLabel className='text-sm font-medium'>Course Duration</FormLabel>
+                      <DatePickerWithRange date={field.value} setDate={field.onChange} />
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <div className='grid grid-cols-2 gap-4'>
+                  <FormField
+                    control={form.control}
+                    name='courseType'
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className='text-sm font-medium'>Course Type</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder='Select a course type' />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {Object.values(CourseType).map((type) => (
+                              <SelectItem key={type} value={type}>
+                                {CourseTypeDetails[type as CourseType].name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name='ects'
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className='text-sm font-medium'>ECTS Credits</FormLabel>
+                        <FormControl>
+                          <Input
+                            type='number'
+                            placeholder='Enter ECTS'
+                            {...field}
+                            onChange={(e) => {
+                              const value = e.target.value
+                              field.onChange(value === '' ? '' : Number(value))
+                            }}
+                            value={field.value === 0 && !isEctsDisabled ? '' : field.value}
+                            disabled={isEctsDisabled}
+                            className='w-full'
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <FormField
+                  control={form.control}
+                  name='shortDescription'
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className='text-sm font-medium'>Short Description</FormLabel>
+                      <FormControl>
+                        <Input placeholder='One sentence summary' {...field} className='w-full' />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name='longDescription'
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className='text-sm font-medium'>Long Description</FormLabel>
+                      <FormControl>
+                        <Textarea
+                          placeholder='Share more context about this course'
+                          className='w-full min-h-[100px]'
+                          rows={4}
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              {/* Appearance Section */}
+              <div className='border-t pt-6 space-y-4'>
+                <div>
+                  <h3 className='text-sm font-semibold text-foreground'>Course Appearance</h3>
+                  <p className='text-sm text-muted-foreground mt-1'>
+                    Customize how this course appears to students
+                  </p>
+                </div>
+
+                <div className='grid grid-cols-2 gap-4'>
+                  <FormField
+                    control={form.control}
+                    name='color'
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className='text-sm font-medium'>Background Color</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder='Select a color' />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {courseAppearanceColors.map((color) => (
+                              <SelectItem key={color} value={color}>
+                                <div className='flex items-center gap-2'>
+                                  <div
+                                    className={`w-5 h-5 rounded border border-border ${color}`}
+                                  ></div>
+                                  <span className='capitalize'>{color.split('-')[1]}</span>
+                                </div>
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name='icon'
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className='text-sm font-medium'>Course Icon</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder='Select an icon' />
+                            </SelectTrigger>
+                          </FormControl>
+                          <IconSelector />
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </div>
+            </div>
+
+            <DialogFooter className='pt-2 gap-2'>
               <Button type='button' variant='outline' onClick={onClose}>
                 Cancel
               </Button>

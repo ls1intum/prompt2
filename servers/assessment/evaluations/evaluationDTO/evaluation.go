@@ -3,21 +3,23 @@ package evaluationDTO
 import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
+	"github.com/ls1intum/prompt2/servers/assessment/assessmentType"
 	"github.com/ls1intum/prompt2/servers/assessment/assessments/scoreLevel/scoreLevelDTO"
 	db "github.com/ls1intum/prompt2/servers/assessment/db/sqlc"
 )
 
 type Evaluation struct {
-	ID                          uuid.UUID                `json:"id"`
-	CourseParticipationID       uuid.UUID                `json:"courseParticipationID"`
-	CoursePhaseID               uuid.UUID                `json:"coursePhaseID"`
-	CompetencyID                uuid.UUID                `json:"competencyID"`
-	ScoreLevel                  scoreLevelDTO.ScoreLevel `json:"scoreLevel"`
-	AuthorCourseParticipationID uuid.UUID                `json:"authorCourseParticipationID"`
-	EvaluatedAt                 pgtype.Timestamptz       `json:"evaluatedAt"`
+	ID                          uuid.UUID                     `json:"id"`
+	CourseParticipationID       uuid.UUID                     `json:"courseParticipationID"`
+	CoursePhaseID               uuid.UUID                     `json:"coursePhaseID"`
+	CompetencyID                uuid.UUID                     `json:"competencyID"`
+	ScoreLevel                  scoreLevelDTO.ScoreLevel      `json:"scoreLevel"`
+	AuthorCourseParticipationID uuid.UUID                     `json:"authorCourseParticipationID"`
+	EvaluatedAt                 pgtype.Timestamptz            `json:"evaluatedAt"`
+	Type                        assessmentType.AssessmentType `json:"type"`
 }
 
-func MapToEvaluationDTO(evaluation db.Evaluation) Evaluation {
+func MapDBToEvaluationDTO(evaluation db.Evaluation) Evaluation {
 	return Evaluation{
 		ID:                          evaluation.ID,
 		CourseParticipationID:       evaluation.CourseParticipationID,
@@ -26,13 +28,14 @@ func MapToEvaluationDTO(evaluation db.Evaluation) Evaluation {
 		ScoreLevel:                  scoreLevelDTO.MapDBScoreLevelToDTO(evaluation.ScoreLevel),
 		AuthorCourseParticipationID: evaluation.AuthorCourseParticipationID,
 		EvaluatedAt:                 evaluation.EvaluatedAt,
+		Type:                        assessmentType.MapDBAssessmentTypeToDTO(evaluation.Type),
 	}
 }
 
 func MapToEvaluationDTOs(evaluations []db.Evaluation) []Evaluation {
 	result := make([]Evaluation, len(evaluations))
 	for i, evaluation := range evaluations {
-		result[i] = MapToEvaluationDTO(evaluation)
+		result[i] = MapDBToEvaluationDTO(evaluation)
 	}
 	return result
 }

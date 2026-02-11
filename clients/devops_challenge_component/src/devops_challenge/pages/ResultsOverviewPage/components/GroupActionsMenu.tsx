@@ -23,7 +23,7 @@ interface GroupActionsMenuProps {
   onClose: () => void
 }
 
-export const GroupActionsMenu = ({ selectedRows, onClose }: GroupActionsMenuProps): JSX.Element => {
+export const GroupActionsMenu = ({ selectedRows, onClose }: GroupActionsMenuProps) => {
   const [isOpen, setIsOpen] = useState(false)
   const [dialogState, setDialogState] = useState<{
     type: 'setPassed' | 'setFailed' | null

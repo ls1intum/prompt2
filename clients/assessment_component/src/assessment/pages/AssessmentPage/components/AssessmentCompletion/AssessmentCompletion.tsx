@@ -1,8 +1,6 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useParams } from 'react-router-dom'
 import { Lock, Unlock } from 'lucide-react'
-
-import { format } from 'date-fns'
 
 import {
   Button,
@@ -19,7 +17,10 @@ import { useAuthStore } from '@tumaet/prompt-shared-state'
 import { useCoursePhaseConfigStore } from '../../../../zustand/useCoursePhaseConfigStore'
 import { useStudentAssessmentStore } from '../../../../zustand/useStudentAssessmentStore'
 
+import { ActionItem } from '../../../../interfaces/actionItem'
+
 import { AssessmentCompletionDialog } from '../../../components/AssessmentCompletionDialog'
+import { DeadlineBadge } from '../../../components/badges'
 
 import { ActionItemPanel } from './components/ActionItemPanel'
 import { GradeSuggestion } from './components/GradeSuggestion'
@@ -28,9 +29,17 @@ import { useCreateOrUpdateAssessmentCompletion } from './hooks/useCreateOrUpdate
 import { useMarkAssessmentAsComplete } from './hooks/useMarkAssessmentAsComplete'
 import { useUnmarkAssessmentAsCompleted } from './hooks/useUnmarkAssessmentAsCompleted'
 
-import { validateGrade } from './utils/validateGrade'
+import { validateGrade } from '../../../utils/gradeConfig'
 
-export const AssessmentCompletion = () => {
+interface AssessmentCompletionProps {
+  readOnly?: boolean
+  actionItems?: ActionItem[]
+}
+
+export const AssessmentCompletion = ({
+  readOnly = false,
+  actionItems,
+}: AssessmentCompletionProps) => {
   const { phaseId } = useParams<{ phaseId: string }>()
 
   const { coursePhaseConfig } = useCoursePhaseConfigStore()
@@ -43,10 +52,19 @@ export const AssessmentCompletion = () => {
     assessmentCompletion?.gradeSuggestion?.toString() || '',
   )
 
+  const textareaRef = useRef<HTMLTextAreaElement>(null)
+
   useEffect(() => {
     setGeneralRemarks(assessmentCompletion?.comment || '')
     setGradeSuggestion(assessmentCompletion?.gradeSuggestion?.toString() || '')
   }, [assessmentCompletion])
+
+  useEffect(() => {
+    if (textareaRef.current) {
+      textareaRef.current.style.height = 'auto'
+      textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`
+    }
+  }, [generalRemarks])
 
   const [dialogOpen, setDialogOpen] = useState(false)
   const [error, setError] = useState<string | undefined>(undefined)
@@ -64,24 +82,24 @@ export const AssessmentCompletion = () => {
 
   const isPending = isCreatePending || isMarkPending || isUnmarkPending
 
-  // Check if deadline has passed
   const isDeadlinePassed = deadline ? new Date() > new Date(deadline) : false
 
   const { user } = useAuthStore()
   const userName = user ? `${user.firstName} ${user.lastName}` : 'Unknown User'
 
   const handleConfirm = () => {
+    if (readOnly) {
+      return
+    }
     const handleCompletion = async () => {
       try {
         if (assessmentCompletion?.completed ?? false) {
-          // Check if deadline has passed before unmarking
           if (isDeadlinePassed) {
             setError('Cannot unmark assessment as completed: deadline has passed.')
             return
           }
           await unmarkAsCompleted(courseParticipationID ?? '')
         } else {
-          // Validate grade before final submission
           const gradeValidation = validateGrade(gradeSuggestion)
           if (!gradeValidation.isValid) {
             setError(`Cannot complete assessment: ${gradeValidation.error}`)
@@ -98,7 +116,7 @@ export const AssessmentCompletion = () => {
           })
         }
         setDialogOpen(false)
-      } catch (err) {
+      } catch {
         setError('An error occurred while updating the assessment completion status.')
       }
     }
@@ -107,6 +125,9 @@ export const AssessmentCompletion = () => {
   }
 
   const handleSaveFormData = async (newRemarks: string, newGrade: string) => {
+    if (readOnly) {
+      return
+    }
     if (newRemarks.trim() || newGrade) {
       try {
         const gradeValidation = validateGrade(newGrade)
@@ -132,24 +153,33 @@ export const AssessmentCompletion = () => {
     }
   }
 
+  const isCompleted = readOnly || (assessmentCompletion?.completed ?? false)
+
   return (
     <div className='space-y-4'>
-      <h1 className='text-xl font-semibold tracking-tight'>Finalize your Assessment</h1>
+      <h1 className='text-xl font-semibold tracking-tight'>Assessment Summary</h1>
 
       <div className='grid grid-cols-1 lg:grid-cols-2 gap-4'>
         <div className='grid grid-cols-1 gap-4'>
-          <Card>
+          <Card className='flex flex-col flex-grow'>
             <CardHeader>
               <CardTitle>General Remarks</CardTitle>
+              {coursePhaseConfig?.actionItemsVisible && !readOnly && (
+                <p className='text-xs text-gray-500 dark:text-gray-400 mt-1'>
+                  These remarks will be visible to the student once results are released.
+                </p>
+              )}
             </CardHeader>
-            <CardContent>
+            <CardContent className='flex flex-col flex-grow'>
               <Textarea
+                ref={textareaRef}
                 placeholder='What did this person do particularly well?'
-                className='min-h-[100px]'
+                className='w-full resize-none min-h-[100px] overflow-hidden'
+                rows={4}
                 value={generalRemarks}
                 onChange={(e) => setGeneralRemarks(e.target.value)}
                 onBlur={() => handleSaveFormData(generalRemarks, gradeSuggestion)}
-                disabled={assessmentCompletion?.completed ?? false}
+                disabled={isCompleted}
               />
             </CardContent>
           </Card>
@@ -159,68 +189,61 @@ export const AssessmentCompletion = () => {
               setGradeSuggestion(value)
               handleSaveFormData(generalRemarks, value)
             }}
+            readOnly={readOnly}
           />
         </div>
 
-        <ActionItemPanel />
+        <ActionItemPanel readOnly={readOnly} actionItems={actionItems} />
       </div>
 
-      {error && !dialogOpen && (
+      {error && !dialogOpen && !readOnly && (
         <Alert variant='destructive' className='mt-4'>
           <AlertDescription>{error}</AlertDescription>
         </Alert>
       )}
 
-      <div className='flex justify-between items-center mt-8'>
-        <div className='flex flex-col'>
-          {deadline && (
-            <div className='text-muted-foreground'>
-              Deadline: {deadline ? format(new Date(deadline), 'dd.MM.yyyy') : 'No deadline set'}
-              {isDeadlinePassed && (
-                <span className='text-red-600 ml-2 font-medium'>(Deadline has passed)</span>
+      {!readOnly && (
+        <>
+          <div className='flex justify-between items-center mt-8'>
+            <div className='flex flex-col'>{deadline && <DeadlineBadge deadline={deadline} />}</div>
+
+            <Button
+              size='sm'
+              disabled={isPending || (assessmentCompletion?.completed && isDeadlinePassed)}
+              onClick={handleButtonClick}
+            >
+              {assessmentCompletion?.completed ? (
+                <span className='flex items-center gap-1'>
+                  <Unlock className='h-3.5 w-3.5' />
+                  Unmark as Final
+                </span>
+              ) : (
+                <span className='flex items-center gap-1'>
+                  <Lock className='h-3.5 w-3.5' />
+                  Mark Assessment as Final
+                </span>
               )}
-            </div>
-          )}
-          {isDeadlinePassed && assessmentCompletion?.completed && (
-            <div className='text-sm text-red-600 mt-1'>
-              Assessments cannot be unmarked as final after the deadline has passed.
-            </div>
-          )}
-        </div>
+            </Button>
+          </div>
 
-        <Button
-          size='sm'
-          disabled={isPending || (assessmentCompletion?.completed && isDeadlinePassed)}
-          onClick={handleButtonClick}
-        >
-          {assessmentCompletion?.completed ? (
-            <span className='flex items-center gap-1'>
-              <Unlock className='h-3.5 w-3.5' />
-              Unmark as Final
-            </span>
-          ) : (
-            <span className='flex items-center gap-1'>
-              <Lock className='h-3.5 w-3.5' />
-              Mark Assessment as Final
-            </span>
-          )}
-        </Button>
-      </div>
-
-      <AssessmentCompletionDialog
-        completed={assessmentCompletion?.completed ?? false}
-        completedAt={
-          assessmentCompletion?.completedAt ? new Date(assessmentCompletion.completedAt) : undefined
-        }
-        author={assessmentCompletion?.author}
-        isPending={isPending}
-        dialogOpen={dialogOpen}
-        setDialogOpen={setDialogOpen}
-        error={error}
-        setError={setError}
-        handleConfirm={handleConfirm}
-        isDeadlinePassed={isDeadlinePassed}
-      />
+          <AssessmentCompletionDialog
+            completed={assessmentCompletion?.completed ?? false}
+            completedAt={
+              assessmentCompletion?.completedAt
+                ? new Date(assessmentCompletion.completedAt)
+                : undefined
+            }
+            author={assessmentCompletion?.author}
+            isPending={isPending}
+            dialogOpen={dialogOpen}
+            setDialogOpen={setDialogOpen}
+            error={error}
+            setError={setError}
+            handleConfirm={handleConfirm}
+            isDeadlinePassed={isDeadlinePassed}
+          />
+        </>
+      )}
     </div>
   )
 }

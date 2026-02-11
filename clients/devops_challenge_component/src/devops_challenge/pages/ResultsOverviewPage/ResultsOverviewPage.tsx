@@ -38,7 +38,7 @@ import {
   useCustomElementWidth,
 } from '@tumaet/prompt-ui-components'
 
-export const ResultsOverviewPage = (): JSX.Element => {
+export const ResultsOverviewPage = () => {
   const [sorting, setSorting] = useState<SortingState>([])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
   const [rowSelection, setRowSelection] = useState({})

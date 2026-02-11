@@ -4,7 +4,7 @@ title: "Production Setup"
 
 # Production Setup
 
-The general setup is described in the [Contributor Setup Guide](#contributor.setup-guide). This guide focuses on the dockerized setup process for PROMPT. The PROMPT setup process is straightforward and requires only a few environment variables to adjust.
+The general setup is described in the [Contributor Setup Guide](/contributor/setup). This guide focuses on the dockerized setup process for PROMPT. The PROMPT setup process is straightforward and requires only a few environment variables to adjust.
 
 There are three crucial steps for setting up PROMPT:
 
@@ -38,7 +38,7 @@ PROMPT uses Keycloak for authentication and user rights management. In particula
     - **`<SemesterTag>-<CourseName>-Lecturer`**  
       Group: `Lecturer` (a subgroup of the course group). This role grants admin rights on the course. The course creator is automatically added to this role.
     - **`<SemesterTag>-<CourseName>-Editor`**  
-      Group: `Editor` (a subgroup of the course group). This role has limited user rights. For more details, refer to the [Contributor Guide](#contributor.setup-guide).
+    Group: `Editor` (a subgroup of the course group). This role has limited user rights. For more details, refer to the [Contributor Guide](/contributor/setup).
 
 There are two options for setting up Keycloak:
 
@@ -95,7 +95,7 @@ Follow these steps:
 
 ### Option 2: Use a Standalone Keycloak Instance for PROMPT
 
-For this option, refer to the [Contributor Setup Guide](#contributor.setup-guide) on how to configure a standalone Keycloak instance and the `keycloakConfig.json`.
+For this option, refer to the [Contributor Setup Guide](/contributor/setup) on how to configure a standalone Keycloak instance and the `keycloakConfig.json`.
 
 Keep in mind:
 
@@ -120,8 +120,6 @@ You can use any SMTP server by adjusting your environment file with the correspo
 ---
 
 ## 3. Container Setup
-
-(adjust-environment-variables)=
 
 ### 3.1 Adjust Environment Variables
 
@@ -246,3 +244,4 @@ To start the docker containers, run the following command (adjust `<path to your
 
 ```bash
 docker compose -f docker-compose.prod.yml --env-file=<path to your env file> up --pull=always -d
+```

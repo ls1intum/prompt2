@@ -17,17 +17,24 @@ import { CreateCategoryRequest } from '../../../../../interfaces/category'
 
 import { useCreateCategory } from '../hooks/useCreateCategory'
 
-export const CreateCategoryForm = ({ assessmentTemplateID }: { assessmentTemplateID: string }) => {
+export const CreateCategoryForm = ({
+  assessmentSchemaID,
+  onCancel,
+}: {
+  assessmentSchemaID: string
+  onCancel?: () => void
+}) => {
   const [error, setError] = useState<string | undefined>(undefined)
   const { register, handleSubmit, reset } = useForm<CreateCategoryRequest>()
   const { mutate, isPending } = useCreateCategory(setError)
 
   const onSubmit = (data: CreateCategoryRequest) => {
     mutate(
-      { ...data, assessmentTemplateID },
+      { ...data, assessmentSchemaID },
       {
         onSuccess: () => {
           reset()
+          onCancel?.()
         },
       },
     )
@@ -43,28 +50,30 @@ export const CreateCategoryForm = ({ assessmentTemplateID }: { assessmentTemplat
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit(onSubmit)} className='space-y-4'>
-          <div className='space-y-2'>
-            <Label htmlFor='name' className='text-sm font-medium'>
-              Category Name
-            </Label>
-            <Input
-              id='name'
-              placeholder='Enter category name'
-              className='focus-visible:ring-1'
-              {...register('name', { required: true })}
-            />
-          </div>
+          <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
+            <div className='space-y-2'>
+              <Label htmlFor='name' className='text-sm font-medium'>
+                Category Name
+              </Label>
+              <Input
+                id='name'
+                placeholder='Enter category name'
+                className='focus-visible:ring-1'
+                {...register('name', { required: true })}
+              />
+            </div>
 
-          <div className='space-y-2'>
-            <Label htmlFor='shortName' className='text-sm font-medium'>
-              Short Category Name
-            </Label>
-            <Input
-              id='shortName'
-              placeholder='Enter short category name'
-              className='focus-visible:ring-1'
-              {...register('shortName', { required: true })}
-            />
+            <div className='space-y-2'>
+              <Label htmlFor='shortName' className='text-sm font-medium'>
+                Short Category Name
+              </Label>
+              <Input
+                id='shortName'
+                placeholder='Enter short category name'
+                className='focus-visible:ring-1'
+                {...register('shortName', { required: true })}
+              />
+            </div>
           </div>
 
           <div className='space-y-2'>
@@ -103,9 +112,22 @@ export const CreateCategoryForm = ({ assessmentTemplateID }: { assessmentTemplat
             </div>
           )}
 
-          <Button type='submit' disabled={isPending} className='w-full sm:w-auto'>
-            {isPending ? 'Creating...' : 'Create Category'}
-          </Button>
+          <div className='flex gap-2'>
+            <Button type='submit' disabled={isPending} className='flex-1'>
+              {isPending ? 'Creating...' : 'Create Category'}
+            </Button>
+            {onCancel && (
+              <Button
+                type='button'
+                variant='outline'
+                onClick={onCancel}
+                disabled={isPending}
+                className='flex-1'
+              >
+                Cancel
+              </Button>
+            )}
+          </div>
         </form>
       </CardContent>
     </Card>

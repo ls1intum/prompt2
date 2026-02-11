@@ -3,11 +3,17 @@ package course
 import (
 	"context"
 	"errors"
+	"unicode/utf8"
 
 	"github.com/google/uuid"
 	"github.com/ls1intum/prompt2/servers/core/course/courseDTO"
 	"github.com/ls1intum/prompt2/servers/core/coursePhase"
 	log "github.com/sirupsen/logrus"
+)
+
+const (
+	maxShortDescriptionLength = 255
+	maxLongDescriptionLength  = 5000
 )
 
 func validateCreateCourse(c courseDTO.CreateCourse) error {
@@ -26,10 +32,12 @@ func validateCreateCourse(c courseDTO.CreateCourse) error {
 		log.Error(errorMessage)
 		return errors.New(errorMessage)
 	}
-	if c.StartDate.Time.After(c.EndDate.Time) {
-		errorMessage := "start date must be before end date"
-		log.Error(errorMessage)
-		return errors.New(errorMessage)
+	if !c.Template {
+		if c.StartDate.Time.After(c.EndDate.Time) {
+			errorMessage := "start date must be before end date"
+			log.Error(errorMessage)
+			return errors.New(errorMessage)
+		}
 	}
 	if !c.SemesterTag.Valid || c.SemesterTag.String == "" {
 		errorMessage := "semester tag is required"
@@ -38,6 +46,18 @@ func validateCreateCourse(c courseDTO.CreateCourse) error {
 	}
 	if c.CourseType == "" {
 		errorMessage := "course type is required"
+		log.Error(errorMessage)
+		return errors.New(errorMessage)
+	}
+
+	if c.ShortDescription.Valid && utf8.RuneCountInString(c.ShortDescription.String) > maxShortDescriptionLength {
+		errorMessage := "short description must be 255 characters or fewer"
+		log.Error(errorMessage)
+		return errors.New(errorMessage)
+	}
+
+	if c.LongDescription.Valid && utf8.RuneCountInString(c.LongDescription.String) > maxLongDescriptionLength {
+		errorMessage := "long description must be 5000 characters or fewer"
 		log.Error(errorMessage)
 		return errors.New(errorMessage)
 	}
@@ -111,6 +131,18 @@ func validateUpdateCourseData(c courseDTO.UpdateCourseData) error {
 			log.Error(errorMessage)
 			return errors.New(errorMessage)
 		}
+	}
+
+	if c.ShortDescription.Valid && utf8.RuneCountInString(c.ShortDescription.String) > maxShortDescriptionLength {
+		errorMessage := "short description must be 255 characters or fewer"
+		log.Error(errorMessage)
+		return errors.New(errorMessage)
+	}
+
+	if c.LongDescription.Valid && utf8.RuneCountInString(c.LongDescription.String) > maxLongDescriptionLength {
+		errorMessage := "long description must be 5000 characters or fewer"
+		log.Error(errorMessage)
+		return errors.New(errorMessage)
 	}
 	return nil
 }

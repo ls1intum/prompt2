@@ -9,6 +9,8 @@ import (
 	"github.com/stretchr/testify/suite"
 
 	"github.com/ls1intum/prompt2/servers/assessment/assessments/actionItem/actionItemDTO"
+	"github.com/ls1intum/prompt2/servers/assessment/assessments/assessmentCompletion"
+	"github.com/ls1intum/prompt2/servers/assessment/coursePhaseConfig"
 	"github.com/ls1intum/prompt2/servers/assessment/testutils"
 )
 
@@ -35,8 +37,13 @@ func (suite *ActionItemServiceTestSuite) SetupSuite() {
 	}
 	ActionItemServiceSingleton = &suite.actionItemService
 
-	// Generate test UUIDs
-	suite.testCoursePhaseID = uuid.New()
+	// Initialize required singletons
+	assessmentCompletion.AssessmentCompletionServiceSingleton = &assessmentCompletion.AssessmentCompletionService{}
+	coursePhaseConfig.CoursePhaseConfigSingleton = coursePhaseConfig.NewCoursePhaseConfigService(*testDB.Queries, testDB.Conn)
+
+	// Use predefined test UUIDs from the database dump
+	// This phase has assessment open (start in past, deadline in future)
+	suite.testCoursePhaseID = uuid.MustParse("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa")
 	suite.testCourseParticipationID = uuid.New()
 	suite.testActionItemID = uuid.New()
 }
@@ -137,7 +144,7 @@ func (suite *ActionItemServiceTestSuite) TestDeleteActionItemNonExistent() {
 
 func (suite *ActionItemServiceTestSuite) TestListActionItemsForCoursePhase() {
 	// Create multiple action items for the same course phase
-	testCoursePhaseID := uuid.New()
+	testCoursePhaseID := suite.testCoursePhaseID
 
 	actionItems := []actionItemDTO.CreateActionItemRequest{
 		{
@@ -173,7 +180,7 @@ func (suite *ActionItemServiceTestSuite) TestListActionItemsForCoursePhase() {
 
 func (suite *ActionItemServiceTestSuite) TestListActionItemsForStudentInPhase() {
 	// Create action items for a specific student in a course phase
-	testCoursePhaseID := uuid.New()
+	testCoursePhaseID := suite.testCoursePhaseID
 	testStudentID := uuid.New()
 
 	actionItems := []actionItemDTO.CreateActionItemRequest{
@@ -217,7 +224,7 @@ func (suite *ActionItemServiceTestSuite) TestListActionItemsForStudentInPhase() 
 
 func (suite *ActionItemServiceTestSuite) TestCountActionItemsForStudentInPhase() {
 	// Create action items for a specific student in a course phase
-	testCoursePhaseID := uuid.New()
+	testCoursePhaseID := suite.testCoursePhaseID
 	testStudentID := uuid.New()
 
 	actionItems := []actionItemDTO.CreateActionItemRequest{
@@ -261,6 +268,125 @@ func (suite *ActionItemServiceTestSuite) TestCountActionItemsForStudentInPhaseEm
 	count, err := CountActionItemsForStudentInPhase(suite.suiteCtx, nonExistentStudentID, nonExistentCoursePhaseID)
 	assert.NoError(suite.T(), err, "Should be able to count action items even when none exist")
 	assert.Equal(suite.T(), int64(0), count, "Should return count of 0 for non-existent student/phase")
+}
+
+func (suite *ActionItemServiceTestSuite) TestGetAllActionItemsForCoursePhaseCommunication() {
+	// Create multiple action items for different course participation IDs in the same course phase
+	testCoursePhaseID := suite.testCoursePhaseID
+	testStudentID1 := uuid.New()
+	testStudentID2 := uuid.New()
+
+	actionItems := []actionItemDTO.CreateActionItemRequest{
+		{
+			CoursePhaseID:         testCoursePhaseID,
+			CourseParticipationID: testStudentID1,
+			Action:                "Student 1 - Action 1",
+			Author:                "author1@example.com",
+		},
+		{
+			CoursePhaseID:         testCoursePhaseID,
+			CourseParticipationID: testStudentID1,
+			Action:                "Student 1 - Action 2",
+			Author:                "author1@example.com",
+		},
+		{
+			CoursePhaseID:         testCoursePhaseID,
+			CourseParticipationID: testStudentID2,
+			Action:                "Student 2 - Action 1",
+			Author:                "author2@example.com",
+		},
+	}
+
+	// Create the action items
+	for _, item := range actionItems {
+		err := CreateActionItem(suite.suiteCtx, item)
+		assert.NoError(suite.T(), err)
+	}
+
+	// Get all action items grouped by course participation ID
+	retrievedItems, err := GetAllActionItemsForCoursePhaseCommunication(suite.suiteCtx, testCoursePhaseID)
+	assert.NoError(suite.T(), err, "Should be able to get all action items for course phase communication")
+	assert.GreaterOrEqual(suite.T(), len(retrievedItems), 2, "Should return at least 2 course participation groups")
+
+	// Verify the structure - should be grouped by course participation ID
+	foundStudent1 := false
+	foundStudent2 := false
+	for _, item := range retrievedItems {
+		if item.CourseParticipationID == testStudentID1 {
+			foundStudent1 = true
+			assert.GreaterOrEqual(suite.T(), len(item.ActionItems), 2, "Student 1 should have at least 2 action items")
+		}
+		if item.CourseParticipationID == testStudentID2 {
+			foundStudent2 = true
+			assert.GreaterOrEqual(suite.T(), len(item.ActionItems), 1, "Student 2 should have at least 1 action item")
+		}
+	}
+	assert.True(suite.T(), foundStudent1, "Should find action items for student 1")
+	assert.True(suite.T(), foundStudent2, "Should find action items for student 2")
+}
+
+func (suite *ActionItemServiceTestSuite) TestGetAllActionItemsForCoursePhaseCommunicationEmpty() {
+	// Test getting action items for a course phase with no action items
+	nonExistentCoursePhaseID := uuid.New()
+
+	retrievedItems, err := GetAllActionItemsForCoursePhaseCommunication(suite.suiteCtx, nonExistentCoursePhaseID)
+	assert.NoError(suite.T(), err, "Should not return error for non-existent course phase")
+	assert.Equal(suite.T(), 0, len(retrievedItems), "Should return empty array for non-existent course phase")
+}
+
+func (suite *ActionItemServiceTestSuite) TestGetStudentActionItemsForCoursePhaseCommunication() {
+	// Create action items for a specific student in a course phase
+	testCoursePhaseID := suite.testCoursePhaseID
+	testStudentID := uuid.New()
+
+	actionItems := []actionItemDTO.CreateActionItemRequest{
+		{
+			CoursePhaseID:         testCoursePhaseID,
+			CourseParticipationID: testStudentID,
+			Action:                "Communication Action 1",
+			Author:                "author1@example.com",
+		},
+		{
+			CoursePhaseID:         testCoursePhaseID,
+			CourseParticipationID: testStudentID,
+			Action:                "Communication Action 2",
+			Author:                "author2@example.com",
+		},
+	}
+
+	// Create the action items
+	for _, item := range actionItems {
+		err := CreateActionItem(suite.suiteCtx, item)
+		assert.NoError(suite.T(), err)
+	}
+
+	// Get action items for the specific student
+	retrievedItems, err := GetStudentActionItemsForCoursePhaseCommunication(suite.suiteCtx, testStudentID, testCoursePhaseID)
+	assert.NoError(suite.T(), err, "Should be able to get student action items for course phase communication")
+	assert.GreaterOrEqual(suite.T(), len(retrievedItems), 2, "Should return at least 2 action items")
+
+	// Verify the returned items are strings (action text only)
+	expectedActions := []string{"Communication Action 1", "Communication Action 2"}
+	for _, expectedAction := range expectedActions {
+		found := false
+		for _, retrievedAction := range retrievedItems {
+			if retrievedAction == expectedAction {
+				found = true
+				break
+			}
+		}
+		assert.True(suite.T(), found, "Should find expected action: %s", expectedAction)
+	}
+}
+
+func (suite *ActionItemServiceTestSuite) TestGetStudentActionItemsForCoursePhaseCommunicationEmpty() {
+	// Test getting action items for a student with no action items
+	nonExistentStudentID := uuid.New()
+	nonExistentCoursePhaseID := uuid.New()
+
+	retrievedItems, err := GetStudentActionItemsForCoursePhaseCommunication(suite.suiteCtx, nonExistentStudentID, nonExistentCoursePhaseID)
+	assert.NoError(suite.T(), err, "Should not return error for non-existent student/phase")
+	assert.Equal(suite.T(), 0, len(retrievedItems), "Should return empty array for non-existent student/phase")
 }
 
 func TestActionItemServiceTestSuite(t *testing.T) {

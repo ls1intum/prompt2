@@ -31,8 +31,15 @@ func setupCourseRouter(router *gin.RouterGroup, authMiddleware func() gin.Handle
 	course.GET("/:uuid/phase_data_graph", permissionIDMiddleware(permissionValidation.PromptAdmin, permissionValidation.CourseLecturer, permissionValidation.CourseEditor), getPhaseDataGraph)
 	course.PUT("/:uuid/phase_data_graph", permissionIDMiddleware(permissionValidation.PromptAdmin, permissionValidation.CourseLecturer), updatePhaseDataGraph)
 
+	course.PUT("/:uuid/archive", permissionIDMiddleware(permissionValidation.PromptAdmin, permissionValidation.CourseLecturer, permissionValidation.CourseEditor), archiveCourse)
+
 	course.PUT("/:uuid", permissionIDMiddleware(permissionValidation.PromptAdmin, permissionValidation.CourseLecturer), updateCourseData)
 	course.GET("/self", getOwnCourses)
+
+	course.PUT("/:uuid/template", permissionIDMiddleware(permissionValidation.PromptAdmin, permissionValidation.CourseLecturer), updateCourseTemplateStatus)
+	course.GET("/:uuid/template", permissionIDMiddleware(permissionValidation.PromptAdmin, permissionValidation.CourseLecturer), checkCourseTemplateStatus)
+
+	course.GET("/template", permissionRoleMiddleware(permissionValidation.PromptAdmin, permissionValidation.CourseLecturer), getTemplateCourses)
 
 	course.DELETE("/:uuid", permissionIDMiddleware(permissionValidation.PromptAdmin, permissionValidation.CourseLecturer), deleteCourse)
 }
@@ -347,6 +354,44 @@ func parseAndValidateMetaDataGraph(c *gin.Context) ([]courseDTO.MetaDataGraphIte
 	return newGraph, courseID, nil
 }
 
+// archiveCourse godoc
+// @Summary Archive or unarchive a course
+// @Description Set archived=true (with archived_on=NOW()) or archived=false (with archived_on=NULL)
+// @Tags courses
+// @Accept json
+// @Produce json
+// @Param uuid path string true "Course UUID"
+// @Param update body courseDTO.CourseArchiveStatus true "Archive status update"
+// @Success 200 {object} courseDTO.Course "Updated course"
+// @Failure 400 {object} utils.ErrorResponse
+// @Failure 500 {object} utils.ErrorResponse
+// @Router /courses/{uuid}/archive [put]
+func archiveCourse(c *gin.Context) {
+	courseID, err := uuid.Parse(c.Param("uuid"))
+	if err != nil {
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	var update courseDTO.CourseArchiveStatus
+	if err := c.BindJSON(&update); err != nil {
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	updatedCourse, err := UpdateCourseArchiveStatus(c, courseID, update.Archived)
+	if err != nil {
+		log.Error(err)
+		handleError(
+			c,
+			http.StatusInternalServerError,
+			errors.New("failed to update course archive status"),
+		)
+		return
+	}
+
+	c.JSON(http.StatusOK, updatedCourse)
+}
 // updateCourseData godoc
 // @Summary Update course data
 // @Description Update the data for a course
@@ -413,6 +458,97 @@ func deleteCourse(c *gin.Context) {
 	}
 
 	c.Status(http.StatusOK)
+}
+
+// updateCourseTemplateStatus godoc
+// @Summary Update course template status
+// @Description Update whether a course is marked as a template
+// @Tags courses
+// @Accept json
+// @Produce json
+// @Param uuid path string true "Course UUID"
+// @Param update body courseDTO.CourseTemplateStatus true "Template status update"
+// @Success 200 {string} string "OK"
+// @Failure 400 {object} utils.ErrorResponse
+// @Failure 500 {object} utils.ErrorResponse
+// @Router /courses/{uuid}/template [put]
+func updateCourseTemplateStatus(c *gin.Context) {
+	courseID, err := uuid.Parse(c.Param("uuid"))
+	if err != nil {
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	var update courseDTO.CourseTemplateStatus
+	if err := c.BindJSON(&update); err != nil {
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	err = UpdateCourseTemplateStatus(c, courseID, update.IsTemplate)
+	if err != nil {
+		log.Error(err)
+		handleError(c, http.StatusInternalServerError, errors.New("failed to update course template status"))
+		return
+	}
+
+	c.Status(http.StatusOK)
+}
+
+// getTemplateCourses godoc
+// @Summary Get template courses
+// @Description Get all courses marked as templates accessible to the user
+// @Tags courses
+// @Produce json
+// @Success 200 {array} courseDTO.Course
+// @Failure 403 {object} utils.ErrorResponse
+// @Failure 500 {object} utils.ErrorResponse
+// @Router /courses/template [get]
+func getTemplateCourses(c *gin.Context) {
+	rolesVal, exists := c.Get("userRoles")
+	if !exists {
+		handleError(c, http.StatusForbidden, errors.New("missing user roles"))
+		return
+	}
+
+	userRoles := rolesVal.(map[string]bool)
+
+	courses, err := GetTemplateCourses(c, userRoles)
+	if err != nil {
+		handleError(c, http.StatusInternalServerError, err)
+		return
+	}
+
+	c.IndentedJSON(http.StatusOK, courses)
+}
+
+// checkCourseTemplateStatus godoc
+// @Summary Check course template status
+// @Description Get the template status of a course
+// @Tags courses
+// @Produce json
+// @Param uuid path string true "Course UUID"
+// @Success 200 {object} courseDTO.CourseTemplateStatus
+// @Failure 400 {object} utils.ErrorResponse
+// @Failure 500 {object} utils.ErrorResponse
+// @Router /courses/{uuid}/template [get]
+func checkCourseTemplateStatus(c *gin.Context) {
+	courseID, err := uuid.Parse(c.Param("uuid"))
+	if err != nil {
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	isTemplate, err := CheckCourseTemplateStatus(c, courseID)
+	if err != nil {
+		log.Error(err)
+		handleError(c, http.StatusInternalServerError, errors.New("failed to check if course is template"))
+		return
+	}
+
+	c.IndentedJSON(http.StatusOK, courseDTO.CourseTemplateStatus{
+		IsTemplate: isTemplate,
+	})
 }
 
 func handleError(c *gin.Context, statusCode int, err error) {

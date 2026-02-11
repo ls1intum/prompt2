@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
@@ -12,7 +13,7 @@ import (
 	"github.com/ls1intum/prompt2/servers/core/coursePhase/coursePhaseDTO"
 	db "github.com/ls1intum/prompt2/servers/core/db/sqlc"
 	"github.com/ls1intum/prompt2/servers/core/permissionValidation"
-	"github.com/ls1intum/prompt2/servers/core/utils"
+	promptSDK "github.com/ls1intum/prompt-sdk"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -152,7 +153,7 @@ func CreateCourse(ctx context.Context, course courseDTO.CreateCourse, requesterI
 	if err != nil {
 		return courseDTO.Course{}, err
 	}
-	defer utils.DeferRollback(tx, ctx)
+	defer promptSDK.DeferDBRollback(tx, ctx)
 	qtx := CourseServiceSingleton.queries.WithTx(tx)
 
 	createCourseParams, err := course.GetDBModel()
@@ -161,6 +162,10 @@ func CreateCourse(ctx context.Context, course courseDTO.CreateCourse, requesterI
 	}
 
 	createCourseParams.ID = uuid.New()
+	if createCourseParams.Template {
+		createCourseParams.StartDate = pgtype.Date{Valid: false}
+		createCourseParams.EndDate = pgtype.Date{Valid: false}
+	}
 	createdCourse, err := qtx.CreateCourse(ctx, createCourseParams)
 	if err != nil {
 		return courseDTO.Course{}, err
@@ -184,7 +189,7 @@ func UpdateCoursePhaseOrder(ctx context.Context, courseID uuid.UUID, graphUpdate
 	if err != nil {
 		return err
 	}
-	defer utils.DeferRollback(tx, ctx)
+	defer promptSDK.DeferDBRollback(tx, ctx)
 	qtx := CourseServiceSingleton.queries.WithTx(tx)
 
 	// delete all previous connections
@@ -284,7 +289,7 @@ func UpdateParticipationDataGraph(ctx context.Context, courseID uuid.UUID, graph
 	if err != nil {
 		return err
 	}
-	defer utils.DeferRollback(tx, ctx)
+	defer promptSDK.DeferDBRollback(tx, ctx)
 	qtx := CourseServiceSingleton.queries.WithTx(tx)
 
 	// delete all previous connections
@@ -319,7 +324,7 @@ func UpdatePhaseDataGraph(ctx context.Context, courseID uuid.UUID, graphUpdate [
 	if err != nil {
 		return err
 	}
-	defer utils.DeferRollback(tx, ctx)
+	defer promptSDK.DeferDBRollback(tx, ctx)
 	qtx := CourseServiceSingleton.queries.WithTx(tx)
 
 	// delete all previous connections
@@ -347,6 +352,44 @@ func UpdatePhaseDataGraph(ctx context.Context, courseID uuid.UUID, graphUpdate [
 	}
 	return nil
 
+}
+
+func UpdateCourseArchiveStatus(
+	ctx context.Context,
+	courseID uuid.UUID,
+	archived bool,
+) (courseDTO.Course, error) {
+	ctxWithTimeout, cancel := db.GetTimeoutContext(ctx)
+	defer cancel()
+
+	var archivedOn pgtype.Timestamptz
+	if archived {
+		archivedOn = pgtype.Timestamptz{
+			Time:  time.Now(),
+			Valid: true,
+		}
+	}
+
+	res, err := CourseServiceSingleton.queries.ArchiveCourse(
+		ctxWithTimeout,
+		db.ArchiveCourseParams{
+			ID:         courseID,
+			Archived:   archived,
+			ArchivedOn: archivedOn,
+		},
+	)
+	if err != nil {
+		log.Error(err)
+		return courseDTO.Course{}, errors.New("failed to update course archive status")
+	}
+
+	course, err := courseDTO.GetCourseDTOFromDBModel(res)
+	if err != nil {
+		log.Error(err)
+		return courseDTO.Course{}, errors.New("failed to map course dto")
+	}
+
+	return course, nil
 }
 
 func UpdateCourseData(ctx context.Context, courseID uuid.UUID, courseData courseDTO.UpdateCourseData) error {
@@ -381,4 +424,78 @@ func DeleteCourse(ctx context.Context, courseID uuid.UUID) error {
 	}
 
 	return nil
+}
+
+func UpdateCourseTemplateStatus(ctx context.Context, courseID uuid.UUID, isTemplate bool) error {
+	ctxWithTimeout, cancel := db.GetTimeoutContext(ctx)
+	defer cancel()
+
+	if isTemplate {
+		err := CourseServiceSingleton.queries.MarkCourseAsTemplate(ctxWithTimeout, courseID)
+		if err != nil {
+			log.Error(err)
+			return errors.New("failed to mark course as template")
+		}
+	} else {
+		err := CourseServiceSingleton.queries.UnmarkCourseAsTemplate(ctxWithTimeout, courseID)
+		if err != nil {
+			log.Error(err)
+			return errors.New("failed to unmark course as template")
+		}
+	}
+
+	return nil
+}
+
+func GetTemplateCourses(ctx context.Context, userRoles map[string]bool) ([]courseDTO.Course, error) {
+	ctxWithTimeout, cancel := db.GetTimeoutContext(ctx)
+	defer cancel()
+
+	var courses []db.Course
+	var err error
+	if userRoles[permissionValidation.PromptAdmin] {
+		courses, err = CourseServiceSingleton.queries.GetTemplateCoursesAdmin(ctxWithTimeout)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		userRolesArray := []string{}
+		for key, value := range userRoles {
+			if value {
+				userRolesArray = append(userRolesArray, key)
+			}
+		}
+		coursesRestricted, err := CourseServiceSingleton.queries.GetTemplateCoursesRestricted(ctxWithTimeout, userRolesArray)
+		if err != nil {
+			return nil, err
+		}
+
+		for _, course := range coursesRestricted {
+			courses = append(courses, db.Course(course))
+		}
+	}
+
+	dtoCourses := make([]courseDTO.Course, 0, len(courses))
+	for _, course := range courses {
+		dtoCourse, err := courseDTO.GetCourseDTOFromDBModel(course)
+		if err != nil {
+			return nil, err
+		}
+		dtoCourses = append(dtoCourses, dtoCourse)
+	}
+
+	return dtoCourses, nil
+}
+
+func CheckCourseTemplateStatus(ctx context.Context, courseID uuid.UUID) (bool, error) {
+	ctxWithTimeout, cancel := db.GetTimeoutContext(ctx)
+	defer cancel()
+
+	isTemplate, err := CourseServiceSingleton.queries.CheckCourseTemplateStatus(ctxWithTimeout, courseID)
+	if err != nil {
+		log.Error(err)
+		return false, errors.New("failed to check if course is template")
+	}
+
+	return isTemplate, nil
 }
