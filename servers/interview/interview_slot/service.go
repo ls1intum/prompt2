@@ -518,7 +518,7 @@ func createInterviewAssignment(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to process request"})
 		return
 	}
-	defer tx.Rollback(ctx)
+	defer func() { _ = tx.Rollback(ctx) }()
 
 	qtx := InterviewSlotServiceSingleton.queries.WithTx(tx)
 
@@ -631,7 +631,7 @@ func createInterviewAssignmentAdmin(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to process request"})
 		return
 	}
-	defer tx.Rollback(ctx)
+	defer func() { _ = tx.Rollback(ctx) }()
 
 	qtx := InterviewSlotServiceSingleton.queries.WithTx(tx)
 

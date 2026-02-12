@@ -8,7 +8,6 @@ import {
   AvatarImage,
   AvatarFallback,
   Separator,
-  Badge,
 } from '@tumaet/prompt-ui-components'
 import {
   getStudyDegreeString,

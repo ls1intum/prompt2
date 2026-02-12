@@ -90,7 +90,8 @@ export const StudentInterviewPage = () => {
     onError: (error: any) => {
       toast({
         title: 'Booking failed',
-        description: error?.response?.data?.error || 'Failed to book interview slot. Please try again.',
+        description:
+          error?.response?.data?.error || 'Failed to book interview slot. Please try again.',
         variant: 'destructive',
       })
     },
