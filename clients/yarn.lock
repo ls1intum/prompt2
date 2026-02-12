@@ -14650,16 +14650,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-day-picker@npm:9.13.0":
-  version: 9.13.0
-  resolution: "react-day-picker@npm:9.13.0"
+"react-day-picker@npm:9.13.2":
+  version: 9.13.2
+  resolution: "react-day-picker@npm:9.13.2"
   dependencies:
     "@date-fns/tz": "npm:^1.4.1"
     date-fns: "npm:^4.1.0"
     date-fns-jalali: "npm:^4.1.0-0"
   peerDependencies:
     react: ">=16.8.0"
-  checksum: 10c0/e176309a24697f6552c80c7fde257f3dc06506a4e5ec22b11b55bf136bd452ab98d2ca9c2a17632092d67d23d08b3b35daf77d99e95a937ad290d3322abc745c
+  checksum: 10c0/08bc8453d1743fd23644836acca3c655dbd442473b3b0a647a0599c2320998f1cf975dc607216bcdabaa2b09808e227fc6f2851cac9b323817d6838afe5e0759
   languageName: node
   linkType: hard
 
@@ -15674,7 +15674,7 @@ __metadata:
     cmdk: "npm:1.1.1"
     date-fns: "npm:^4.1.0"
     i18n-iso-countries: "npm:^7.14.0"
-    react-day-picker: "npm:9.13.0"
+    react-day-picker: "npm:9.13.2"
     react-hook-form: "npm:^7.71.1"
     recharts: "npm:^3.7.0"
     tailwindcss: "npm:^4.1.18"
