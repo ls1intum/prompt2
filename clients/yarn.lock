@@ -6011,7 +6011,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "assessment_component@workspace:assessment_component"
   dependencies:
-    webpack: "npm:^5.105.0"
+    webpack: "npm:^5.105.1"
     webpack-cli: "npm:^6.0.1"
   languageName: unknown
   linkType: soft
@@ -6670,7 +6670,7 @@ __metadata:
     i18n-iso-countries: "npm:^7.14.0"
     react-beautiful-dnd: "npm:^13.1.1"
     sha256: "npm:^0.2.0"
-    webpack: "npm:^5.105.0"
+    webpack: "npm:^5.105.1"
     webpack-bundle-analyzer: "npm:^5.2.0"
     webpack-cli: "npm:^6.0.1"
   languageName: unknown
@@ -7907,7 +7907,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "devops_challenge_component@workspace:devops_challenge_component"
   dependencies:
-    webpack: "npm:^5.105.0"
+    webpack: "npm:^5.105.1"
     webpack-cli: "npm:^6.0.1"
   languageName: unknown
   linkType: soft
@@ -10232,7 +10232,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "interview_component@workspace:interview_component"
   dependencies:
-    webpack: "npm:^5.105.0"
+    webpack: "npm:^5.105.1"
     webpack-cli: "npm:^6.0.1"
   languageName: unknown
   linkType: soft
@@ -10241,7 +10241,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "intro_course_developer_component@workspace:intro_course_developer_component"
   dependencies:
-    webpack: "npm:^5.105.0"
+    webpack: "npm:^5.105.1"
     webpack-cli: "npm:^6.0.1"
   languageName: unknown
   linkType: soft
@@ -11118,7 +11118,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"lerna@npm:^9.0.3":
+"lerna@npm:^9.0.4":
   version: 9.0.4
   resolution: "lerna@npm:9.0.4"
   dependencies:
@@ -11582,7 +11582,7 @@ __metadata:
   resolution: "matching_component@workspace:matching_component"
   dependencies:
     papaparse: "npm:^5.5.3"
-    webpack: "npm:^5.105.0"
+    webpack: "npm:^5.105.1"
     webpack-cli: "npm:^6.0.1"
     xlsx: "npm:^0.18.5"
   languageName: unknown
@@ -14230,7 +14230,7 @@ __metadata:
     html-webpack-plugin: "npm:^5.6.6"
     jwt-decode: "npm:^4.0.0"
     keycloak-js: "npm:25.0.6"
-    lerna: "npm:^9.0.3"
+    lerna: "npm:^9.0.4"
     lowlight: "npm:^3.3.0"
     lucide-react: "npm:^0.563.0"
     postcss: "npm:^8.5.6"
@@ -14252,7 +14252,7 @@ __metadata:
     ts-node: "npm:^10.9.2"
     ts-node-register: "npm:^1.0.0"
     typescript: "npm:^5.9.3"
-    webpack: "npm:^5.105.0"
+    webpack: "npm:^5.105.1"
     webpack-cli: "npm:^6.0.1"
     webpack-dev-server: "npm:^5.2.3"
     zustand: "npm:^5.0.11"
@@ -15451,7 +15451,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "self_team_allocation_component@workspace:self_team_allocation_component"
   dependencies:
-    webpack: "npm:^5.105.0"
+    webpack: "npm:^5.105.1"
     webpack-cli: "npm:^6.0.1"
   languageName: unknown
   linkType: soft
@@ -15678,7 +15678,7 @@ __metadata:
     react-hook-form: "npm:^7.71.1"
     recharts: "npm:^3.7.0"
     tailwindcss: "npm:^4.1.18"
-    webpack: "npm:^5.105.0"
+    webpack: "npm:^5.105.1"
     webpack-cli: "npm:^6.0.1"
     webpack-dev-server: "npm:^5.2.3"
     zod: "npm:^4.3.6"
@@ -16426,7 +16426,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "team_allocation_component@workspace:team_allocation_component"
   dependencies:
-    webpack: "npm:^5.105.0"
+    webpack: "npm:^5.105.1"
     webpack-cli: "npm:^6.0.1"
   languageName: unknown
   linkType: soft
@@ -16442,7 +16442,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "template_component@workspace:template_component"
   dependencies:
-    webpack: "npm:^5.105.0"
+    webpack: "npm:^5.105.1"
     webpack-cli: "npm:^6.0.1"
   languageName: unknown
   linkType: soft
@@ -17436,7 +17436,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"webpack@npm:^5, webpack@npm:^5.105.0":
+"webpack@npm:^5":
   version: 5.105.0
   resolution: "webpack@npm:5.105.0"
   dependencies:
@@ -17471,6 +17471,44 @@ __metadata:
   bin:
     webpack: bin/webpack.js
   checksum: 10c0/4aea6b976485b5364e122f301c08f48efa84ddb2c0cb5d09f27445d1f2da0b9875cd889e41b58cac3ff05618a9c965be716df52586d151b5f52a7bbed7662174
+  languageName: node
+  linkType: hard
+
+"webpack@npm:^5.105.1":
+  version: 5.105.1
+  resolution: "webpack@npm:5.105.1"
+  dependencies:
+    "@types/eslint-scope": "npm:^3.7.7"
+    "@types/estree": "npm:^1.0.8"
+    "@types/json-schema": "npm:^7.0.15"
+    "@webassemblyjs/ast": "npm:^1.14.1"
+    "@webassemblyjs/wasm-edit": "npm:^1.14.1"
+    "@webassemblyjs/wasm-parser": "npm:^1.14.1"
+    acorn: "npm:^8.15.0"
+    acorn-import-phases: "npm:^1.0.3"
+    browserslist: "npm:^4.28.1"
+    chrome-trace-event: "npm:^1.0.2"
+    enhanced-resolve: "npm:^5.19.0"
+    es-module-lexer: "npm:^2.0.0"
+    eslint-scope: "npm:5.1.1"
+    events: "npm:^3.2.0"
+    glob-to-regexp: "npm:^0.4.1"
+    graceful-fs: "npm:^4.2.11"
+    json-parse-even-better-errors: "npm:^2.3.1"
+    loader-runner: "npm:^4.3.1"
+    mime-types: "npm:^2.1.27"
+    neo-async: "npm:^2.6.2"
+    schema-utils: "npm:^4.3.3"
+    tapable: "npm:^2.3.0"
+    terser-webpack-plugin: "npm:^5.3.16"
+    watchpack: "npm:^2.5.1"
+    webpack-sources: "npm:^3.3.3"
+  peerDependenciesMeta:
+    webpack-cli:
+      optional: true
+  bin:
+    webpack: bin/webpack.js
+  checksum: 10c0/421fb761202473dbc6dd87d6a9efe0ea02293ca4352bf988db669f0d6ebfb5b8ea499e09971539357b531f126ae4209956b984d807aece769ad6826612739c7a
   languageName: node
   linkType: hard
 
