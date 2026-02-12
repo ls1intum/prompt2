@@ -91,7 +91,7 @@
     "@types/dotenv-webpack": "^7.0.8",
     "@types/eslint": "^9.6.1",
     "@types/node": "^25.2.3",
-    "@types/react": "^19.2.13",
+    "@types/react": "^19.2.14",
     "@types/react-beautiful-dnd": "^13.1.8",
     "@types/react-dom": "^19.2.3",
     "@typescript-eslint/eslint-plugin": "^8.54.0",
