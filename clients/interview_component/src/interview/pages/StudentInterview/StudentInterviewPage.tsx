@@ -13,6 +13,7 @@ import {
   Alert,
   AlertDescription,
   cn,
+  useToast,
 } from '@tumaet/prompt-ui-components'
 import { Calendar, Clock, MapPin, Users, CheckCircle2, AlertCircle } from 'lucide-react'
 import { format } from 'date-fns'
@@ -41,6 +42,7 @@ export const StudentInterviewPage = () => {
   const { phaseId } = useParams<{ phaseId: string }>()
   const queryClient = useQueryClient()
   const [selectedSlotId, setSelectedSlotId] = useState<string | null>(null)
+  const { toast } = useToast()
 
   // Fetch all available slots
   const { data: slots, isLoading: slotsLoading } = useQuery<InterviewSlot[]>({
@@ -80,6 +82,17 @@ export const StudentInterviewPage = () => {
       queryClient.invalidateQueries({ queryKey: ['myInterviewAssignment', phaseId] })
       queryClient.invalidateQueries({ queryKey: ['interviewSlots', phaseId] })
       setSelectedSlotId(null)
+      toast({
+        title: 'Slot booked successfully',
+        description: 'Your interview slot has been confirmed.',
+      })
+    },
+    onError: (error: any) => {
+      toast({
+        title: 'Booking failed',
+        description: error?.response?.data?.error || 'Failed to book interview slot. Please try again.',
+        variant: 'destructive',
+      })
     },
   })
 
@@ -93,6 +106,17 @@ export const StudentInterviewPage = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['myInterviewAssignment', phaseId] })
       queryClient.invalidateQueries({ queryKey: ['interviewSlots', phaseId] })
+      toast({
+        title: 'Booking cancelled',
+        description: 'Your interview slot booking has been cancelled.',
+      })
+    },
+    onError: (error: any) => {
+      toast({
+        title: 'Cancellation failed',
+        description: error?.response?.data?.error || 'Failed to cancel booking. Please try again.',
+        variant: 'destructive',
+      })
     },
   })
 

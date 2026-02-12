@@ -751,7 +751,9 @@ func getMyInterviewAssignment(c *gin.Context) {
 		c.JSON(http.StatusBadGateway, gin.H{"error": "Failed to fetch participation"})
 		return
 	}
-	defer resp.Body.Close()
+	defer func() {
+		_ = resp.Body.Close()
+	}()
 
 	if resp.StatusCode == http.StatusNotFound {
 		c.JSON(http.StatusNotFound, gin.H{"error": "No course participation found for user"})
@@ -857,7 +859,9 @@ func fetchAllStudentsForCoursePhase(c *gin.Context, coursePhaseID uuid.UUID) (ma
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch course phase participations: %w", err)
 	}
-	defer resp.Body.Close()
+	defer func() {
+		_ = resp.Body.Close()
+	}()
 
 	if resp.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("core service returned status %d for course phase participations", resp.StatusCode)

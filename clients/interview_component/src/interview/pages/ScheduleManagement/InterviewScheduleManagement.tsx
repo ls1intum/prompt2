@@ -35,6 +35,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
+  useToast,
 } from '@tumaet/prompt-ui-components'
 import { Calendar, Clock, MapPin, Users, Plus, Pencil, Trash2, UserPlus } from 'lucide-react'
 import { format } from 'date-fns'
@@ -76,6 +77,7 @@ interface SlotFormData {
 export const InterviewScheduleManagement = () => {
   const { phaseId } = useParams<{ phaseId: string }>()
   const queryClient = useQueryClient()
+  const { toast } = useToast()
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
   const [isAssignDialogOpen, setIsAssignDialogOpen] = useState(false)
@@ -130,9 +132,17 @@ export const InterviewScheduleManagement = () => {
       queryClient.invalidateQueries({ queryKey: ['interviewSlots', phaseId] })
       setIsCreateDialogOpen(false)
       resetForm()
+      toast({
+        title: 'Slot created',
+        description: 'Interview slot has been created successfully.',
+      })
     },
-    onError: (error) => {
-      console.error('Failed to create slot:', error)
+    onError: (error: any) => {
+      toast({
+        title: 'Creation failed',
+        description: error?.response?.data?.error || 'Failed to create interview slot.',
+        variant: 'destructive',
+      })
     },
   })
 
@@ -155,9 +165,17 @@ export const InterviewScheduleManagement = () => {
       setIsEditDialogOpen(false)
       setEditingSlot(null)
       resetForm()
+      toast({
+        title: 'Slot updated',
+        description: 'Interview slot has been updated successfully.',
+      })
     },
-    onError: (error) => {
-      console.error('Failed to update slot:', error)
+    onError: (error: any) => {
+      toast({
+        title: 'Update failed',
+        description: error?.response?.data?.error || 'Failed to update interview slot.',
+        variant: 'destructive',
+      })
     },
   })
 
@@ -170,9 +188,17 @@ export const InterviewScheduleManagement = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['interviewSlots', phaseId] })
+      toast({
+        title: 'Slot deleted',
+        description: 'Interview slot has been deleted successfully.',
+      })
     },
-    onError: (error) => {
-      console.error('Failed to delete slot:', error)
+    onError: (error: any) => {
+      toast({
+        title: 'Deletion failed',
+        description: error?.response?.data?.error || 'Failed to delete interview slot.',
+        variant: 'destructive',
+      })
     },
   })
 
@@ -199,10 +225,17 @@ export const InterviewScheduleManagement = () => {
       setIsAssignDialogOpen(false)
       setSelectedParticipationId('')
       setAssigningSlot(null)
+      toast({
+        title: 'Student assigned',
+        description: 'Student has been assigned to the interview slot successfully.',
+      })
     },
     onError: (error: any) => {
-      console.error('Failed to assign student:', error)
-      alert(error.response?.data?.error || 'Failed to assign student')
+      toast({
+        title: 'Assignment failed',
+        description: error.response?.data?.error || 'Failed to assign student to interview slot.',
+        variant: 'destructive',
+      })
     },
   })
 
