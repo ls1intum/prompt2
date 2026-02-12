@@ -14242,7 +14242,7 @@ __metadata:
     react-hook-form: "npm:^7.71.1"
     react-medium-image-zoom: "npm:^5.4.0"
     react-router-dom: "npm:^7.13.0"
-    sass-loader: "npm:^16.0.6"
+    sass-loader: "npm:^16.0.7"
     sonner: "npm:^2.0.7"
     style-loader: "npm:^4.0.0"
     tailwind-merge: "npm:^3.4.0"
@@ -15376,7 +15376,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"sass-loader@npm:^16.0.6":
+"sass-loader@npm:^16.0.7":
   version: 16.0.7
   resolution: "sass-loader@npm:16.0.7"
   dependencies:
