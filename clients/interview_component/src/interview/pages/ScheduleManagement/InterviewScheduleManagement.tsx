@@ -97,7 +97,11 @@ export const InterviewScheduleManagement = () => {
   })
 
   // Fetch all slots
-  const { data: slots, isLoading, isError } = useQuery<InterviewSlot[]>({
+  const {
+    data: slots,
+    isLoading,
+    isError,
+  } = useQuery<InterviewSlot[]>({
     queryKey: ['interviewSlots', phaseId],
     queryFn: async () => {
       const response = await interviewAxiosInstance.get(
@@ -539,7 +543,12 @@ export const InterviewScheduleManagement = () => {
                           >
                             <UserPlus className='h-4 w-4' />
                           </Button>
-                          <Button variant='ghost' size='sm' onClick={() => handleEditClick(slot)} aria-label='Edit slot'>
+                          <Button
+                            variant='ghost'
+                            size='sm'
+                            onClick={() => handleEditClick(slot)}
+                            aria-label='Edit slot'
+                          >
                             <Pencil className='h-4 w-4' />
                           </Button>
                           <Button

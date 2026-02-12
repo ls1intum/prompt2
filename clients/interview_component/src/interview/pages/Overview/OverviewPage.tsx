@@ -2,7 +2,6 @@ import { useState } from 'react'
 import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import { cn, ManagementPageHeader, useScreenSize } from '@tumaet/prompt-ui-components'
 import { StudentCard } from '../../components/StudentCard'
-import { useParticipationStore } from '../../zustand/useParticipationStore'
 import { SortDropdownMenu } from '../../components/SortDropdownMenu'
 import { useSorting } from '../../hooks/useSorting'
 import { useQuery } from '@tanstack/react-query'
@@ -31,7 +30,12 @@ export const OverviewPage = () => {
   const orderedParticipations = useSorting(sortBy)
 
   // Fetch interview slots with assignments
-  const { data: slots, isLoading, isError, error } = useQuery<InterviewSlotData[]>({
+  const {
+    data: slots,
+    isLoading,
+    isError,
+    error,
+  } = useQuery<InterviewSlotData[]>({
     queryKey: ['interviewSlots', phaseId],
     queryFn: async () => {
       const response = await interviewAxiosInstance.get(
