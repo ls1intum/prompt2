@@ -315,6 +315,11 @@ func validateAnswers(ctx context.Context, coursePhaseID uuid.UUID, application a
 		return errors.New("could not validate the application")
 	}
 
+	applicationQuestionsFileUpload, err := ApplicationServiceSingleton.queries.GetApplicationQuestionsFileUploadForCoursePhase(ctx, coursePhaseID)
+	if err != nil {
+		return errors.New("could not validate the application")
+	}
+
 	// 3. Validate all the answers
 	err = validateTextAnswers(applicationQuestionsText, application.AnswersText)
 	if err != nil {
@@ -324,6 +329,42 @@ func validateAnswers(ctx context.Context, coursePhaseID uuid.UUID, application a
 	err = validateMultiSelectAnswers(applicationQuestionsMultiSelect, application.AnswersMultiSelect)
 	if err != nil {
 		return err
+	}
+
+	err = validateFileUploadAnswers(applicationQuestionsFileUpload, application.AnswersFileUpload)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func validateFileUploadAnswers(fileUploadQuestions []db.ApplicationQuestionFileUpload, fileUploadAnswers []applicationDTO.CreateAnswerFileUpload) error {
+	questionMap := make(map[uuid.UUID]db.ApplicationQuestionFileUpload, len(fileUploadQuestions))
+	for _, question := range fileUploadQuestions {
+		questionMap[question.ID] = question
+	}
+
+	answerMap := make(map[uuid.UUID]uuid.UUID, len(fileUploadAnswers))
+	for _, answer := range fileUploadAnswers {
+		question, exists := questionMap[answer.ApplicationQuestionID]
+		if !exists {
+			return errors.New("all answers must correspond to existing questions")
+		}
+		if answer.FileID == uuid.Nil {
+			return fmt.Errorf("file upload answer for question %q has no file id", question.Title)
+		}
+		if _, duplicate := answerMap[answer.ApplicationQuestionID]; duplicate {
+			return errors.New("duplicate file upload answer for question")
+		}
+		answerMap[answer.ApplicationQuestionID] = answer.FileID
+	}
+
+	for _, question := range fileUploadQuestions {
+		answerFileID, exists := answerMap[question.ID]
+		if question.IsRequired && (!exists || answerFileID == uuid.Nil) {
+			return errors.New("all required questions must be answered")
+		}
 	}
 
 	return nil

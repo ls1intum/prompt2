@@ -64,7 +64,7 @@ func (suite *StorageServiceTestSuite) TestUploadFile_Success() {
 		UploaderUserID: suite.testUserID,
 		UploaderEmail:  "test.user@tum.de",
 
-		Description:    "Test file upload",
+		Description: "Test file upload",
 	}
 
 	result, err := suite.service.UploadFile(suite.ctx, req)
@@ -160,7 +160,9 @@ func (suite *StorageServiceTestSuite) TestDownloadFile_Success() {
 	assert.NoError(suite.T(), err)
 	assert.NotNil(suite.T(), reader)
 	assert.Equal(suite.T(), "download-test.pdf", filename)
-	defer reader.Close()
+	defer func() {
+		assert.NoError(suite.T(), reader.Close())
+	}()
 
 	// Verify content
 	downloadedContent, _ := io.ReadAll(reader)
@@ -245,13 +247,17 @@ func (suite *StorageServiceTestSuite) createMultipartFileHeader(filename, conten
 	writer := multipart.NewWriter(body)
 
 	// Create form file
-	part, _ := writer.CreateFormFile("file", filename)
-	part.Write(content)
-	writer.Close()
+	part, err := writer.CreateFormFile("file", filename)
+	assert.NoError(suite.T(), err)
+	_, err = part.Write(content)
+	assert.NoError(suite.T(), err)
+	err = writer.Close()
+	assert.NoError(suite.T(), err)
 
 	// Parse the multipart form
 	reader := multipart.NewReader(body, writer.Boundary())
-	form, _ := reader.ReadForm(10 << 20) // 10 MB max memory
+	form, err := reader.ReadForm(10 << 20) // 10 MB max memory
+	assert.NoError(suite.T(), err)
 
 	// Get the file header
 	fileHeaders := form.File["file"]

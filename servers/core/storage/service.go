@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"mime"
 	"mime/multipart"
 	"path/filepath"
 	"strconv"
@@ -110,7 +111,11 @@ func (s *StorageService) UploadFile(ctx context.Context, req FileUploadRequest) 
 		log.WithError(err).Error("Failed to open uploaded file")
 		return nil, fmt.Errorf("failed to open file: %w", err)
 	}
-	defer file.Close()
+	defer func() {
+		if closeErr := file.Close(); closeErr != nil {
+			log.WithError(closeErr).Warn("Failed to close uploaded file")
+		}
+	}()
 
 	// Generate a unique filename to prevent collisions
 	ext := filepath.Ext(req.File.Filename)
@@ -239,7 +244,11 @@ func (s *StorageService) CreateFileFromStorageKey(ctx context.Context, req Creat
 		return nil, fmt.Errorf("failed to check existing file: %w", err)
 	}
 
-	if req.CoursePhaseID != nil {
+	if req.CoursePhaseID == nil {
+		if strings.HasPrefix(req.StorageKey, "course-phase/") {
+			return nil, fmt.Errorf("course phase id is required for course-phase storage keys")
+		}
+	} else {
 		expectedPrefix := fmt.Sprintf("course-phase/%s/", req.CoursePhaseID.String())
 		if !strings.HasPrefix(req.StorageKey, expectedPrefix) {
 			return nil, fmt.Errorf("storage key does not match course phase")
@@ -444,8 +453,28 @@ func (s *StorageService) isAllowedType(contentType string) bool {
 		return true // No restrictions
 	}
 
+	normalizedContentType := strings.TrimSpace(contentType)
+	if normalizedContentType == "" {
+		return false
+	}
+	if mediaType, _, err := mime.ParseMediaType(normalizedContentType); err == nil {
+		normalizedContentType = mediaType
+	} else if separatorIndex := strings.Index(normalizedContentType, ";"); separatorIndex >= 0 {
+		normalizedContentType = strings.TrimSpace(normalizedContentType[:separatorIndex])
+	}
+
 	for _, allowed := range s.allowedTypes {
-		if strings.EqualFold(allowed, contentType) {
+		normalizedAllowedType := strings.TrimSpace(allowed)
+		if normalizedAllowedType == "" {
+			continue
+		}
+		if mediaType, _, err := mime.ParseMediaType(normalizedAllowedType); err == nil {
+			normalizedAllowedType = mediaType
+		} else if separatorIndex := strings.Index(normalizedAllowedType, ";"); separatorIndex >= 0 {
+			normalizedAllowedType = strings.TrimSpace(normalizedAllowedType[:separatorIndex])
+		}
+
+		if strings.EqualFold(normalizedAllowedType, normalizedContentType) {
 			return true
 		}
 	}

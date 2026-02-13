@@ -1,6 +1,9 @@
 import { axiosInstance } from '@/network/configService'
 
-export const deleteApplicationFile = async (coursePhaseId: string, fileId: string): Promise<void> => {
+export const deleteApplicationFile = async (
+  coursePhaseId: string,
+  fileId: string,
+): Promise<void> => {
   if (!coursePhaseId) {
     throw new Error('coursePhaseId is required to delete a file')
   }

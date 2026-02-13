@@ -58,41 +58,19 @@ func buildFileUploadAnswerDTOs(ctx context.Context, answers []db.ApplicationAnsw
 	return answerDTOs
 }
 
-// createOrReplaceFileUploadAnswer creates a new file upload answer, deleting the old file if one exists
-func createOrReplaceFileUploadAnswer(ctx context.Context, qtx *db.Queries, answer applicationDTO.CreateAnswerFileUpload, courseParticipationID uuid.UUID) error {
-	if answer.FileID == uuid.Nil {
-		return nil
-	}
-
-	// Check if there's an existing file upload answer for this question
-	existingAnswer, err := qtx.GetApplicationAnswerFileUploadByQuestionAndParticipation(ctx, db.GetApplicationAnswerFileUploadByQuestionAndParticipationParams{
-		ApplicationQuestionID: answer.ApplicationQuestionID,
-		CourseParticipationID: courseParticipationID,
-	})
-	if err != nil && !errors.Is(err, sql.ErrNoRows) {
-		return err
-	}
-	if err == nil {
-		if existingAnswer.FileID != answer.FileID {
-			// Existing answer found, delete the old file from storage
-			deleteErr := storage.StorageServiceSingleton.DeleteFile(ctx, existingAnswer.FileID, true)
-			if deleteErr != nil {
-				log.WithError(deleteErr).WithField("fileId", existingAnswer.FileID).Warn("Failed to delete old file, continuing with save")
-			}
-		}
-	}
-
-	// Create the new answer
-	answerDBModel := answer.GetDBModel()
-	answerDBModel.ID = uuid.New()
-	answerDBModel.CourseParticipationID = courseParticipationID
-	return qtx.CreateOrOverwriteApplicationAnswerFileUpload(ctx, db.CreateOrOverwriteApplicationAnswerFileUploadParams(answerDBModel))
+// createOrReplaceFileUploadAnswer creates or updates a file upload answer and returns a stale file id for cleanup after commit.
+func createOrReplaceFileUploadAnswer(ctx context.Context, qtx *db.Queries, answer applicationDTO.CreateAnswerFileUpload, courseParticipationID uuid.UUID) (*uuid.UUID, error) {
+	return upsertFileUploadAnswer(ctx, qtx, answer, courseParticipationID)
 }
 
-// createOrOverwriteFileUploadAnswer creates or overwrites a file upload answer, deleting the old file if one exists
-func createOrOverwriteFileUploadAnswer(ctx context.Context, qtx *db.Queries, answer applicationDTO.CreateAnswerFileUpload, courseParticipationID uuid.UUID) error {
+// createOrOverwriteFileUploadAnswer creates or updates a file upload answer and returns a stale file id for cleanup after commit.
+func createOrOverwriteFileUploadAnswer(ctx context.Context, qtx *db.Queries, answer applicationDTO.CreateAnswerFileUpload, courseParticipationID uuid.UUID) (*uuid.UUID, error) {
+	return upsertFileUploadAnswer(ctx, qtx, answer, courseParticipationID)
+}
+
+func upsertFileUploadAnswer(ctx context.Context, qtx *db.Queries, answer applicationDTO.CreateAnswerFileUpload, courseParticipationID uuid.UUID) (*uuid.UUID, error) {
 	if answer.FileID == uuid.Nil {
-		return nil
+		return nil, nil
 	}
 
 	// Check if there's an existing file upload answer for this question
@@ -101,23 +79,50 @@ func createOrOverwriteFileUploadAnswer(ctx context.Context, qtx *db.Queries, ans
 		CourseParticipationID: courseParticipationID,
 	})
 	if err != nil && !errors.Is(err, sql.ErrNoRows) {
-		return err
+		return nil, err
 	}
+
+	var oldFileID *uuid.UUID
 	if err == nil {
 		if existingAnswer.FileID != answer.FileID {
-			// Existing answer found, delete the old file from storage
-			deleteErr := storage.StorageServiceSingleton.DeleteFile(ctx, existingAnswer.FileID, true)
-			if deleteErr != nil {
-				log.WithError(deleteErr).WithField("fileId", existingAnswer.FileID).Warn("Failed to delete old file, continuing with save")
-			}
+			existingFileID := existingAnswer.FileID
+			oldFileID = &existingFileID
 		}
 	}
 
-	// Create or overwrite the answer
+	// Create or overwrite the answer in the same transaction.
 	answerDBModel := answer.GetDBModel()
 	answerDBModel.ID = uuid.New()
 	answerDBModel.CourseParticipationID = courseParticipationID
-	return qtx.CreateOrOverwriteApplicationAnswerFileUpload(ctx, db.CreateOrOverwriteApplicationAnswerFileUploadParams(answerDBModel))
+	if err := qtx.CreateOrOverwriteApplicationAnswerFileUpload(ctx, db.CreateOrOverwriteApplicationAnswerFileUploadParams(answerDBModel)); err != nil {
+		return nil, err
+	}
+
+	return oldFileID, nil
+}
+
+func cleanupReplacedFiles(ctx context.Context, fileIDs []uuid.UUID) {
+	if len(fileIDs) == 0 {
+		return
+	}
+	if storage.StorageServiceSingleton == nil {
+		return
+	}
+
+	seenFileIDs := make(map[uuid.UUID]struct{}, len(fileIDs))
+	for _, fileID := range fileIDs {
+		if fileID == uuid.Nil {
+			continue
+		}
+		if _, seen := seenFileIDs[fileID]; seen {
+			continue
+		}
+		seenFileIDs[fileID] = struct{}{}
+
+		if err := storage.StorageServiceSingleton.DeleteFile(ctx, fileID, true); err != nil {
+			log.WithError(err).WithField("fileId", fileID).Warn("Failed to delete replaced file after transaction commit")
+		}
+	}
 }
 
 func GetApplicationForm(ctx context.Context, coursePhaseID uuid.UUID) (applicationDTO.Form, error) {
@@ -403,11 +408,16 @@ func PostApplicationExtern(ctx context.Context, coursePhaseID uuid.UUID, applica
 		}
 	}
 
+	replacedFileIDs := make([]uuid.UUID, 0, len(application.AnswersFileUpload))
 	for _, answer := range application.AnswersFileUpload {
-		err = createOrReplaceFileUploadAnswer(ctx, qtx, answer, cPhaseParticipation.CourseParticipationID)
+		var oldFileID *uuid.UUID
+		oldFileID, err = createOrReplaceFileUploadAnswer(ctx, qtx, answer, cPhaseParticipation.CourseParticipationID)
 		if err != nil {
 			log.Error(err)
 			return uuid.Nil, errors.New("could not save the application answers")
+		}
+		if oldFileID != nil {
+			replacedFileIDs = append(replacedFileIDs, *oldFileID)
 		}
 	}
 
@@ -434,6 +444,8 @@ func PostApplicationExtern(ctx context.Context, coursePhaseID uuid.UUID, applica
 		log.Error(err)
 		return uuid.Nil, fmt.Errorf("failed to commit transaction: %w", err)
 	}
+
+	cleanupReplacedFiles(ctx, replacedFileIDs)
 
 	return cPhaseParticipation.CourseParticipationID, nil
 }
@@ -580,11 +592,16 @@ func PostApplicationAuthenticatedStudent(ctx context.Context, coursePhaseID uuid
 		}
 	}
 
+	replacedFileIDs := make([]uuid.UUID, 0, len(application.AnswersFileUpload))
 	for _, answer := range application.AnswersFileUpload {
-		err = createOrOverwriteFileUploadAnswer(ctx, qtx, answer, cPhaseParticipation.CourseParticipationID)
+		var oldFileID *uuid.UUID
+		oldFileID, err = createOrOverwriteFileUploadAnswer(ctx, qtx, answer, cPhaseParticipation.CourseParticipationID)
 		if err != nil {
 			log.Error(err)
 			return uuid.Nil, errors.New("could not save the application answers")
+		}
+		if oldFileID != nil {
+			replacedFileIDs = append(replacedFileIDs, *oldFileID)
 		}
 	}
 
@@ -611,6 +628,8 @@ func PostApplicationAuthenticatedStudent(ctx context.Context, coursePhaseID uuid
 		log.Error(err)
 		return uuid.Nil, fmt.Errorf("failed to commit transaction: %w", err)
 	}
+
+	cleanupReplacedFiles(ctx, replacedFileIDs)
 
 	return cPhaseParticipation.CourseParticipationID, nil
 

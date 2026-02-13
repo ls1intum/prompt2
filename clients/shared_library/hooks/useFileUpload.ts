@@ -22,9 +22,7 @@ export const useFileUpload = (options?: UseFileUploadOptions): UseFileUploadRetu
       return uploadFile({
         ...params,
         onUploadProgress: (progressEvent) => {
-          const percentCompleted = Math.round(
-            (progressEvent.loaded * 100) / progressEvent.total
-          )
+          const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total)
           setUploadProgress(percentCompleted)
           params.onUploadProgress?.(progressEvent)
         },

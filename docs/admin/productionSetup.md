@@ -274,7 +274,7 @@ PROMPT now stores uploaded files in an S3-compatible bucket (SeaweedFS S3 gatewa
 
 ---
 
-### 3.3 Start the Docker Containers
+### 3.4 Start the Docker Containers
 
 To start the docker containers, run the following command (adjust `<path to your env file>` as needed):
 

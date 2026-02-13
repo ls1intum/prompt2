@@ -32,7 +32,7 @@ func NewS3Adapter(bucket, region, endpoint, publicEndpoint, accessKey, secretKey
 	ctx := context.Background()
 	var cfg aws.Config
 	var err error
-	cfg, err = buildS3Config(ctx, region, endpoint, accessKey, secretKey)
+	cfg, err = buildS3Config(ctx, region, accessKey, secretKey)
 
 	if err != nil {
 		return nil, fmt.Errorf("failed to load AWS config: %w", err)
@@ -40,18 +40,21 @@ func NewS3Adapter(bucket, region, endpoint, publicEndpoint, accessKey, secretKey
 
 	client := s3.NewFromConfig(cfg, func(o *s3.Options) {
 		o.UsePathStyle = forcePathStyle
+		if endpoint != "" {
+			o.BaseEndpoint = aws.String(endpoint)
+		}
 	})
 
-	presignConfig := cfg
-	if publicEndpoint != "" && publicEndpoint != endpoint {
-		presignConfig, err = buildS3Config(ctx, region, publicEndpoint, accessKey, secretKey)
-		if err != nil {
-			return nil, fmt.Errorf("failed to load AWS presign config: %w", err)
-		}
+	presignEndpoint := endpoint
+	if publicEndpoint != "" {
+		presignEndpoint = publicEndpoint
 	}
 
-	presignClient := s3.NewPresignClient(s3.NewFromConfig(presignConfig, func(o *s3.Options) {
+	presignClient := s3.NewPresignClient(s3.NewFromConfig(cfg, func(o *s3.Options) {
 		o.UsePathStyle = forcePathStyle
+		if presignEndpoint != "" {
+			o.BaseEndpoint = aws.String(presignEndpoint)
+		}
 	}))
 
 	_, err = client.HeadBucket(ctx, &s3.HeadBucketInput{
@@ -98,23 +101,7 @@ func NewS3Adapter(bucket, region, endpoint, publicEndpoint, accessKey, secretKey
 	}, nil
 }
 
-func buildS3Config(ctx context.Context, region, endpoint, accessKey, secretKey string) (aws.Config, error) {
-	if endpoint != "" {
-		customResolver := aws.EndpointResolverWithOptionsFunc(func(service, region string, options ...interface{}) (aws.Endpoint, error) {
-			return aws.Endpoint{
-				URL:               endpoint,
-				SigningRegion:     region,
-				HostnameImmutable: true,
-			}, nil
-		})
-
-		return config.LoadDefaultConfig(ctx,
-			config.WithRegion(region),
-			config.WithEndpointResolverWithOptions(customResolver),
-			config.WithCredentialsProvider(credentials.NewStaticCredentialsProvider(accessKey, secretKey, "")),
-		)
-	}
-
+func buildS3Config(ctx context.Context, region, accessKey, secretKey string) (aws.Config, error) {
 	return config.LoadDefaultConfig(ctx,
 		config.WithRegion(region),
 		config.WithCredentialsProvider(credentials.NewStaticCredentialsProvider(accessKey, secretKey, "")),
