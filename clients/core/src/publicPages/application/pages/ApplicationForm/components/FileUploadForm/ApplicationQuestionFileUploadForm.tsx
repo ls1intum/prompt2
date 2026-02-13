@@ -49,7 +49,7 @@ export const ApplicationQuestionFileUploadForm = forwardRef<
       applicationQuestionID: question.id,
       fileID: uploadedFile?.id || existingAnswer?.fileID || '',
     }),
-    rerender: (_newAnswer?: ApplicationAnswerFileUpload) => {
+    rerender: () => {
       // If we have a new answer, we don't need to do anything as the file is already uploaded
       // The FileList component will show the uploaded files
     },

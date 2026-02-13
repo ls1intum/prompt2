@@ -73,6 +73,9 @@ CREATE TABLE course_participation (
     student_id uuid NOT NULL
 );
 
+ALTER TABLE ONLY course_participation
+    ADD CONSTRAINT course_participation_pkey PRIMARY KEY (id);
+
 CREATE TYPE pass_status AS ENUM ('passed', 'failed', 'not_assessed');
 
 CREATE TABLE course_phase_participation (
@@ -534,6 +537,62 @@ ALTER TABLE course_phase_participation
 -- Rename the dependency graph table to "participation_data_dependency_graph"
 ALTER TABLE meta_data_dependency_graph 
     RENAME TO participation_data_dependency_graph;
+
+-- Add files table required by file upload answers
+CREATE TABLE IF NOT EXISTS files (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    filename VARCHAR(500) NOT NULL,
+    original_filename VARCHAR(500) NOT NULL,
+    content_type VARCHAR(200) NOT NULL,
+    size_bytes BIGINT NOT NULL CHECK (size_bytes >= 0),
+    storage_key VARCHAR(500) NOT NULL UNIQUE,
+    storage_provider VARCHAR(50) NOT NULL DEFAULT 'seaweedfs',
+    uploaded_by_user_id VARCHAR(200) NOT NULL,
+    uploaded_by_email VARCHAR(200),
+    course_phase_id UUID,
+    description TEXT,
+    tags VARCHAR(100)[],
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMP,
+    CONSTRAINT fk_files_course_phase FOREIGN KEY (course_phase_id) REFERENCES course_phase(id) ON DELETE SET NULL
+);
+
+CREATE INDEX idx_files_storage_key ON files(storage_key);
+CREATE INDEX idx_files_uploaded_by ON files(uploaded_by_user_id);
+CREATE INDEX idx_files_course_phase_id ON files(course_phase_id) WHERE course_phase_id IS NOT NULL;
+CREATE INDEX idx_files_created_at ON files(created_at DESC);
+CREATE INDEX idx_files_deleted_at ON files(deleted_at) WHERE deleted_at IS NULL;
+
+-- Add sample uploaded file for required file upload answer tests
+INSERT INTO files (
+    id,
+    filename,
+    original_filename,
+    content_type,
+    size_bytes,
+    storage_key,
+    storage_provider,
+    uploaded_by_user_id,
+    uploaded_by_email,
+    course_phase_id,
+    description,
+    tags
+) VALUES (
+    'd3d04042-95d1-4765-8592-caf9560c8c3f',
+    'resume_seeded.pdf',
+    'resume.pdf',
+    'application/pdf',
+    1024,
+    'course-phase/4179d58a-d00d-4fa7-94a5-397bc69fab02/resume_seeded.pdf',
+    'seaweedfs',
+    'external',
+    'seed@example.com',
+    '4179d58a-d00d-4fa7-94a5-397bc69fab02',
+    'Seed file for application router tests',
+    '{application,resume}'
+);
+
 -- Add application_question_file_upload table for file upload questions
 CREATE TABLE IF NOT EXISTS application_question_file_upload (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
