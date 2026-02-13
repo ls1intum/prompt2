@@ -38,7 +38,7 @@ PROMPT uses Keycloak for authentication and user rights management. In particula
     - **`<SemesterTag>-<CourseName>-Lecturer`**  
       Group: `Lecturer` (a subgroup of the course group). This role grants admin rights on the course. The course creator is automatically added to this role.
     - **`<SemesterTag>-<CourseName>-Editor`**  
-    Group: `Editor` (a subgroup of the course group). This role has limited user rights. For more details, refer to the [Contributor Guide](/contributor/setup).
+      Group: `Editor` (a subgroup of the course group). This role has limited user rights. For more details, refer to the [Contributor Guide](/contributor/setup).
 
 There are two options for setting up Keycloak:
 
@@ -52,10 +52,10 @@ Follow these steps:
    Add your client domain to the following fields. All URLs must be prefixed with `https`.
    - **Root URL**
    - **Home URL**
-   - **Valid Redirect URLs**    (must be postfixed with `/*`)
-   - **Valid Logout URLs**      (must be postfixed with `/*`)
+   - **Valid Redirect URLs** (must be postfixed with `/*`)
+   - **Valid Logout URLs** (must be postfixed with `/*`)
    - **Web-Origin URLs**
-    IMPORTANT: Only postfix Valid Redirect and Logout URLs.
+     IMPORTANT: Only postfix Valid Redirect and Logout URLs.
 2. **Add Mappers for User Attributes**  
    PROMPT authenticates students using their `matriculation_number` and `university_login`. To include these in the token:
    - Navigate to **Client Scopes** for `prompt-client`.
@@ -75,7 +75,7 @@ Follow these steps:
    - **Root URL**
    - **Home URL**
    - **Valid Redirect URI**
-   - **Valid Post Logout Redirect URI**  
+   - **Valid Post Logout Redirect URI**
 
    Each URL must start with `https` and ALL must be postfixed with `/*` (note that the postfixes might differ from those in `prompt-client`).
 
@@ -101,10 +101,10 @@ Keep in mind:
 
 - The `docker-compose.extern.yml` includes a sample setup with a Docker container for Keycloak and a database instance to persist Keycloak data.
 - **Domain Setup:**  
-  Configure a separate domain for your Keycloak instance (this can be a subdomain but **not** a subpath).  
-  - **Valid Examples:**  
+  Configure a separate domain for your Keycloak instance (this can be a subdomain but **not** a subpath).
+  - **Valid Examples:**
     - `prompt.<yourDomain>.de` and `keycloak.prompt.<yourDomain>.de`
-  - **Invalid Example:**  
+  - **Invalid Example:**
     - `prompt.<yourDomain>.de` and `prompt.<yourDomain>.de/keycloak`
 - Follow the Contributor Guide closely and copy the `KEYCLOAK_CLIENT_SECRET` into your environment file as described.
 - To support student login, your Keycloak instance must allow authentication with `matriculation_number` and `university_login` attributes. Without these, student-specific management console features will not be available (although this does not affect the application module).
@@ -246,7 +246,7 @@ PROMPT now stores uploaded files in an S3-compatible bucket (SeaweedFS S3 gatewa
   Example (local): `http://localhost:8334`.
 
 - **`S3_ACCESS_KEY`** / **`S3_SECRET_KEY`**  
-  Credentials for the S3 API. Required for non-local endpoints.
+  Credentials for the S3 API. Used by both the core server and the SeaweedFS S3 gateway. The access key acts as an identifier (e.g., `prompt-s3-user`), while the secret key should be a strong random value.
 
 - **`S3_FORCE_PATH_STYLE`**  
   Set to `true` for SeaweedFS/MinIO. Set to `false` for AWS S3.
@@ -256,9 +256,6 @@ PROMPT now stores uploaded files in an S3-compatible bucket (SeaweedFS S3 gatewa
 
 - **`ALLOWED_FILE_TYPES`**  
   Comma-separated list of allowed MIME types. Leave empty to allow all.
-
-- **`SEAWEEDFS_S3_USER`** / **`SEAWEEDFS_S3_PASSWORD`**  
-  Credentials for the SeaweedFS S3 gateway (should match `S3_ACCESS_KEY` / `S3_SECRET_KEY`).
 
 ---
 
