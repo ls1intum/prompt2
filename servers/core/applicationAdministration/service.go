@@ -9,13 +9,13 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
+	promptSDK "github.com/ls1intum/prompt-sdk"
 	"github.com/ls1intum/prompt2/servers/core/applicationAdministration/applicationDTO"
 	"github.com/ls1intum/prompt2/servers/core/course/courseParticipation"
 	"github.com/ls1intum/prompt2/servers/core/course/courseParticipation/courseParticipationDTO"
 	"github.com/ls1intum/prompt2/servers/core/coursePhase"
 	"github.com/ls1intum/prompt2/servers/core/coursePhase/coursePhaseParticipation"
 	"github.com/ls1intum/prompt2/servers/core/coursePhase/coursePhaseParticipation/coursePhaseParticipationDTO"
-	promptSDK "github.com/ls1intum/prompt-sdk"
 	db "github.com/ls1intum/prompt2/servers/core/db/sqlc"
 	"github.com/ls1intum/prompt2/servers/core/student"
 	log "github.com/sirupsen/logrus"
@@ -172,19 +172,30 @@ func GetApplicationFormWithDetails(ctx context.Context, coursePhaseID uuid.UUID)
 	defer cancel()
 	applicationCoursePhase, err := ApplicationServiceSingleton.queries.GetOpenApplicationPhase(ctxWithTimeout, coursePhaseID)
 	if err != nil {
-		log.Error(err)
+		requestLogger := log.WithField("coursePhaseID", coursePhaseID)
+		if errors.Is(err, sql.ErrNoRows) {
+			requestLogger.WithError(err).Warn("open application phase not found or not open")
+		} else {
+			requestLogger.WithError(err).Error("failed to load open application phase")
+		}
 		return applicationDTO.FormWithDetails{}, ErrNotFound
 	}
 
 	applicationFormText, err := ApplicationServiceSingleton.queries.GetApplicationQuestionsTextForCoursePhase(ctxWithTimeout, coursePhaseID)
 	if err != nil {
-		log.Error(err)
+		log.WithFields(log.Fields{
+			"coursePhaseID": coursePhaseID,
+			"questionType":  "text",
+		}).WithError(err).Error("failed to load application questions")
 		return applicationDTO.FormWithDetails{}, errors.New("could not get application form")
 	}
 
 	applicationFormMultiSelect, err := ApplicationServiceSingleton.queries.GetApplicationQuestionsMultiSelectForCoursePhase(ctxWithTimeout, coursePhaseID)
 	if err != nil {
-		log.Error(err)
+		log.WithFields(log.Fields{
+			"coursePhaseID": coursePhaseID,
+			"questionType":  "multi_select",
+		}).WithError(err).Error("failed to load application questions")
 		return applicationDTO.FormWithDetails{}, errors.New("could not get application form")
 	}
 

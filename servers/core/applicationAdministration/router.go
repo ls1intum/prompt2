@@ -156,14 +156,20 @@ func getApplicationFormWithCourseDetails(c *gin.Context) {
 		handleError(c, http.StatusBadRequest, err)
 		return
 	}
+	requestLogger := log.WithFields(log.Fields{
+		"coursePhaseID": coursePhaseId,
+		"path":          c.FullPath(),
+		"clientIP":      c.ClientIP(),
+	})
 
 	applicationForm, err := GetApplicationFormWithDetails(c, coursePhaseId)
 	if err != nil {
-		log.Error(err)
 		if errors.Is(err, ErrNotFound) {
+			requestLogger.WithError(err).Warn("open application form not found")
 			handleError(c, http.StatusNotFound, errors.New("application not found"))
 			return
 		}
+		requestLogger.WithError(err).Error("failed to get application form with course details")
 		handleError(c, http.StatusInternalServerError, errors.New("could not get application form"))
 		return
 	}
@@ -188,14 +194,22 @@ func getApplicationAuthenticated(c *gin.Context) {
 		handleError(c, http.StatusBadRequest, err)
 		return
 	}
+	requestLogger := log.WithFields(log.Fields{
+		"coursePhaseID": coursePhaseID,
+		"path":          c.FullPath(),
+		"clientIP":      c.ClientIP(),
+		"userID":        c.GetString("userID"),
+	})
 	matriculationNumber := c.GetString("matriculationNumber")
 	if matriculationNumber == "" {
+		requestLogger.Warn("no matriculation number found in authentication context")
 		handleError(c, http.StatusUnauthorized, errors.New("no matriculation number found"))
 		return
 	}
 
 	universityLogin := c.GetString("universityLogin")
 	if universityLogin == "" {
+		requestLogger.Warn("no university login found in authentication context")
 		handleError(c, http.StatusUnauthorized, errors.New("no university login found"))
 		return
 	}
@@ -205,7 +219,7 @@ func getApplicationAuthenticated(c *gin.Context) {
 
 	applicationForm, err := GetApplicationAuthenticatedByMatriculationNumberAndUniversityLogin(c, coursePhaseID, matriculationNumber, universityLogin)
 	if err != nil {
-		log.Error(err)
+		requestLogger.WithError(err).Error("failed to get authenticated application form")
 		handleError(c, http.StatusInternalServerError, errors.New("could not get application form"))
 		return
 	}
