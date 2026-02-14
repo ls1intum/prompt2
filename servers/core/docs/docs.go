@@ -2663,6 +2663,59 @@ const docTemplate = `{
                 }
             }
         },
+        "/mailing/{coursePhaseID}/evaluation-reminder": {
+            "post": {
+                "description": "Sends reminder mails for incomplete self/peer/tutor evaluations in a given course phase",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "mailing"
+                ],
+                "summary": "Manually trigger evaluation reminder mail for a course phase",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Course Phase UUID",
+                        "name": "coursePhaseID",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Reminder request",
+                        "name": "reminder",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/mailingDTO.SendEvaluationReminderRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/mailingDTO.EvaluationReminderReport"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/students/": {
             "get": {
                 "description": "Get a list of all students",
@@ -4259,6 +4312,54 @@ const docTemplate = `{
                 }
             }
         },
+        "mailingDTO.EvaluationReminderReport": {
+            "type": "object",
+            "properties": {
+                "deadline": {
+                    "type": "string"
+                },
+                "deadlinePassed": {
+                    "type": "boolean"
+                },
+                "evaluationType": {
+                    "$ref": "#/definitions/mailingDTO.EvaluationType"
+                },
+                "failedEmails": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "previousSentAt": {
+                    "type": "string"
+                },
+                "requestedRecipients": {
+                    "type": "integer"
+                },
+                "sentAt": {
+                    "type": "string"
+                },
+                "successfulEmails": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "mailingDTO.EvaluationType": {
+            "type": "string",
+            "enum": [
+                "self",
+                "peer",
+                "tutor"
+            ],
+            "x-enum-varnames": [
+                "EvaluationTypeSelf",
+                "EvaluationTypePeer",
+                "EvaluationTypeTutor"
+            ]
+        },
         "mailingDTO.MailingReport": {
             "type": "object",
             "properties": {
@@ -4273,6 +4374,14 @@ const docTemplate = `{
                     "items": {
                         "type": "string"
                     }
+                }
+            }
+        },
+        "mailingDTO.SendEvaluationReminderRequest": {
+            "type": "object",
+            "properties": {
+                "evaluationType": {
+                    "$ref": "#/definitions/mailingDTO.EvaluationType"
                 }
             }
         },

@@ -7,6 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	promptSDK "github.com/ls1intum/prompt-sdk"
+	"github.com/ls1intum/prompt2/servers/assessment/assessmentType"
 	"github.com/ls1intum/prompt2/servers/assessment/coursePhaseConfig/coursePhaseConfigDTO"
 	log "github.com/sirupsen/logrus"
 )
@@ -22,6 +23,7 @@ func setupCoursePhaseRouter(routerGroup *gin.RouterGroup, authMiddleware func(al
 	coursePhaseRouter.GET("", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor, promptSDK.CourseStudent), getCoursePhaseConfig)
 	coursePhaseRouter.PUT("", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), createOrUpdateCoursePhaseConfig)
 	coursePhaseRouter.POST("/release", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), releaseResults)
+	coursePhaseRouter.GET("/reminders/incomplete", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), getIncompleteReminderRecipients)
 
 	coursePhaseRouter.GET("participations", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), getParticipationsForCoursePhase)
 	coursePhaseRouter.GET("teams", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor, promptSDK.CourseStudent), getTeamsForCoursePhase)
@@ -182,4 +184,54 @@ func getTeamsForCoursePhase(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, teams)
+}
+
+// getIncompleteReminderRecipients godoc
+// @Summary List incomplete reminder recipients by evaluation type
+// @Description Returns authors who have not fully completed evaluations for the selected type.
+// @Tags course_phase_config
+// @Produce json
+// @Param coursePhaseID path string true "Course phase ID"
+// @Param type query string true "Evaluation type (self|peer|tutor)"
+// @Success 200 {object} coursePhaseConfigDTO.EvaluationReminderRecipients
+// @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /course_phase/{coursePhaseID}/config/reminders/incomplete [get]
+func getIncompleteReminderRecipients(c *gin.Context) {
+	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
+	if err != nil {
+		log.WithError(err).Error("Failed to parse course phase ID")
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid course phase ID"})
+		return
+	}
+
+	evaluationType, err := parseEvaluationType(c.Query("type"))
+	if err != nil {
+		log.WithError(err).Error("Invalid reminder evaluation type")
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	authHeader := c.GetHeader("Authorization")
+	response, err := GetEvaluationReminderRecipients(c, authHeader, coursePhaseID, evaluationType)
+	if err != nil {
+		log.WithError(err).Error("Failed to compute incomplete reminder recipients")
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to compute reminder recipients"})
+		return
+	}
+
+	c.JSON(http.StatusOK, response)
+}
+
+func parseEvaluationType(raw string) (assessmentType.AssessmentType, error) {
+	switch raw {
+	case string(assessmentType.Self):
+		return assessmentType.Self, nil
+	case string(assessmentType.Peer):
+		return assessmentType.Peer, nil
+	case string(assessmentType.Tutor):
+		return assessmentType.Tutor, nil
+	default:
+		return "", errors.New("invalid evaluation type, expected one of: self, peer, tutor")
+	}
 }

@@ -1,6 +1,7 @@
 package mailing
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -18,6 +19,7 @@ import (
 func setupMailingRouter(router *gin.RouterGroup, authMiddleware func() gin.HandlerFunc, permissionRoleMiddleware func(allowedRoles ...string) gin.HandlerFunc) {
 	mailing := router.Group("/mailing", authMiddleware())
 	mailing.PUT("/:coursePhaseID", permissionRoleMiddleware(permissionValidation.PromptAdmin, permissionValidation.PromptLecturer, permissionValidation.CourseLecturer), sendStatusMailManualTrigger)
+	mailing.POST("/:coursePhaseID/evaluation-reminder", permissionRoleMiddleware(permissionValidation.PromptAdmin, permissionValidation.PromptLecturer, permissionValidation.CourseLecturer), sendEvaluationReminderManualTrigger)
 }
 
 // sendStatusMailManualTrigger godoc
@@ -51,6 +53,49 @@ func sendStatusMailManualTrigger(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, response)
+}
+
+// sendEvaluationReminderManualTrigger godoc
+// @Summary Manually trigger evaluation reminder mail for a course phase
+// @Description Sends reminder mails for incomplete self/peer/tutor evaluations in a given course phase
+// @Tags mailing
+// @Accept json
+// @Produce json
+// @Param coursePhaseID path string true "Course Phase UUID"
+// @Param reminder body mailingDTO.SendEvaluationReminderRequest true "Reminder request"
+// @Success 200 {object} mailingDTO.EvaluationReminderReport
+// @Failure 400 {object} utils.ErrorResponse
+// @Failure 500 {object} utils.ErrorResponse
+// @Router /mailing/{coursePhaseID}/evaluation-reminder [post]
+func sendEvaluationReminderManualTrigger(c *gin.Context) {
+	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
+	if err != nil {
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	var request mailingDTO.SendEvaluationReminderRequest
+	if err := c.BindJSON(&request); err != nil {
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+	if !request.EvaluationType.IsValid() {
+		handleError(c, http.StatusBadRequest, errors.New("invalid evaluationType, expected self, peer, or tutor"))
+		return
+	}
+
+	report, err := SendEvaluationReminderManualTrigger(
+		c,
+		coursePhaseID,
+		request.EvaluationType,
+		c.GetHeader("Authorization"),
+	)
+	if err != nil {
+		handleError(c, http.StatusInternalServerError, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, report)
 }
 
 func handleError(c *gin.Context, statusCode int, err error) {

@@ -867,6 +867,39 @@ definitions:
       username:
         type: string
     type: object
+  mailingDTO.EvaluationReminderReport:
+    properties:
+      deadline:
+        type: string
+      deadlinePassed:
+        type: boolean
+      evaluationType:
+        $ref: '#/definitions/mailingDTO.EvaluationType'
+      failedEmails:
+        items:
+          type: string
+        type: array
+      previousSentAt:
+        type: string
+      requestedRecipients:
+        type: integer
+      sentAt:
+        type: string
+      successfulEmails:
+        items:
+          type: string
+        type: array
+    type: object
+  mailingDTO.EvaluationType:
+    enum:
+    - self
+    - peer
+    - tutor
+    type: string
+    x-enum-varnames:
+    - EvaluationTypeSelf
+    - EvaluationTypePeer
+    - EvaluationTypeTutor
   mailingDTO.MailingReport:
     properties:
       failedEmails:
@@ -877,6 +910,11 @@ definitions:
         items:
           type: string
         type: array
+    type: object
+  mailingDTO.SendEvaluationReminderRequest:
+    properties:
+      evaluationType:
+        $ref: '#/definitions/mailingDTO.EvaluationType'
     type: object
   mailingDTO.SendStatusMail:
     properties:
@@ -2820,6 +2858,42 @@ paths:
           schema:
             $ref: '#/definitions/utils.ErrorResponse'
       summary: Manually trigger status mail for a course phase
+      tags:
+      - mailing
+  /mailing/{coursePhaseID}/evaluation-reminder:
+    post:
+      consumes:
+      - application/json
+      description: Sends reminder mails for incomplete self/peer/tutor evaluations
+        in a given course phase
+      parameters:
+      - description: Course Phase UUID
+        in: path
+        name: coursePhaseID
+        required: true
+        type: string
+      - description: Reminder request
+        in: body
+        name: reminder
+        required: true
+        schema:
+          $ref: '#/definitions/mailingDTO.SendEvaluationReminderRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/mailingDTO.EvaluationReminderReport'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      summary: Manually trigger evaluation reminder mail for a course phase
       tags:
       - mailing
   /students/:

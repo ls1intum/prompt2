@@ -1702,6 +1702,60 @@
                 }
             }
         },
+        "/course_phase/{coursePhaseID}/config/reminders/incomplete": {
+            "get": {
+                "description": "Returns authors who have not fully completed evaluations for the selected type.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "course_phase_config"
+                ],
+                "summary": "List incomplete reminder recipients by evaluation type",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Course phase ID",
+                        "name": "coursePhaseID",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Evaluation type (self|peer|tutor)",
+                        "name": "type",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/coursePhaseConfigDTO.EvaluationReminderRecipients"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/course_phase/{coursePhaseID}/config/teams": {
             "get": {
                 "description": "Get teams for a course phase from core service.",
@@ -5021,6 +5075,35 @@
                 },
                 "tutorEvaluationStart": {
                     "type": "string"
+                }
+            }
+        },
+        "coursePhaseConfigDTO.EvaluationReminderRecipients": {
+            "type": "object",
+            "properties": {
+                "completedAuthors": {
+                    "type": "integer"
+                },
+                "deadline": {
+                    "type": "string"
+                },
+                "deadlinePassed": {
+                    "type": "boolean"
+                },
+                "evaluationEnabled": {
+                    "type": "boolean"
+                },
+                "evaluationType": {
+                    "$ref": "#/definitions/assessmentType.AssessmentType"
+                },
+                "incompleteAuthorCourseParticipationIDs": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "totalAuthors": {
+                    "type": "integer"
                 }
             }
         },
