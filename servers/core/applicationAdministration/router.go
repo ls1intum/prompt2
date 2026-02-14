@@ -43,10 +43,15 @@ func setupApplicationRouter(router *gin.RouterGroup, authMiddleware func() gin.H
 	apply.GET("", getAllOpenApplications)
 	apply.GET("/:coursePhaseID", getApplicationFormWithCourseDetails)
 	apply.POST("/:coursePhaseID", postApplicationExtern)
+	apply.POST("/:coursePhaseID/files/presign", presignApplicationUploadExternal)
+	apply.POST("/:coursePhaseID/files/complete", completeApplicationUploadExternal)
 
 	applyAuthenticated := router.Group("/apply/authenticated", applicationMiddleware())
 	applyAuthenticated.GET("/:coursePhaseID", getApplicationAuthenticated)
 	applyAuthenticated.POST("/:coursePhaseID", postApplicationAuthenticated)
+	applyAuthenticated.POST("/:coursePhaseID/files/presign", presignApplicationUploadAuthenticated)
+	applyAuthenticated.POST("/:coursePhaseID/files/complete", completeApplicationUploadAuthenticated)
+	applyAuthenticated.DELETE("/:coursePhaseID/files/:fileId", deleteApplicationFileAuthenticated)
 
 }
 
