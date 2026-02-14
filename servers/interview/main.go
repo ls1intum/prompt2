@@ -20,7 +20,8 @@ import (
 	"github.com/ls1intum/prompt2/servers/interview/config"
 	"github.com/ls1intum/prompt2/servers/interview/copy"
 	db "github.com/ls1intum/prompt2/servers/interview/db/sqlc"
-	"github.com/ls1intum/prompt2/servers/interview/interview_slot"
+	interview_assignment "github.com/ls1intum/prompt2/servers/interview/interviewAssignment"
+	interview_slot "github.com/ls1intum/prompt2/servers/interview/interviewSlot"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -179,6 +180,7 @@ func main() {
 	config.InitConfigModule(api, *query, conn)
 
 	interview_slot.InitInterviewSlotModule(api, *query, conn)
+	interview_assignment.InitInterviewAssignmentModule(api, *query, conn)
 
 	serverAddress := promptSDK.GetEnv("SERVER_ADDRESS", "localhost:8087")
 	log.Info("Interview Server started")
