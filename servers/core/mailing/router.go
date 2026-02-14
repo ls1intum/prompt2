@@ -1,7 +1,6 @@
 package mailing
 
 import (
-	"errors"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -11,6 +10,8 @@ import (
 	"github.com/ls1intum/prompt2/servers/core/utils"
 )
 
+var sendManualMailFn = SendManualMailToParticipants
+
 // setupMailingRouter sets up the mailing endpoints
 // @Summary Mailing Endpoints
 // @Description Endpoints for sending status mails
@@ -19,7 +20,7 @@ import (
 func setupMailingRouter(router *gin.RouterGroup, authMiddleware func() gin.HandlerFunc, permissionRoleMiddleware func(allowedRoles ...string) gin.HandlerFunc) {
 	mailing := router.Group("/mailing", authMiddleware())
 	mailing.PUT("/:coursePhaseID", permissionRoleMiddleware(permissionValidation.PromptAdmin, permissionValidation.PromptLecturer, permissionValidation.CourseLecturer), sendStatusMailManualTrigger)
-	mailing.POST("/:coursePhaseID/evaluation-reminder", permissionRoleMiddleware(permissionValidation.PromptAdmin, permissionValidation.PromptLecturer, permissionValidation.CourseLecturer), sendEvaluationReminderManualTrigger)
+	mailing.POST("/:coursePhaseID/manual", permissionRoleMiddleware(permissionValidation.PromptAdmin, permissionValidation.PromptLecturer, permissionValidation.CourseLecturer), sendManualMailTrigger)
 }
 
 // sendStatusMailManualTrigger godoc
@@ -55,40 +56,35 @@ func sendStatusMailManualTrigger(c *gin.Context) {
 	c.JSON(http.StatusOK, response)
 }
 
-// sendEvaluationReminderManualTrigger godoc
-// @Summary Manually trigger evaluation reminder mail for a course phase
-// @Description Sends reminder mails for incomplete self/peer/tutor evaluations in a given course phase
+// sendManualMailTrigger godoc
+// @Summary Manually trigger custom mails for a selected recipient list
+// @Description Sends mails to the provided course participations using the provided template and placeholders
 // @Tags mailing
 // @Accept json
 // @Produce json
 // @Param coursePhaseID path string true "Course Phase UUID"
-// @Param reminder body mailingDTO.SendEvaluationReminderRequest true "Reminder request"
-// @Success 200 {object} mailingDTO.EvaluationReminderReport
+// @Param request body mailingDTO.SendManualMailRequest true "Manual mail request"
+// @Success 200 {object} mailingDTO.ManualMailReport
 // @Failure 400 {object} utils.ErrorResponse
 // @Failure 500 {object} utils.ErrorResponse
-// @Router /mailing/{coursePhaseID}/evaluation-reminder [post]
-func sendEvaluationReminderManualTrigger(c *gin.Context) {
+// @Router /mailing/{coursePhaseID}/manual [post]
+func sendManualMailTrigger(c *gin.Context) {
 	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
 	if err != nil {
 		handleError(c, http.StatusBadRequest, err)
 		return
 	}
 
-	var request mailingDTO.SendEvaluationReminderRequest
+	var request mailingDTO.SendManualMailRequest
 	if err := c.BindJSON(&request); err != nil {
 		handleError(c, http.StatusBadRequest, err)
 		return
 	}
-	if !request.EvaluationType.IsValid() {
-		handleError(c, http.StatusBadRequest, errors.New("invalid evaluationType, expected self, peer, or tutor"))
-		return
-	}
 
-	report, err := SendEvaluationReminderManualTrigger(
+	report, err := sendManualMailFn(
 		c,
 		coursePhaseID,
-		request.EvaluationType,
-		c.GetHeader("Authorization"),
+		request,
 	)
 	if err != nil {
 		handleError(c, http.StatusInternalServerError, err)

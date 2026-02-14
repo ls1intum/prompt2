@@ -10,11 +10,15 @@ export const sendEvaluationReminder = async (
 ): Promise<EvaluationReminderReport> => {
   try {
     return (
-      await axiosInstance.post(`/api/mailing/${coursePhaseID}/evaluation-reminder`, request, {
-        headers: {
-          'Content-Type': 'application/json',
+      await axiosInstance.post(
+        `/assessment/api/course_phase/${coursePhaseID}/config/reminders/send`,
+        request,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+          },
         },
-      })
+      )
     ).data
   } catch (err) {
     console.error('Failed to send evaluation reminder:', err)

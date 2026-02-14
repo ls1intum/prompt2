@@ -14,6 +14,9 @@ import (
 	db "github.com/ls1intum/prompt2/servers/assessment/db/sqlc"
 )
 
+var getParticipationsForCoursePhaseFn = GetParticipationsForCoursePhase
+var getTeamsForCoursePhaseFn = GetTeamsForCoursePhase
+
 func GetEvaluationReminderRecipients(
 	ctx context.Context,
 	authHeader string,
@@ -33,15 +36,17 @@ func GetEvaluationReminderRecipients(
 		deadlineTime = &deadlineCopy
 	}
 
-	participations, err := GetParticipationsForCoursePhase(ctx, authHeader, coursePhaseID)
+	participations, err := getParticipationsForCoursePhaseFn(ctx, authHeader, coursePhaseID)
 	if err != nil {
 		return coursePhaseConfigDTO.EvaluationReminderRecipients{}, err
 	}
 
 	result := coursePhaseConfigDTO.EvaluationReminderRecipients{
 		EvaluationType:                         evaluationType,
+		EvaluationTypeLabel:                    getEvaluationTypeLabel(evaluationType),
 		EvaluationEnabled:                      evaluationEnabled,
 		Deadline:                               deadlineTime,
+		EvaluationDeadlinePlaceholder:          getEvaluationDeadlinePlaceholder(deadlineTime),
 		DeadlinePassed:                         deadlinePassed,
 		IncompleteAuthorCourseParticipationIDs: make([]uuid.UUID, 0),
 		TotalAuthors:                           len(participations),
@@ -54,7 +59,7 @@ func GetEvaluationReminderRecipients(
 		return result, nil
 	}
 
-	teams, err := GetTeamsForCoursePhase(ctx, authHeader, coursePhaseID)
+	teams, err := getTeamsForCoursePhaseFn(ctx, authHeader, coursePhaseID)
 	if err != nil {
 		return coursePhaseConfigDTO.EvaluationReminderRecipients{}, err
 	}
@@ -229,4 +234,24 @@ func deduplicateUUIDs(ids []uuid.UUID) []uuid.UUID {
 		result = append(result, id)
 	}
 	return result
+}
+
+func getEvaluationTypeLabel(evaluationType assessmentType.AssessmentType) string {
+	switch evaluationType {
+	case assessmentType.Self:
+		return "Self Evaluation"
+	case assessmentType.Peer:
+		return "Peer Evaluation"
+	case assessmentType.Tutor:
+		return "Tutor Evaluation"
+	default:
+		return string(evaluationType)
+	}
+}
+
+func getEvaluationDeadlinePlaceholder(deadline *time.Time) string {
+	if deadline == nil {
+		return ""
+	}
+	return deadline.Format("02.01.2006 15:04")
 }

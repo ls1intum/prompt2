@@ -481,16 +481,48 @@ definitions:
         type: string
       deadlinePassed:
         type: boolean
+      evaluationDeadlinePlaceholder:
+        type: string
       evaluationEnabled:
         type: boolean
       evaluationType:
         $ref: '#/definitions/assessmentType.AssessmentType'
+      evaluationTypeLabel:
+        type: string
       incompleteAuthorCourseParticipationIDs:
         items:
           type: string
         type: array
       totalAuthors:
         type: integer
+    type: object
+  coursePhaseConfigDTO.EvaluationReminderSendReport:
+    properties:
+      deadline:
+        type: string
+      deadlinePassed:
+        type: boolean
+      evaluationType:
+        $ref: '#/definitions/assessmentType.AssessmentType'
+      failedEmails:
+        items:
+          type: string
+        type: array
+      previousSentAt:
+        type: string
+      requestedRecipients:
+        type: integer
+      sentAt:
+        type: string
+      successfulEmails:
+        items:
+          type: string
+        type: array
+    type: object
+  coursePhaseConfigDTO.SendEvaluationReminderRequest:
+    properties:
+      evaluationType:
+        $ref: '#/definitions/assessmentType.AssessmentType'
     type: object
   db.Category:
     properties:
@@ -2032,6 +2064,52 @@ paths:
               type: string
             type: object
       summary: List incomplete reminder recipients by evaluation type
+      tags:
+      - course_phase_config
+  /course_phase/{coursePhaseID}/config/reminders/send:
+    post:
+      consumes:
+      - application/json
+      description: Computes incomplete recipients in assessment and triggers core
+        manual mailing for the selected type.
+      parameters:
+      - description: Course phase ID
+        in: path
+        name: coursePhaseID
+        required: true
+        type: string
+      - description: Evaluation reminder send request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/coursePhaseConfigDTO.SendEvaluationReminderRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/coursePhaseConfigDTO.EvaluationReminderSendReport'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "409":
+          description: Conflict
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Send evaluation reminders
       tags:
       - course_phase_config
   /course_phase/{coursePhaseID}/config/teams:

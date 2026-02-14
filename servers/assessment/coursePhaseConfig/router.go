@@ -3,6 +3,7 @@ package coursePhaseConfig
 import (
 	"errors"
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -11,6 +12,9 @@ import (
 	"github.com/ls1intum/prompt2/servers/assessment/coursePhaseConfig/coursePhaseConfigDTO"
 	log "github.com/sirupsen/logrus"
 )
+
+var getEvaluationReminderRecipientsFn = GetEvaluationReminderRecipients
+var sendEvaluationReminderManualTriggerFn = SendEvaluationReminderManualTrigger
 
 // setupCoursePhaseRouter sets up course phase config endpoints.
 // @Summary Course Phase Config Endpoints
@@ -24,6 +28,7 @@ func setupCoursePhaseRouter(routerGroup *gin.RouterGroup, authMiddleware func(al
 	coursePhaseRouter.PUT("", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), createOrUpdateCoursePhaseConfig)
 	coursePhaseRouter.POST("/release", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), releaseResults)
 	coursePhaseRouter.GET("/reminders/incomplete", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), getIncompleteReminderRecipients)
+	coursePhaseRouter.POST("/reminders/send", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), sendEvaluationReminder)
 
 	coursePhaseRouter.GET("participations", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), getParticipationsForCoursePhase)
 	coursePhaseRouter.GET("teams", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor, promptSDK.CourseStudent), getTeamsForCoursePhase)
@@ -213,10 +218,26 @@ func getIncompleteReminderRecipients(c *gin.Context) {
 	}
 
 	authHeader := c.GetHeader("Authorization")
-	response, err := GetEvaluationReminderRecipients(c, authHeader, coursePhaseID, evaluationType)
+	response, err := getEvaluationReminderRecipientsFn(c, authHeader, coursePhaseID, evaluationType)
 	if err != nil {
 		log.WithError(err).Error("Failed to compute incomplete reminder recipients")
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to compute reminder recipients"})
+		return
+	}
+	if !response.EvaluationEnabled {
+		c.JSON(http.StatusConflict, gin.H{
+			"error": "evaluation type is disabled for this course phase",
+		})
+		return
+	}
+	if !response.DeadlinePassed {
+		deadlineMessage := "evaluation deadline has not passed yet"
+		if response.Deadline != nil {
+			deadlineMessage = "evaluation deadline has not passed yet (deadline: " + response.Deadline.Format(time.RFC3339) + ")"
+		}
+		c.JSON(http.StatusConflict, gin.H{
+			"error": deadlineMessage,
+		})
 		return
 	}
 
@@ -234,4 +255,61 @@ func parseEvaluationType(raw string) (assessmentType.AssessmentType, error) {
 	default:
 		return "", errors.New("invalid evaluation type, expected one of: self, peer, tutor")
 	}
+}
+
+// sendEvaluationReminder godoc
+// @Summary Send evaluation reminders
+// @Description Computes incomplete recipients in assessment and triggers core manual mailing for the selected type.
+// @Tags course_phase_config
+// @Accept json
+// @Produce json
+// @Param coursePhaseID path string true "Course phase ID"
+// @Param request body coursePhaseConfigDTO.SendEvaluationReminderRequest true "Evaluation reminder send request"
+// @Success 200 {object} coursePhaseConfigDTO.EvaluationReminderSendReport
+// @Failure 400 {object} map[string]string
+// @Failure 409 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /course_phase/{coursePhaseID}/config/reminders/send [post]
+func sendEvaluationReminder(c *gin.Context) {
+	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
+	if err != nil {
+		log.WithError(err).Error("Failed to parse course phase ID")
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid course phase ID"})
+		return
+	}
+
+	var request coursePhaseConfigDTO.SendEvaluationReminderRequest
+	if err := c.ShouldBindJSON(&request); err != nil {
+		log.WithError(err).Error("Failed to bind request")
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request format"})
+		return
+	}
+	if request.EvaluationType == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid evaluation type, expected one of: self, peer, tutor"})
+		return
+	}
+	evaluationType, err := parseEvaluationType(string(request.EvaluationType))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	report, err := sendEvaluationReminderManualTriggerFn(
+		c,
+		c.GetHeader("Authorization"),
+		coursePhaseID,
+		evaluationType,
+	)
+	if err != nil {
+		if errors.Is(err, ErrReminderDeadlineNotPassed) ||
+			errors.Is(err, ErrReminderEvaluationDisabled) {
+			c.JSON(http.StatusConflict, gin.H{"error": err.Error()})
+			return
+		}
+		log.WithError(err).Error("Failed to send evaluation reminder")
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to send evaluation reminder"})
+		return
+	}
+
+	c.JSON(http.StatusOK, report)
 }

@@ -2663,9 +2663,9 @@ const docTemplate = `{
                 }
             }
         },
-        "/mailing/{coursePhaseID}/evaluation-reminder": {
+        "/mailing/{coursePhaseID}/manual": {
             "post": {
-                "description": "Sends reminder mails for incomplete self/peer/tutor evaluations in a given course phase",
+                "description": "Sends mails to the provided course participations using the provided template and placeholders",
                 "consumes": [
                     "application/json"
                 ],
@@ -2675,7 +2675,7 @@ const docTemplate = `{
                 "tags": [
                     "mailing"
                 ],
-                "summary": "Manually trigger evaluation reminder mail for a course phase",
+                "summary": "Manually trigger custom mails for a selected recipient list",
                 "parameters": [
                     {
                         "type": "string",
@@ -2685,12 +2685,12 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "description": "Reminder request",
-                        "name": "reminder",
+                        "description": "Manual mail request",
+                        "name": "request",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/mailingDTO.SendEvaluationReminderRequest"
+                            "$ref": "#/definitions/mailingDTO.SendManualMailRequest"
                         }
                     }
                 ],
@@ -2698,7 +2698,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/mailingDTO.EvaluationReminderReport"
+                            "$ref": "#/definitions/mailingDTO.ManualMailReport"
                         }
                     },
                     "400": {
@@ -4312,54 +4312,6 @@ const docTemplate = `{
                 }
             }
         },
-        "mailingDTO.EvaluationReminderReport": {
-            "type": "object",
-            "properties": {
-                "deadline": {
-                    "type": "string"
-                },
-                "deadlinePassed": {
-                    "type": "boolean"
-                },
-                "evaluationType": {
-                    "$ref": "#/definitions/mailingDTO.EvaluationType"
-                },
-                "failedEmails": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                "previousSentAt": {
-                    "type": "string"
-                },
-                "requestedRecipients": {
-                    "type": "integer"
-                },
-                "sentAt": {
-                    "type": "string"
-                },
-                "successfulEmails": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                }
-            }
-        },
-        "mailingDTO.EvaluationType": {
-            "type": "string",
-            "enum": [
-                "self",
-                "peer",
-                "tutor"
-            ],
-            "x-enum-varnames": [
-                "EvaluationTypeSelf",
-                "EvaluationTypePeer",
-                "EvaluationTypeTutor"
-            ]
-        },
         "mailingDTO.MailingReport": {
             "type": "object",
             "properties": {
@@ -4377,11 +4329,49 @@ const docTemplate = `{
                 }
             }
         },
-        "mailingDTO.SendEvaluationReminderRequest": {
+        "mailingDTO.ManualMailReport": {
             "type": "object",
             "properties": {
-                "evaluationType": {
-                    "$ref": "#/definitions/mailingDTO.EvaluationType"
+                "failedEmails": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "requestedRecipients": {
+                    "type": "integer"
+                },
+                "sentAt": {
+                    "type": "string"
+                },
+                "successfulEmails": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "mailingDTO.SendManualMailRequest": {
+            "type": "object",
+            "properties": {
+                "additionalPlaceholders": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "content": {
+                    "type": "string"
+                },
+                "recipientCourseParticipationIDs": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "subject": {
+                    "type": "string"
                 }
             }
         },
