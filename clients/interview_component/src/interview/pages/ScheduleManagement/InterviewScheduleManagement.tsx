@@ -37,7 +37,7 @@ import {
   SelectValue,
   useToast,
 } from '@tumaet/prompt-ui-components'
-import { Calendar, Clock, MapPin, Users, Plus, Pencil, Trash2, UserPlus } from 'lucide-react'
+import { Calendar, Clock, MapPin, Users, Plus, Pencil, Trash2, X, UserPlus } from 'lucide-react'
 import { format } from 'date-fns'
 
 interface StudentInfo {
@@ -81,7 +81,12 @@ export const InterviewScheduleManagement = () => {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
   const [isAssignDialogOpen, setIsAssignDialogOpen] = useState(false)
+  const [isUnassignDialogOpen, setIsUnassignDialogOpen] = useState(false)
   const [assigningSlot, setAssigningSlot] = useState<InterviewSlot | null>(null)
+  const [unassigningInfo, setUnassigningInfo] = useState<{
+    assignmentId: string
+    studentName: string
+  } | null>(null)
   const [selectedParticipationId, setSelectedParticipationId] = useState<string>('')
   const [editingSlot, setEditingSlot] = useState<InterviewSlot | null>(null)
   const [formData, setFormData] = useState<SlotFormData>({
@@ -239,6 +244,31 @@ export const InterviewScheduleManagement = () => {
     },
   })
 
+  // Unassign student mutation
+  const unassignStudentMutation = useMutation({
+    mutationFn: async (assignmentId: string) => {
+      await interviewAxiosInstance.delete(
+        `interview/api/course_phase/${phaseId}/interview-assignments/${assignmentId}`,
+      )
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['interviewSlots', phaseId] })
+      setIsUnassignDialogOpen(false)
+      setUnassigningInfo(null)
+      toast({
+        title: 'Student unassigned',
+        description: 'Student has been removed from the interview slot.',
+      })
+    },
+    onError: (error: any) => {
+      toast({
+        title: 'Unassignment failed',
+        description: error?.response?.data?.error || 'Failed to unassign student.',
+        variant: 'destructive',
+      })
+    },
+  })
+
   const resetForm = () => {
     setFormData({
       start_time: '',
@@ -298,6 +328,17 @@ export const InterviewScheduleManagement = () => {
         slotId: assigningSlot.id,
         participationId: selectedParticipationId,
       })
+    }
+  }
+
+  const handleUnassignClick = (assignmentId: string, studentName: string) => {
+    setUnassigningInfo({ assignmentId, studentName })
+    setIsUnassignDialogOpen(true)
+  }
+
+  const handleConfirmUnassign = () => {
+    if (unassigningInfo) {
+      unassignStudentMutation.mutate(unassigningInfo.assignmentId)
     }
   }
 
@@ -540,14 +581,24 @@ export const InterviewScheduleManagement = () => {
                       </TableCell>
                       <TableCell>
                         {slot.assignments && slot.assignments.length > 0 ? (
-                          <div className='space-y-1'>
-                            {slot.assignments.map((assignment) => (
-                              <Badge key={assignment.id} variant='outline' className='mr-1'>
-                                {assignment.student
-                                  ? `${assignment.student.firstName} ${assignment.student.lastName}`
-                                  : assignment.course_participation_id}
-                              </Badge>
-                            ))}
+                          <div className='flex flex-wrap gap-1'>
+                            {slot.assignments.map((assignment) => {
+                              const studentName = assignment.student
+                                ? `${assignment.student.firstName} ${assignment.student.lastName}`
+                                : assignment.course_participation_id
+                              return (
+                                <Badge
+                                  key={assignment.id}
+                                  variant='outline'
+                                  className='cursor-pointer hover:bg-destructive hover:text-destructive-foreground transition-colors group pr-1'
+                                  onClick={() => handleUnassignClick(assignment.id, studentName)}
+                                  title={`Click to remove ${studentName}`}
+                                >
+                                  {studentName}
+                                  <X className='ml-1 h-3 w-3 opacity-50 group-hover:opacity-100' />
+                                </Badge>
+                              )
+                            })}
                           </div>
                         ) : (
                           <span className='text-muted-foreground text-sm'>No bookings yet</span>
@@ -683,6 +734,41 @@ export const InterviewScheduleManagement = () => {
               }
             >
               {assignStudentMutation.isPending ? 'Assigning...' : 'Assign Student'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Unassign Confirmation Dialog */}
+      <Dialog open={isUnassignDialogOpen} onOpenChange={setIsUnassignDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Unassign Student</DialogTitle>
+            <DialogDescription>
+              {unassigningInfo && (
+                <>
+                  Are you sure you want to unassign <strong>{unassigningInfo.studentName}</strong>{' '}
+                  from this interview slot? The student will need to book a new slot if needed.
+                </>
+              )}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant='outline'
+              onClick={() => {
+                setIsUnassignDialogOpen(false)
+                setUnassigningInfo(null)
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant='destructive'
+              onClick={handleConfirmUnassign}
+              disabled={unassignStudentMutation.isPending}
+            >
+              {unassignStudentMutation.isPending ? 'Unassigning...' : 'Unassign'}
             </Button>
           </DialogFooter>
         </DialogContent>
