@@ -18,7 +18,7 @@ jobs:
     outputs:
       directories: ${{ steps.resolve.outputs.directories }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
       - id: resolve
@@ -71,9 +71,9 @@ jobs:
         directory: ${{ fromJson(needs.resolve-directories.outputs.directories) }}
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Set up Go
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@v6
         with:
           go-version: "1.25"
           cache-dependency-path: "**/*.sum"

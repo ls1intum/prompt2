@@ -1,6 +1,6 @@
 module github.com/ls1intum/prompt2/servers/intro_course
 
-go 1.25.6
+go 1.25
 
 require (
 	github.com/getsentry/sentry-go v0.42.0

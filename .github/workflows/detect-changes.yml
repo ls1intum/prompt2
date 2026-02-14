@@ -2,6 +2,11 @@ name: Detect Changes
 
 on:
   workflow_call:
+    inputs:
+      base_sha:
+        description: "Base SHA to compare against"
+        required: false
+        type: string
     outputs:
       server_modules:
         description: "JSON array of server modules that should run"
@@ -15,6 +20,7 @@ on:
 
 permissions:
   contents: read
+  pull-requests: read
 
 jobs:
   detect:
@@ -24,7 +30,7 @@ jobs:
       api_spec_directories: ${{ steps.set-outputs.outputs.api_spec_directories }}
       client_modules: ${{ steps.set-outputs.outputs.client_modules }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
       - uses: tj-actions/changed-files@v45
@@ -34,6 +40,7 @@ jobs:
           dir_names: true
           dir_names_max_depth: 2
           json: true
+          base_sha: ${{ inputs.base_sha }}
       - uses: tj-actions/changed-files@v45
         id: changed-clients
         with:
@@ -41,15 +48,36 @@ jobs:
           dir_names: true
           dir_names_max_depth: 2
           json: true
+          base_sha: ${{ inputs.base_sha }}
       - uses: tj-actions/changed-files@v45
         id: changed-workflows
         with:
           files: .github/workflows/**
+          base_sha: ${{ inputs.base_sha }}
+      - uses: tj-actions/changed-files@v45
+        id: changed-client-root
+        with:
+          files: |
+            clients/package.json
+            clients/yarn.lock
+            clients/lerna.json
+            clients/Dockerfile
+            clients/eslint.config.mjs
+          base_sha: ${{ inputs.base_sha }}
+      - uses: tj-actions/changed-files@v45
+        id: changed-server-root
+        with:
+          files: |
+            servers/go.mod
+            servers/go.sum
+          base_sha: ${{ inputs.base_sha }}
       - id: set-outputs
         run: |
           set -euo pipefail
 
           workflows_changed="${{ steps.changed-workflows.outputs.any_changed }}"
+          client_root_changed="${{ steps.changed-client-root.outputs.any_changed }}"
+          server_root_changed="${{ steps.changed-server-root.outputs.any_changed }}"
           event_name="${{ github.event_name }}"
           force_all=false
           if [ "$event_name" = "release" ]; then
@@ -63,7 +91,7 @@ jobs:
           }
 
           server_modules="[]"
-          if [ "$workflows_changed" = "true" ] || [ "$force_all" = "true" ]; then
+          if [ "$workflows_changed" = "true" ] || [ "$server_root_changed" = "true" ] || [ "$force_all" = "true" ]; then
             if compgen -G "servers/*/" > /dev/null; then
               for dir in servers/*/; do
                 module=$(basename "$dir")
@@ -78,7 +106,7 @@ jobs:
           fi
 
           client_modules="[]"
-          if [ "$workflows_changed" = "true" ] || [ "$force_all" = "true" ]; then
+          if [ "$workflows_changed" = "true" ] || [ "$client_root_changed" = "true" ] || [ "$force_all" = "true" ]; then
             if compgen -G "clients/*/" > /dev/null; then
               for dir in clients/*/; do
                 module=$(basename "$dir")
@@ -102,7 +130,7 @@ jobs:
           }
 
           api_spec_directories="[]"
-          if [ "$workflows_changed" = "true" ] || [ "$force_all" = "true" ]; then
+          if [ "$workflows_changed" = "true" ] || [ "$server_root_changed" = "true" ] || [ "$force_all" = "true" ]; then
             if compgen -G "servers/*/" > /dev/null; then
               for dir in servers/*/; do
                 module=$(basename "$dir")
