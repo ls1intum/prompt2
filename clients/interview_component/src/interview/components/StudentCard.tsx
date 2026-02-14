@@ -1,26 +1,32 @@
-import { GraduationCap, BookOpen, Mic, FileUserIcon } from 'lucide-react'
+import { GraduationCap, BookOpen, Mic, FileUserIcon, Calendar, Clock, MapPin } from 'lucide-react'
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
   Avatar,
+  AvatarImage,
   AvatarFallback,
   Separator,
-  Badge,
 } from '@tumaet/prompt-ui-components'
-import { AvatarImage } from '@radix-ui/react-avatar'
 import {
   getStudyDegreeString,
   CoursePhaseParticipationWithStudent,
 } from '@tumaet/prompt-shared-state'
 import { getGravatarUrl } from '@/lib/getGravatarUrl'
 import { getStatusColor } from '@/lib/getStatusColor'
-import { InterviewSlot } from '../interfaces/InterviewSlots'
+import { format } from 'date-fns'
+
+interface InterviewSlotData {
+  id: string
+  start_time: string
+  end_time: string
+  location: string | null
+}
 
 interface StudentCardProps {
   participation: CoursePhaseParticipationWithStudent
-  interviewSlot?: InterviewSlot
+  interviewSlot?: InterviewSlotData
 }
 
 export function StudentCard({ participation, interviewSlot }: StudentCardProps) {
@@ -42,19 +48,33 @@ export function StudentCard({ participation, interviewSlot }: StudentCardProps) 
             {participation.student.lastName[0]}
           </AvatarFallback>
         </Avatar>
-        <div className='absolute right-0'>
-          {interviewSlot && (
-            <Badge className='ml-auto mr-2 mt-2' variant='outline'>
-              #{interviewSlot.index}: {interviewSlot.startTime} - {interviewSlot.endTime}
-            </Badge>
-          )}
-        </div>
       </div>
 
       <CardHeader>
         <CardTitle className='text-left'>
           {participation.student.firstName} {participation.student.lastName}
         </CardTitle>
+        {interviewSlot && (
+          <div className='mt-2 space-y-1'>
+            <div className='flex items-center gap-2 text-sm text-muted-foreground'>
+              <Calendar className='h-3 w-3' />
+              <span>{format(new Date(interviewSlot.start_time), 'PPP')}</span>
+            </div>
+            <div className='flex items-center gap-2 text-sm text-muted-foreground'>
+              <Clock className='h-3 w-3' />
+              <span>
+                {format(new Date(interviewSlot.start_time), 'p')} -{' '}
+                {format(new Date(interviewSlot.end_time), 'p')}
+              </span>
+            </div>
+            {interviewSlot.location && (
+              <div className='flex items-center gap-2 text-sm text-muted-foreground'>
+                <MapPin className='h-3 w-3' />
+                <span>{interviewSlot.location}</span>
+              </div>
+            )}
+          </div>
+        )}
       </CardHeader>
 
       <CardContent className='grid gap-2'>

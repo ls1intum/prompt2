@@ -48,7 +48,8 @@ jobs:
     with:
       directories: ${{ needs.detect-changes.outputs.server_modules }}
   build-servers:
-    needs: test-servers
+    if: ${{ always() && !cancelled() && !contains(needs.*.result, 'failure') }}
+    needs: [detect-changes, test-servers]
     uses: ./.github/workflows/build-and-push-servers.yml
     secrets: inherit
   lint-clients:
@@ -58,7 +59,8 @@ jobs:
     with:
       modules: ${{ needs.detect-changes.outputs.client_modules }}
   build-clients:
-    needs: lint-clients
+    if: ${{ always() && !cancelled() && !contains(needs.*.result, 'failure') }}
+    needs: [detect-changes, lint-clients]
     uses: ./.github/workflows/build-and-push-clients.yml
     secrets: inherit
   deploy-dev:
