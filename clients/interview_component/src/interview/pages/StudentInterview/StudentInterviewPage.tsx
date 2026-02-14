@@ -44,7 +44,6 @@ export const StudentInterviewPage = () => {
   const [selectedSlotId, setSelectedSlotId] = useState<string | null>(null)
   const { toast } = useToast()
 
-  // Fetch all available slots
   const { data: slots, isLoading: slotsLoading } = useQuery<InterviewSlot[]>({
     queryKey: ['interviewSlots', phaseId],
     queryFn: async () => {
@@ -56,20 +55,27 @@ export const StudentInterviewPage = () => {
     enabled: !!phaseId,
   })
 
-  // Fetch user's current assignment
-  const { data: myAssignment, isLoading: assignmentLoading } = useQuery<InterviewAssignment>({
-    queryKey: ['myInterviewAssignment', phaseId],
-    queryFn: async () => {
-      const response = await interviewAxiosInstance.get(
-        `interview/api/course_phase/${phaseId}/interview-assignments/my-assignment`,
-      )
-      return response.data
+  const { data: myAssignment, isLoading: assignmentLoading } = useQuery<InterviewAssignment | null>(
+    {
+      queryKey: ['myInterviewAssignment', phaseId],
+      queryFn: async () => {
+        try {
+          const response = await interviewAxiosInstance.get(
+            `interview/api/course_phase/${phaseId}/interview-assignments/my-assignment`,
+          )
+          return response.data
+        } catch (error: any) {
+          // 404 means no assignment exists, which is valid
+          if (error.response?.status === 404) {
+            return null
+          }
+          throw error
+        }
+      },
+      enabled: !!phaseId,
     },
-    enabled: !!phaseId,
-    retry: false,
-  })
+  )
 
-  // Book interview slot mutation
   const bookSlotMutation = useMutation({
     mutationFn: async (slotId: string) => {
       const response = await interviewAxiosInstance.post(
@@ -97,16 +103,18 @@ export const StudentInterviewPage = () => {
     },
   })
 
-  // Cancel booking mutation
   const cancelBookingMutation = useMutation({
     mutationFn: async (assignmentId: string) => {
       await interviewAxiosInstance.delete(
         `interview/api/course_phase/${phaseId}/interview-assignments/${assignmentId}`,
       )
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['myInterviewAssignment', phaseId] })
-      queryClient.invalidateQueries({ queryKey: ['interviewSlots', phaseId] })
+    onSuccess: async () => {
+      queryClient.setQueryData(['myInterviewAssignment', phaseId], null)
+      await Promise.all([
+        queryClient.refetchQueries({ queryKey: ['myInterviewAssignment', phaseId] }),
+        queryClient.refetchQueries({ queryKey: ['interviewSlots', phaseId] }),
+      ])
       toast({
         title: 'Booking cancelled',
         description: 'Your interview slot booking has been cancelled.',
