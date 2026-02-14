@@ -1,4 +1,5 @@
 import {
+  Button,
   Card,
   CardContent,
   CardFooter,
@@ -9,20 +10,12 @@ import {
   TooltipTrigger,
 } from '@tumaet/prompt-ui-components'
 import { Course } from '@tumaet/prompt-shared-state'
-import {
-  CalendarDays,
-  GraduationCap,
-  Clock,
-  Calendar,
-  ChevronRight,
-  Archive,
-  ArchiveRestore,
-} from 'lucide-react'
+import { CalendarDays, GraduationCap, Clock, Calendar, ChevronRight, Settings } from 'lucide-react'
 import { CourseTypeDetails } from '@tumaet/prompt-shared-state'
 import DynamicIcon from '@/components/DynamicIcon'
 import { useNavigate } from 'react-router-dom'
-import { archiveCourses, unarchiveCourses } from '@core/network/mutations/updateCourseArchiveStatus'
 import { formatDate } from '@core/utils/formatDate'
+import { CourseArchiveButton } from './CourseArchiveButton'
 
 type CourseMetaItemProps = {
   icon: React.ReactNode
@@ -47,14 +40,7 @@ type CourseCardProps = {
 export const CourseCard = ({ course }: CourseCardProps) => {
   const bgColor = course.studentReadableData?.['bg-color'] || 'bg-gray-50'
   const navigate = useNavigate()
-
-  const handleArchive = async () => {
-    if (course.archived) {
-      await unarchiveCourses([course.id])
-    } else {
-      await archiveCourses([course.id])
-    }
-  }
+  const settingsURL = `/management/course/${course.id}/settings`
 
   return (
     <Card className='overflow-hidden border border-gray-200 h-full flex flex-col'>
@@ -76,25 +62,28 @@ export const CourseCard = ({ course }: CourseCardProps) => {
             </CardTitle>
           </div>
 
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <button
-                onClick={handleArchive}
-                className='shrink-0 p-2 rounded-md bg-white focus-visible:ring-2 focus-visible:ring-offset-2 hover:bg-gray-100'
-                aria-label={course.archived ? 'Unarchive course' : 'Archive course'}
-              >
-                {course.archived ? (
-                  <ArchiveRestore className='w-6 h-6 text-gray-600' />
-                ) : (
-                  <Archive className='w-6 h-6 text-gray-600' />
-                )}
-              </button>
-            </TooltipTrigger>
+          <div className='flex gap-2'>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <CourseArchiveButton archived={course.archived} courseId={course.id} />
+              </TooltipTrigger>
 
-            <TooltipContent>
-              {course.archived ? 'Unarchive this course' : 'Archive this course'}
-            </TooltipContent>
-          </Tooltip>
+              <TooltipContent>
+                {course.archived ? 'Unarchive this course' : 'Archive this course'}
+              </TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <Button
+                variant='outline'
+                onClick={() => navigate(settingsURL)}
+                className='shrink-0 focus-visible:ring-2 focus-visible:ring-offset-2'
+              >
+                <Settings className='text-gray-600' />
+              </Button>
+
+              <TooltipContent>Go to Course Settings</TooltipContent>
+            </Tooltip>
+          </div>
         </div>
       </CardHeader>
 
