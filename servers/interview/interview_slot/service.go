@@ -10,7 +10,6 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -28,7 +27,24 @@ type InterviewSlotService struct {
 
 var InterviewSlotServiceSingleton *InterviewSlotService
 
-// Helper functions for type conversion
+type ServiceError struct {
+	StatusCode int
+	Message    string
+	Err        error
+}
+
+func (e *ServiceError) Error() string {
+	return e.Message
+}
+
+func (e *ServiceError) Unwrap() error {
+	return e.Err
+}
+
+func newServiceError(statusCode int, message string, err error) *ServiceError {
+	return &ServiceError{StatusCode: statusCode, Message: message, Err: err}
+}
+
 func timeToPgTimestamptz(t time.Time) pgtype.Timestamptz {
 	return pgtype.Timestamptz{Time: t, Valid: true}
 }
@@ -54,95 +70,44 @@ func pgTextToStringPtr(t pgtype.Text) *string {
 	return nil
 }
 
-// createInterviewSlot godoc
-// @Summary Create a new interview slot
-// @Description Creates a new interview time slot for the course phase
-// @Tags interview-slots
-// @Accept json
-// @Produce json
-// @Param coursePhaseID path string true "Course Phase UUID"
-// @Param request body interviewSlotDTO.CreateInterviewSlotRequest true "Interview slot details"
-// @Success 201 {object} db.InterviewSlot
-// @Failure 400 {object} map[string]string
-// @Failure 500 {object} map[string]string
-// @Security ApiKeyAuth
-// @Router /course_phase/{coursePhaseID}/interview-slots [post]
-func createInterviewSlot(c *gin.Context) {
-	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid course phase ID"})
-		return
-	}
-
-	var req interviewSlotDTO.CreateInterviewSlotRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-
+func CreateInterviewSlot(ctx context.Context, coursePhaseID uuid.UUID, req interviewSlotDTO.CreateInterviewSlotRequest) (db.InterviewSlot, error) {
 	if !req.EndTime.After(req.StartTime) {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "End time must be after start time"})
-		return
+		return db.InterviewSlot{}, newServiceError(http.StatusBadRequest, "End time must be after start time", nil)
 	}
 
-	slot, err := InterviewSlotServiceSingleton.queries.CreateInterviewSlot(context.Background(), db.CreateInterviewSlotParams{
+	slot, err := InterviewSlotServiceSingleton.queries.CreateInterviewSlot(ctx, db.CreateInterviewSlotParams{
 		CoursePhaseID: coursePhaseID,
 		StartTime:     timeToPgTimestamptz(req.StartTime),
 		EndTime:       timeToPgTimestamptz(req.EndTime),
 		Location:      stringPtrToPgText(req.Location),
 		Capacity:      req.Capacity,
 	})
-
 	if err != nil {
 		log.Errorf("Failed to create interview slot: %v", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create interview slot"})
-		return
+		return db.InterviewSlot{}, newServiceError(http.StatusInternalServerError, "Failed to create interview slot", err)
 	}
 
-	c.JSON(http.StatusCreated, slot)
+	return slot, nil
 }
 
-// getAllInterviewSlots godoc
-// @Summary Get all interview slots for a course phase
-// @Description Retrieves all interview slots with assignment details
-// @Tags interview-slots
-// @Produce json
-// @Param coursePhaseID path string true "Course Phase UUID"
-// @Success 200 {array} interviewSlotDTO.InterviewSlotResponse
-// @Failure 400 {object} map[string]string
-// @Failure 500 {object} map[string]string
-// @Security ApiKeyAuth
-// @Router /course_phase/{coursePhaseID}/interview-slots [get]
-func getAllInterviewSlots(c *gin.Context) {
-	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid course phase ID"})
-		return
-	}
-
-	rows, err := InterviewSlotServiceSingleton.queries.GetInterviewSlotWithAssignments(context.Background(), coursePhaseID)
+func GetAllInterviewSlots(ctx context.Context, coursePhaseID uuid.UUID, authHeader string) ([]interviewSlotDTO.InterviewSlotResponse, error) {
+	rows, err := InterviewSlotServiceSingleton.queries.GetInterviewSlotWithAssignments(ctx, coursePhaseID)
 	if err != nil {
 		log.Errorf("Failed to get interview slots: %v", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get interview slots"})
-		return
+		return nil, newServiceError(http.StatusInternalServerError, "Failed to get interview slots", err)
 	}
 
-	// Get all students for this course phase at once
-	// This may fail for non-admin users due to permissions, which is OK - they'll see slots without student names
-	studentMap, err := fetchAllStudentsForCoursePhase(c, coursePhaseID)
+	studentMap, err := fetchAllStudentsForCoursePhase(ctx, coursePhaseID, authHeader)
 	if err != nil {
 		log.Warnf("Failed to fetch students for course phase (may be due to permissions): %v", err)
-		studentMap = make(map[uuid.UUID]*interviewSlotDTO.StudentInfo) // Empty map - slots will show without student details
+		studentMap = make(map[uuid.UUID]*interviewSlotDTO.StudentInfo)
 	}
 
-	// Group assignments by slot
 	slotMap := make(map[uuid.UUID]*interviewSlotDTO.InterviewSlotResponse)
 	slotOrder := []uuid.UUID{}
 
 	for _, row := range rows {
-		// Check if slot already exists in map
 		if _, exists := slotMap[row.SlotID]; !exists {
-			// New slot
 			slotMap[row.SlotID] = &interviewSlotDTO.InterviewSlotResponse{
 				ID:            row.SlotID,
 				CoursePhaseID: row.CoursePhaseID,
@@ -157,9 +122,7 @@ func getAllInterviewSlots(c *gin.Context) {
 			slotOrder = append(slotOrder, row.SlotID)
 		}
 
-		// Add assignment if it exists (assignment_id will be NULL if no assignment)
 		if row.AssignmentID.Valid {
-			// Convert pgtype.UUID Bytes to google uuid.UUID
 			assignmentUUID, err := uuid.FromBytes(row.AssignmentID.Bytes[:])
 			if err != nil {
 				log.Warnf("Failed to parse assignment UUID: %v", err)
@@ -171,20 +134,16 @@ func getAllInterviewSlots(c *gin.Context) {
 				continue
 			}
 
-			// Get student info from the map
-			student := studentMap[participationUUID]
-
 			assignment := interviewSlotDTO.AssignmentInfo{
 				ID:                    assignmentUUID,
 				CourseParticipationID: participationUUID,
 				AssignedAt:            pgTimestamptzToTime(row.AssignedAt),
-				Student:               student,
+				Student:               studentMap[participationUUID],
 			}
 			slotMap[row.SlotID].Assignments = append(slotMap[row.SlotID].Assignments, assignment)
 		}
 	}
 
-	// Build response array in order
 	response := make([]interviewSlotDTO.InterviewSlotResponse, 0, len(slotOrder))
 	for _, slotID := range slotOrder {
 		slot := slotMap[slotID]
@@ -192,78 +151,42 @@ func getAllInterviewSlots(c *gin.Context) {
 		response = append(response, *slot)
 	}
 
-	log.Debugf("Returning %d slots with assignments", len(response))
-
-	c.JSON(http.StatusOK, response)
+	return response, nil
 }
 
-// getInterviewSlot godoc
-// @Summary Get a specific interview slot
-// @Description Retrieves details of a specific interview slot
-// @Tags interview-slots
-// @Produce json
-// @Param coursePhaseID path string true "Course Phase UUID"
-// @Param slotId path string true "Interview Slot UUID"
-// @Success 200 {object} interviewSlotDTO.InterviewSlotResponse
-// @Failure 400 {object} map[string]string
-// @Failure 404 {object} map[string]string
-// @Failure 500 {object} map[string]string
-// @Security ApiKeyAuth
-// @Router /course_phase/{coursePhaseID}/interview-slots/{slotId} [get]
-func getInterviewSlot(c *gin.Context) {
-	slotID, err := uuid.Parse(c.Param("slotId"))
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid slot ID"})
-		return
-	}
-
-	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid course phase ID"})
-		return
-	}
-
-	slot, err := InterviewSlotServiceSingleton.queries.GetInterviewSlot(context.Background(), slotID)
+func GetInterviewSlot(ctx context.Context, coursePhaseID uuid.UUID, slotID uuid.UUID, authHeader string) (interviewSlotDTO.InterviewSlotResponse, error) {
+	slot, err := InterviewSlotServiceSingleton.queries.GetInterviewSlot(ctx, slotID)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			c.JSON(http.StatusNotFound, gin.H{"error": "Interview slot not found"})
-		} else {
-			log.Errorf("Failed to get interview slot: %v", err)
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get interview slot"})
+			return interviewSlotDTO.InterviewSlotResponse{}, newServiceError(http.StatusNotFound, "Interview slot not found", err)
 		}
-		return
+		log.Errorf("Failed to get interview slot: %v", err)
+		return interviewSlotDTO.InterviewSlotResponse{}, newServiceError(http.StatusInternalServerError, "Failed to get interview slot", err)
 	}
 
-	// Verify slot belongs to this course phase
 	if slot.CoursePhaseID != coursePhaseID {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Interview slot not found"})
-		return
+		return interviewSlotDTO.InterviewSlotResponse{}, newServiceError(http.StatusNotFound, "Interview slot not found", nil)
 	}
 
-	// Get assignments for this slot
-	assignments, err := InterviewSlotServiceSingleton.queries.GetInterviewAssignmentsBySlot(context.Background(), slotID)
+	assignments, err := InterviewSlotServiceSingleton.queries.GetInterviewAssignmentsBySlot(ctx, slotID)
 	if err != nil {
 		log.Errorf("Failed to get assignments for slot %s: %v", slotID, err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get assignments"})
-		return
+		return interviewSlotDTO.InterviewSlotResponse{}, newServiceError(http.StatusInternalServerError, "Failed to get assignments", err)
 	}
 
-	// Get all students for this course phase
-	// This may fail for non-admin users due to permissions, which is OK - they'll see assignments without student names
-	studentMap, err := fetchAllStudentsForCoursePhase(c, coursePhaseID)
+	studentMap, err := fetchAllStudentsForCoursePhase(ctx, coursePhaseID, authHeader)
 	if err != nil {
 		log.Warnf("Failed to fetch students for course phase (may be due to permissions): %v", err)
-		studentMap = make(map[uuid.UUID]*interviewSlotDTO.StudentInfo) // Empty map - assignments will show without student details
+		studentMap = make(map[uuid.UUID]*interviewSlotDTO.StudentInfo)
 	}
 
 	assignmentInfos := make([]interviewSlotDTO.AssignmentInfo, len(assignments))
 	for i, assignment := range assignments {
-		student := studentMap[assignment.CourseParticipationID]
 		assignmentInfos[i] = interviewSlotDTO.AssignmentInfo{
 			ID:                    assignment.ID,
 			CourseParticipationID: assignment.CourseParticipationID,
 			AssignedAt:            pgTimestamptzToTime(assignment.AssignedAt),
-			Student:               student,
+			Student:               studentMap[assignment.CourseParticipationID],
 		}
 	}
 
@@ -280,443 +203,250 @@ func getInterviewSlot(c *gin.Context) {
 		UpdatedAt:     pgTimestamptzToTime(slot.UpdatedAt),
 	}
 
-	c.JSON(http.StatusOK, response)
+	return response, nil
 }
 
-// updateInterviewSlot godoc
-// @Summary Update an interview slot
-// @Description Updates an existing interview slot
-// @Tags interview-slots
-// @Accept json
-// @Produce json
-// @Param coursePhaseID path string true "Course Phase UUID"
-// @Param slotId path string true "Interview Slot UUID"
-// @Param request body interviewSlotDTO.UpdateInterviewSlotRequest true "Updated slot details"
-// @Success 200 {object} db.InterviewSlot
-// @Failure 400 {object} map[string]string
-// @Failure 500 {object} map[string]string
-// @Security ApiKeyAuth
-// @Router /course_phase/{coursePhaseID}/interview-slots/{slotId} [put]
-func updateInterviewSlot(c *gin.Context) {
-	slotID, err := uuid.Parse(c.Param("slotId"))
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid slot ID"})
-		return
-	}
-
-	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid course phase ID"})
-		return
-	}
-
-	var req interviewSlotDTO.UpdateInterviewSlotRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-
+func UpdateInterviewSlot(ctx context.Context, coursePhaseID uuid.UUID, slotID uuid.UUID, req interviewSlotDTO.UpdateInterviewSlotRequest) (db.InterviewSlot, error) {
 	if !req.EndTime.After(req.StartTime) {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "End time must be after start time"})
-		return
+		return db.InterviewSlot{}, newServiceError(http.StatusBadRequest, "End time must be after start time", nil)
 	}
 
-	// Verify slot belongs to this course phase before updating
-	existingSlot, err := InterviewSlotServiceSingleton.queries.GetInterviewSlot(context.Background(), slotID)
+	existingSlot, err := InterviewSlotServiceSingleton.queries.GetInterviewSlot(ctx, slotID)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			c.JSON(http.StatusNotFound, gin.H{"error": "Interview slot not found"})
-		} else {
-			log.Errorf("Failed to get interview slot: %v", err)
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get interview slot"})
+			return db.InterviewSlot{}, newServiceError(http.StatusNotFound, "Interview slot not found", err)
 		}
-		return
+		log.Errorf("Failed to get interview slot: %v", err)
+		return db.InterviewSlot{}, newServiceError(http.StatusInternalServerError, "Failed to get interview slot", err)
 	}
 
 	if existingSlot.CoursePhaseID != coursePhaseID {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Interview slot not found"})
-		return
+		return db.InterviewSlot{}, newServiceError(http.StatusNotFound, "Interview slot not found", nil)
 	}
 
-	// Validate that new capacity is not less than current assigned count
-	currentAssignedCount, err := InterviewSlotServiceSingleton.queries.CountAssignmentsBySlot(context.Background(), slotID)
+	currentAssignedCount, err := InterviewSlotServiceSingleton.queries.CountAssignmentsBySlot(ctx, slotID)
 	if err != nil {
 		log.Errorf("Failed to count assignments for slot: %v", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to validate capacity"})
-		return
+		return db.InterviewSlot{}, newServiceError(http.StatusInternalServerError, "Failed to validate capacity", err)
 	}
 
 	if req.Capacity < int32(currentAssignedCount) {
-		c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("Cannot reduce capacity to %d: slot has %d existing assignments", req.Capacity, currentAssignedCount)})
-		return
+		return db.InterviewSlot{}, newServiceError(
+			http.StatusBadRequest,
+			fmt.Sprintf("Cannot reduce capacity to %d: slot has %d existing assignments", req.Capacity, currentAssignedCount),
+			nil,
+		)
 	}
 
-	slot, err := InterviewSlotServiceSingleton.queries.UpdateInterviewSlot(context.Background(), db.UpdateInterviewSlotParams{
+	slot, err := InterviewSlotServiceSingleton.queries.UpdateInterviewSlot(ctx, db.UpdateInterviewSlotParams{
 		ID:        slotID,
 		StartTime: timeToPgTimestamptz(req.StartTime),
 		EndTime:   timeToPgTimestamptz(req.EndTime),
 		Location:  stringPtrToPgText(req.Location),
 		Capacity:  req.Capacity,
 	})
-
 	if err != nil {
 		log.Errorf("Failed to update interview slot: %v", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update interview slot"})
-		return
+		return db.InterviewSlot{}, newServiceError(http.StatusInternalServerError, "Failed to update interview slot", err)
 	}
 
-	c.JSON(http.StatusOK, slot)
+	return slot, nil
 }
 
-// deleteInterviewSlot godoc
-// @Summary Delete an interview slot
-// @Description Deletes an interview slot and all its assignments
-// @Tags interview-slots
-// @Param coursePhaseID path string true "Course Phase UUID"
-// @Param slotId path string true "Interview Slot UUID"
-// @Success 204
-// @Failure 400 {object} map[string]string
-// @Failure 500 {object} map[string]string
-// @Security ApiKeyAuth
-// @Router /course_phase/{coursePhaseID}/interview-slots/{slotId} [delete]
-func deleteInterviewSlot(c *gin.Context) {
-	slotID, err := uuid.Parse(c.Param("slotId"))
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid slot ID"})
-		return
-	}
-
-	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid course phase ID"})
-		return
-	}
-
-	// Verify slot belongs to this course phase before deleting
-	existingSlot, err := InterviewSlotServiceSingleton.queries.GetInterviewSlot(context.Background(), slotID)
+func DeleteInterviewSlot(ctx context.Context, coursePhaseID uuid.UUID, slotID uuid.UUID) error {
+	existingSlot, err := InterviewSlotServiceSingleton.queries.GetInterviewSlot(ctx, slotID)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			c.JSON(http.StatusNotFound, gin.H{"error": "Interview slot not found"})
-		} else {
-			log.Errorf("Failed to get interview slot: %v", err)
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get interview slot"})
+			return newServiceError(http.StatusNotFound, "Interview slot not found", err)
 		}
-		return
+		log.Errorf("Failed to get interview slot: %v", err)
+		return newServiceError(http.StatusInternalServerError, "Failed to get interview slot", err)
 	}
 
 	if existingSlot.CoursePhaseID != coursePhaseID {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Interview slot not found"})
-		return
+		return newServiceError(http.StatusNotFound, "Interview slot not found", nil)
 	}
 
-	err = InterviewSlotServiceSingleton.queries.DeleteInterviewSlot(context.Background(), slotID)
-	if err != nil {
+	if err := InterviewSlotServiceSingleton.queries.DeleteInterviewSlot(ctx, slotID); err != nil {
 		log.Errorf("Failed to delete interview slot: %v", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete interview slot"})
-		return
+		return newServiceError(http.StatusInternalServerError, "Failed to delete interview slot", err)
 	}
 
-	c.Status(http.StatusNoContent)
+	return nil
 }
 
-// createInterviewAssignment godoc
-// @Summary Assign current user to an interview slot
-// @Description Students can book themselves into an available interview slot
-// @Tags interview-assignments
-// @Accept json
-// @Produce json
-// @Param coursePhaseID path string true "Course Phase UUID"
-// @Param request body interviewSlotDTO.CreateInterviewAssignmentRequest true "Assignment details"
-// @Success 201 {object} interviewSlotDTO.InterviewAssignmentResponse
-// @Failure 400 {object} map[string]string
-// @Failure 409 {object} map[string]string
-// @Failure 500 {object} map[string]string
-// @Security ApiKeyAuth
-// @Router /course_phase/{coursePhaseID}/interview-assignments [post]
-func createInterviewAssignment(c *gin.Context) {
-	var req interviewSlotDTO.CreateInterviewAssignmentRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
+func CreateInterviewAssignment(ctx context.Context, coursePhaseID uuid.UUID, participationUUID uuid.UUID, req interviewSlotDTO.CreateInterviewAssignmentRequest) (interviewSlotDTO.InterviewAssignmentResponse, error) {
+	if participationUUID == uuid.Nil {
+		return interviewSlotDTO.InterviewAssignmentResponse{}, newServiceError(http.StatusBadRequest, "Invalid course participation ID", nil)
 	}
 
-	// Get course participation ID from context (set by auth middleware)
-	courseParticipationID, exists := c.Get("courseParticipationID")
-	if !exists {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Course participation ID not found"})
-		return
-	}
-
-	participationUUID, ok := courseParticipationID.(uuid.UUID)
-	if !ok {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid course participation ID"})
-		return
-	}
-
-	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid course phase ID"})
-		return
-	}
-
-	// Use transaction to prevent race condition
-	ctx := context.Background()
 	tx, err := InterviewSlotServiceSingleton.conn.Begin(ctx)
 	if err != nil {
 		log.Errorf("Failed to begin transaction: %v", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to process request"})
-		return
+		return interviewSlotDTO.InterviewAssignmentResponse{}, newServiceError(http.StatusInternalServerError, "Failed to process request", err)
 	}
 	defer func() { _ = tx.Rollback(ctx) }()
 
 	qtx := InterviewSlotServiceSingleton.queries.WithTx(tx)
 
-	// Lock the slot row using FOR UPDATE
 	slot, err := qtx.GetInterviewSlotForUpdate(ctx, req.InterviewSlotID)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			c.JSON(http.StatusNotFound, gin.H{"error": "Interview slot not found"})
-		} else {
-			log.Errorf("Failed to get interview slot: %v", err)
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get interview slot"})
+			return interviewSlotDTO.InterviewAssignmentResponse{}, newServiceError(http.StatusNotFound, "Interview slot not found", err)
 		}
-		return
+		log.Errorf("Failed to get interview slot: %v", err)
+		return interviewSlotDTO.InterviewAssignmentResponse{}, newServiceError(http.StatusInternalServerError, "Failed to get interview slot", err)
 	}
 
-	// Verify slot belongs to this course phase
 	if slot.CoursePhaseID != coursePhaseID {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Interview slot not found"})
-		return
+		return interviewSlotDTO.InterviewAssignmentResponse{}, newServiceError(http.StatusNotFound, "Interview slot not found", nil)
 	}
 
-	// Check capacity within transaction
 	count, err := qtx.CountAssignmentsBySlot(ctx, req.InterviewSlotID)
 	if err != nil {
 		log.Errorf("Failed to count assignments: %v", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to check slot availability"})
-		return
+		return interviewSlotDTO.InterviewAssignmentResponse{}, newServiceError(http.StatusInternalServerError, "Failed to check slot availability", err)
 	}
-
 	if count >= int64(slot.Capacity) {
-		c.JSON(http.StatusConflict, gin.H{"error": "Interview slot is full"})
-		return
+		return interviewSlotDTO.InterviewAssignmentResponse{}, newServiceError(http.StatusConflict, "Interview slot is full", nil)
 	}
 
-	// Check if student already has an assignment
 	existingAssignment, err := qtx.GetInterviewAssignmentByParticipation(ctx, db.GetInterviewAssignmentByParticipationParams{
 		CourseParticipationID: participationUUID,
 		CoursePhaseID:         coursePhaseID,
 	})
 	if err != nil && !errors.Is(err, sql.ErrNoRows) {
 		log.Errorf("Failed to check existing assignment: %v", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to check existing assignment"})
-		return
+		return interviewSlotDTO.InterviewAssignmentResponse{}, newServiceError(http.StatusInternalServerError, "Failed to check existing assignment", err)
 	}
 	if err == nil && existingAssignment.ID != uuid.Nil {
-		c.JSON(http.StatusConflict, gin.H{"error": "You already have an interview slot assigned"})
-		return
+		return interviewSlotDTO.InterviewAssignmentResponse{}, newServiceError(http.StatusConflict, "You already have an interview slot assigned", nil)
 	}
 
-	// Create assignment within transaction
 	assignment, err := qtx.CreateInterviewAssignment(ctx, db.CreateInterviewAssignmentParams{
 		InterviewSlotID:       req.InterviewSlotID,
 		CourseParticipationID: participationUUID,
 	})
-
 	if err != nil {
 		log.Errorf("Failed to create interview assignment: %v", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create interview assignment"})
-		return
+		return interviewSlotDTO.InterviewAssignmentResponse{}, newServiceError(http.StatusInternalServerError, "Failed to create interview assignment", err)
 	}
 
-	// Commit the transaction
 	if err := tx.Commit(ctx); err != nil {
 		log.Errorf("Failed to commit transaction: %v", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create assignment"})
-		return
+		return interviewSlotDTO.InterviewAssignmentResponse{}, newServiceError(http.StatusInternalServerError, "Failed to create assignment", err)
 	}
 
-	response := interviewSlotDTO.InterviewAssignmentResponse{
+	return interviewSlotDTO.InterviewAssignmentResponse{
 		ID:                    assignment.ID,
 		InterviewSlotID:       assignment.InterviewSlotID,
 		CourseParticipationID: assignment.CourseParticipationID,
 		AssignedAt:            pgTimestamptzToTime(assignment.AssignedAt),
-	}
-
-	c.JSON(http.StatusCreated, response)
+	}, nil
 }
 
-// createInterviewAssignmentAdmin godoc
-// @Summary Manually assign a student to an interview slot (Admin only)
-// @Description Allows admins/lecturers to manually assign any student to an interview slot
-// @Tags interview-assignments
-// @Accept json
-// @Produce json
-// @Param coursePhaseID path string true "Course Phase UUID"
-// @Param request body interviewSlotDTO.CreateInterviewAssignmentAdminRequest true "Assignment details with course participation ID"
-// @Success 201 {object} interviewSlotDTO.InterviewAssignmentResponse
-// @Failure 400 {object} map[string]string
-// @Failure 409 {object} map[string]string
-// @Failure 500 {object} map[string]string
-// @Security ApiKeyAuth
-// @Router /course_phase/{coursePhaseID}/interview-assignments/admin [post]
-func createInterviewAssignmentAdmin(c *gin.Context) {
-	var req interviewSlotDTO.CreateInterviewAssignmentAdminRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
+func CreateInterviewAssignmentAdmin(ctx context.Context, coursePhaseID uuid.UUID, req interviewSlotDTO.CreateInterviewAssignmentAdminRequest) (interviewSlotDTO.InterviewAssignmentResponse, error) {
+	if req.CourseParticipationID == uuid.Nil {
+		return interviewSlotDTO.InterviewAssignmentResponse{}, newServiceError(http.StatusBadRequest, "Invalid course participation ID", nil)
 	}
 
-	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid course phase ID"})
-		return
-	}
-
-	// Use transaction to prevent race condition
-	ctx := context.Background()
 	tx, err := InterviewSlotServiceSingleton.conn.Begin(ctx)
 	if err != nil {
 		log.Errorf("Failed to begin transaction: %v", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to process request"})
-		return
+		return interviewSlotDTO.InterviewAssignmentResponse{}, newServiceError(http.StatusInternalServerError, "Failed to process request", err)
 	}
 	defer func() { _ = tx.Rollback(ctx) }()
 
 	qtx := InterviewSlotServiceSingleton.queries.WithTx(tx)
 
-	// Lock the slot row using FOR UPDATE
 	slot, err := qtx.GetInterviewSlotForUpdate(ctx, req.InterviewSlotID)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			c.JSON(http.StatusNotFound, gin.H{"error": "Interview slot not found"})
-		} else {
-			log.Errorf("Failed to get interview slot: %v", err)
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get interview slot"})
+			return interviewSlotDTO.InterviewAssignmentResponse{}, newServiceError(http.StatusNotFound, "Interview slot not found", err)
 		}
-		return
+		log.Errorf("Failed to get interview slot: %v", err)
+		return interviewSlotDTO.InterviewAssignmentResponse{}, newServiceError(http.StatusInternalServerError, "Failed to get interview slot", err)
 	}
 
-	// Verify slot belongs to this course phase
 	if slot.CoursePhaseID != coursePhaseID {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Interview slot not found"})
-		return
+		return interviewSlotDTO.InterviewAssignmentResponse{}, newServiceError(http.StatusNotFound, "Interview slot not found", nil)
 	}
 
-	// Check capacity within transaction
 	count, err := qtx.CountAssignmentsBySlot(ctx, req.InterviewSlotID)
 	if err != nil {
 		log.Errorf("Failed to count assignments: %v", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to check slot availability"})
-		return
+		return interviewSlotDTO.InterviewAssignmentResponse{}, newServiceError(http.StatusInternalServerError, "Failed to check slot availability", err)
 	}
-
 	if count >= int64(slot.Capacity) {
-		c.JSON(http.StatusConflict, gin.H{"error": "Interview slot is full"})
-		return
+		return interviewSlotDTO.InterviewAssignmentResponse{}, newServiceError(http.StatusConflict, "Interview slot is full", nil)
 	}
 
-	// Check if student already has an assignment
 	existingAssignment, err := qtx.GetInterviewAssignmentByParticipation(ctx, db.GetInterviewAssignmentByParticipationParams{
 		CourseParticipationID: req.CourseParticipationID,
 		CoursePhaseID:         coursePhaseID,
 	})
 	if err != nil && !errors.Is(err, sql.ErrNoRows) {
 		log.Errorf("Failed to check existing assignment: %v", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to check existing assignment"})
-		return
+		return interviewSlotDTO.InterviewAssignmentResponse{}, newServiceError(http.StatusInternalServerError, "Failed to check existing assignment", err)
 	}
 	if err == nil && existingAssignment.ID != uuid.Nil {
-		c.JSON(http.StatusConflict, gin.H{"error": "Student already has an interview slot assigned"})
-		return
+		return interviewSlotDTO.InterviewAssignmentResponse{}, newServiceError(http.StatusConflict, "Student already has an interview slot assigned", nil)
 	}
 
-	// Create assignment within transaction
 	assignment, err := qtx.CreateInterviewAssignment(ctx, db.CreateInterviewAssignmentParams{
 		InterviewSlotID:       req.InterviewSlotID,
 		CourseParticipationID: req.CourseParticipationID,
 	})
-
 	if err != nil {
 		log.Errorf("Failed to create interview assignment: %v", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create interview assignment"})
-		return
+		return interviewSlotDTO.InterviewAssignmentResponse{}, newServiceError(http.StatusInternalServerError, "Failed to create interview assignment", err)
 	}
 
-	// Commit the transaction
 	if err := tx.Commit(ctx); err != nil {
 		log.Errorf("Failed to commit transaction: %v", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create assignment"})
-		return
+		return interviewSlotDTO.InterviewAssignmentResponse{}, newServiceError(http.StatusInternalServerError, "Failed to create assignment", err)
 	}
 
-	response := interviewSlotDTO.InterviewAssignmentResponse{
+	return interviewSlotDTO.InterviewAssignmentResponse{
 		ID:                    assignment.ID,
 		InterviewSlotID:       assignment.InterviewSlotID,
 		CourseParticipationID: assignment.CourseParticipationID,
 		AssignedAt:            pgTimestamptzToTime(assignment.AssignedAt),
-	}
-
-	c.JSON(http.StatusCreated, response)
+	}, nil
 }
 
-// getMyInterviewAssignment godoc
-// @Summary Get current user's interview assignment
-// @Description Retrieves the interview assignment for the current student
-// @Tags interview-assignments
-// @Produce json
-// @Param coursePhaseID path string true "Course Phase UUID"
-// @Success 200 {object} interviewSlotDTO.InterviewAssignmentResponse
-// @Failure 404 {object} map[string]string
-// @Failure 500 {object} map[string]string
-// @Security ApiKeyAuth
-// @Router /course_phase/{coursePhaseID}/interview-assignments/my-assignment [get]
-func getMyInterviewAssignment(c *gin.Context) {
-	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid course phase ID"})
-		return
-	}
-
-	participationUUID, statusCode, errorMessage, err := fetchSelfParticipationID(c, coursePhaseID)
+func GetMyInterviewAssignment(ctx context.Context, coursePhaseID uuid.UUID, authHeader string) (interviewSlotDTO.InterviewAssignmentResponse, error) {
+	participationUUID, statusCode, errorMessage, err := fetchSelfParticipationID(ctx, coursePhaseID, authHeader)
 	if err != nil {
 		log.Errorf("Failed to fetch self participation: %v", err)
-		c.JSON(statusCode, gin.H{"error": errorMessage})
-		return
+		return interviewSlotDTO.InterviewAssignmentResponse{}, newServiceError(statusCode, errorMessage, err)
 	}
-	log.Debugf("Found participation UUID %s for course phase %s", participationUUID, coursePhaseID)
 
-	assignment, err := InterviewSlotServiceSingleton.queries.GetInterviewAssignmentByParticipation(context.Background(), db.GetInterviewAssignmentByParticipationParams{
+	assignment, err := InterviewSlotServiceSingleton.queries.GetInterviewAssignmentByParticipation(ctx, db.GetInterviewAssignmentByParticipationParams{
 		CourseParticipationID: participationUUID,
 		CoursePhaseID:         coursePhaseID,
 	})
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			c.JSON(http.StatusNotFound, gin.H{"error": "No interview assignment found"})
-		} else {
-			log.Errorf("Failed to get interview assignment: %v", err)
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get interview assignment"})
+			return interviewSlotDTO.InterviewAssignmentResponse{}, newServiceError(http.StatusNotFound, "No interview assignment found", err)
 		}
-		return
+		log.Errorf("Failed to get interview assignment: %v", err)
+		return interviewSlotDTO.InterviewAssignmentResponse{}, newServiceError(http.StatusInternalServerError, "Failed to get interview assignment", err)
 	}
 
-	// Get slot details
-	slot, err := InterviewSlotServiceSingleton.queries.GetInterviewSlot(context.Background(), assignment.InterviewSlotID)
+	slot, err := InterviewSlotServiceSingleton.queries.GetInterviewSlot(ctx, assignment.InterviewSlotID)
 	if err != nil {
 		log.Errorf("Failed to get slot details: %v", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get slot details"})
-		return
+		return interviewSlotDTO.InterviewAssignmentResponse{}, newServiceError(http.StatusInternalServerError, "Failed to get slot details", err)
 	}
 
-	// Count assignments for the slot
-	count, err := InterviewSlotServiceSingleton.queries.CountAssignmentsBySlot(context.Background(), slot.ID)
+	count, err := InterviewSlotServiceSingleton.queries.CountAssignmentsBySlot(ctx, slot.ID)
 	if err != nil {
 		log.Errorf("Failed to count assignments for slot: %v", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to count assignments"})
-		return
+		return interviewSlotDTO.InterviewAssignmentResponse{}, newServiceError(http.StatusInternalServerError, "Failed to count assignments", err)
 	}
 
-	response := interviewSlotDTO.InterviewAssignmentResponse{
+	return interviewSlotDTO.InterviewAssignmentResponse{
 		ID:                    assignment.ID,
 		InterviewSlotID:       assignment.InterviewSlotID,
 		CourseParticipationID: assignment.CourseParticipationID,
@@ -732,21 +462,78 @@ func getMyInterviewAssignment(c *gin.Context) {
 			CreatedAt:     pgTimestamptzToTime(slot.CreatedAt),
 			UpdatedAt:     pgTimestamptzToTime(slot.UpdatedAt),
 		},
-	}
-
-	c.JSON(http.StatusOK, response)
+	}, nil
 }
 
-func fetchSelfParticipationID(c *gin.Context, coursePhaseID uuid.UUID) (uuid.UUID, int, string, error) {
+func DeleteInterviewAssignment(ctx context.Context, coursePhaseID uuid.UUID, assignmentID uuid.UUID, authHeader string, roles []string) error {
+	assignment, err := InterviewSlotServiceSingleton.queries.GetInterviewAssignment(ctx, assignmentID)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return newServiceError(http.StatusNotFound, "Assignment not found", err)
+		}
+		log.Errorf("Failed to get interview assignment: %v", err)
+		return newServiceError(http.StatusInternalServerError, "Failed to get interview assignment", err)
+	}
+
+	slot, err := InterviewSlotServiceSingleton.queries.GetInterviewSlot(ctx, assignment.InterviewSlotID)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return newServiceError(http.StatusNotFound, "Slot not found", err)
+		}
+		log.Errorf("Failed to get interview slot: %v", err)
+		return newServiceError(http.StatusInternalServerError, "Failed to get interview slot", err)
+	}
+
+	if slot.CoursePhaseID != coursePhaseID {
+		return newServiceError(http.StatusForbidden, "Assignment does not belong to the specified course phase", nil)
+	}
+
+	isPrivileged := false
+	privilegedRoles := []string{promptSDK.PromptAdmin, promptSDK.PromptLecturer, promptSDK.CourseLecturer, promptSDK.CourseEditor}
+	for _, role := range roles {
+		for _, privileged := range privilegedRoles {
+			if role == privileged {
+				isPrivileged = true
+				break
+			}
+		}
+		if isPrivileged {
+			break
+		}
+	}
+
+	if !isPrivileged {
+		selfParticipationID, statusCode, _, err := fetchSelfParticipationID(ctx, coursePhaseID, authHeader)
+		if err != nil {
+			if statusCode == http.StatusNotFound {
+				return newServiceError(http.StatusForbidden, "Cannot delete another user's assignment", err)
+			}
+			log.Errorf("Failed to fetch self participation for ownership check: %v", err)
+			return newServiceError(http.StatusBadGateway, "Failed to verify ownership", err)
+		}
+
+		if assignment.CourseParticipationID != selfParticipationID {
+			return newServiceError(http.StatusForbidden, "Cannot delete another user's assignment", nil)
+		}
+	}
+
+	if err := InterviewSlotServiceSingleton.queries.DeleteInterviewAssignment(ctx, assignmentID); err != nil {
+		log.Errorf("Failed to delete interview assignment: %v", err)
+		return newServiceError(http.StatusInternalServerError, "Failed to delete interview assignment", err)
+	}
+
+	return nil
+}
+
+func fetchSelfParticipationID(ctx context.Context, coursePhaseID uuid.UUID, authHeader string) (uuid.UUID, int, string, error) {
 	coreURL := sdkUtils.GetCoreUrl()
 	url := fmt.Sprintf("%s/api/course_phases/%s/participations/self", coreURL, coursePhaseID)
 
-	req, err := http.NewRequest("GET", url, nil)
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 	if err != nil {
 		return uuid.Nil, http.StatusInternalServerError, "Failed to fetch participation", fmt.Errorf("failed to create request for self participation: %w", err)
 	}
 
-	authHeader := c.GetHeader("Authorization")
 	if authHeader != "" {
 		req.Header.Set("Authorization", authHeader)
 	}
@@ -763,7 +550,6 @@ func fetchSelfParticipationID(c *gin.Context, coursePhaseID uuid.UUID) (uuid.UUI
 	if resp.StatusCode == http.StatusNotFound {
 		return uuid.Nil, http.StatusNotFound, "No course participation found for user", errors.New("no course participation found for user")
 	}
-
 	if resp.StatusCode != http.StatusOK {
 		return uuid.Nil, http.StatusBadGateway, "Failed to fetch participation", fmt.Errorf("core service returned status %d for self participation", resp.StatusCode)
 	}
@@ -785,19 +571,15 @@ func fetchSelfParticipationID(c *gin.Context, coursePhaseID uuid.UUID) (uuid.UUI
 	return selfParticipation.CourseParticipationID, http.StatusOK, "", nil
 }
 
-// fetchAllStudentsForCoursePhase fetches all students for a course phase from the core service
-// and returns a map of course participation ID to student info
-func fetchAllStudentsForCoursePhase(c *gin.Context, coursePhaseID uuid.UUID) (map[uuid.UUID]*interviewSlotDTO.StudentInfo, error) {
+func fetchAllStudentsForCoursePhase(ctx context.Context, coursePhaseID uuid.UUID, authHeader string) (map[uuid.UUID]*interviewSlotDTO.StudentInfo, error) {
 	coreURL := sdkUtils.GetCoreUrl()
 	url := fmt.Sprintf("%s/api/course_phases/%s/participations", coreURL, coursePhaseID)
 
-	req, err := http.NewRequest("GET", url, nil)
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create request for course phase participations: %w", err)
 	}
 
-	// Forward the authorization header
-	authHeader := c.GetHeader("Authorization")
 	if authHeader != "" {
 		req.Header.Set("Authorization", authHeader)
 	}
@@ -831,7 +613,6 @@ func fetchAllStudentsForCoursePhase(c *gin.Context, coursePhaseID uuid.UUID) (ma
 		return nil, fmt.Errorf("failed to unmarshal course phase participations: %w", err)
 	}
 
-	// Build map of course participation ID to student info
 	studentMap := make(map[uuid.UUID]*interviewSlotDTO.StudentInfo)
 	for _, participation := range participationsResponse.Participations {
 		studentCopy := participation.Student
@@ -839,117 +620,4 @@ func fetchAllStudentsForCoursePhase(c *gin.Context, coursePhaseID uuid.UUID) (ma
 	}
 
 	return studentMap, nil
-}
-
-// deleteInterviewAssignment godoc
-// @Summary Delete an interview assignment
-// @Description Removes a student's assignment to an interview slot
-// @Tags interview-assignments
-// @Param coursePhaseID path string true "Course Phase UUID"
-// @Param assignmentId path string true "Assignment UUID"
-// @Success 204
-// @Failure 400 {object} map[string]string
-// @Failure 500 {object} map[string]string
-// @Security ApiKeyAuth
-// @Router /course_phase/{coursePhaseID}/interview-assignments/{assignmentId} [delete]
-func deleteInterviewAssignment(c *gin.Context) {
-	assignmentID, err := uuid.Parse(c.Param("assignmentId"))
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid assignment ID"})
-		return
-	}
-
-	// Get the assignment first to verify ownership
-	assignment, err := InterviewSlotServiceSingleton.queries.GetInterviewAssignment(context.Background(), assignmentID)
-	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			c.JSON(http.StatusNotFound, gin.H{"error": "Assignment not found"})
-		} else {
-			log.Errorf("Failed to get interview assignment: %v", err)
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get interview assignment"})
-		}
-		return
-	}
-
-	// Parse and verify the course phase ID from the path
-	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid course phase ID"})
-		return
-	}
-
-	// Fetch the slot to verify it belongs to the specified course phase
-	slot, err := InterviewSlotServiceSingleton.queries.GetInterviewSlot(context.Background(), assignment.InterviewSlotID)
-	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			c.JSON(http.StatusNotFound, gin.H{"error": "Slot not found"})
-		} else {
-			log.Errorf("Failed to get interview slot: %v", err)
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get interview slot"})
-		}
-		return
-	}
-
-	// Verify the slot belongs to the course phase in the path
-	if slot.CoursePhaseID != coursePhaseID {
-		log.Warnf("Attempt to delete assignment %s: slot belongs to course phase %s but path specifies %s", assignmentID, slot.CoursePhaseID, coursePhaseID)
-		c.JSON(http.StatusForbidden, gin.H{"error": "Assignment does not belong to the specified course phase"})
-		return
-	}
-
-	// Check user roles for authorization
-	userRoles, exists := c.Get("userRoles")
-	if !exists {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "User roles not found"})
-		return
-	}
-
-	roles, ok := userRoles.([]string)
-	if !ok {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid user roles"})
-		return
-	}
-
-	// Check if user has privileged role (can delete any assignment)
-	isPrivileged := false
-	privilegedRoles := []string{promptSDK.PromptAdmin, promptSDK.PromptLecturer, promptSDK.CourseLecturer, promptSDK.CourseEditor}
-	for _, role := range roles {
-		for _, privileged := range privilegedRoles {
-			if role == privileged {
-				isPrivileged = true
-				break
-			}
-		}
-		if isPrivileged {
-			break
-		}
-	}
-
-	// If not privileged, verify ownership
-	if !isPrivileged {
-		selfParticipationID, statusCode, _, err := fetchSelfParticipationID(c, coursePhaseID)
-		if err != nil {
-			if statusCode == http.StatusNotFound {
-				c.JSON(http.StatusForbidden, gin.H{"error": "Cannot delete another user's assignment"})
-				return
-			}
-			log.Errorf("Failed to fetch self participation for ownership check: %v", err)
-			c.JSON(http.StatusBadGateway, gin.H{"error": "Failed to verify ownership"})
-			return
-		}
-
-		if assignment.CourseParticipationID != selfParticipationID {
-			c.JSON(http.StatusForbidden, gin.H{"error": "Cannot delete another user's assignment"})
-			return
-		}
-	}
-
-	err = InterviewSlotServiceSingleton.queries.DeleteInterviewAssignment(context.Background(), assignmentID)
-	if err != nil {
-		log.Errorf("Failed to delete interview assignment: %v", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete interview assignment"})
-		return
-	}
-
-	c.Status(http.StatusNoContent)
 }
