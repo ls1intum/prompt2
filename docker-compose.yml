@@ -477,7 +477,7 @@ services:
     container_name: prompt-seaweedfs-s3
     ports:
       - "8334:8333"   # S3 API
-    command: "s3 -filer=seaweedfs-filer:8888 -ip.bind=0.0.0.0 -config=/etc/seaweedfs/s3.json"
+    command: "s3 -filer=seaweedfs-filer:8888 -ip.bind=0.0.0.0"
     depends_on:
       seaweedfs-master:
         condition: service_healthy
