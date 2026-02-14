@@ -4,13 +4,13 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
+	promptSDK "github.com/ls1intum/prompt-sdk"
+	sdkUtils "github.com/ls1intum/prompt-sdk/utils"
 	db "github.com/ls1intum/prompt2/servers/core/db/sqlc"
 	"github.com/ls1intum/prompt2/servers/core/meta"
-	promptSDK "github.com/ls1intum/prompt-sdk"
 	log "github.com/sirupsen/logrus"
-
 )
 
 func initInterview() error {
@@ -25,7 +25,7 @@ func initInterview() error {
 		if err != nil {
 			return err
 		}
-	  defer promptSDK.DeferDBRollback(tx, ctx)
+		defer promptSDK.DeferDBRollback(tx, ctx)
 		qtx := CoursePhaseTypeServiceSingleton.queries.WithTx(tx)
 
 		// 1.) Create the phase
@@ -34,7 +34,7 @@ func initInterview() error {
 			Name:         "Interview",
 			InitialPhase: false,
 			BaseUrl:      "core",
-      Description:  pgtype.Text{String: "A placeholder description for this course phase type. Detailed description will follow.", Valid: true},
+			Description:  pgtype.Text{String: "A placeholder description for this course phase type. Detailed description will follow.", Valid: true},
 		}
 		err = qtx.CreateCoursePhaseType(ctx, newInterviewPhase)
 		if err != nil {
@@ -107,7 +107,7 @@ func initMatching() error {
 		if err != nil {
 			return err
 		}
-	  defer promptSDK.DeferDBRollback(tx, ctx)
+		defer promptSDK.DeferDBRollback(tx, ctx)
 		qtx := CoursePhaseTypeServiceSingleton.queries.WithTx(tx)
 
 		// 1.) Create the phase
@@ -116,7 +116,7 @@ func initMatching() error {
 			Name:         "Matching",
 			InitialPhase: false,
 			BaseUrl:      "core",
-      Description:  pgtype.Text{String: "A placeholder description for this course phase type. Detailed description will follow.", Valid: true},
+			Description:  pgtype.Text{String: "A placeholder description for this course phase type. Detailed description will follow.", Valid: true},
 		}
 		err = qtx.CreateCoursePhaseType(ctx, newMatchingPhase)
 		if err != nil {
@@ -183,7 +183,7 @@ func initIntroCourseDeveloper() error {
 			Name:         "Intro Course Developer",
 			InitialPhase: false,
 			BaseUrl:      baseURL,
-      Description:  pgtype.Text{String: "A placeholder description for this course phase type. Detailed description will follow.", Valid: true},
+			Description:  pgtype.Text{String: "A placeholder description for this course phase type. Detailed description will follow.", Valid: true},
 		}
 		err = qtx.CreateCoursePhaseType(ctx, newIntroCourseDeveloper)
 		if err != nil {
@@ -225,7 +225,7 @@ func initDevOpsChallenge() error {
 			Name:         "DevOps Challenge",
 			InitialPhase: false,
 			BaseUrl:      "core", // We use core here, as the server does not provide any exported DTOs
-      Description:  pgtype.Text{String: "A placeholder description for this course phase type. Detailed description will follow.", Valid: true},
+			Description:  pgtype.Text{String: "A placeholder description for this course phase type. Detailed description will follow.", Valid: true},
 		}
 		err = CoursePhaseTypeServiceSingleton.queries.CreateCoursePhaseType(ctx, newDevOps)
 		if err != nil {
@@ -269,7 +269,7 @@ func initAssessment() error {
 			Name:         "Assessment",
 			InitialPhase: false,
 			BaseUrl:      baseURL,
-      Description:  pgtype.Text{String: "A placeholder description for this course phase type. Detailed description will follow.", Valid: true},
+			Description:  pgtype.Text{String: "A placeholder description for this course phase type. Detailed description will follow.", Valid: true},
 		}
 		err = qtx.CreateCoursePhaseType(ctx, newAssessment)
 		if err != nil {
@@ -350,7 +350,7 @@ func initTeamAllocation() error {
 			Name:         "Team Allocation",
 			InitialPhase: false,
 			BaseUrl:      baseURL,
-      Description:  pgtype.Text{String: "A placeholder description for this course phase type. Detailed description will follow.", Valid: true},
+			Description:  pgtype.Text{String: "A placeholder description for this course phase type. Detailed description will follow.", Valid: true},
 		}
 		err = qtx.CreateCoursePhaseType(ctx, newTeamAllocation)
 		if err != nil {
@@ -433,7 +433,7 @@ func initSelfTeamAllocation() error {
 			Name:         "Self Team Allocation",
 			InitialPhase: false,
 			BaseUrl:      baseURL,
-      Description:  pgtype.Text{String: "A placeholder description for this course phase type. Detailed description will follow.", Valid: true},
+			Description:  pgtype.Text{String: "A placeholder description for this course phase type. Detailed description will follow.", Valid: true},
 		}
 		err = qtx.CreateCoursePhaseType(ctx, newTeamAllocation)
 		if err != nil {
@@ -461,6 +461,71 @@ func initSelfTeamAllocation() error {
 
 	} else {
 		log.Debug("team allocation module already exists")
+	}
+
+	return nil
+}
+
+func initCertificate() error {
+	ctx := context.Background()
+	exists, err := CoursePhaseTypeServiceSingleton.queries.TestCertificateTypeExists(ctx)
+
+	if err != nil {
+		log.Error("failed to check if certificate phase type exists: ", err)
+		return err
+	}
+	if !exists {
+		// Begin transaction
+		tx, err := CoursePhaseTypeServiceSingleton.conn.Begin(ctx)
+		if err != nil {
+			log.Error("failed to begin transaction: ", err)
+			return err
+		}
+		defer sdkUtils.DeferRollback(tx, ctx)
+		qtx := CoursePhaseTypeServiceSingleton.queries.WithTx(tx)
+
+		// 1.) Create the phase
+		baseURL := "{CORE_HOST}/certificate/api"
+		if CoursePhaseTypeServiceSingleton.isDevEnvironment {
+			baseURL = "http://localhost:8083/certificate/api"
+		}
+
+		newCertificate := db.CreateCoursePhaseTypeParams{
+			ID:           uuid.New(),
+			Name:         "Certificate",
+			InitialPhase: false,
+			BaseUrl:      baseURL,
+		}
+		err = qtx.CreateCoursePhaseType(ctx, newCertificate)
+		if err != nil {
+			log.Error("failed to create certificate phase type: ", err)
+			return err
+		}
+
+		// 2.) Create required inputs - Certificate phase typically needs team and student data
+		// Team allocation input (to know which teams exist)
+		err = qtx.InsertTeamAllocationRequiredInput(ctx, newCertificate.ID)
+		if err != nil {
+			log.Error("failed to create required team allocation input: ", err)
+			return err
+		}
+
+		// Team input (to get team information)
+		err = qtx.InsertTeamRequiredInput(ctx, newCertificate.ID)
+		if err != nil {
+			log.Error("failed to create required team input: ", err)
+			return err
+		}
+
+		// No provided outputs for certificate phase (it's typically an end phase)
+
+		// 3.) Commit the transaction
+		if err := tx.Commit(ctx); err != nil {
+			return fmt.Errorf("failed to commit transaction: %w", err)
+		}
+
+	} else {
+		log.Debug("certificate phase type already exists")
 	}
 
 	return nil
