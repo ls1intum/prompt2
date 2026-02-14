@@ -204,16 +204,44 @@ func (suite *InterviewSlotServiceTestSuite) TestDeleteInterviewSlot() {
 }
 
 func (suite *InterviewSlotServiceTestSuite) TestDeleteInterviewSlotCascadesAssignments() {
-	slotID := uuid.MustParse("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa")
-
-	assignments, err := suite.testDB.Queries.GetInterviewAssignmentsBySlot(suite.ctx, slotID)
+	// Create a new slot with assignments for testing cascade delete
+	location := "Cascade Test Room"
+	createReq := interviewSlotDTO.CreateInterviewSlotRequest{
+		StartTime: time.Now().Add(48 * time.Hour),
+		EndTime:   time.Now().Add(49 * time.Hour),
+		Location:  &location,
+		Capacity:  5,
+	}
+	slot, err := CreateInterviewSlot(suite.ctx, suite.activePhaseID, createReq)
 	require.NoError(suite.T(), err)
-	require.Greater(suite.T(), len(assignments), 0)
 
-	err = DeleteInterviewSlot(suite.ctx, suite.activePhaseID, slotID)
+	// Create some assignments for this slot
+	participationID1 := uuid.MustParse("aaaa1111-1111-1111-1111-111111111111")
+	participationID2 := uuid.MustParse("bbbb1111-1111-1111-1111-111111111111")
+
+	_, err = suite.testDB.Queries.CreateInterviewAssignment(suite.ctx, db.CreateInterviewAssignmentParams{
+		InterviewSlotID:       slot.ID,
+		CourseParticipationID: participationID1,
+	})
 	require.NoError(suite.T(), err)
 
-	assignments, err = suite.testDB.Queries.GetInterviewAssignmentsBySlot(suite.ctx, slotID)
+	_, err = suite.testDB.Queries.CreateInterviewAssignment(suite.ctx, db.CreateInterviewAssignmentParams{
+		InterviewSlotID:       slot.ID,
+		CourseParticipationID: participationID2,
+	})
+	require.NoError(suite.T(), err)
+
+	// Verify assignments exist
+	assignments, err := suite.testDB.Queries.GetInterviewAssignmentsBySlot(suite.ctx, slot.ID)
+	require.NoError(suite.T(), err)
+	require.Equal(suite.T(), 2, len(assignments))
+
+	// Delete the slot
+	err = DeleteInterviewSlot(suite.ctx, suite.activePhaseID, slot.ID)
+	require.NoError(suite.T(), err)
+
+	// Verify assignments were cascaded (deleted)
+	assignments, err = suite.testDB.Queries.GetInterviewAssignmentsBySlot(suite.ctx, slot.ID)
 	require.NoError(suite.T(), err)
 	require.Equal(suite.T(), 0, len(assignments))
 }

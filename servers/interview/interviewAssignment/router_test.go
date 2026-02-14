@@ -7,9 +7,12 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
+	db "github.com/ls1intum/prompt2/servers/interview/db/sqlc"
 	interviewAssignmentDTO "github.com/ls1intum/prompt2/servers/interview/interviewAssignment/interviewAssignmentDTO"
 	"github.com/ls1intum/prompt2/servers/interview/testutils"
 	"github.com/stretchr/testify/require"
@@ -96,9 +99,18 @@ func (suite *InterviewAssignmentRouterTestSuite) TestGetMyInterviewAssignmentRou
 }
 
 func (suite *InterviewAssignmentRouterTestSuite) TestDeleteInterviewAssignmentRoute() {
+	// Create a dedicated slot for this test with large capacity
+	slot, err := suite.testDB.Queries.CreateInterviewSlot(suite.ctx, db.CreateInterviewSlotParams{
+		CoursePhaseID: uuid.MustParse("11111111-1111-1111-1111-111111111111"),
+		StartTime:     pgtype.Timestamptz{Time: time.Now().Add(102 * time.Hour), Valid: true},
+		EndTime:       pgtype.Timestamptz{Time: time.Now().Add(103 * time.Hour), Valid: true},
+		Capacity:      10,
+	})
+	require.NoError(suite.T(), err)
+
 	participationID := uuid.New()
 	createBody := interviewAssignmentDTO.CreateInterviewAssignmentRequest{
-		InterviewSlotID: uuid.MustParse("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"),
+		InterviewSlotID: slot.ID,
 	}
 	assignment, err := CreateInterviewAssignment(suite.ctx, uuid.MustParse("11111111-1111-1111-1111-111111111111"), participationID, createBody)
 	require.NoError(suite.T(), err)

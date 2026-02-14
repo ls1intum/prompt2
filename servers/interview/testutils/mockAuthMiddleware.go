@@ -3,6 +3,7 @@ package testutils
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"github.com/ls1intum/prompt-sdk/keycloakTokenVerifier"
 	"github.com/sirupsen/logrus"
 )
 
@@ -65,6 +66,14 @@ func NewMockAuthMiddleware(identity MockIdentity) func(allowedRoles ...string) g
 			for _, role := range merged.Roles {
 				userRoles[role] = true
 			}
+
+			// Create and set token user using the SDK's TokenUser type
+			tokenUser := keycloakTokenVerifier.TokenUser{
+				Roles:      userRoles,
+				IsLecturer: false,
+				IsEditor:   false,
+			}
+			c.Set("tokenUser", tokenUser)
 
 			c.Set("userRoles", userRoles)
 			c.Set("userEmail", merged.Email)

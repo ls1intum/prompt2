@@ -3,8 +3,11 @@ package interviewAssignment
 import (
 	"context"
 	"testing"
+	"time"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
+	db "github.com/ls1intum/prompt2/servers/interview/db/sqlc"
 	interviewAssignmentDTO "github.com/ls1intum/prompt2/servers/interview/interviewAssignment/interviewAssignmentDTO"
 	"github.com/ls1intum/prompt2/servers/interview/testutils"
 	"github.com/stretchr/testify/require"
@@ -114,10 +117,18 @@ func (suite *InterviewAssignmentServiceTestSuite) TestGetMyInterviewAssignmentNo
 }
 
 func (suite *InterviewAssignmentServiceTestSuite) TestDeleteInterviewAssignment() {
-	slotID := uuid.MustParse("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb")
+	// Create a dedicated slot for this test with large capacity
+	slot, err := suite.testDB.Queries.CreateInterviewSlot(suite.ctx, db.CreateInterviewSlotParams{
+		CoursePhaseID: suite.activePhaseID,
+		StartTime:     pgtype.Timestamptz{Time: time.Now().Add(100 * time.Hour), Valid: true},
+		EndTime:       pgtype.Timestamptz{Time: time.Now().Add(101 * time.Hour), Valid: true},
+		Capacity:      10,
+	})
+	require.NoError(suite.T(), err)
+
 	participationID := uuid.New()
 	createReq := interviewAssignmentDTO.CreateInterviewAssignmentRequest{
-		InterviewSlotID: slotID,
+		InterviewSlotID: slot.ID,
 	}
 	assignment, err := CreateInterviewAssignment(suite.ctx, suite.activePhaseID, participationID, createReq)
 	require.NoError(suite.T(), err)
