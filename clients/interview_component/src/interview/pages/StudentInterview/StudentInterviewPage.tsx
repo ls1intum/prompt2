@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { interviewAxiosInstance } from '../../network/interviewServerConfig'
+import { useCourseStore } from '@tumaet/prompt-shared-state'
 import {
   Button,
   Card,
@@ -12,10 +13,19 @@ import {
   Badge,
   Alert,
   AlertDescription,
+  AlertTitle,
   cn,
   useToast,
 } from '@tumaet/prompt-ui-components'
-import { Calendar, Clock, MapPin, Users, CheckCircle2, AlertCircle } from 'lucide-react'
+import {
+  Calendar,
+  Clock,
+  MapPin,
+  Users,
+  CheckCircle2,
+  AlertCircle,
+  TriangleAlert,
+} from 'lucide-react'
 import { format } from 'date-fns'
 
 interface InterviewSlot {
@@ -39,7 +49,9 @@ interface InterviewAssignment {
 }
 
 export const StudentInterviewPage = () => {
-  const { phaseId } = useParams<{ phaseId: string }>()
+  const { courseId, phaseId } = useParams<{ courseId: string; phaseId: string }>()
+  const { isStudentOfCourse } = useCourseStore()
+  const isStudent = isStudentOfCourse(courseId ?? '')
   const queryClient = useQueryClient()
   const [selectedSlotId, setSelectedSlotId] = useState<string | null>(null)
   const { toast } = useToast()
@@ -73,6 +85,7 @@ export const StudentInterviewPage = () => {
         }
       },
       enabled: !!phaseId,
+      retry: false, // Don't retry - 404 is a valid response for users without assignments
     },
   )
 
@@ -159,6 +172,19 @@ export const StudentInterviewPage = () => {
         <p className='text-muted-foreground'>Select an available time slot for your interview</p>
       </div>
 
+      {/* Non-student Disclaimer */}
+      {!isStudent && (
+        <Alert className='mb-6'>
+          <TriangleAlert className='h-4 w-4' />
+          <AlertTitle>You are not a student of this course.</AlertTitle>
+          <AlertDescription>
+            You can view all interview slots below, but booking is disabled because you are not a
+            student of this course. For configuring interview slots, please refer to the Schedule
+            Management page.
+          </AlertDescription>
+        </Alert>
+      )}
+
       {/* Current Booking Status */}
       {myAssignment && myAssignment.slot_details && (
         <Alert className='mb-6 border-green-500 bg-green-50 dark:bg-green-950'>
@@ -188,15 +214,17 @@ export const StudentInterviewPage = () => {
                 </div>
               )}
             </div>
-            <Button
-              variant='outline'
-              size='sm'
-              onClick={handleCancelBooking}
-              disabled={cancelBookingMutation.isPending}
-              className='mt-3 border-red-300 text-red-700 hover:bg-red-100 dark:border-red-700 dark:text-red-400 dark:hover:bg-red-950'
-            >
-              {cancelBookingMutation.isPending ? 'Canceling...' : 'Cancel Booking'}
-            </Button>
+            {isStudent && (
+              <Button
+                variant='outline'
+                size='sm'
+                onClick={handleCancelBooking}
+                disabled={cancelBookingMutation.isPending}
+                className='mt-3 border-red-300 text-red-700 hover:bg-red-100 dark:border-red-700 dark:text-red-400 dark:hover:bg-red-950'
+              >
+                {cancelBookingMutation.isPending ? 'Canceling...' : 'Cancel Booking'}
+              </Button>
+            )}
           </AlertDescription>
         </Alert>
       )}
@@ -209,18 +237,19 @@ export const StudentInterviewPage = () => {
               {slots.map((slot) => {
                 const isFull = isSlotFull(slot)
                 const isPast = isSlotPast(slot)
-                const isDisabled = isFull || isPast
+                const isDisabled = isFull || isPast || !isStudent
                 const isSelected = selectedSlotId === slot.id
 
                 return (
                   <Card
                     key={slot.id}
                     className={cn(
-                      'cursor-pointer transition-all hover:shadow-md',
+                      isStudent && 'cursor-pointer transition-all hover:shadow-md',
                       isSelected && 'ring-2 ring-primary',
-                      isDisabled && 'opacity-50 cursor-not-allowed',
+                      isDisabled && 'opacity-50',
+                      (isFull || isPast) && 'cursor-not-allowed',
                     )}
-                    onClick={() => !isDisabled && setSelectedSlotId(slot.id)}
+                    onClick={() => isStudent && !isDisabled && setSelectedSlotId(slot.id)}
                   >
                     <CardHeader>
                       <div className='flex justify-between items-start'>
@@ -274,7 +303,7 @@ export const StudentInterviewPage = () => {
             </Alert>
           )}
 
-          {selectedSlotId && (
+          {isStudent && selectedSlotId && (
             <div className='mt-6 flex justify-center'>
               <Button size='lg' onClick={handleBookSlot} disabled={bookSlotMutation.isPending}>
                 {bookSlotMutation.isPending ? 'Booking...' : 'Confirm Booking'}
