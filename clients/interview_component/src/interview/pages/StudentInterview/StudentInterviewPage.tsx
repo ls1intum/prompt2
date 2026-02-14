@@ -166,12 +166,7 @@ export const StudentInterviewPage = () => {
   }
 
   return (
-    <div className='container mx-auto py-8 px-4 max-w-6xl'>
-      <div className='mb-8'>
-        <h1 className='text-3xl font-bold mb-2'>Interview Scheduling</h1>
-        <p className='text-muted-foreground'>Select an available time slot for your interview</p>
-      </div>
-
+    <div className='container mx-auto pb-8 px-4 max-w-6xl'>
       {/* Non-student Disclaimer */}
       {!isStudent && (
         <Alert className='mb-6'>
@@ -184,6 +179,11 @@ export const StudentInterviewPage = () => {
           </AlertDescription>
         </Alert>
       )}
+
+      <div className={!isStudent ? 'mb-8' : 'mb-8 mt-8'}>
+        <h1 className='text-3xl font-bold mb-2'>Interview Scheduling</h1>
+        <p className='text-muted-foreground'>Select an available time slot for your interview</p>
+      </div>
 
       {/* Current Booking Status */}
       {myAssignment && myAssignment.slot_details && (
