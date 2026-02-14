@@ -14,7 +14,7 @@ require (
 	github.com/stretchr/testify v1.11.1
 	github.com/swaggo/swag v1.16.6
 	github.com/testcontainers/testcontainers-go v0.40.0
-	gitlab.com/gitlab-org/api/client-go v1.27.0
+	gitlab.com/gitlab-org/api/client-go v1.34.0
 )
 
 require (
