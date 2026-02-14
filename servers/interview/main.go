@@ -6,6 +6,7 @@ import (
 	"net/url"
 	"os"
 	"os/exec"
+	"strconv"
 	"strings"
 	"time"
 
@@ -63,6 +64,11 @@ func initSentry() {
 
 	transport := sentry.NewHTTPTransport()
 	transport.Timeout = 2 * time.Second
+	sendDefaultPII, err := strconv.ParseBool(promptSDK.GetEnv("SENTRY_SEND_DEFAULT_PII", "false"))
+	if err != nil {
+		log.Warnf("Invalid SENTRY_SEND_DEFAULT_PII value, defaulting to false: %v", err)
+		sendDefaultPII = false
+	}
 
 	if err := sentry.Init(sentry.ClientOptions{
 		Dsn:              sentryDsn,
@@ -71,7 +77,7 @@ func initSentry() {
 		Transport:        transport,
 		EnableLogs:       true,
 		AttachStacktrace: true,
-		SendDefaultPII:   true,
+		SendDefaultPII:   sendDefaultPII,
 		EnableTracing:    true,
 		TracesSampleRate: 1.0,
 	}); err != nil {
@@ -159,7 +165,13 @@ func main() {
 	api := router.Group("interview/api/course_phase/:coursePhaseID")
 	initKeycloak(*query)
 
-	api.GET("/hello", helloInterviewServer)
+	api.GET("/hello", promptSDK.AuthenticationMiddleware(
+		promptSDK.PromptAdmin,
+		promptSDK.PromptLecturer,
+		promptSDK.CourseLecturer,
+		promptSDK.CourseEditor,
+		promptSDK.CourseStudent,
+	), helloInterviewServer)
 
 	copyApi := router.Group("interview/api")
 	copy.InitCopyModule(copyApi, *query, conn)
@@ -176,6 +188,16 @@ func main() {
 	}
 }
 
+// helloInterviewServer godoc
+// @Summary Interview service hello endpoint
+// @Description Returns a simple response from the interview service
+// @Tags interview
+// @Produce json
+// @Param coursePhaseID path string true "Course Phase UUID"
+// @Success 200 {object} map[string]string
+// @Failure 401 {object} map[string]string
+// @Security ApiKeyAuth
+// @Router /course_phase/{coursePhaseID}/hello [get]
 func helloInterviewServer(c *gin.Context) {
 	c.JSON(200, gin.H{
 		"message": "Hello from the interview service",

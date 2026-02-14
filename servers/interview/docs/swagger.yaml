@@ -165,6 +165,35 @@ info:
   title: PROMPT Interview API
   version: "1.0"
 paths:
+  /course_phase/{coursePhaseID}/hello:
+    get:
+      description: Returns a simple response from the interview service
+      parameters:
+      - description: Course Phase UUID
+        in: path
+        name: coursePhaseID
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Interview service hello endpoint
+      tags:
+      - interview
   /course_phase/{coursePhaseID}/interview-assignments:
     post:
       consumes:
@@ -207,6 +236,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - ApiKeyAuth: []
       summary: Assign current user to an interview slot
       tags:
       - interview-assignments
@@ -239,6 +270,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - ApiKeyAuth: []
       summary: Delete an interview assignment
       tags:
       - interview-assignments
@@ -285,6 +318,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - ApiKeyAuth: []
       summary: Manually assign a student to an interview slot (Admin only)
       tags:
       - interview-assignments
@@ -316,6 +351,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - ApiKeyAuth: []
       summary: Get current user's interview assignment
       tags:
       - interview-assignments
@@ -349,6 +386,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - ApiKeyAuth: []
       summary: Get all interview slots for a course phase
       tags:
       - interview-slots
@@ -387,6 +426,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - ApiKeyAuth: []
       summary: Create a new interview slot
       tags:
       - interview-slots
@@ -419,6 +460,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - ApiKeyAuth: []
       summary: Delete an interview slot
       tags:
       - interview-slots
@@ -460,6 +503,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - ApiKeyAuth: []
       summary: Get a specific interview slot
       tags:
       - interview-slots
@@ -503,6 +548,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - ApiKeyAuth: []
       summary: Update an interview slot
       tags:
       - interview-slots

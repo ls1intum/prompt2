@@ -15,8 +15,59 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/course_phase/{coursePhaseID}/hello": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Returns a simple response from the interview service",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "interview"
+                ],
+                "summary": "Interview service hello endpoint",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Course Phase UUID",
+                        "name": "coursePhaseID",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/course_phase/{coursePhaseID}/interview-assignments": {
             "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Students can book themselves into an available interview slot",
                 "consumes": [
                     "application/json"
@@ -85,6 +136,11 @@ const docTemplate = `{
         },
         "/course_phase/{coursePhaseID}/interview-assignments/admin": {
             "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Allows admins/lecturers to manually assign any student to an interview slot",
                 "consumes": [
                     "application/json"
@@ -153,6 +209,11 @@ const docTemplate = `{
         },
         "/course_phase/{coursePhaseID}/interview-assignments/my-assignment": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Retrieves the interview assignment for the current student",
                 "produces": [
                     "application/json"
@@ -200,6 +261,11 @@ const docTemplate = `{
         },
         "/course_phase/{coursePhaseID}/interview-assignments/{assignmentId}": {
             "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Removes a student's assignment to an interview slot",
                 "tags": [
                     "interview-assignments"
@@ -248,6 +314,11 @@ const docTemplate = `{
         },
         "/course_phase/{coursePhaseID}/interview-slots": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Retrieves all interview slots with assignment details",
                 "produces": [
                     "application/json"
@@ -296,6 +367,11 @@ const docTemplate = `{
                 }
             },
             "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Creates a new interview time slot for the course phase",
                 "consumes": [
                     "application/json"
@@ -355,6 +431,11 @@ const docTemplate = `{
         },
         "/course_phase/{coursePhaseID}/interview-slots/{slotId}": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Retrieves details of a specific interview slot",
                 "produces": [
                     "application/json"
@@ -416,6 +497,11 @@ const docTemplate = `{
                 }
             },
             "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Updates an existing interview slot",
                 "consumes": [
                     "application/json"
@@ -480,6 +566,11 @@ const docTemplate = `{
                 }
             },
             "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Deletes an interview slot and all its assignments",
                 "tags": [
                     "interview-slots"
