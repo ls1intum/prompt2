@@ -19,7 +19,7 @@ definitions:
       updated_at:
         $ref: '#/definitions/pgtype.Timestamptz'
     type: object
-  interview_slot.AssignmentInfo:
+  interviewSlotDTO.AssignmentInfo:
     properties:
       assigned_at:
         type: string
@@ -28,9 +28,9 @@ definitions:
       id:
         type: string
       student:
-        $ref: '#/definitions/interview_slot.StudentInfo'
+        $ref: '#/definitions/interviewSlotDTO.StudentInfo'
     type: object
-  interview_slot.CreateInterviewAssignmentAdminRequest:
+  interviewSlotDTO.CreateInterviewAssignmentAdminRequest:
     properties:
       course_participation_id:
         type: string
@@ -40,14 +40,14 @@ definitions:
     - course_participation_id
     - interview_slot_id
     type: object
-  interview_slot.CreateInterviewAssignmentRequest:
+  interviewSlotDTO.CreateInterviewAssignmentRequest:
     properties:
       interview_slot_id:
         type: string
     required:
     - interview_slot_id
     type: object
-  interview_slot.CreateInterviewSlotRequest:
+  interviewSlotDTO.CreateInterviewSlotRequest:
     properties:
       capacity:
         minimum: 1
@@ -63,7 +63,7 @@ definitions:
     - end_time
     - start_time
     type: object
-  interview_slot.InterviewAssignmentResponse:
+  interviewSlotDTO.InterviewAssignmentResponse:
     properties:
       assigned_at:
         type: string
@@ -74,15 +74,15 @@ definitions:
       interview_slot_id:
         type: string
       slot_details:
-        $ref: '#/definitions/interview_slot.InterviewSlotResponse'
+        $ref: '#/definitions/interviewSlotDTO.InterviewSlotResponse'
     type: object
-  interview_slot.InterviewSlotResponse:
+  interviewSlotDTO.InterviewSlotResponse:
     properties:
       assigned_count:
         type: integer
       assignments:
         items:
-          $ref: '#/definitions/interview_slot.AssignmentInfo'
+          $ref: '#/definitions/interviewSlotDTO.AssignmentInfo'
         type: array
       capacity:
         type: integer
@@ -101,7 +101,7 @@ definitions:
       updated_at:
         type: string
     type: object
-  interview_slot.StudentInfo:
+  interviewSlotDTO.StudentInfo:
     properties:
       email:
         type: string
@@ -112,7 +112,7 @@ definitions:
       lastName:
         type: string
     type: object
-  interview_slot.UpdateInterviewSlotRequest:
+  interviewSlotDTO.UpdateInterviewSlotRequest:
     properties:
       capacity:
         minimum: 1
@@ -210,14 +210,14 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/interview_slot.CreateInterviewAssignmentRequest'
+          $ref: '#/definitions/interviewSlotDTO.CreateInterviewAssignmentRequest'
       produces:
       - application/json
       responses:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/interview_slot.InterviewAssignmentResponse'
+            $ref: '#/definitions/interviewSlotDTO.InterviewAssignmentResponse'
         "400":
           description: Bad Request
           schema:
@@ -292,14 +292,14 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/interview_slot.CreateInterviewAssignmentAdminRequest'
+          $ref: '#/definitions/interviewSlotDTO.CreateInterviewAssignmentAdminRequest'
       produces:
       - application/json
       responses:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/interview_slot.InterviewAssignmentResponse'
+            $ref: '#/definitions/interviewSlotDTO.InterviewAssignmentResponse'
         "400":
           description: Bad Request
           schema:
@@ -338,7 +338,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/interview_slot.InterviewAssignmentResponse'
+            $ref: '#/definitions/interviewSlotDTO.InterviewAssignmentResponse'
         "404":
           description: Not Found
           schema:
@@ -372,7 +372,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/interview_slot.InterviewSlotResponse'
+              $ref: '#/definitions/interviewSlotDTO.InterviewSlotResponse'
             type: array
         "400":
           description: Bad Request
@@ -406,7 +406,7 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/interview_slot.CreateInterviewSlotRequest'
+          $ref: '#/definitions/interviewSlotDTO.CreateInterviewSlotRequest'
       produces:
       - application/json
       responses:
@@ -484,7 +484,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/interview_slot.InterviewSlotResponse'
+            $ref: '#/definitions/interviewSlotDTO.InterviewSlotResponse'
         "400":
           description: Bad Request
           schema:
@@ -528,7 +528,7 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/interview_slot.UpdateInterviewSlotRequest'
+          $ref: '#/definitions/interviewSlotDTO.UpdateInterviewSlotRequest'
       produces:
       - application/json
       responses:

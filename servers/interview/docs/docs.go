@@ -93,7 +93,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/interview_slot.CreateInterviewAssignmentRequest"
+                            "$ref": "#/definitions/interviewSlotDTO.CreateInterviewAssignmentRequest"
                         }
                     }
                 ],
@@ -101,7 +101,7 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/interview_slot.InterviewAssignmentResponse"
+                            "$ref": "#/definitions/interviewSlotDTO.InterviewAssignmentResponse"
                         }
                     },
                     "400": {
@@ -166,7 +166,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/interview_slot.CreateInterviewAssignmentAdminRequest"
+                            "$ref": "#/definitions/interviewSlotDTO.CreateInterviewAssignmentAdminRequest"
                         }
                     }
                 ],
@@ -174,7 +174,7 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/interview_slot.InterviewAssignmentResponse"
+                            "$ref": "#/definitions/interviewSlotDTO.InterviewAssignmentResponse"
                         }
                     },
                     "400": {
@@ -235,7 +235,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/interview_slot.InterviewAssignmentResponse"
+                            "$ref": "#/definitions/interviewSlotDTO.InterviewAssignmentResponse"
                         }
                     },
                     "404": {
@@ -342,7 +342,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/interview_slot.InterviewSlotResponse"
+                                "$ref": "#/definitions/interviewSlotDTO.InterviewSlotResponse"
                             }
                         }
                     },
@@ -397,7 +397,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/interview_slot.CreateInterviewSlotRequest"
+                            "$ref": "#/definitions/interviewSlotDTO.CreateInterviewSlotRequest"
                         }
                     }
                 ],
@@ -464,7 +464,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/interview_slot.InterviewSlotResponse"
+                            "$ref": "#/definitions/interviewSlotDTO.InterviewSlotResponse"
                         }
                     },
                     "400": {
@@ -534,7 +534,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/interview_slot.UpdateInterviewSlotRequest"
+                            "$ref": "#/definitions/interviewSlotDTO.UpdateInterviewSlotRequest"
                         }
                     }
                 ],
@@ -648,7 +648,7 @@ const docTemplate = `{
                 }
             }
         },
-        "interview_slot.AssignmentInfo": {
+        "interviewSlotDTO.AssignmentInfo": {
             "type": "object",
             "properties": {
                 "assigned_at": {
@@ -661,11 +661,11 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "student": {
-                    "$ref": "#/definitions/interview_slot.StudentInfo"
+                    "$ref": "#/definitions/interviewSlotDTO.StudentInfo"
                 }
             }
         },
-        "interview_slot.CreateInterviewAssignmentAdminRequest": {
+        "interviewSlotDTO.CreateInterviewAssignmentAdminRequest": {
             "type": "object",
             "required": [
                 "course_participation_id",
@@ -680,7 +680,7 @@ const docTemplate = `{
                 }
             }
         },
-        "interview_slot.CreateInterviewAssignmentRequest": {
+        "interviewSlotDTO.CreateInterviewAssignmentRequest": {
             "type": "object",
             "required": [
                 "interview_slot_id"
@@ -691,7 +691,7 @@ const docTemplate = `{
                 }
             }
         },
-        "interview_slot.CreateInterviewSlotRequest": {
+        "interviewSlotDTO.CreateInterviewSlotRequest": {
             "type": "object",
             "required": [
                 "capacity",
@@ -714,7 +714,7 @@ const docTemplate = `{
                 }
             }
         },
-        "interview_slot.InterviewAssignmentResponse": {
+        "interviewSlotDTO.InterviewAssignmentResponse": {
             "type": "object",
             "properties": {
                 "assigned_at": {
@@ -730,11 +730,11 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "slot_details": {
-                    "$ref": "#/definitions/interview_slot.InterviewSlotResponse"
+                    "$ref": "#/definitions/interviewSlotDTO.InterviewSlotResponse"
                 }
             }
         },
-        "interview_slot.InterviewSlotResponse": {
+        "interviewSlotDTO.InterviewSlotResponse": {
             "type": "object",
             "properties": {
                 "assigned_count": {
@@ -743,7 +743,7 @@ const docTemplate = `{
                 "assignments": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/interview_slot.AssignmentInfo"
+                        "$ref": "#/definitions/interviewSlotDTO.AssignmentInfo"
                     }
                 },
                 "capacity": {
@@ -772,7 +772,7 @@ const docTemplate = `{
                 }
             }
         },
-        "interview_slot.StudentInfo": {
+        "interviewSlotDTO.StudentInfo": {
             "type": "object",
             "properties": {
                 "email": {
@@ -789,7 +789,7 @@ const docTemplate = `{
                 }
             }
         },
-        "interview_slot.UpdateInterviewSlotRequest": {
+        "interviewSlotDTO.UpdateInterviewSlotRequest": {
             "type": "object",
             "required": [
                 "capacity",

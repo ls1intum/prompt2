@@ -17,6 +17,7 @@ import (
 	promptSDK "github.com/ls1intum/prompt-sdk"
 	sdkUtils "github.com/ls1intum/prompt-sdk/utils"
 	db "github.com/ls1intum/prompt2/servers/interview/db/sqlc"
+	interviewSlotDTO "github.com/ls1intum/prompt2/servers/interview/interview_slot/interviewSlotDTO"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -26,60 +27,6 @@ type InterviewSlotService struct {
 }
 
 var InterviewSlotServiceSingleton *InterviewSlotService
-
-type SelfParticipationResponse struct {
-	CourseParticipationID uuid.UUID `json:"courseParticipationID"`
-}
-
-type CreateInterviewSlotRequest struct {
-	StartTime time.Time `json:"start_time" binding:"required"`
-	EndTime   time.Time `json:"end_time" binding:"required"`
-	Location  *string   `json:"location"`
-	Capacity  int32     `json:"capacity" binding:"required,min=1"`
-}
-
-type UpdateInterviewSlotRequest struct {
-	StartTime time.Time `json:"start_time" binding:"required"`
-	EndTime   time.Time `json:"end_time" binding:"required"`
-	Location  *string   `json:"location"`
-	Capacity  int32     `json:"capacity" binding:"required,min=1"`
-}
-
-type CreateInterviewAssignmentRequest struct {
-	InterviewSlotID uuid.UUID `json:"interview_slot_id" binding:"required"`
-}
-
-type CreateInterviewAssignmentAdminRequest struct {
-	InterviewSlotID       uuid.UUID `json:"interview_slot_id" binding:"required"`
-	CourseParticipationID uuid.UUID `json:"course_participation_id" binding:"required"`
-}
-
-type StudentInfo struct {
-	ID        uuid.UUID `json:"id"`
-	FirstName string    `json:"firstName"`
-	LastName  string    `json:"lastName"`
-	Email     string    `json:"email"`
-}
-
-type AssignmentInfo struct {
-	ID                    uuid.UUID    `json:"id"`
-	CourseParticipationID uuid.UUID    `json:"course_participation_id"`
-	AssignedAt            time.Time    `json:"assigned_at"`
-	Student               *StudentInfo `json:"student,omitempty"`
-}
-
-type InterviewSlotResponse struct {
-	ID            uuid.UUID        `json:"id"`
-	CoursePhaseID uuid.UUID        `json:"course_phase_id"`
-	StartTime     time.Time        `json:"start_time"`
-	EndTime       time.Time        `json:"end_time"`
-	Location      *string          `json:"location"`
-	Capacity      int32            `json:"capacity"`
-	AssignedCount int64            `json:"assigned_count"`
-	Assignments   []AssignmentInfo `json:"assignments"`
-	CreatedAt     time.Time        `json:"created_at"`
-	UpdatedAt     time.Time        `json:"updated_at"`
-}
 
 // Helper functions for type conversion
 func timeToPgTimestamptz(t time.Time) pgtype.Timestamptz {
@@ -107,14 +54,6 @@ func pgTextToStringPtr(t pgtype.Text) *string {
 	return nil
 }
 
-type InterviewAssignmentResponse struct {
-	ID                    uuid.UUID              `json:"id"`
-	InterviewSlotID       uuid.UUID              `json:"interview_slot_id"`
-	CourseParticipationID uuid.UUID              `json:"course_participation_id"`
-	AssignedAt            time.Time              `json:"assigned_at"`
-	SlotDetails           *InterviewSlotResponse `json:"slot_details,omitempty"`
-}
-
 // createInterviewSlot godoc
 // @Summary Create a new interview slot
 // @Description Creates a new interview time slot for the course phase
@@ -122,7 +61,7 @@ type InterviewAssignmentResponse struct {
 // @Accept json
 // @Produce json
 // @Param coursePhaseID path string true "Course Phase UUID"
-// @Param request body CreateInterviewSlotRequest true "Interview slot details"
+// @Param request body interviewSlotDTO.CreateInterviewSlotRequest true "Interview slot details"
 // @Success 201 {object} db.InterviewSlot
 // @Failure 400 {object} map[string]string
 // @Failure 500 {object} map[string]string
@@ -135,7 +74,7 @@ func createInterviewSlot(c *gin.Context) {
 		return
 	}
 
-	var req CreateInterviewSlotRequest
+	var req interviewSlotDTO.CreateInterviewSlotRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -169,7 +108,7 @@ func createInterviewSlot(c *gin.Context) {
 // @Tags interview-slots
 // @Produce json
 // @Param coursePhaseID path string true "Course Phase UUID"
-// @Success 200 {array} InterviewSlotResponse
+// @Success 200 {array} interviewSlotDTO.InterviewSlotResponse
 // @Failure 400 {object} map[string]string
 // @Failure 500 {object} map[string]string
 // @Security ApiKeyAuth
@@ -193,25 +132,25 @@ func getAllInterviewSlots(c *gin.Context) {
 	studentMap, err := fetchAllStudentsForCoursePhase(c, coursePhaseID)
 	if err != nil {
 		log.Warnf("Failed to fetch students for course phase (may be due to permissions): %v", err)
-		studentMap = make(map[uuid.UUID]*StudentInfo) // Empty map - slots will show without student details
+		studentMap = make(map[uuid.UUID]*interviewSlotDTO.StudentInfo) // Empty map - slots will show without student details
 	}
 
 	// Group assignments by slot
-	slotMap := make(map[uuid.UUID]*InterviewSlotResponse)
+	slotMap := make(map[uuid.UUID]*interviewSlotDTO.InterviewSlotResponse)
 	slotOrder := []uuid.UUID{}
 
 	for _, row := range rows {
 		// Check if slot already exists in map
 		if _, exists := slotMap[row.SlotID]; !exists {
 			// New slot
-			slotMap[row.SlotID] = &InterviewSlotResponse{
+			slotMap[row.SlotID] = &interviewSlotDTO.InterviewSlotResponse{
 				ID:            row.SlotID,
 				CoursePhaseID: row.CoursePhaseID,
 				StartTime:     pgTimestamptzToTime(row.StartTime),
 				EndTime:       pgTimestamptzToTime(row.EndTime),
 				Location:      pgTextToStringPtr(row.Location),
 				Capacity:      row.Capacity,
-				Assignments:   []AssignmentInfo{},
+				Assignments:   []interviewSlotDTO.AssignmentInfo{},
 				CreatedAt:     pgTimestamptzToTime(row.CreatedAt),
 				UpdatedAt:     pgTimestamptzToTime(row.UpdatedAt),
 			}
@@ -235,7 +174,7 @@ func getAllInterviewSlots(c *gin.Context) {
 			// Get student info from the map
 			student := studentMap[participationUUID]
 
-			assignment := AssignmentInfo{
+			assignment := interviewSlotDTO.AssignmentInfo{
 				ID:                    assignmentUUID,
 				CourseParticipationID: participationUUID,
 				AssignedAt:            pgTimestamptzToTime(row.AssignedAt),
@@ -246,7 +185,7 @@ func getAllInterviewSlots(c *gin.Context) {
 	}
 
 	// Build response array in order
-	response := make([]InterviewSlotResponse, 0, len(slotOrder))
+	response := make([]interviewSlotDTO.InterviewSlotResponse, 0, len(slotOrder))
 	for _, slotID := range slotOrder {
 		slot := slotMap[slotID]
 		slot.AssignedCount = int64(len(slot.Assignments))
@@ -265,7 +204,7 @@ func getAllInterviewSlots(c *gin.Context) {
 // @Produce json
 // @Param coursePhaseID path string true "Course Phase UUID"
 // @Param slotId path string true "Interview Slot UUID"
-// @Success 200 {object} InterviewSlotResponse
+// @Success 200 {object} interviewSlotDTO.InterviewSlotResponse
 // @Failure 400 {object} map[string]string
 // @Failure 404 {object} map[string]string
 // @Failure 500 {object} map[string]string
@@ -314,13 +253,13 @@ func getInterviewSlot(c *gin.Context) {
 	studentMap, err := fetchAllStudentsForCoursePhase(c, coursePhaseID)
 	if err != nil {
 		log.Warnf("Failed to fetch students for course phase (may be due to permissions): %v", err)
-		studentMap = make(map[uuid.UUID]*StudentInfo) // Empty map - assignments will show without student details
+		studentMap = make(map[uuid.UUID]*interviewSlotDTO.StudentInfo) // Empty map - assignments will show without student details
 	}
 
-	assignmentInfos := make([]AssignmentInfo, len(assignments))
+	assignmentInfos := make([]interviewSlotDTO.AssignmentInfo, len(assignments))
 	for i, assignment := range assignments {
 		student := studentMap[assignment.CourseParticipationID]
-		assignmentInfos[i] = AssignmentInfo{
+		assignmentInfos[i] = interviewSlotDTO.AssignmentInfo{
 			ID:                    assignment.ID,
 			CourseParticipationID: assignment.CourseParticipationID,
 			AssignedAt:            pgTimestamptzToTime(assignment.AssignedAt),
@@ -328,7 +267,7 @@ func getInterviewSlot(c *gin.Context) {
 		}
 	}
 
-	response := InterviewSlotResponse{
+	response := interviewSlotDTO.InterviewSlotResponse{
 		ID:            slot.ID,
 		CoursePhaseID: slot.CoursePhaseID,
 		StartTime:     pgTimestamptzToTime(slot.StartTime),
@@ -352,7 +291,7 @@ func getInterviewSlot(c *gin.Context) {
 // @Produce json
 // @Param coursePhaseID path string true "Course Phase UUID"
 // @Param slotId path string true "Interview Slot UUID"
-// @Param request body UpdateInterviewSlotRequest true "Updated slot details"
+// @Param request body interviewSlotDTO.UpdateInterviewSlotRequest true "Updated slot details"
 // @Success 200 {object} db.InterviewSlot
 // @Failure 400 {object} map[string]string
 // @Failure 500 {object} map[string]string
@@ -371,7 +310,7 @@ func updateInterviewSlot(c *gin.Context) {
 		return
 	}
 
-	var req UpdateInterviewSlotRequest
+	var req interviewSlotDTO.UpdateInterviewSlotRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -487,15 +426,15 @@ func deleteInterviewSlot(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param coursePhaseID path string true "Course Phase UUID"
-// @Param request body CreateInterviewAssignmentRequest true "Assignment details"
-// @Success 201 {object} InterviewAssignmentResponse
+// @Param request body interviewSlotDTO.CreateInterviewAssignmentRequest true "Assignment details"
+// @Success 201 {object} interviewSlotDTO.InterviewAssignmentResponse
 // @Failure 400 {object} map[string]string
 // @Failure 409 {object} map[string]string
 // @Failure 500 {object} map[string]string
 // @Security ApiKeyAuth
 // @Router /course_phase/{coursePhaseID}/interview-assignments [post]
 func createInterviewAssignment(c *gin.Context) {
-	var req CreateInterviewAssignmentRequest
+	var req interviewSlotDTO.CreateInterviewAssignmentRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -597,7 +536,7 @@ func createInterviewAssignment(c *gin.Context) {
 		return
 	}
 
-	response := InterviewAssignmentResponse{
+	response := interviewSlotDTO.InterviewAssignmentResponse{
 		ID:                    assignment.ID,
 		InterviewSlotID:       assignment.InterviewSlotID,
 		CourseParticipationID: assignment.CourseParticipationID,
@@ -614,15 +553,15 @@ func createInterviewAssignment(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param coursePhaseID path string true "Course Phase UUID"
-// @Param request body CreateInterviewAssignmentAdminRequest true "Assignment details with course participation ID"
-// @Success 201 {object} InterviewAssignmentResponse
+// @Param request body interviewSlotDTO.CreateInterviewAssignmentAdminRequest true "Assignment details with course participation ID"
+// @Success 201 {object} interviewSlotDTO.InterviewAssignmentResponse
 // @Failure 400 {object} map[string]string
 // @Failure 409 {object} map[string]string
 // @Failure 500 {object} map[string]string
 // @Security ApiKeyAuth
 // @Router /course_phase/{coursePhaseID}/interview-assignments/admin [post]
 func createInterviewAssignmentAdmin(c *gin.Context) {
-	var req CreateInterviewAssignmentAdminRequest
+	var req interviewSlotDTO.CreateInterviewAssignmentAdminRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -711,7 +650,7 @@ func createInterviewAssignmentAdmin(c *gin.Context) {
 		return
 	}
 
-	response := InterviewAssignmentResponse{
+	response := interviewSlotDTO.InterviewAssignmentResponse{
 		ID:                    assignment.ID,
 		InterviewSlotID:       assignment.InterviewSlotID,
 		CourseParticipationID: assignment.CourseParticipationID,
@@ -727,7 +666,7 @@ func createInterviewAssignmentAdmin(c *gin.Context) {
 // @Tags interview-assignments
 // @Produce json
 // @Param coursePhaseID path string true "Course Phase UUID"
-// @Success 200 {object} InterviewAssignmentResponse
+// @Success 200 {object} interviewSlotDTO.InterviewAssignmentResponse
 // @Failure 404 {object} map[string]string
 // @Failure 500 {object} map[string]string
 // @Security ApiKeyAuth
@@ -777,12 +716,12 @@ func getMyInterviewAssignment(c *gin.Context) {
 		return
 	}
 
-	response := InterviewAssignmentResponse{
+	response := interviewSlotDTO.InterviewAssignmentResponse{
 		ID:                    assignment.ID,
 		InterviewSlotID:       assignment.InterviewSlotID,
 		CourseParticipationID: assignment.CourseParticipationID,
 		AssignedAt:            pgTimestamptzToTime(assignment.AssignedAt),
-		SlotDetails: &InterviewSlotResponse{
+		SlotDetails: &interviewSlotDTO.InterviewSlotResponse{
 			ID:            slot.ID,
 			CoursePhaseID: slot.CoursePhaseID,
 			StartTime:     pgTimestamptzToTime(slot.StartTime),
@@ -834,7 +773,7 @@ func fetchSelfParticipationID(c *gin.Context, coursePhaseID uuid.UUID) (uuid.UUI
 		return uuid.Nil, http.StatusInternalServerError, "Failed to read participation", fmt.Errorf("failed to read self participation response: %w", err)
 	}
 
-	var selfParticipation SelfParticipationResponse
+	var selfParticipation interviewSlotDTO.SelfParticipationResponse
 	if err := json.Unmarshal(body, &selfParticipation); err != nil {
 		return uuid.Nil, http.StatusInternalServerError, "Failed to parse participation", fmt.Errorf("failed to unmarshal self participation response: %w", err)
 	}
@@ -848,7 +787,7 @@ func fetchSelfParticipationID(c *gin.Context, coursePhaseID uuid.UUID) (uuid.UUI
 
 // fetchAllStudentsForCoursePhase fetches all students for a course phase from the core service
 // and returns a map of course participation ID to student info
-func fetchAllStudentsForCoursePhase(c *gin.Context, coursePhaseID uuid.UUID) (map[uuid.UUID]*StudentInfo, error) {
+func fetchAllStudentsForCoursePhase(c *gin.Context, coursePhaseID uuid.UUID) (map[uuid.UUID]*interviewSlotDTO.StudentInfo, error) {
 	coreURL := sdkUtils.GetCoreUrl()
 	url := fmt.Sprintf("%s/api/course_phases/%s/participations", coreURL, coursePhaseID)
 
@@ -883,8 +822,8 @@ func fetchAllStudentsForCoursePhase(c *gin.Context, coursePhaseID uuid.UUID) (ma
 
 	var participationsResponse struct {
 		Participations []struct {
-			CourseParticipationID uuid.UUID   `json:"courseParticipationID"`
-			Student               StudentInfo `json:"student"`
+			CourseParticipationID uuid.UUID                    `json:"courseParticipationID"`
+			Student               interviewSlotDTO.StudentInfo `json:"student"`
 		} `json:"participations"`
 	}
 
@@ -893,7 +832,7 @@ func fetchAllStudentsForCoursePhase(c *gin.Context, coursePhaseID uuid.UUID) (ma
 	}
 
 	// Build map of course participation ID to student info
-	studentMap := make(map[uuid.UUID]*StudentInfo)
+	studentMap := make(map[uuid.UUID]*interviewSlotDTO.StudentInfo)
 	for _, participation := range participationsResponse.Participations {
 		studentCopy := participation.Student
 		studentMap[participation.CourseParticipationID] = &studentCopy
