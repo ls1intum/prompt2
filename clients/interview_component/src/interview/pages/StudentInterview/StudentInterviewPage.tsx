@@ -252,12 +252,12 @@ export const StudentInterviewPage = () => {
                           href={slot.location}
                           target='_blank'
                           rel='noopener noreferrer'
-                          className='text-blue-600 hover:underline truncate break-all'
+                          className='text-blue-600 hover:underline truncate min-w-0'
                         >
                           {slot.location}
                         </a>
                       ) : (
-                        <span className='truncate'>{slot.location}</span>
+                        <span className='truncate min-w-0'>{slot.location}</span>
                       )}
                     </div>
                   )}

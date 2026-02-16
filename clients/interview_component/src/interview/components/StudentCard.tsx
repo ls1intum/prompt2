@@ -75,12 +75,12 @@ export function StudentCard({ participation, interviewSlot }: StudentCardProps) 
                     href={interviewSlot.location}
                     target='_blank'
                     rel='noopener noreferrer'
-                    className='text-blue-600 hover:underline truncate break-all'
+                    className='text-blue-600 hover:underline truncate min-w-0'
                   >
                     {interviewSlot.location}
                   </a>
                 ) : (
-                  <span className='truncate'>{interviewSlot.location}</span>
+                  <span className='truncate min-w-0'>{interviewSlot.location}</span>
                 )}
               </div>
             )}
