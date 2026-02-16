@@ -17,15 +17,7 @@ import {
   cn,
   useToast,
 } from '@tumaet/prompt-ui-components'
-import {
-  Calendar,
-  Clock,
-  MapPin,
-  Users,
-  CheckCircle2,
-  AlertCircle,
-  TriangleAlert,
-} from 'lucide-react'
+import { Clock, MapPin, Users, AlertCircle, TriangleAlert } from 'lucide-react'
 import { format } from 'date-fns'
 
 interface InterviewSlot {
@@ -182,135 +174,129 @@ export const StudentInterviewPage = () => {
 
       <div className={!isStudent ? 'mb-8' : 'mb-8 mt-8'}>
         <h1 className='text-3xl font-bold mb-2'>Interview Scheduling</h1>
-        <p className='text-muted-foreground'>Select an available time slot for your interview</p>
+        <p className='text-muted-foreground'>
+          {myAssignment
+            ? 'Your booked interview slot is highlighted below'
+            : 'Select an available time slot for your interview'}
+        </p>
       </div>
 
-      {/* Current Booking Status */}
-      {myAssignment && myAssignment.slot_details && (
-        <Alert className='mb-6 border-green-500 bg-green-50 dark:bg-green-950'>
-          <CheckCircle2 className='h-4 w-4 text-green-600' />
-          <AlertDescription className='ml-2'>
-            <div className='font-semibold text-green-900 dark:text-green-100 mb-2'>
-              You have successfully booked your interview slot
-            </div>
-            <div className='text-sm text-green-800 dark:text-green-200 space-y-1'>
-              <div className='flex items-center gap-2'>
-                <Calendar className='h-4 w-4' />
-                <span>
-                  {format(new Date(myAssignment.slot_details.start_time), 'EEEE, MMMM d, yyyy')}
-                </span>
-              </div>
-              <div className='flex items-center gap-2'>
-                <Clock className='h-4 w-4' />
-                <span>
-                  {format(new Date(myAssignment.slot_details.start_time), 'HH:mm')} -{' '}
-                  {format(new Date(myAssignment.slot_details.end_time), 'HH:mm')}
-                </span>
-              </div>
-              {myAssignment.slot_details.location && (
-                <div className='flex items-center gap-2'>
-                  <MapPin className='h-4 w-4' />
-                  <span>{myAssignment.slot_details.location}</span>
-                </div>
-              )}
-            </div>
-            {isStudent && (
-              <Button
-                variant='outline'
-                size='sm'
-                onClick={handleCancelBooking}
-                disabled={cancelBookingMutation.isPending}
-                className='mt-3 border-red-300 text-red-700 hover:bg-red-100 dark:border-red-700 dark:text-red-400 dark:hover:bg-red-950'
+      {/* Slots Grid */}
+      {slots && slots.length > 0 ? (
+        <div className='grid gap-4 md:grid-cols-2 lg:grid-cols-3'>
+          {slots.map((slot) => {
+            const isFull = isSlotFull(slot)
+            const isPast = isSlotPast(slot)
+            const isBooked = myAssignment?.interview_slot_id === slot.id
+            const isSelected = selectedSlotId === slot.id
+            const hasBooking = !!myAssignment
+            const isDisabled = !isBooked && (isFull || isPast || !isStudent || hasBooking)
+
+            return (
+              <Card
+                key={slot.id}
+                className={cn(
+                  'transition-all',
+                  isBooked && 'ring-2 ring-green-500 bg-green-50 dark:bg-green-950/20',
+                  !isBooked && isSelected && 'ring-2 ring-primary',
+                  !isBooked &&
+                    isStudent &&
+                    !isFull &&
+                    !isPast &&
+                    !hasBooking &&
+                    'cursor-pointer hover:shadow-md',
+                  isDisabled && 'opacity-50 cursor-not-allowed',
+                )}
+                onClick={() =>
+                  !isBooked &&
+                  isStudent &&
+                  !isFull &&
+                  !isPast &&
+                  !hasBooking &&
+                  setSelectedSlotId(slot.id)
+                }
               >
-                {cancelBookingMutation.isPending ? 'Canceling...' : 'Cancel Booking'}
-              </Button>
-            )}
+                <CardHeader>
+                  <div className='flex justify-between items-start'>
+                    <CardTitle className='text-lg'>
+                      {format(new Date(slot.start_time), 'EEE, MMM d')}
+                    </CardTitle>
+                    {isBooked ? (
+                      <Badge className='bg-green-600'>Booked</Badge>
+                    ) : isFull ? (
+                      <Badge variant='destructive'>Full</Badge>
+                    ) : isPast ? (
+                      <Badge variant='secondary'>Past</Badge>
+                    ) : (
+                      <Badge variant='secondary' className='bg-green-100 text-green-800'>
+                        Available
+                      </Badge>
+                    )}
+                  </div>
+                  <CardDescription>
+                    <div className='flex items-center gap-1 mt-1'>
+                      <Clock className='h-3 w-3' />
+                      <span className='text-sm'>
+                        {format(new Date(slot.start_time), 'HH:mm')} -{' '}
+                        {format(new Date(slot.end_time), 'HH:mm')}
+                      </span>
+                    </div>
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className='space-y-3'>
+                  {slot.location && (
+                    <div className='flex items-center gap-2 text-sm text-muted-foreground'>
+                      <MapPin className='h-4 w-4' />
+                      <span>{slot.location}</span>
+                    </div>
+                  )}
+                  <div className='flex items-center gap-2 text-sm text-muted-foreground'>
+                    <Users className='h-4 w-4' />
+                    <span>
+                      {slot.assigned_count} / {slot.capacity} booked
+                    </span>
+                  </div>
+
+                  {/* Action Button */}
+                  {isStudent && isBooked && (
+                    <Button
+                      variant='destructive'
+                      size='sm'
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        handleCancelBooking()
+                      }}
+                      disabled={cancelBookingMutation.isPending}
+                      className='w-full mt-2'
+                    >
+                      {cancelBookingMutation.isPending ? 'Canceling...' : 'Cancel Booking'}
+                    </Button>
+                  )}
+                  {isStudent && !isBooked && !hasBooking && isSelected && !isFull && !isPast && (
+                    <Button
+                      size='sm'
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        handleBookSlot()
+                      }}
+                      disabled={bookSlotMutation.isPending}
+                      className='w-full mt-2'
+                    >
+                      {bookSlotMutation.isPending ? 'Booking...' : 'Confirm Booking'}
+                    </Button>
+                  )}
+                </CardContent>
+              </Card>
+            )
+          })}
+        </div>
+      ) : (
+        <Alert>
+          <AlertCircle className='h-4 w-4' />
+          <AlertDescription className='ml-2'>
+            No interview slots are currently available. Please check back later.
           </AlertDescription>
         </Alert>
-      )}
-
-      {/* Available Slots */}
-      {!myAssignment && (
-        <>
-          {slots && slots.length > 0 ? (
-            <div className='grid gap-4 md:grid-cols-2 lg:grid-cols-3'>
-              {slots.map((slot) => {
-                const isFull = isSlotFull(slot)
-                const isPast = isSlotPast(slot)
-                const isDisabled = isFull || isPast || !isStudent
-                const isSelected = selectedSlotId === slot.id
-
-                return (
-                  <Card
-                    key={slot.id}
-                    className={cn(
-                      isStudent && 'cursor-pointer transition-all hover:shadow-md',
-                      isSelected && 'ring-2 ring-primary',
-                      isDisabled && 'opacity-50',
-                      (isFull || isPast) && 'cursor-not-allowed',
-                    )}
-                    onClick={() => isStudent && !isDisabled && setSelectedSlotId(slot.id)}
-                  >
-                    <CardHeader>
-                      <div className='flex justify-between items-start'>
-                        <CardTitle className='text-lg'>
-                          {format(new Date(slot.start_time), 'EEE, MMM d')}
-                        </CardTitle>
-                        {isFull ? (
-                          <Badge variant='destructive'>Full</Badge>
-                        ) : isPast ? (
-                          <Badge variant='secondary'>Past</Badge>
-                        ) : (
-                          <Badge variant='secondary' className='bg-green-100 text-green-800'>
-                            Available
-                          </Badge>
-                        )}
-                      </div>
-                      <CardDescription>
-                        <div className='flex items-center gap-1 mt-1'>
-                          <Clock className='h-3 w-3' />
-                          <span className='text-sm'>
-                            {format(new Date(slot.start_time), 'HH:mm')} -{' '}
-                            {format(new Date(slot.end_time), 'HH:mm')}
-                          </span>
-                        </div>
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      {slot.location && (
-                        <div className='flex items-center gap-2 text-sm text-muted-foreground mb-2'>
-                          <MapPin className='h-4 w-4' />
-                          <span>{slot.location}</span>
-                        </div>
-                      )}
-                      <div className='flex items-center gap-2 text-sm text-muted-foreground'>
-                        <Users className='h-4 w-4' />
-                        <span>
-                          {slot.assigned_count} / {slot.capacity} booked
-                        </span>
-                      </div>
-                    </CardContent>
-                  </Card>
-                )
-              })}
-            </div>
-          ) : (
-            <Alert>
-              <AlertCircle className='h-4 w-4' />
-              <AlertDescription className='ml-2'>
-                No interview slots are currently available. Please check back later.
-              </AlertDescription>
-            </Alert>
-          )}
-
-          {isStudent && selectedSlotId && (
-            <div className='mt-6 flex justify-center'>
-              <Button size='lg' onClick={handleBookSlot} disabled={bookSlotMutation.isPending}>
-                {bookSlotMutation.isPending ? 'Booking...' : 'Confirm Booking'}
-              </Button>
-            </div>
-          )}
-        </>
       )}
     </div>
   )
