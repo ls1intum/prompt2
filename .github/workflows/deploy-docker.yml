@@ -219,9 +219,6 @@ jobs:
             echo "DB_PORT_SELF_TEAM_ALLOCATION=${{ vars.DB_PORT_SELF_TEAM_ALLOCATION }}" >> .env.prod
             echo "DB_HOST_INTERVIEW=${{ vars.DB_HOST_INTERVIEW }}" >> .env.prod
             echo "DB_PORT_INTERVIEW=${{ vars.DB_PORT_INTERVIEW }}" >> .env.prod
-            echo "DB_INTERVIEW_NAME=${{ vars.DB_INTERVIEW_NAME }}" >> .env.prod
-            echo "DB_INTERVIEW_USER=${{ vars.DB_INTERVIEW_USER }}" >> .env.prod
-            echo "DB_INTERVIEW_PASSWORD=${{ secrets.DB_INTERVIEW_PASSWORD }}" >> .env.prod
             echo "DB_HOST_ASSESSMENT=${{ vars.DB_HOST_ASSESSMENT }}" >> .env.prod
             echo "DB_PORT_ASSESSMENT=${{ vars.DB_PORT_ASSESSMENT }}" >> .env.prod
 
