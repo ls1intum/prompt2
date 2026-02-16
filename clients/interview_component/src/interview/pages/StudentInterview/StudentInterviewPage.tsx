@@ -246,8 +246,19 @@ export const StudentInterviewPage = () => {
                 <CardContent className='space-y-3'>
                   {slot.location && (
                     <div className='flex items-center gap-2 text-sm text-muted-foreground'>
-                      <MapPin className='h-4 w-4' />
-                      <span>{slot.location}</span>
+                      <MapPin className='h-4 w-4 flex-shrink-0' />
+                      {slot.location.match(/^https?:\/\//) ? (
+                        <a
+                          href={slot.location}
+                          target='_blank'
+                          rel='noopener noreferrer'
+                          className='text-blue-600 hover:underline truncate break-all'
+                        >
+                          {slot.location}
+                        </a>
+                      ) : (
+                        <span className='truncate'>{slot.location}</span>
+                      )}
                     </div>
                   )}
                   <div className='flex items-center gap-2 text-sm text-muted-foreground'>
