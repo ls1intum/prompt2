@@ -36,6 +36,9 @@ on:
       server_assessment_image_tag:
         required: true
         type: string
+      server_interview_image_tag:
+        required: true
+        type: string
       assessment_image_tag:
         required: true
         type: string
@@ -81,7 +84,7 @@ jobs:
           proxy_port: ${{ vars.DEPLOYMENT_GATEWAY_PORT }}
           script: |
             # Define services to stop/remove (all except reverse-proxy and maintenance)
-            SERVICES="server-core server-intro-course server-team-allocation server-self-team-allocation server-assessment client-core client-assessment-component client-devops-challenge-component client-intro-course-developer-component client-interview-component client-matching-component client-team-allocation-component client-self-team-allocation-component client-template-component"
+            SERVICES="server-core server-intro-course server-team-allocation server-self-team-allocation server-assessment server-interview client-core client-assessment-component client-devops-challenge-component client-intro-course-developer-component client-interview-component client-matching-component client-team-allocation-component client-self-team-allocation-component client-template-component"
             # Stop all services except reverse-proxy and maintenance (keep fallback active)
             docker compose -f docker-compose.prod.yml --env-file=.env.prod stop $SERVICES
             # Remove stopped containers
@@ -214,6 +217,13 @@ jobs:
             echo "DB_PORT_TEAM_ALLOCATION=${{ vars.DB_PORT_TEAM_ALLOCATION }}" >> .env.prod
             echo "DB_HOST_SELF_TEAM_ALLOCATION=${{ vars.DB_HOST_SELF_TEAM_ALLOCATION }}" >> .env.prod
             echo "DB_PORT_SELF_TEAM_ALLOCATION=${{ vars.DB_PORT_SELF_TEAM_ALLOCATION }}" >> .env.prod
+            echo "DB_HOST_INTERVIEW=${{ vars.DB_HOST_INTERVIEW }}" >> .env.prod
+            echo "DB_PORT_INTERVIEW=${{ vars.DB_PORT_INTERVIEW }}" >> .env.prod
+            echo "DB_INTERVIEW_NAME=${{ vars.DB_INTERVIEW_NAME }}" >> .env.prod
+            echo "DB_INTERVIEW_USER=${{ vars.DB_INTERVIEW_USER }}" >> .env.prod
+            echo "DB_INTERVIEW_PASSWORD=${{ secrets.DB_INTERVIEW_PASSWORD }}" >> .env.prod
+            echo "DB_HOST_ASSESSMENT=${{ vars.DB_HOST_ASSESSMENT }}" >> .env.prod
+            echo "DB_PORT_ASSESSMENT=${{ vars.DB_PORT_ASSESSMENT }}" >> .env.prod
 
             echo "KEYCLOAK_HOST=${{ vars.KEYCLOAK_HOST }}" >> .env.prod
             echo "KEYCLOAK_REALM_NAME=${{ vars.KEYCLOAK_REALM_NAME }}" >> .env.prod
@@ -229,6 +239,7 @@ jobs:
             echo "SERVER_TEAM_ALLOCATION_IMAGE_TAG=${{ inputs.server_team_allocation_image_tag }}" >> .env.prod
             echo "SERVER_ASSESSMENT_IMAGE_TAG=${{ inputs.server_assessment_image_tag }}" >> .env.prod
             echo "SERVER_SELF_TEAM_ALLOCATION_IMAGE_TAG=${{ inputs.server_self_team_allocation_image_tag }}" >> .env.prod
+            echo "SERVER_INTERVIEW_IMAGE_TAG=${{ inputs.server_interview_image_tag }}" >> .env.prod
 
             echo "CORE_IMAGE_TAG=${{ inputs.core_image_tag }}" >> .env.prod
             echo "TEMPLATE_IMAGE_TAG=${{ inputs.template_image_tag }}" >> .env.prod
@@ -253,7 +264,9 @@ jobs:
             echo "SENTRY_DSN_TEAM_ALLOCATION=${{ vars.SENTRY_DSN_TEAM_ALLOCATION }}" >> .env.prod
             echo "SENTRY_DSN_SELF_TEAM_ALLOCATION=${{ vars.SENTRY_DSN_SELF_TEAM_ALLOCATION }}" >> .env.prod
             echo "SENTRY_DSN_ASSESSMENT=${{ vars.SENTRY_DSN_ASSESSMENT }}" >> .env.prod
+            echo "SENTRY_DSN_INTERVIEW=${{ vars.SENTRY_DSN_INTERVIEW }}" >> .env.prod
 
+            echo "ACME_EMAIL=${{ vars.ACME_EMAIL }}" >> .env.prod
             echo "GITLAB_ACCESS_TOKEN=${{ vars.GITLAB_ACCESS_TOKEN }}" >> .env.prod
 
       - name: SSH to VM and Execute Docker-Compose Up
