@@ -19,6 +19,36 @@ definitions:
       updated_at:
         $ref: '#/definitions/pgtype.Timestamptz'
     type: object
+  interviewAssignmentDTO.CreateInterviewAssignmentAdminRequest:
+    properties:
+      course_participation_id:
+        type: string
+      interview_slot_id:
+        type: string
+    required:
+    - course_participation_id
+    - interview_slot_id
+    type: object
+  interviewAssignmentDTO.CreateInterviewAssignmentRequest:
+    properties:
+      interview_slot_id:
+        type: string
+    required:
+    - interview_slot_id
+    type: object
+  interviewAssignmentDTO.InterviewAssignmentResponse:
+    properties:
+      assigned_at:
+        type: string
+      course_participation_id:
+        type: string
+      id:
+        type: string
+      interview_slot_id:
+        type: string
+      slot_details:
+        $ref: '#/definitions/interviewSlotDTO.InterviewSlotResponse'
+    type: object
   interviewSlotDTO.AssignmentInfo:
     properties:
       assigned_at:
@@ -29,23 +59,6 @@ definitions:
         type: string
       student:
         $ref: '#/definitions/interviewSlotDTO.StudentInfo'
-    type: object
-  interviewSlotDTO.CreateInterviewAssignmentAdminRequest:
-    properties:
-      course_participation_id:
-        type: string
-      interview_slot_id:
-        type: string
-    required:
-    - course_participation_id
-    - interview_slot_id
-    type: object
-  interviewSlotDTO.CreateInterviewAssignmentRequest:
-    properties:
-      interview_slot_id:
-        type: string
-    required:
-    - interview_slot_id
     type: object
   interviewSlotDTO.CreateInterviewSlotRequest:
     properties:
@@ -62,19 +75,6 @@ definitions:
     - capacity
     - end_time
     - start_time
-    type: object
-  interviewSlotDTO.InterviewAssignmentResponse:
-    properties:
-      assigned_at:
-        type: string
-      course_participation_id:
-        type: string
-      id:
-        type: string
-      interview_slot_id:
-        type: string
-      slot_details:
-        $ref: '#/definitions/interviewSlotDTO.InterviewSlotResponse'
     type: object
   interviewSlotDTO.InterviewSlotResponse:
     properties:
@@ -210,14 +210,14 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/interviewSlotDTO.CreateInterviewAssignmentRequest'
+          $ref: '#/definitions/interviewAssignmentDTO.CreateInterviewAssignmentRequest'
       produces:
       - application/json
       responses:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/interviewSlotDTO.InterviewAssignmentResponse'
+            $ref: '#/definitions/interviewAssignmentDTO.InterviewAssignmentResponse'
         "400":
           description: Bad Request
           schema:
@@ -292,14 +292,14 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/interviewSlotDTO.CreateInterviewAssignmentAdminRequest'
+          $ref: '#/definitions/interviewAssignmentDTO.CreateInterviewAssignmentAdminRequest'
       produces:
       - application/json
       responses:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/interviewSlotDTO.InterviewAssignmentResponse'
+            $ref: '#/definitions/interviewAssignmentDTO.InterviewAssignmentResponse'
         "400":
           description: Bad Request
           schema:
@@ -338,7 +338,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/interviewSlotDTO.InterviewAssignmentResponse'
+            $ref: '#/definitions/interviewAssignmentDTO.InterviewAssignmentResponse'
         "404":
           description: Not Found
           schema:
