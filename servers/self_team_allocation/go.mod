@@ -1,6 +1,6 @@
 module github.com/ls1intum/prompt2/servers/self_team_allocation
 
-go 1.25
+go 1.26
 
 require (
 	github.com/getsentry/sentry-go v0.42.0

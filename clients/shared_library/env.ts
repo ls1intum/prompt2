@@ -11,6 +11,7 @@ type EnvType = {
   TEAM_ALLOCATION_HOST: string
   ASSESSMENT_HOST: string
   DEVOPS_CHALLENGE_HOST: string
+  INTERVIEW_HOST: string
   KEYCLOAK_HOST: string
   KEYCLOAK_REALM_NAME: string
   CHAIR_NAME_LONG: string

@@ -1,6 +1,6 @@
 module github.com/ls1intum/prompt2/servers/intro_course
 
-go 1.25
+go 1.26
 
 require (
 	github.com/getsentry/sentry-go v0.42.0
@@ -14,7 +14,7 @@ require (
 	github.com/stretchr/testify v1.11.1
 	github.com/swaggo/swag v1.16.6
 	github.com/testcontainers/testcontainers-go v0.40.0
-	gitlab.com/gitlab-org/api/client-go v1.27.0
+	gitlab.com/gitlab-org/api/client-go v1.34.0
 )
 
 require (
