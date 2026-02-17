@@ -69,8 +69,19 @@ export function StudentCard({ participation, interviewSlot }: StudentCardProps) 
             </div>
             {interviewSlot.location && (
               <div className='flex items-center gap-2 text-sm text-muted-foreground'>
-                <MapPin className='h-3 w-3' />
-                <span>{interviewSlot.location}</span>
+                <MapPin className='h-3 w-3 flex-shrink-0' />
+                {interviewSlot.location.match(/^https?:\/\//) ? (
+                  <a
+                    href={interviewSlot.location}
+                    target='_blank'
+                    rel='noopener noreferrer'
+                    className='text-blue-600 hover:underline truncate min-w-0'
+                  >
+                    {interviewSlot.location}
+                  </a>
+                ) : (
+                  <span className='truncate min-w-0'>{interviewSlot.location}</span>
+                )}
               </div>
             )}
           </div>

@@ -564,8 +564,19 @@ export const InterviewScheduleManagement = () => {
                       <TableCell>
                         {slot.location ? (
                           <div className='flex items-center gap-2'>
-                            <MapPin className='h-4 w-4 text-muted-foreground' />
-                            <span>{slot.location}</span>
+                            <MapPin className='h-4 w-4 text-muted-foreground flex-shrink-0' />
+                            {slot.location.match(/^https?:\/\//) ? (
+                              <a
+                                href={slot.location}
+                                target='_blank'
+                                rel='noopener noreferrer'
+                                className='text-blue-600 hover:underline truncate min-w-0'
+                              >
+                                {slot.location}
+                              </a>
+                            ) : (
+                              <span className='truncate min-w-0'>{slot.location}</span>
+                            )}
                           </div>
                         ) : (
                           <span className='text-muted-foreground'>—</span>
