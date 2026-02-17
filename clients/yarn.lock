@@ -9190,7 +9190,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"framer-motion@npm:^12.34.0":
+"framer-motion@npm:^12.34.1":
   version: 12.34.1
   resolution: "framer-motion@npm:12.34.1"
   dependencies:
@@ -14235,7 +14235,7 @@ __metadata:
     eslint-plugin-react: "npm:^7.37.5"
     eslint-plugin-react-hooks: "npm:^7.0.1"
     file-saver: "npm:^2.0.5"
-    framer-motion: "npm:^12.34.0"
+    framer-motion: "npm:^12.34.1"
     html-webpack-plugin: "npm:^5.6.6"
     jwt-decode: "npm:^4.0.0"
     keycloak-js: "npm:25.0.6"
