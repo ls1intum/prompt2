@@ -16,7 +16,7 @@ import { PostApplication } from '@core/interfaces/application/postApplication'
 import { postNewApplicationExtern } from '@core/network/mutations/postApplicationExtern'
 import { ApplicationSavingDialog } from './components/ApplicationSavingDialog'
 
-export const ApplicationLoginPage = (): JSX.Element => {
+export const ApplicationLoginPage = () => {
   const { phaseId } = useParams<{ phaseId: string }>()
   const navigate = useNavigate()
   const [selectedContinueAsExternal, setSelectedContinueAsExternal] = useState(false)

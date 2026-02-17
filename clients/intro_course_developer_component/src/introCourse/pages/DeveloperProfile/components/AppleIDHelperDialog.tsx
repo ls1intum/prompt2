@@ -13,7 +13,7 @@ import {
   Separator,
 } from '@tumaet/prompt-ui-components'
 
-export const AppleIDHelperDialog = (): JSX.Element => {
+export const AppleIDHelperDialog = () => {
   const [open, setOpen] = React.useState(false)
 
   return (

@@ -24,7 +24,6 @@ import {
   Alert,
   AlertDescription,
 } from '@tumaet/prompt-ui-components'
-import {} from 'react'
 
 import type {
   Competency,
@@ -34,16 +33,20 @@ import { useUpdateCompetency } from '../hooks/useUpdateCompetency'
 
 const updateCompetencySchema = z.object({
   id: z.string(),
-  categoryID: z.string(),
-  name: z.string().min(1, 'Name is required'),
-  shortName: z.string().min(1, 'Short name is required'),
-  description: z.string().min(1, 'Description is required'),
-  descriptionVeryBad: z.string().min(1, 'Very bad level description is required'),
-  descriptionBad: z.string().min(1, 'Bad level description is required'),
-  descriptionOk: z.string().min(1, 'OK level description is required'),
-  descriptionGood: z.string().min(1, 'Good level description is required'),
-  descriptionVeryGood: z.string().min(1, 'Very good level description is required'),
-  weight: z.number().min(0, 'Weight must be positive').max(100, 'Weight cannot exceed 100'),
+  categoryID: z.string().optional(),
+  name: z.string().min(1, 'Name is required').optional(),
+  shortName: z.string().min(1, 'Short name is required').optional(),
+  description: z.string().min(1, 'Description is required').optional(),
+  descriptionVeryBad: z.string().min(1, 'Very bad level description is required').optional(),
+  descriptionBad: z.string().min(1, 'Bad level description is required').optional(),
+  descriptionOk: z.string().min(1, 'OK level description is required').optional(),
+  descriptionGood: z.string().min(1, 'Good level description is required').optional(),
+  descriptionVeryGood: z.string().min(1, 'Very good level description is required').optional(),
+  weight: z
+    .number()
+    .min(0, 'Weight must be positive')
+    .max(100, 'Weight cannot exceed 100')
+    .optional(),
 })
 
 interface EditCompetencyDialogProps {
@@ -77,6 +80,27 @@ export function EditCompetencyDialog({
     resolver: zodResolver(updateCompetencySchema),
   })
 
+  const handleClose = () => {
+    onOpenChange(false)
+    setError(undefined)
+    form.reset()
+  }
+
+  const handleDialogOpenChange = (nextOpen: boolean) => {
+    if (!nextOpen) {
+      handleClose()
+      return
+    }
+
+    onOpenChange(nextOpen)
+  }
+
+  const onSubmit = (data: UpdateCompetencyRequest) => {
+    mutate(data, {
+      onSuccess: () => handleClose(),
+    })
+  }
+
   useEffect(() => {
     if (competency) {
       form.reset({
@@ -95,28 +119,15 @@ export function EditCompetencyDialog({
     }
   }, [competency, form])
 
-  useEffect(() => {
-    if (!open || !competency) return
-
-    const subscription = form.watch((value, { name, type }) => {
-      if (name && type === 'change') {
-        const data = form.getValues() as UpdateCompetencyRequest
-        mutate(data)
-      }
-    })
-
-    return () => subscription.unsubscribe()
-  }, [form, mutate, open, competency])
-
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={handleDialogOpenChange}>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Edit Competency</DialogTitle>
           <DialogDescription>Update the competency details below.</DialogDescription>
         </DialogHeader>
         <Form {...form}>
-          <div className='space-y-4'>
+          <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-4'>
             <FormField
               control={form.control}
               name='name'
@@ -277,11 +288,14 @@ export function EditCompetencyDialog({
             )}
 
             <DialogFooter>
-              <Button type='button' variant='outline' onClick={() => onOpenChange(false)}>
+              <Button type='button' variant='outline' onClick={handleClose} disabled={isUpdating}>
+                Cancel
+              </Button>
+              <Button type='submit' disabled={isUpdating}>
                 {isUpdating ? 'Saving...' : 'Save'}
               </Button>
             </DialogFooter>
-          </div>
+          </form>
         </Form>
       </DialogContent>
     </Dialog>

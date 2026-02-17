@@ -22,7 +22,7 @@ interface ScoreLevelDistributionDiagramProps {
 export const ScoreLevelDistributionDiagram = ({
   participations,
   scoreLevels,
-}: ScoreLevelDistributionDiagramProps): JSX.Element => {
+}: ScoreLevelDistributionDiagramProps) => {
   const chartData = useMemo(() => {
     const scoreLevelCounts = [
       { level: ScoreLevel.VeryGood, label: 'Very Good' },

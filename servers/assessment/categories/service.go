@@ -6,11 +6,13 @@ import (
 	"fmt"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
 	promptSDK "github.com/ls1intum/prompt-sdk"
 	"github.com/ls1intum/prompt2/servers/assessment/categories/categoryDTO"
 	db "github.com/ls1intum/prompt2/servers/assessment/db/sqlc"
+	"github.com/ls1intum/prompt2/servers/assessment/schemaModification"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -22,6 +24,17 @@ type CategoryService struct {
 var CategoryServiceSingleton *CategoryService
 
 func CreateCategory(ctx context.Context, coursePhaseID uuid.UUID, req categoryDTO.CreateCategoryRequest) error {
+	result, err := schemaModification.GetOrCopySchemaForWrite(
+		ctx,
+		CategoryServiceSingleton.queries,
+		req.AssessmentSchemaID,
+		uuid.Nil, // No entity ID for create operations
+		coursePhaseID,
+	)
+	if err != nil {
+		return err
+	}
+
 	tx, err := CategoryServiceSingleton.conn.Begin(ctx)
 	if err != nil {
 		return err
@@ -31,12 +44,12 @@ func CreateCategory(ctx context.Context, coursePhaseID uuid.UUID, req categoryDT
 	qtx := CategoryServiceSingleton.queries.WithTx(tx)
 
 	err = qtx.CreateCategory(ctx, db.CreateCategoryParams{
-		ID:                   uuid.New(),
-		Name:                 req.Name,
-		ShortName:            pgtype.Text{String: req.ShortName, Valid: true},
-		Description:          pgtype.Text{String: req.Description, Valid: true},
-		Weight:               req.Weight,
-		AssessmentSchemaID: req.AssessmentSchemaID,
+		ID:                 uuid.New(),
+		Name:               req.Name,
+		ShortName:          pgtype.Text{String: req.ShortName, Valid: true},
+		Description:        pgtype.Text{String: req.Description, Valid: true},
+		Weight:             req.Weight,
+		AssessmentSchemaID: result.TargetSchemaID,
 	})
 	if err != nil {
 		log.Error("could not create category: ", err)
@@ -70,27 +83,99 @@ func ListCategories(ctx context.Context) ([]db.Category, error) {
 }
 
 func UpdateCategory(ctx context.Context, id uuid.UUID, coursePhaseID uuid.UUID, req categoryDTO.UpdateCategoryRequest) error {
-	err := CategoryServiceSingleton.queries.UpdateCategory(ctx, db.UpdateCategoryParams{
-		ID:                   id,
-		Name:                 req.Name,
-		ShortName:            pgtype.Text{String: req.ShortName, Valid: true},
-		Description:          pgtype.Text{String: req.Description, Valid: true},
-		Weight:               req.Weight,
-		AssessmentSchemaID: req.AssessmentSchemaID,
+	currentCategory, err := CategoryServiceSingleton.queries.GetCategory(ctx, id)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil
+		}
+		log.WithError(err).Error("Failed to get current category")
+		return errors.New("failed to get current category")
+	}
+	currentSchemaID := currentCategory.AssessmentSchemaID
+
+	result, err := schemaModification.GetOrCopySchemaForWrite(
+		ctx,
+		CategoryServiceSingleton.queries,
+		currentSchemaID,
+		id,
+		coursePhaseID,
+	)
+	if err != nil {
+		return err
+	}
+
+	tx, err := CategoryServiceSingleton.conn.Begin(ctx)
+	if err != nil {
+		log.WithError(err).Error("Failed to begin transaction")
+		return fmt.Errorf("failed to begin transaction: %w", err)
+	}
+	defer promptSDK.DeferDBRollback(tx, ctx)
+
+	qtx := CategoryServiceSingleton.queries.WithTx(tx)
+
+	err = qtx.UpdateCategory(ctx, db.UpdateCategoryParams{
+		ID:                 result.TargetEntityID,
+		Name:               req.Name,
+		ShortName:          pgtype.Text{String: req.ShortName, Valid: true},
+		Description:        pgtype.Text{String: req.Description, Valid: true},
+		Weight:             req.Weight,
+		AssessmentSchemaID: result.TargetSchemaID,
 	})
 	if err != nil {
 		log.Error("could not update category: ", err)
 		return errors.New("could not update category")
 	}
+
+	if err := tx.Commit(ctx); err != nil {
+		log.WithError(err).Error("Failed to commit transaction")
+		return fmt.Errorf("failed to commit transaction: %w", err)
+	}
+
 	return nil
 }
 
-func DeleteCategory(ctx context.Context, id uuid.UUID) error {
-	err := CategoryServiceSingleton.queries.DeleteCategory(ctx, id)
+func DeleteCategory(ctx context.Context, id uuid.UUID, coursePhaseID uuid.UUID) error {
+	currentCategory, err := CategoryServiceSingleton.queries.GetCategory(ctx, id)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil
+		}
+		log.Error("could not get category: ", err)
+		return errors.New("could not get category")
+	}
+	currentSchemaID := currentCategory.AssessmentSchemaID
+
+	result, err := schemaModification.GetOrCopySchemaForWrite(
+		ctx,
+		CategoryServiceSingleton.queries,
+		currentSchemaID,
+		id,
+		coursePhaseID,
+	)
+	if err != nil {
+		return err
+	}
+
+	tx, err := CategoryServiceSingleton.conn.Begin(ctx)
+	if err != nil {
+		log.WithError(err).Error("Failed to begin transaction")
+		return fmt.Errorf("failed to begin transaction: %w", err)
+	}
+	defer promptSDK.DeferDBRollback(tx, ctx)
+
+	qtx := CategoryServiceSingleton.queries.WithTx(tx)
+
+	err = qtx.DeleteCategory(ctx, result.TargetEntityID)
 	if err != nil {
 		log.Error("could not delete category: ", err)
 		return errors.New("could not delete category")
 	}
+
+	if err := tx.Commit(ctx); err != nil {
+		log.WithError(err).Error("Failed to commit transaction")
+		return fmt.Errorf("failed to commit transaction: %w", err)
+	}
+
 	return nil
 }
 

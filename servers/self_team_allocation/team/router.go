@@ -31,6 +31,17 @@ func setupTeamRouter(routerGroup *gin.RouterGroup, authMiddleware func(allowedRo
 	teamRouter.GET("/tutors", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), getTutors)
 }
 
+// getAllTeams godoc
+// @Summary Get all teams
+// @Description Get all teams for a course phase
+// @Tags team
+// @Produce json
+// @Param coursePhaseID path string true "Course Phase UUID"
+// @Success 200 {array} promptTypes.Team
+// @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Security ApiKeyAuth
+// @Router /course_phase/{coursePhaseID}/team [get]
 func getAllTeams(c *gin.Context) {
 	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
 	if err != nil {
@@ -47,6 +58,18 @@ func getAllTeams(c *gin.Context) {
 	c.JSON(http.StatusOK, teams)
 }
 
+// getTeamByID godoc
+// @Summary Get team by ID
+// @Description Get a specific team by its ID
+// @Tags team
+// @Produce json
+// @Param coursePhaseID path string true "Course Phase UUID"
+// @Param teamID path string true "Team UUID"
+// @Success 200 {object} promptTypes.Team
+// @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Security ApiKeyAuth
+// @Router /course_phase/{coursePhaseID}/team/{teamID} [get]
 func getTeamByID(c *gin.Context) {
 	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
 	if err != nil {
@@ -70,6 +93,19 @@ func getTeamByID(c *gin.Context) {
 	c.JSON(http.StatusOK, team)
 }
 
+// createTeams godoc
+// @Summary Create new teams
+// @Description Create one or more new teams for a course phase
+// @Tags team
+// @Accept json
+// @Produce json
+// @Param coursePhaseID path string true "Course Phase UUID"
+// @Param request body teamDTO.CreateTeamsRequest true "Team names to create"
+// @Success 201
+// @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Security ApiKeyAuth
+// @Router /course_phase/{coursePhaseID}/team [post]
 func createTeams(c *gin.Context) {
 	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
 	if err != nil {
@@ -102,6 +138,20 @@ func createTeams(c *gin.Context) {
 	c.Status(http.StatusCreated)
 }
 
+// updateTeam godoc
+// @Summary Update team
+// @Description Update team name
+// @Tags team
+// @Accept json
+// @Produce json
+// @Param coursePhaseID path string true "Course Phase UUID"
+// @Param teamID path string true "Team UUID"
+// @Param request body teamDTO.UpdateTeamRequest true "New team name"
+// @Success 200
+// @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Security ApiKeyAuth
+// @Router /course_phase/{coursePhaseID}/team/{teamID} [put]
 func updateTeam(c *gin.Context) {
 	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
 	if err != nil {
@@ -141,6 +191,18 @@ func updateTeam(c *gin.Context) {
 	c.Status(http.StatusOK)
 }
 
+// assignTeam godoc
+// @Summary Assign student to team
+// @Description Assign the authenticated student to a team
+// @Tags team
+// @Produce json
+// @Param coursePhaseID path string true "Course Phase UUID"
+// @Param teamID path string true "Team UUID"
+// @Success 200
+// @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Security ApiKeyAuth
+// @Router /course_phase/{coursePhaseID}/team/{teamID}/assignment [put]
 func assignTeam(c *gin.Context) {
 	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
 	if err != nil {
@@ -207,6 +269,18 @@ func assignTeam(c *gin.Context) {
 	c.Status(http.StatusOK)
 }
 
+// leaveTeam godoc
+// @Summary Leave team
+// @Description Remove the authenticated student from a team
+// @Tags team
+// @Produce json
+// @Param coursePhaseID path string true "Course Phase UUID"
+// @Param teamID path string true "Team UUID"
+// @Success 200
+// @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Security ApiKeyAuth
+// @Router /course_phase/{coursePhaseID}/team/{teamID}/assignment [delete]
 func leaveTeam(c *gin.Context) {
 	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
 	if err != nil {
@@ -247,6 +321,18 @@ func leaveTeam(c *gin.Context) {
 	c.Status(http.StatusOK)
 }
 
+// deleteTeam godoc
+// @Summary Delete team
+// @Description Delete a team from the course phase
+// @Tags team
+// @Produce json
+// @Param coursePhaseID path string true "Course Phase UUID"
+// @Param teamID path string true "Team UUID"
+// @Success 200
+// @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Security ApiKeyAuth
+// @Router /course_phase/{coursePhaseID}/team/{teamID} [delete]
 func deleteTeam(c *gin.Context) {
 	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
 	if err != nil {
@@ -270,6 +356,19 @@ func deleteTeam(c *gin.Context) {
 	c.Status(http.StatusOK)
 }
 
+// importTutors godoc
+// @Summary Import tutors
+// @Description Import multiple tutors for the course phase
+// @Tags team
+// @Accept json
+// @Produce json
+// @Param coursePhaseID path string true "Course Phase UUID"
+// @Param tutors body []promptTypes.Person true "List of tutors to import"
+// @Success 201
+// @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Security ApiKeyAuth
+// @Router /course_phase/{coursePhaseID}/team/tutors [post]
 func importTutors(c *gin.Context) {
 	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
 	if err != nil {
@@ -294,6 +393,20 @@ func importTutors(c *gin.Context) {
 	c.Status(http.StatusCreated)
 }
 
+// createManualTutor godoc
+// @Summary Create manual tutor
+// @Description Create a manual tutor for a specific team
+// @Tags team
+// @Accept json
+// @Produce json
+// @Param coursePhaseID path string true "Course Phase UUID"
+// @Param teamID path string true "Team UUID"
+// @Param request body object{firstName=string,lastName=string} true "Tutor information"
+// @Success 201
+// @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Security ApiKeyAuth
+// @Router /course_phase/{coursePhaseID}/team/{teamID}/tutor [post]
 func createManualTutor(c *gin.Context) {
 	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
 	if err != nil {
@@ -329,6 +442,18 @@ func createManualTutor(c *gin.Context) {
 	c.Status(http.StatusCreated)
 }
 
+// deleteTutor godoc
+// @Summary Delete tutor
+// @Description Delete a tutor from the course phase
+// @Tags team
+// @Produce json
+// @Param coursePhaseID path string true "Course Phase UUID"
+// @Param tutorID path string true "Tutor UUID"
+// @Success 200
+// @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Security ApiKeyAuth
+// @Router /course_phase/{coursePhaseID}/team/tutor/{tutorID} [delete]
 func deleteTutor(c *gin.Context) {
 	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
 	if err != nil {
@@ -353,6 +478,17 @@ func deleteTutor(c *gin.Context) {
 	c.Status(http.StatusOK)
 }
 
+// getTutors godoc
+// @Summary Get all tutors
+// @Description Get all tutors for a course phase
+// @Tags team
+// @Produce json
+// @Param coursePhaseID path string true "Course Phase UUID"
+// @Success 200 {array} promptTypes.Person
+// @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Security ApiKeyAuth
+// @Router /course_phase/{coursePhaseID}/team/tutors [get]
 func getTutors(c *gin.Context) {
 	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
 	if err != nil {

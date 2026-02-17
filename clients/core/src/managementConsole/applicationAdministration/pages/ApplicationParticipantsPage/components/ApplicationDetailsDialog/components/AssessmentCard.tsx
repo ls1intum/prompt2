@@ -28,7 +28,7 @@ export const AssessmentCard = ({
   restrictedData,
   acceptanceStatus,
   courseParticipationID,
-}: AssessmentCardProps): JSX.Element => {
+}: AssessmentCardProps) => {
   const [currentScore, setCurrentScore] = useState<number | null>(score)
   const [newComment, setNewComment] = useState<string>('')
   const comments = (restrictedData.comments as InstructorComment[]) ?? []
@@ -81,7 +81,7 @@ export const AssessmentCard = ({
   return (
     <Card className='w-full'>
       <CardHeader>
-        <CardTitle className='text-2xl font-bold'>Assessment</CardTitle>
+        <CardTitle>Assessment</CardTitle>
       </CardHeader>
       <CardContent className='space-y-6'>
         <div className='space-y-4'>

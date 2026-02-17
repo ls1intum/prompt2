@@ -23,7 +23,7 @@ interface CategoryDiagramProps {
   assessments: Assessment[]
 }
 
-export const CategoryDiagram = ({ categories, assessments }: CategoryDiagramProps): JSX.Element => {
+export const CategoryDiagram = ({ categories, assessments }: CategoryDiagramProps) => {
   const chartData = categories.map((category) => {
     const categoryAssessments = assessments.filter((assessment) =>
       category.competencies.map((competency) => competency.id).includes(assessment.competencyID),

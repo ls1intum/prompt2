@@ -25,6 +25,16 @@ func copyCourseInternal(c *gin.Context, sourceCourseID uuid.UUID, courseVariable
 		return courseDTO.Course{}, fmt.Errorf("failed to fetch source course: %w", err)
 	}
 
+	shortDescription := sourceCourse.ShortDescription
+	if courseVariables.ShortDescription.Valid {
+		shortDescription = courseVariables.ShortDescription
+	}
+
+	longDescription := sourceCourse.LongDescription
+	if courseVariables.LongDescription.Valid {
+		longDescription = courseVariables.LongDescription
+	}
+
 	restrictedData, err := meta.GetMetaDataDTOFromDBModel(sourceCourse.RestrictedData)
 	if err != nil {
 		return courseDTO.Course{}, fmt.Errorf("failed to convert restricted data: %w", err)
@@ -43,6 +53,8 @@ func copyCourseInternal(c *gin.Context, sourceCourseID uuid.UUID, courseVariable
 			SemesterTag:         courseVariables.SemesterTag,
 			RestrictedData:      restrictedData,
 			StudentReadableData: studentReadableData,
+			ShortDescription:    shortDescription,
+			LongDescription:     longDescription,
 			CourseType:          sourceCourse.CourseType,
 			Ects:                sourceCourse.Ects,
 		}
@@ -54,6 +66,8 @@ func copyCourseInternal(c *gin.Context, sourceCourseID uuid.UUID, courseVariable
 			SemesterTag:         courseVariables.SemesterTag,
 			RestrictedData:      restrictedData,
 			StudentReadableData: studentReadableData,
+			ShortDescription:    shortDescription,
+			LongDescription:     longDescription,
 			CourseType:          sourceCourse.CourseType,
 			Ects:                sourceCourse.Ects,
 		}

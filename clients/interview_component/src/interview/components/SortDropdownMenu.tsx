@@ -12,7 +12,7 @@ interface SortDropdownMenuProps {
   setSortBy: (value: string) => void
 }
 
-export const SortDropdownMenu = ({ sortBy, setSortBy }: SortDropdownMenuProps): JSX.Element => {
+export const SortDropdownMenu = ({ sortBy, setSortBy }: SortDropdownMenuProps) => {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>

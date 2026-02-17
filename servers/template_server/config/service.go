@@ -23,6 +23,15 @@ var ConfigServiceSingleton *ConfigService
 
 type TemplateServerConfigHandler struct{}
 
+// HandlePhaseConfig godoc
+// @Summary Get phase configuration status
+// @Description Get configuration status flags for a course phase.
+// @Tags config
+// @Produce json
+// @Param coursePhaseID path string true "Course Phase UUID"
+// @Success 200 {object} map[string]bool
+// @Failure 500 {object} map[string]string
+// @Router /course_phase/{coursePhaseID}/config [get]
 // HandlePhaseConfig is a placeholder implementation demonstrating the expected
 // method signature for phase config handlers. It currently returns 404 until
 // the actual functionality is implemented.

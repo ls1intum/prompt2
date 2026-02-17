@@ -4,9 +4,9 @@ import { Loader2 } from 'lucide-react'
 import { getCoursePhaseParticipations } from '@/network/queries/getCoursePhaseParticipations'
 import { CoursePhaseParticipationsWithResolution } from '@tumaet/prompt-shared-state'
 import { ErrorPage, ManagementPageHeader } from '@tumaet/prompt-ui-components'
-import { CoursePhaseParticipationsTablePage } from '@/components/pages/CoursePhaseParticipationsTable/CoursePhaseParticipationsTablePage'
+import { CoursePhaseParticipationsTable } from '@/components/pages/CoursePhaseParticipationsTable/CoursePhaseParticipationsTable'
 
-export const MatchingParticipantsPage = (): JSX.Element => {
+export const MatchingParticipantsPage = () => {
   const { phaseId } = useParams<{ phaseId: string }>()
 
   const {
@@ -29,11 +29,10 @@ export const MatchingParticipantsPage = (): JSX.Element => {
           <Loader2 className='h-12 w-12 animate-spin text-primary' />
         </div>
       ) : (
-        <CoursePhaseParticipationsTablePage
+        <CoursePhaseParticipationsTable
+          phaseId={phaseId!}
           participants={coursePhaseParticipations.participations ?? []}
-          prevDataKeys={['score']}
-          restrictedDataKeys={[]}
-          studentReadableDataKeys={[]}
+          exportDeps={{ prevDataKeys: ['score'] }}
         />
       )}
     </div>

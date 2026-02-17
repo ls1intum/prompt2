@@ -9,6 +9,8 @@ import (
 	"github.com/stretchr/testify/suite"
 
 	"github.com/ls1intum/prompt2/servers/assessment/assessments/actionItem/actionItemDTO"
+	"github.com/ls1intum/prompt2/servers/assessment/assessments/assessmentCompletion"
+	"github.com/ls1intum/prompt2/servers/assessment/coursePhaseConfig"
 	"github.com/ls1intum/prompt2/servers/assessment/testutils"
 )
 
@@ -35,8 +37,13 @@ func (suite *ActionItemServiceTestSuite) SetupSuite() {
 	}
 	ActionItemServiceSingleton = &suite.actionItemService
 
-	// Generate test UUIDs
-	suite.testCoursePhaseID = uuid.New()
+	// Initialize required singletons
+	assessmentCompletion.AssessmentCompletionServiceSingleton = &assessmentCompletion.AssessmentCompletionService{}
+	coursePhaseConfig.CoursePhaseConfigSingleton = coursePhaseConfig.NewCoursePhaseConfigService(*testDB.Queries, testDB.Conn)
+
+	// Use predefined test UUIDs from the database dump
+	// This phase has assessment open (start in past, deadline in future)
+	suite.testCoursePhaseID = uuid.MustParse("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa")
 	suite.testCourseParticipationID = uuid.New()
 	suite.testActionItemID = uuid.New()
 }
@@ -137,7 +144,7 @@ func (suite *ActionItemServiceTestSuite) TestDeleteActionItemNonExistent() {
 
 func (suite *ActionItemServiceTestSuite) TestListActionItemsForCoursePhase() {
 	// Create multiple action items for the same course phase
-	testCoursePhaseID := uuid.New()
+	testCoursePhaseID := suite.testCoursePhaseID
 
 	actionItems := []actionItemDTO.CreateActionItemRequest{
 		{
@@ -173,7 +180,7 @@ func (suite *ActionItemServiceTestSuite) TestListActionItemsForCoursePhase() {
 
 func (suite *ActionItemServiceTestSuite) TestListActionItemsForStudentInPhase() {
 	// Create action items for a specific student in a course phase
-	testCoursePhaseID := uuid.New()
+	testCoursePhaseID := suite.testCoursePhaseID
 	testStudentID := uuid.New()
 
 	actionItems := []actionItemDTO.CreateActionItemRequest{
@@ -217,7 +224,7 @@ func (suite *ActionItemServiceTestSuite) TestListActionItemsForStudentInPhase() 
 
 func (suite *ActionItemServiceTestSuite) TestCountActionItemsForStudentInPhase() {
 	// Create action items for a specific student in a course phase
-	testCoursePhaseID := uuid.New()
+	testCoursePhaseID := suite.testCoursePhaseID
 	testStudentID := uuid.New()
 
 	actionItems := []actionItemDTO.CreateActionItemRequest{
@@ -265,7 +272,7 @@ func (suite *ActionItemServiceTestSuite) TestCountActionItemsForStudentInPhaseEm
 
 func (suite *ActionItemServiceTestSuite) TestGetAllActionItemsForCoursePhaseCommunication() {
 	// Create multiple action items for different course participation IDs in the same course phase
-	testCoursePhaseID := uuid.New()
+	testCoursePhaseID := suite.testCoursePhaseID
 	testStudentID1 := uuid.New()
 	testStudentID2 := uuid.New()
 
@@ -329,7 +336,7 @@ func (suite *ActionItemServiceTestSuite) TestGetAllActionItemsForCoursePhaseComm
 
 func (suite *ActionItemServiceTestSuite) TestGetStudentActionItemsForCoursePhaseCommunication() {
 	// Create action items for a specific student in a course phase
-	testCoursePhaseID := uuid.New()
+	testCoursePhaseID := suite.testCoursePhaseID
 	testStudentID := uuid.New()
 
 	actionItems := []actionItemDTO.CreateActionItemRequest{

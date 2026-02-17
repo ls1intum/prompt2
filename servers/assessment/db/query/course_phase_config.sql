@@ -96,6 +96,40 @@ WHERE course_phase_id = $1;
 INSERT INTO course_phase_config (course_phase_id)
 VALUES ($1);
 
+-- name: CheckAssessmentSchemaUsageInOtherPhases :one
+SELECT EXISTS(
+    SELECT 1
+    FROM course_phase_config cpc
+    WHERE (
+        cpc.assessment_schema_id = $1
+        OR cpc.self_evaluation_schema = $1
+        OR cpc.peer_evaluation_schema = $1
+        OR cpc.tutor_evaluation_schema = $1
+    )
+    AND cpc.course_phase_id != $2
+    AND EXISTS(
+        SELECT 1
+        FROM assessment a
+        WHERE a.course_phase_id = cpc.course_phase_id
+        AND a.competency_id IN (
+            SELECT co.id
+            FROM competency co
+            INNER JOIN category cat ON co.category_id = cat.id
+            WHERE cat.assessment_schema_id = $1
+        )
+        UNION
+        SELECT 1
+        FROM evaluation e
+        WHERE e.course_phase_id = cpc.course_phase_id
+        AND e.competency_id IN (
+            SELECT co.id
+            FROM competency co
+            INNER JOIN category cat ON co.category_id = cat.id
+            WHERE cat.assessment_schema_id = $1
+        )
+    )
+) AS schema_used_in_other_phases;
+
 -- name: CreateOrUpdateCoursePhaseConfig :exec
 INSERT INTO course_phase_config (assessment_schema_id,
                                  course_phase_id,
@@ -115,10 +149,14 @@ INSERT INTO course_phase_config (assessment_schema_id,
                                  tutor_evaluation_deadline,
                                  evaluation_results_visible,
                                  grade_suggestion_visible,
-                                 action_items_visible)
+                                 action_items_visible,
+                                 results_released,
+                                 grading_sheet_visible)
 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, 
         COALESCE(sqlc.narg('grade_suggestion_visible')::boolean, TRUE), 
-        COALESCE(sqlc.narg('action_items_visible')::boolean, TRUE))
+        COALESCE(sqlc.narg('action_items_visible')::boolean, TRUE),
+        COALESCE(sqlc.narg('results_released')::boolean, FALSE),
+        COALESCE(sqlc.narg('grading_sheet_visible')::boolean, FALSE))
 ON CONFLICT (course_phase_id)
     DO UPDATE SET assessment_schema_id      = EXCLUDED.assessment_schema_id,
                   start                     = EXCLUDED.start,
@@ -137,4 +175,26 @@ ON CONFLICT (course_phase_id)
                   tutor_evaluation_deadline = EXCLUDED.tutor_evaluation_deadline,
                   evaluation_results_visible = EXCLUDED.evaluation_results_visible,
                   grade_suggestion_visible  = COALESCE(EXCLUDED.grade_suggestion_visible, TRUE),
-                  action_items_visible      = COALESCE(EXCLUDED.action_items_visible, TRUE);
+                  action_items_visible      = COALESCE(EXCLUDED.action_items_visible, TRUE),
+                  results_released          = COALESCE(EXCLUDED.results_released, FALSE),
+                  grading_sheet_visible     = COALESCE(EXCLUDED.grading_sheet_visible, FALSE);
+
+-- name: UpdateCoursePhaseConfigAssessmentSchema :exec
+UPDATE course_phase_config
+SET assessment_schema_id = $2
+WHERE course_phase_id = $1;
+
+-- name: UpdateCoursePhaseConfigSelfEvaluationSchema :exec
+UPDATE course_phase_config
+SET self_evaluation_schema = $2
+WHERE course_phase_id = $1;
+
+-- name: UpdateCoursePhaseConfigPeerEvaluationSchema :exec
+UPDATE course_phase_config
+SET peer_evaluation_schema = $2
+WHERE course_phase_id = $1;
+
+-- name: UpdateCoursePhaseConfigTutorEvaluationSchema :exec
+UPDATE course_phase_config
+SET tutor_evaluation_schema = $2
+WHERE course_phase_id = $1;

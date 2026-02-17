@@ -19,10 +19,11 @@ import (
 
 type CompetencyMapRouterTestSuite struct {
 	suite.Suite
-	router   *gin.Engine
-	suiteCtx context.Context
-	cleanup  func()
-	service  CompetencyMapService
+	router        *gin.Engine
+	suiteCtx      context.Context
+	cleanup       func()
+	service       CompetencyMapService
+	coursePhaseID uuid.UUID
 }
 
 func (suite *CompetencyMapRouterTestSuite) SetupSuite() {
@@ -38,6 +39,7 @@ func (suite *CompetencyMapRouterTestSuite) SetupSuite() {
 		conn:    testDB.Conn,
 	}
 	CompetencyMapServiceSingleton = &suite.service
+	suite.coursePhaseID = uuid.MustParse("4179d58a-d00d-4fa7-94a5-397bc69fab02")
 
 	suite.router = gin.Default()
 	api := suite.router.Group("/api/course_phase/:coursePhaseID")
@@ -90,7 +92,7 @@ func (suite *CompetencyMapRouterTestSuite) TestDeleteCompetencyMapping() {
 		FromCompetencyID: fromCompetencyID,
 		ToCompetencyID:   toCompetencyID,
 	}
-	err := CreateCompetencyMapping(suite.suiteCtx, createReq)
+	err := CreateCompetencyMapping(suite.suiteCtx, suite.coursePhaseID, createReq)
 	assert.NoError(suite.T(), err)
 
 	// Now delete it via API

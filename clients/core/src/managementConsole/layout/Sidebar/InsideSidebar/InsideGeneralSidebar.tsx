@@ -1,17 +1,37 @@
 import { SidebarGroup, SidebarGroupContent, SidebarMenu } from '@tumaet/prompt-ui-components'
-import { Gauge } from 'lucide-react'
+import { Archive, File, FileText, Users } from 'lucide-react'
 import { InsideSidebarMenuItem } from './components/InsideSidebarMenuItem'
+import { InsideSidebarVisualGroup } from './components/InsideSidebarHeading'
 
-export const InsideGeneralSidebar = (): JSX.Element => {
+export const InsideGeneralSidebar = () => {
   return (
     <SidebarMenu>
       <SidebarGroup>
-        <SidebarGroupContent>
-          <InsideSidebarMenuItem
-            icon={<Gauge />}
-            goToPath={'/management/general'}
-            title='Dashboard'
-          />
+        <SidebarGroupContent className='flex flex-col gap-5'>
+          <InsideSidebarVisualGroup title='Courses'>
+            <InsideSidebarMenuItem
+              icon={<FileText />}
+              goToPath={'/management/courses'}
+              title='Courses'
+            />
+            <InsideSidebarMenuItem
+              icon={<File />}
+              goToPath={'/management/course_templates'}
+              title='Template Courses'
+            />
+            <InsideSidebarMenuItem
+              icon={<Archive />}
+              goToPath={'/management/course_archive'}
+              title='Archived Courses'
+            />
+          </InsideSidebarVisualGroup>
+          <InsideSidebarVisualGroup title='Students'>
+            <InsideSidebarMenuItem
+              icon={<Users />}
+              goToPath={'/management/students'}
+              title='Students'
+            />
+          </InsideSidebarVisualGroup>
         </SidebarGroupContent>
       </SidebarGroup>
     </SidebarMenu>

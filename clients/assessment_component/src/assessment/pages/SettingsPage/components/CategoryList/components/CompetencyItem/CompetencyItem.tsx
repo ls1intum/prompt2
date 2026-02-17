@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Edit, Trash2 } from 'lucide-react'
 
-import { Button } from '@tumaet/prompt-ui-components'
+import { Button, Badge } from '@tumaet/prompt-ui-components'
 
 import { AssessmentType } from '../../../../../../interfaces/assessmentType'
 import { Competency } from '../../../../../../interfaces/competency'
@@ -21,9 +21,15 @@ interface CompetencyItemProps {
   competency: Competency
   categoryID: string
   assessmentType: AssessmentType
+  disabled?: boolean
 }
 
-export const CompetencyItem = ({ competency, categoryID, assessmentType }: CompetencyItemProps) => {
+export const CompetencyItem = ({
+  competency,
+  categoryID,
+  assessmentType,
+  disabled = false,
+}: CompetencyItemProps) => {
   const [competencyToEdit, setCompetencyToEdit] = useState<Competency | undefined>(undefined)
   const [competencyToDelete, setCompetencyToDelete] = useState<
     | {
@@ -52,7 +58,12 @@ export const CompetencyItem = ({ competency, categoryID, assessmentType }: Compe
     <div>
       <div className='rounded-md border p-4 space-y-4'>
         <div className='flex justify-between items-center gap-2'>
-          <h3 className='text-base font-medium'>{competency.name}</h3>
+          <div className='flex flex-wrap items-center gap-2'>
+            <h3 className='text-base font-medium'>{competency.name}</h3>
+            <Badge className='h-5 px-2 text-xs font-medium bg-slate-100 text-slate-700 border-slate-200 hover:bg-slate-100'>
+              Weight: {competency.weight}
+            </Badge>
+          </div>
 
           <div className='flex'>
             <Button
@@ -61,6 +72,7 @@ export const CompetencyItem = ({ competency, categoryID, assessmentType }: Compe
               className='h-7 w-7'
               onClick={() => setCompetencyToEdit(competency)}
               aria-label={`Edit ${competency.name}`}
+              disabled={disabled}
             >
               <Edit size={16} />
             </Button>
@@ -76,6 +88,7 @@ export const CompetencyItem = ({ competency, categoryID, assessmentType }: Compe
                 })
               }
               aria-label={`Delete ${competency.name}`}
+              disabled={disabled}
             >
               <Trash2 size={16} className='text-destructive' />
             </Button>

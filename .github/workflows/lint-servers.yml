@@ -2,32 +2,31 @@ name: Lint Servers
 
 on:
   workflow_call:
+    inputs:
+      modules:
+        description: "JSON array of server modules to lint"
+        required: true
+        type: string
+
+permissions:
+  contents: read
 
 jobs:
-  set-matrix:
-    runs-on: ubuntu-latest
-    outputs:
-      modules: ${{ steps.set-matrix.outputs.modules }}
-    steps:
-      - uses: actions/checkout@v4
-      - id: set-matrix
-        run: echo "modules=$(find servers -mindepth 1 -maxdepth 1 -type d | jq -R -s -c 'split("\n")[:-1]')" >> "$GITHUB_OUTPUT"
-
   lint-server:
-    needs: set-matrix
+    if: inputs.modules != '[]'
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        module: ${{ fromJson(needs.set-matrix.outputs.modules) }}
+        module: ${{ fromJson(inputs.modules) }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
+      - uses: actions/checkout@v6
+      - uses: actions/setup-go@v6
         with:
           go-version: stable
-          cache-dependency-path: "${{ matrix.module }}/*.sum"
+          cache-dependency-path: "servers/${{ matrix.module }}/*.sum"
       - name: golangci-lint
-        uses: golangci/golangci-lint-action@v6
+        uses: golangci/golangci-lint-action@v7
         with:
-          version: v1.64
-          working-directory: ${{ matrix.module }}
+          version: latest
+          working-directory: servers/${{ matrix.module }}
           args: --timeout 5m

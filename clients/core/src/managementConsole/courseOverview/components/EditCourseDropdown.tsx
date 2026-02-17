@@ -17,7 +17,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { EditCourseDialog } from './EditCourseDialog'
 import { CopyCourseDialog } from './CopyCourseDialog'
 
-export const EditCourseDropdown = (): JSX.Element => {
+export const EditCourseDropdown = () => {
   const { courseId } = useParams<{ courseId: string }>()
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [editCourseDialogOpen, setEditCourseDialogOpen] = useState(false)
@@ -30,7 +30,7 @@ export const EditCourseDropdown = (): JSX.Element => {
     mutationFn: () => deleteCourse(courseId ?? ''),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['courses'] })
-      navigate('/management/general')
+      navigate('/management/courses')
     },
     onError: () => {
       toast({

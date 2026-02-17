@@ -3,21 +3,18 @@ import { useNavigate, useLocation, useParams } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { Loader2 } from 'lucide-react'
 
-import { ManagementPageHeader, ErrorPage } from '@tumaet/prompt-ui-components'
-import { CoursePhaseParticipationsTablePage } from '@/components/pages/CoursePhaseParticipationsTable/CoursePhaseParticipationsTablePage'
-
-import { ExtraParticipationTableColumn } from '@/components/pages/CoursePhaseParticipationsTable/interfaces/ExtraParticipationTableColumn'
+import { ManagementPageHeader, ErrorPage, TableFilter } from '@tumaet/prompt-ui-components'
+import { CoursePhaseParticipationsTable } from '@/components/pages/CoursePhaseParticipationsTable/CoursePhaseParticipationsTable'
 
 import { useCoursePhaseConfigStore } from '../../zustand/useCoursePhaseConfigStore'
 import { useParticipationStore } from '../../zustand/useParticipationStore'
 import { useScoreLevelStore } from '../../zustand/useScoreLevelStore'
 import { useTeamStore } from '../../zustand/useTeamStore'
 
-import { getAllAssessmentCompletionsInPhase } from '../../network/queries/getAllAssessmentCompletionsInPhase'
+import { useGetAllAssessmentCompletions } from '../hooks/useGetAllAssessmentCompletions'
 import { getAllEvaluationCompletionsInPhase } from '../../network/queries/getAllEvaluationCompletionsInPhase'
 
 import { AssessmentType } from '../../interfaces/assessmentType'
-import { AssessmentCompletion } from '../../interfaces/assessmentCompletion'
 
 import { AssessmentDiagram } from '../components/diagrams/AssessmentDiagram'
 import { ScoreLevelDistributionDiagram } from '../components/diagrams/ScoreLevelDistributionDiagram'
@@ -31,8 +28,9 @@ import {
   createPeerEvalStatusColumn,
   createTutorEvalStatusColumn,
 } from './columns'
+import { ExtraParticipantColumn } from '@/components/pages/CoursePhaseParticipationsTable/table/participationRow'
 
-export const AssessmentParticipantsPage = (): JSX.Element => {
+export const AssessmentParticipantsPage = () => {
   const { phaseId } = useParams<{ phaseId: string }>()
   const navigate = useNavigate()
   const path = useLocation().pathname
@@ -47,10 +45,7 @@ export const AssessmentParticipantsPage = (): JSX.Element => {
     isPending: isAssessmentCompletionsPending,
     isError: isAssessmentCompletionsError,
     refetch: refetchAssessmentCompletions,
-  } = useQuery<AssessmentCompletion[]>({
-    queryKey: ['assessmentCompletions', phaseId],
-    queryFn: () => getAllAssessmentCompletionsInPhase(phaseId ?? ''),
-  })
+  } = useGetAllAssessmentCompletions()
 
   const {
     data: evaluationCompletions,
@@ -92,7 +87,7 @@ export const AssessmentParticipantsPage = (): JSX.Element => {
     return completedGradings.map((completion) => completion.gradeSuggestion)
   }, [assessmentCompletions])
 
-  const extraColumns: ExtraParticipationTableColumn[] = useMemo(() => {
+  const extraColumns: ExtraParticipantColumn<any>[] = useMemo(() => {
     if (!scoreLevels) return []
 
     const columns = [
@@ -117,7 +112,7 @@ export const AssessmentParticipantsPage = (): JSX.Element => {
       ),
     ]
 
-    return columns.filter((column) => column !== undefined)
+    return columns.filter((column): column is ExtraParticipantColumn<any> => column !== undefined)
   }, [
     participations,
     teams,
@@ -128,6 +123,15 @@ export const AssessmentParticipantsPage = (): JSX.Element => {
     peerEvaluationCompletions,
     tutorEvaluationCompletions,
   ])
+
+  const extraFilters: TableFilter[] = [
+    {
+      type: 'select',
+      id: 'team',
+      label: 'Team',
+      options: teams.map((team) => team.name),
+    },
+  ]
 
   if (isError) {
     return <ErrorPage message='Error loading assessments' onRetry={refetch} />
@@ -156,14 +160,12 @@ export const AssessmentParticipantsPage = (): JSX.Element => {
         <ScoreLevelDistributionDiagram participations={participations} scoreLevels={scoreLevels} />
       </div>
       <div className='w-full'>
-        <CoursePhaseParticipationsTablePage
+        <CoursePhaseParticipationsTable
+          phaseId={phaseId!}
           participants={participations ?? []}
-          prevDataKeys={[]}
-          restrictedDataKeys={[]}
-          studentReadableDataKeys={[]}
           extraColumns={extraColumns}
-          onClickRowAction={(student) => navigate(`${path}/${student.courseParticipationID}`)}
-          key={JSON.stringify(scoreLevels)}
+          extraFilters={extraFilters}
+          onClickRowAction={(row) => navigate(`${path}/${row.courseParticipationID}`)}
         />
       </div>
     </div>

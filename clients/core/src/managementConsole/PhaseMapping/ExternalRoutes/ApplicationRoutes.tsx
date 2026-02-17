@@ -7,6 +7,7 @@ import { ExternalRoutes } from './ExternalRoutes'
 import { ApplicationParticipantsPage } from '../../applicationAdministration/pages/ApplicationParticipantsPage/ApplicationParticipantsPage'
 import { ApplicationMailingSettings } from '../../applicationAdministration/pages/Mailing/ApplicationMailingSettings'
 import { ApplicationDataWrapper } from '../../applicationAdministration/components/ApplicationDataWrapper'
+import { ApplicationDetailsPage } from '@core/managementConsole/applicationAdministration/pages/ApplicationParticipantsPage/components/ApplicationDetailsDialog/ApplicationDetailsPage'
 
 const applicationRoutesObjects: ExtendedRouteObject[] = [
   {
@@ -46,6 +47,15 @@ const applicationRoutesObjects: ExtendedRouteObject[] = [
     requiredPermissions: [Role.PROMPT_ADMIN, Role.COURSE_LECTURER],
   },
   {
+    path: '/participants/:participationId',
+    element: (
+      <ApplicationDataWrapper>
+        <ApplicationDetailsPage />
+      </ApplicationDataWrapper>
+    ),
+    requiredPermissions: [Role.PROMPT_ADMIN, Role.COURSE_LECTURER],
+  },
+  {
     path: '/mailing',
     element: (
       <ApplicationDataWrapper>
@@ -56,6 +66,6 @@ const applicationRoutesObjects: ExtendedRouteObject[] = [
   },
 ]
 
-export const ApplicationRoutes = (): JSX.Element => {
+export const ApplicationRoutes = () => {
   return <ExternalRoutes routes={applicationRoutesObjects} />
 }

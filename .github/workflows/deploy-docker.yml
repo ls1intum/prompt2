@@ -36,6 +36,9 @@ on:
       server_assessment_image_tag:
         required: true
         type: string
+      server_interview_image_tag:
+        required: true
+        type: string
       assessment_image_tag:
         required: true
         type: string
@@ -57,6 +60,9 @@ on:
       SMTP_PASSWORD:
         required: true
 
+permissions:
+  contents: read
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -66,7 +72,7 @@ jobs:
     steps:
       - name: SSH to VM and Execute Docker-Compose Down
         continue-on-error: true
-        uses: appleboy/ssh-action@v1.0.3
+        uses: appleboy/ssh-action@v1.2.5
         with:
           host: ${{ vars.VM_HOST }}
           username: ${{ vars.VM_USERNAME }}
@@ -78,14 +84,14 @@ jobs:
           proxy_port: ${{ vars.DEPLOYMENT_GATEWAY_PORT }}
           script: |
             # Define services to stop/remove (all except reverse-proxy and maintenance)
-            SERVICES="server-core server-intro-course server-team-allocation server-self-team-allocation server-assessment client-core client-assessment-component client-devops-challenge-component client-intro-course-developer-component client-interview-component client-matching-component client-team-allocation-component client-self-team-allocation-component client-template-component"
+            SERVICES="server-core server-intro-course server-team-allocation server-self-team-allocation server-assessment server-interview client-core client-assessment-component client-devops-challenge-component client-intro-course-developer-component client-interview-component client-matching-component client-team-allocation-component client-self-team-allocation-component client-template-component"
             # Stop all services except reverse-proxy and maintenance (keep fallback active)
             docker compose -f docker-compose.prod.yml --env-file=.env.prod stop $SERVICES
             # Remove stopped containers
             docker compose -f docker-compose.prod.yml --env-file=.env.prod rm -f $SERVICES
 
       - name: checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Package maintenance assets
         run: |
@@ -158,7 +164,7 @@ jobs:
           target: /home/${{ vars.VM_USERNAME }}/postfix-config/
 
       - name: Verify and extract maintenance assets on VM
-        uses: appleboy/ssh-action@v1.0.3
+        uses: appleboy/ssh-action@v1.2.5
         with:
           host: ${{ vars.VM_HOST }}
           username: ${{ vars.VM_USERNAME }}
@@ -175,7 +181,7 @@ jobs:
             tar xzf maintenance.tar.gz -C /home/${{ vars.VM_USERNAME }}
 
       - name: SSH to VM and create .env.prod file
-        uses: appleboy/ssh-action@v1.0.3
+        uses: appleboy/ssh-action@v1.2.5
         with:
           host: ${{ vars.VM_HOST }}
           username: ${{ vars.VM_USERNAME }}
@@ -187,7 +193,7 @@ jobs:
           proxy_port: ${{ vars.DEPLOYMENT_GATEWAY_PORT }}
           script: |
             touch .env.prod 
-            echo "ENVIRONMENT=production" > .env.prod
+            echo "ENVIRONMENT=${{ inputs.environment }}" > .env.prod
             echo "CORE_HOST=${{ vars.CORE_HOST }}" >> .env.prod
             echo "SERVER_CORE_HOST=${{ vars.SERVER_CORE_HOST }}" >> .env.prod
             echo "INTRO_COURSE_HOST=${{ vars.INTRO_COURSE_HOST }}" >> .env.prod
@@ -211,6 +217,10 @@ jobs:
             echo "DB_PORT_TEAM_ALLOCATION=${{ vars.DB_PORT_TEAM_ALLOCATION }}" >> .env.prod
             echo "DB_HOST_SELF_TEAM_ALLOCATION=${{ vars.DB_HOST_SELF_TEAM_ALLOCATION }}" >> .env.prod
             echo "DB_PORT_SELF_TEAM_ALLOCATION=${{ vars.DB_PORT_SELF_TEAM_ALLOCATION }}" >> .env.prod
+            echo "DB_HOST_INTERVIEW=${{ vars.DB_HOST_INTERVIEW }}" >> .env.prod
+            echo "DB_PORT_INTERVIEW=${{ vars.DB_PORT_INTERVIEW }}" >> .env.prod
+            echo "DB_HOST_ASSESSMENT=${{ vars.DB_HOST_ASSESSMENT }}" >> .env.prod
+            echo "DB_PORT_ASSESSMENT=${{ vars.DB_PORT_ASSESSMENT }}" >> .env.prod
 
             echo "KEYCLOAK_HOST=${{ vars.KEYCLOAK_HOST }}" >> .env.prod
             echo "KEYCLOAK_REALM_NAME=${{ vars.KEYCLOAK_REALM_NAME }}" >> .env.prod
@@ -226,6 +236,7 @@ jobs:
             echo "SERVER_TEAM_ALLOCATION_IMAGE_TAG=${{ inputs.server_team_allocation_image_tag }}" >> .env.prod
             echo "SERVER_ASSESSMENT_IMAGE_TAG=${{ inputs.server_assessment_image_tag }}" >> .env.prod
             echo "SERVER_SELF_TEAM_ALLOCATION_IMAGE_TAG=${{ inputs.server_self_team_allocation_image_tag }}" >> .env.prod
+            echo "SERVER_INTERVIEW_IMAGE_TAG=${{ inputs.server_interview_image_tag }}" >> .env.prod
 
             echo "CORE_IMAGE_TAG=${{ inputs.core_image_tag }}" >> .env.prod
             echo "TEMPLATE_IMAGE_TAG=${{ inputs.template_image_tag }}" >> .env.prod
@@ -245,10 +256,18 @@ jobs:
             echo "SMTP_USERNAME=${{ secrets.SMTP_USERNAME }}" >> .env.prod
             echo "SMTP_PASSWORD=${{ secrets.SMTP_PASSWORD }}" >> .env.prod
 
+            echo "SENTRY_DSN_CORE=${{ vars.SENTRY_DSN_CORE }}" >> .env.prod
+            echo "SENTRY_DSN_INTRO_COURSE=${{ vars.SENTRY_DSN_INTRO_COURSE }}" >> .env.prod
+            echo "SENTRY_DSN_TEAM_ALLOCATION=${{ vars.SENTRY_DSN_TEAM_ALLOCATION }}" >> .env.prod
+            echo "SENTRY_DSN_SELF_TEAM_ALLOCATION=${{ vars.SENTRY_DSN_SELF_TEAM_ALLOCATION }}" >> .env.prod
+            echo "SENTRY_DSN_ASSESSMENT=${{ vars.SENTRY_DSN_ASSESSMENT }}" >> .env.prod
+            echo "SENTRY_DSN_INTERVIEW=${{ vars.SENTRY_DSN_INTERVIEW }}" >> .env.prod
+
+            echo "ACME_EMAIL=${{ vars.ACME_EMAIL }}" >> .env.prod
             echo "GITLAB_ACCESS_TOKEN=${{ vars.GITLAB_ACCESS_TOKEN }}" >> .env.prod
 
       - name: SSH to VM and Execute Docker-Compose Up
-        uses: appleboy/ssh-action@v1.0.3
+        uses: appleboy/ssh-action@v1.2.5
         with:
           host: ${{ vars.VM_HOST }}
           username: ${{ vars.VM_USERNAME }}

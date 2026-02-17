@@ -13,7 +13,7 @@ import { useGetEvaluationsForTutorInPhase } from './hooks/useGetEvaluationsForTu
 import { useGetFeedbackItemsForTutorInPhase } from './hooks/useGetFeedbackItemsForTutorInPhase'
 import { CategoryEvaluation } from './components/CategoryEvaluation'
 
-export const TutorEvaluationResultsPage = (): JSX.Element => {
+export const TutorEvaluationResultsPage = () => {
   const { tutorId } = useParams<{ tutorId: string }>()
 
   const { teams } = useTeamStore()

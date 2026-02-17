@@ -20,7 +20,7 @@ interface AddCourseDialogProps {
 export const AddCourseDialog = ({
   open: controlledOpen,
   onOpenChange: controlledOnOpenChange,
-}: AddCourseDialogProps): JSX.Element => {
+}: AddCourseDialogProps) => {
   const [internalOpen, setInternalOpen] = React.useState(false)
   const [currentPage, setCurrentPage] = React.useState(1)
   const [coursePropertiesFormValues, setCoursePropertiesFormValues] =
@@ -69,8 +69,9 @@ export const AddCourseDialog = ({
       ects: coursePropertiesFormValues?.ects || 0,
       semesterTag: coursePropertiesFormValues?.semesterTag || '',
       restrictedMetaData: {},
-      // eslint-disable-next-line prettier/prettier
       studentReadableData: { icon: data.icon, 'bg-color': data.color },
+      shortDescription: coursePropertiesFormValues?.shortDescription || '',
+      longDescription: coursePropertiesFormValues?.longDescription || '',
       template: false,
     }
     // todo API call

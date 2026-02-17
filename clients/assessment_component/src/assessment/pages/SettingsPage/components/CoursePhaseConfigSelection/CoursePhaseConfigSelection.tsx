@@ -17,7 +17,19 @@ import { StudentVisibilityToggles } from './components/StudentVisibilityToggles'
 import { EvaluationOptionSection } from './components/EvaluationOptionSection'
 import { SaveConfigurationSection } from './components/SaveConfigurationSection'
 
-export const CoursePhaseConfigSelection = () => {
+interface CoursePhaseConfigSelectionProps {
+  hasAssessmentData?: boolean
+  hasSelfEvalData?: boolean
+  hasPeerEvalData?: boolean
+  hasTutorEvalData?: boolean
+}
+
+export const CoursePhaseConfigSelection = ({
+  hasAssessmentData = false,
+  hasSelfEvalData = false,
+  hasPeerEvalData = false,
+  hasTutorEvalData = false,
+}: CoursePhaseConfigSelectionProps) => {
   const [error, setError] = useState<string | undefined>(undefined)
 
   const { coursePhaseConfig: originalConfig } = useCoursePhaseConfigStore()
@@ -35,6 +47,8 @@ export const CoursePhaseConfigSelection = () => {
     setGradeSuggestionVisible,
     actionItemsVisible,
     setActionItemsVisible,
+    gradingSheetVisible,
+    setGradingSheetVisible,
     mainConfigState,
     hasMainConfigChanges,
   } = useCoursePhaseConfigForm()
@@ -115,6 +129,7 @@ export const CoursePhaseConfigSelection = () => {
             schemas={schemas ?? []}
             configMutation={configMutation}
             setError={setError}
+            hasAssessmentData={hasAssessmentData}
           />
 
           <EvaluationVisibilityToggle
@@ -128,6 +143,8 @@ export const CoursePhaseConfigSelection = () => {
             onGradeSuggestionVisibleChange={setGradeSuggestionVisible}
             actionItemsVisible={actionItemsVisible}
             onActionItemsVisibleChange={setActionItemsVisible}
+            gradingSheetVisible={gradingSheetVisible}
+            onGradingSheetVisibleChange={setGradingSheetVisible}
             disabled={configMutation.isPending}
           />
 
@@ -151,6 +168,7 @@ export const CoursePhaseConfigSelection = () => {
             configMutation={configMutation}
             setError={setError}
             disabled={configMutation.isPending}
+            hasAssessmentData={hasSelfEvalData}
           />
 
           <EvaluationOptionSection
@@ -167,6 +185,7 @@ export const CoursePhaseConfigSelection = () => {
             configMutation={configMutation}
             setError={setError}
             disabled={configMutation.isPending}
+            hasAssessmentData={hasPeerEvalData}
           />
 
           <EvaluationOptionSection
@@ -183,6 +202,7 @@ export const CoursePhaseConfigSelection = () => {
             configMutation={configMutation}
             setError={setError}
             disabled={configMutation.isPending}
+            hasAssessmentData={hasTutorEvalData}
           />
 
           <SaveConfigurationSection

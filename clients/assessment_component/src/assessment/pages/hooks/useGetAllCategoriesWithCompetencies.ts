@@ -6,11 +6,12 @@ import { CategoryWithCompetencies } from '../../interfaces/category'
 
 import { getAllCategoriesWithCompetencies } from '../../network/queries/getAllCategoriesWithCompetencies'
 
-export const useGetAllCategoriesWithCompetencies = () => {
+export const useGetAllCategoriesWithCompetencies = (options?: { enabled?: boolean }) => {
   const { phaseId } = useParams<{ phaseId: string }>()
 
   return useQuery<CategoryWithCompetencies[]>({
     queryKey: ['categories', phaseId],
     queryFn: () => getAllCategoriesWithCompetencies(phaseId ?? '', AssessmentType.ASSESSMENT),
+    enabled: options?.enabled ?? true,
   })
 }

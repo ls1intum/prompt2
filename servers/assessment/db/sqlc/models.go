@@ -175,11 +175,12 @@ type AssessmentCompletion struct {
 }
 
 type AssessmentSchema struct {
-	ID          uuid.UUID        `json:"id"`
-	Name        string           `json:"name"`
-	Description pgtype.Text      `json:"description"`
-	CreatedAt   pgtype.Timestamp `json:"created_at"`
-	UpdatedAt   pgtype.Timestamp `json:"updated_at"`
+	ID            uuid.UUID        `json:"id"`
+	Name          string           `json:"name"`
+	Description   pgtype.Text      `json:"description"`
+	CreatedAt     pgtype.Timestamp `json:"created_at"`
+	UpdatedAt     pgtype.Timestamp `json:"updated_at"`
+	SourcePhaseID pgtype.UUID      `json:"source_phase_id"`
 }
 
 type Category struct {
@@ -241,6 +242,8 @@ type CoursePhaseConfig struct {
 	EvaluationResultsVisible bool               `json:"evaluation_results_visible"`
 	GradeSuggestionVisible   bool               `json:"grade_suggestion_visible"`
 	ActionItemsVisible       bool               `json:"action_items_visible"`
+	ResultsReleased          bool               `json:"results_released"`
+	GradingSheetVisible      bool               `json:"grading_sheet_visible"`
 }
 
 type Evaluation struct {

@@ -1459,6 +1459,8 @@ components:
           type: boolean
         actionItemsVisible:
           type: boolean
+        gradingSheetVisible:
+          type: boolean
     CreateOrUpdateCoursePhaseConfigRequest:
       type: object
       required:
@@ -1518,6 +1520,8 @@ components:
           type: boolean
           nullable: true
         actionItemsVisible:
+          type: boolean
+        gradingSheetVisible:
           type: boolean
           nullable: true
     AssessmentParticipationWithStudent:

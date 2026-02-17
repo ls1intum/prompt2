@@ -7,6 +7,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/ls1intum/prompt2/servers/assessment/assessments/actionItem/actionItemDTO"
+	"github.com/ls1intum/prompt2/servers/assessment/assessments/assessmentCompletion"
 	db "github.com/ls1intum/prompt2/servers/assessment/db/sqlc"
 	log "github.com/sirupsen/logrus"
 )
@@ -59,7 +60,11 @@ func GetStudentActionItemsForCoursePhaseCommunication(ctx context.Context, cours
 }
 
 func CreateActionItem(ctx context.Context, req actionItemDTO.CreateActionItemRequest) error {
-	err := ActionItemServiceSingleton.queries.CreateActionItem(ctx, req.GetDBModel())
+	err := assessmentCompletion.CheckAssessmentIsEditable(ctx, &ActionItemServiceSingleton.queries, req.CourseParticipationID, req.CoursePhaseID)
+	if err != nil {
+		return err
+	}
+	err = ActionItemServiceSingleton.queries.CreateActionItem(ctx, req.GetDBModel())
 	if err != nil {
 		log.Error("could not create action item: ", err)
 		return errors.New("could not create action item")
@@ -68,7 +73,11 @@ func CreateActionItem(ctx context.Context, req actionItemDTO.CreateActionItemReq
 }
 
 func UpdateActionItem(ctx context.Context, req actionItemDTO.UpdateActionItemRequest) error {
-	err := ActionItemServiceSingleton.queries.UpdateActionItem(ctx, req.GetDBModel())
+	err := assessmentCompletion.CheckAssessmentIsEditable(ctx, &ActionItemServiceSingleton.queries, req.CourseParticipationID, req.CoursePhaseID)
+	if err != nil {
+		return err
+	}
+	err = ActionItemServiceSingleton.queries.UpdateActionItem(ctx, req.GetDBModel())
 	if err != nil {
 		log.Error("could not update action item: ", err)
 		return errors.New("could not update action item")
@@ -77,7 +86,18 @@ func UpdateActionItem(ctx context.Context, req actionItemDTO.UpdateActionItemReq
 }
 
 func DeleteActionItem(ctx context.Context, actionItemID uuid.UUID) error {
-	err := ActionItemServiceSingleton.queries.DeleteActionItem(ctx, actionItemID)
+	actionItem, err := ActionItemServiceSingleton.queries.GetActionItem(ctx, actionItemID)
+	if err != nil {
+		log.Error("could not get action item: ", err)
+		return errors.New("could not get action item")
+	}
+
+	err = assessmentCompletion.CheckAssessmentIsEditable(ctx, &ActionItemServiceSingleton.queries, actionItem.CourseParticipationID, actionItem.CoursePhaseID)
+	if err != nil {
+		return err
+	}
+
+	err = ActionItemServiceSingleton.queries.DeleteActionItem(ctx, actionItemID)
 	if err != nil {
 		log.Error("could not delete action item: ", err)
 		return errors.New("could not delete action item")

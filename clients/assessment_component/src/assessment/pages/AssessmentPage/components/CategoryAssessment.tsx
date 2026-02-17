@@ -4,6 +4,7 @@ import { ChevronRight, ChevronDown } from 'lucide-react'
 
 import { CategoryWithCompetencies } from '../../../interfaces/category'
 import { Assessment } from '../../../interfaces/assessment'
+import { AggregatedEvaluationResult } from '../../../interfaces/assessmentResults'
 import { mapNumberToScoreLevel } from '@tumaet/prompt-shared-state'
 
 import { getWeightedScoreLevel } from '../../utils/getWeightedScoreLevel'
@@ -16,13 +17,19 @@ interface CategoryAssessmentProps {
   category: CategoryWithCompetencies
   assessments: Assessment[]
   completed: boolean
+  peerEvaluationResults?: AggregatedEvaluationResult[]
+  selfEvaluationResults?: AggregatedEvaluationResult[]
+  hidePeerEvaluationDetails?: boolean
 }
 
 export const CategoryAssessment = ({
   category,
   assessments,
   completed,
-}: CategoryAssessmentProps): JSX.Element => {
+  peerEvaluationResults,
+  selfEvaluationResults,
+  hidePeerEvaluationDetails = false,
+}: CategoryAssessmentProps) => {
   const { courseParticipationID } = useParams<{
     courseParticipationID: string
   }>()
@@ -34,6 +41,7 @@ export const CategoryAssessment = ({
   }
 
   const categoryScore = getWeightedScoreLevel(assessments, [category])
+  const sortedCompetencies = [...category.competencies].sort((a, b) => a.name.localeCompare(b.name))
 
   return (
     <div key={category.id} className='mb-6'>
@@ -50,6 +58,7 @@ export const CategoryAssessment = ({
 
           <h2 className='text-xl font-semibold tracking-tight flex-grow'>{category.name}</h2>
         </div>
+
         <div className='flex items-center justify-center gap-1'>
           {assessments.length > 0 && (
             <StudentScoreBadge
@@ -57,10 +66,12 @@ export const CategoryAssessment = ({
               scoreNumeric={categoryScore}
             />
           )}
-          <AssessmentStatusBadge
-            remainingAssessments={category.competencies.length - assessments.length}
-            isFinalized={completed}
-          />
+          {!completed && (
+            <AssessmentStatusBadge
+              remainingAssessments={category.competencies.length - assessments.length}
+              isFinalized={completed}
+            />
+          )}
         </div>
       </div>
 
@@ -72,8 +83,14 @@ export const CategoryAssessment = ({
             </p>
           ) : (
             <div className='grid gap-4'>
-              {category.competencies.map((competency) => {
+              {sortedCompetencies.map((competency) => {
                 const assessment = assessments.find((ass) => ass.competencyID === competency.id)
+                const peerAverage = peerEvaluationResults?.find(
+                  (result) => result.competencyID === competency.id,
+                )
+                const selfAverage = selfEvaluationResults?.find(
+                  (result) => result.competencyID === competency.id,
+                )
 
                 return (
                   <div key={competency.id}>
@@ -82,6 +99,9 @@ export const CategoryAssessment = ({
                       competency={competency}
                       assessment={assessment}
                       completed={completed}
+                      peerEvaluationAverageScore={peerAverage?.averageScoreNumeric}
+                      selfEvaluationAverageScore={selfAverage?.averageScoreNumeric}
+                      hidePeerEvaluationDetails={hidePeerEvaluationDetails}
                     />
                   </div>
                 )

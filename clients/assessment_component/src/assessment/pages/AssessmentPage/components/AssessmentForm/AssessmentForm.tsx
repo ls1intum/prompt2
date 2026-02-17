@@ -26,12 +26,16 @@ import { AssessmentTextField } from './components/AssessmentTextField'
 
 import { useCreateOrUpdateAssessment } from './hooks/useCreateOrUpdateAssessment'
 import { useDeleteAssessment } from './hooks/useDeleteAssessment'
+import { JSX } from 'react/jsx-runtime'
 
 interface AssessmentFormProps {
   courseParticipationID: string
   competency: Competency
   assessment?: Assessment
   completed?: boolean
+  peerEvaluationAverageScore?: number
+  selfEvaluationAverageScore?: number
+  hidePeerEvaluationDetails?: boolean
 }
 
 export const AssessmentForm = ({
@@ -39,6 +43,9 @@ export const AssessmentForm = ({
   competency,
   assessment,
   completed = false,
+  peerEvaluationAverageScore,
+  selfEvaluationAverageScore,
+  hidePeerEvaluationDetails = false,
 }: AssessmentFormProps) => {
   const [error, setError] = useState<string | undefined>(undefined)
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
@@ -63,6 +70,9 @@ export const AssessmentForm = ({
   const { mutate: createOrUpdateAssessment } = useCreateOrUpdateAssessment(setError)
   const deleteAssessment = useDeleteAssessment(setError)
   const selectedScore = form.watch('scoreLevel')
+  const hasExample = (assessment?.examples ?? '').trim().length > 0
+  const hasComment = (assessment?.comment ?? '').trim().length > 0
+  const shouldHideCommentAndExample = completed && !hasExample && !hasComment
 
   useEffect(() => {
     form.reset({
@@ -146,9 +156,12 @@ export const AssessmentForm = ({
     t.members.map((m) => m.id).includes(courseParticipationID ?? ''),
   )?.members
 
-  const selfEvaluationScoreLevel = allSelfEvaluationsForThisStudent.find(
-    (se) => se.competencyID === selfEvaluationCompetency?.id,
-  )?.scoreLevel
+  const selfEvaluationScoreLevel =
+    selfEvaluationAverageScore !== undefined
+      ? mapNumberToScoreLevel(selfEvaluationAverageScore)
+      : allSelfEvaluationsForThisStudent.find(
+          (se) => se.competencyID === selfEvaluationCompetency?.id,
+        )?.scoreLevel
 
   const selfEvaluationStudentAnswers = [
     () => (
@@ -165,32 +178,36 @@ export const AssessmentForm = ({
     (pe) => pe.competencyID === peerEvaluationCompetency?.id,
   )
 
-  const peerEvaluationScore = peerEvaluations?.length
-    ? mapNumberToScoreLevel(
-        peerEvaluations.reduce((acc, pe) => acc + mapScoreLevelToNumber(pe.scoreLevel), 0) /
-          peerEvaluations.length,
-      )
-    : undefined
+  const peerEvaluationScore =
+    peerEvaluationAverageScore !== undefined
+      ? mapNumberToScoreLevel(peerEvaluationAverageScore)
+      : peerEvaluations?.length
+        ? mapNumberToScoreLevel(
+            peerEvaluations.reduce((acc, pe) => acc + mapScoreLevelToNumber(pe.scoreLevel), 0) /
+              peerEvaluations.length,
+          )
+        : undefined
 
-  const peerEvaluationStudentAnswers =
-    teamMembers
-      ?.map((member) => {
-        const memberScoreLevel = peerEvaluations.find(
-          (pe) => pe.authorCourseParticipationID === member.id,
-        )?.scoreLevel
+  const peerEvaluationStudentAnswers: (() => JSX.Element)[] | undefined = hidePeerEvaluationDetails
+    ? undefined
+    : teamMembers
+        ?.map((member) => {
+          const memberScoreLevel = peerEvaluations.find(
+            (pe) => pe.authorCourseParticipationID === member.id,
+          )?.scoreLevel
 
-        return memberScoreLevel !== undefined && peerEvaluationCompetency
-          ? () => (
-              <EvaluationScoreDescriptionBadge
-                key={member.id}
-                competency={peerEvaluationCompetency}
-                scoreLevel={memberScoreLevel}
-                name={`${member.firstName} ${member.lastName}`}
-              />
-            )
-          : undefined
-      })
-      .filter((item) => item !== undefined) ?? []
+          return memberScoreLevel !== undefined && peerEvaluationCompetency
+            ? () => (
+                <EvaluationScoreDescriptionBadge
+                  key={member.id}
+                  competency={peerEvaluationCompetency}
+                  scoreLevel={memberScoreLevel}
+                  name={`${member.firstName} ${member.lastName}`}
+                />
+              )
+            : undefined
+        })
+        .filter((item): item is () => JSX.Element => item !== undefined)
 
   return (
     <Form {...form}>
@@ -228,23 +245,27 @@ export const AssessmentForm = ({
           peerEvaluationStudentAnswers={peerEvaluationStudentAnswers}
         />
 
-        <AssessmentTextField
-          control={form.control}
-          name='examples'
-          placeholder='Example'
-          completed={completed}
-          getScoreLevel={() => form.getValues('scoreLevel')}
-          onBlur={saveAssessment}
-        />
+        {!shouldHideCommentAndExample && (
+          <>
+            <AssessmentTextField
+              control={form.control}
+              name='examples'
+              placeholder='Example'
+              completed={completed}
+              getScoreLevel={() => form.getValues('scoreLevel')}
+              onBlur={saveAssessment}
+            />
 
-        <AssessmentTextField
-          control={form.control}
-          name='comment'
-          placeholder='Additional comments'
-          completed={completed}
-          getScoreLevel={() => form.getValues('scoreLevel')}
-          onBlur={saveAssessment}
-        />
+            <AssessmentTextField
+              control={form.control}
+              name='comment'
+              placeholder='Additional comments'
+              completed={completed}
+              getScoreLevel={() => form.getValues('scoreLevel')}
+              onBlur={saveAssessment}
+            />
+          </>
+        )}
 
         {error && !completed && <FormMessage className='mt-2'>{error}</FormMessage>}
 

@@ -6,10 +6,15 @@ import (
 	"os"
 	"os/exec"
 	"strings"
+	"time"
 
+	"github.com/getsentry/sentry-go"
+	sentrygin "github.com/getsentry/sentry-go/gin"
+	sentrylogrus "github.com/getsentry/sentry-go/logrus"
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5/pgxpool"
 	promptSDK "github.com/ls1intum/prompt-sdk"
+	"github.com/ls1intum/prompt-sdk/utils"
 	sdkUtils "github.com/ls1intum/prompt-sdk/utils"
 	"github.com/ls1intum/prompt2/servers/intro_course/config"
 	"github.com/ls1intum/prompt2/servers/intro_course/copy"
@@ -42,6 +47,58 @@ func runMigrations(databaseURL string) {
 	}
 }
 
+func initSentry() {
+	sentryDsn := utils.GetEnv("SENTRY_DSN_INTRO_COURSE", "")
+	if sentryDsn == "" {
+		log.Info("Sentry DSN not configured, skipping initialization")
+		return
+	}
+
+	transport := sentry.NewHTTPTransport()
+	transport.Timeout = 2 * time.Second
+
+	if err := sentry.Init(sentry.ClientOptions{
+		Dsn:              sentryDsn,
+		Environment:      utils.GetEnv("ENVIRONMENT", "development"),
+		Debug:            false,
+		Transport:        transport,
+		EnableLogs:       true,
+		AttachStacktrace: true,
+		SendDefaultPII:   true,
+		EnableTracing:    true,
+		TracesSampleRate: 1.0,
+	}); err != nil {
+		log.Errorf("Sentry initialization failed: %v", err)
+		return
+	}
+
+	client := sentry.CurrentHub().Client()
+	if client == nil {
+		log.Error("Sentry client is nil")
+		return
+	}
+
+	logHook := sentrylogrus.NewLogHookFromClient(
+		[]log.Level{log.InfoLevel, log.WarnLevel},
+		client,
+	)
+
+	eventHook := sentrylogrus.NewEventHookFromClient(
+		[]log.Level{log.ErrorLevel, log.FatalLevel, log.PanicLevel},
+		client,
+	)
+
+	log.AddHook(logHook)
+	log.AddHook(eventHook)
+
+	log.RegisterExitHandler(func() {
+		eventHook.Flush(5 * time.Second)
+		logHook.Flush(5 * time.Second)
+	})
+
+	log.Info("Sentry initialized successfully")
+}
+
 func initKeycloak() {
 	baseURL := sdkUtils.GetEnv("KEYCLOAK_HOST", "http://localhost:8081")
 	if !strings.HasPrefix(baseURL, "http") {
@@ -56,15 +113,26 @@ func initKeycloak() {
 	}
 }
 
+// @title           PROMPT Intro Course API
+// @version         1.0
+// @description     This is the intro course server of PROMPT.
+// @host            localhost:8082
+// @BasePath        /intro-course/api
+// @externalDocs.description  PROMPT Documentation
+// @externalDocs.url          https://ls1intum.github.io/prompt2/
+// @securityDefinitions.apikey ApiKeyAuth
+// @in header
+// @name Authorization
+// @description Bearer token authentication. Use format: Bearer {token}
 func main() {
-	// establish database connection
+	initSentry()
+	defer sentry.Flush(2 * time.Second)
+
 	databaseURL := getDatabaseURL()
 	log.Debug("Connecting to database at:", databaseURL)
 
-	// run migrations
 	runMigrations(databaseURL)
 
-	// establish db connection
 	conn, err := pgxpool.New(context.Background(), databaseURL)
 	if err != nil {
 		log.Fatalf("Unable to create connection pool: %v\n", err)
@@ -78,6 +146,7 @@ func main() {
 	localHost := "http://localhost:3000"
 	clientHost := sdkUtils.GetEnv("CORE_HOST", localHost)
 	router.Use(sdkUtils.CORS(clientHost))
+	router.Use(sentrygin.New(sentrygin.Options{}))
 
 	api := router.Group("intro-course/api/course_phase/:coursePhaseID")
 	initKeycloak()
@@ -95,6 +164,7 @@ func main() {
 	config.InitConfigModule(api, *query, conn)
 
 	serverAddress := sdkUtils.GetEnv("SERVER_ADDRESS", "localhost:8082")
+	log.Info("Intro Course Server started")
 	err = router.Run(serverAddress)
 	if err != nil {
 		log.Fatalf("Failed to start server: %v", err)

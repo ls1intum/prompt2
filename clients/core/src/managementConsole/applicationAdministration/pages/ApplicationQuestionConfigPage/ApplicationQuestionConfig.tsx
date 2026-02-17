@@ -27,7 +27,7 @@ import { handleQuestionUpdate } from './handlers/handleQuestionUpdate'
 import { AddQuestionMenu } from './components/AddQuestionMenu'
 import { ApplicationPreview } from '@core/publicPages/application/pages/ApplicationPreview/ApplicationPreview'
 
-export const ApplicationQuestionConfig = (): JSX.Element => {
+export const ApplicationQuestionConfig = () => {
   const { phaseId } = useParams<{ phaseId: string }>()
   const [applicationQuestions, setApplicationQuestions] = useState<
     (ApplicationQuestionText | ApplicationQuestionMultiSelect)[]
@@ -183,7 +183,9 @@ export const ApplicationQuestionConfig = (): JSX.Element => {
                               onUpdate={(updatedQuestion) => {
                                 handleQuestionUpdate(updatedQuestion, setApplicationQuestions)
                               }}
-                              ref={(el) => (questionRefs.current[index] = el)}
+                              ref={(el) => {
+                                questionRefs.current[index] = el
+                              }}
                               submitAttempted={submitAttempted}
                               onDelete={handleDeleteQuestion}
                             />

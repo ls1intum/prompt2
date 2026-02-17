@@ -7,7 +7,7 @@ import { InterviewCard } from '../../components/InterviewCard'
 import { ExportedApplicationAnswer } from '@tumaet/prompt-shared-state'
 import { ExportedApplicationAnswerTable } from '@/components/ExportedApplicationAnswerTable'
 
-export const ProfileDetailPage = (): JSX.Element => {
+export const ProfileDetailPage = () => {
   const { studentId } = useParams<{ studentId: string }>()
   const { participations } = useParticipationStore()
   const participation = participations.find((p) => p.student.id === studentId)

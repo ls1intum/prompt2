@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
@@ -351,6 +352,44 @@ func UpdatePhaseDataGraph(ctx context.Context, courseID uuid.UUID, graphUpdate [
 	}
 	return nil
 
+}
+
+func UpdateCourseArchiveStatus(
+	ctx context.Context,
+	courseID uuid.UUID,
+	archived bool,
+) (courseDTO.Course, error) {
+	ctxWithTimeout, cancel := db.GetTimeoutContext(ctx)
+	defer cancel()
+
+	var archivedOn pgtype.Timestamptz
+	if archived {
+		archivedOn = pgtype.Timestamptz{
+			Time:  time.Now(),
+			Valid: true,
+		}
+	}
+
+	res, err := CourseServiceSingleton.queries.ArchiveCourse(
+		ctxWithTimeout,
+		db.ArchiveCourseParams{
+			ID:         courseID,
+			Archived:   archived,
+			ArchivedOn: archivedOn,
+		},
+	)
+	if err != nil {
+		log.Error(err)
+		return courseDTO.Course{}, errors.New("failed to update course archive status")
+	}
+
+	course, err := courseDTO.GetCourseDTOFromDBModel(res)
+	if err != nil {
+		log.Error(err)
+		return courseDTO.Course{}, errors.New("failed to map course dto")
+	}
+
+	return course, nil
 }
 
 func UpdateCourseData(ctx context.Context, courseID uuid.UUID, courseData courseDTO.UpdateCourseData) error {

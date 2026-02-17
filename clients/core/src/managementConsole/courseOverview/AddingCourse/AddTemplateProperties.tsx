@@ -3,6 +3,7 @@ import { useEffect } from 'react'
 import {
   Button,
   Input,
+  Textarea,
   Form,
   FormControl,
   FormField,
@@ -38,6 +39,8 @@ export const AddTemplateProperties: React.FC<AddTemplatePropertiesProps> = ({
       courseType: initialValues?.courseType || '',
       ects: initialValues?.ects ?? undefined,
       semesterTag: 'template',
+      shortDescription: initialValues?.shortDescription || '',
+      longDescription: initialValues?.longDescription || '',
     },
   })
 
@@ -121,6 +124,37 @@ export const AddTemplateProperties: React.FC<AddTemplatePropertiesProps> = ({
             )}
           />
         </div>
+        <FormField
+          control={form.control}
+          name='shortDescription'
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Short Description</FormLabel>
+              <FormControl>
+                <Input placeholder='One sentence summary' {...field} className='w-full' />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name='longDescription'
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Long Description</FormLabel>
+              <FormControl>
+                <Textarea
+                  placeholder='Share more details about this template (optional)'
+                  className='w-full'
+                  rows={4}
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
         <div className='flex justify-between space-x-4 pt-4'>
           <Button type='button' variant='outline' onClick={onCancel}>
             Cancel

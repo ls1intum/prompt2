@@ -39,9 +39,13 @@ on:
         description: "The tag of the self team allocation image that was built"
         value: ${{ jobs.self-team-allocation.outputs.image_tag }}
 
+permissions:
+  contents: read
+  packages: write
+
 jobs:
   clients-base:
-    uses: ls1intum/.github/.github/workflows/build-and-push-docker-image.yml@v1.1.0
+    uses: ls1intum/.github/.github/workflows/build-and-push-docker-image.yml@v1.1.1
     with:
       image-name: ghcr.io/ls1intum/prompt2/prompt-clients-base
       docker-file: clients/Dockerfile # Defaults to Dockerfile
@@ -58,7 +62,7 @@ jobs:
 
   core:
     needs: clients-base
-    uses: ls1intum/.github/.github/workflows/build-and-push-docker-image.yml@v1.1.0
+    uses: ls1intum/.github/.github/workflows/build-and-push-docker-image.yml@v1.1.1
     with:
       image-name: ghcr.io/ls1intum/prompt2/prompt-clients-core
       docker-file: clients/core/Dockerfile # Defaults to Dockerfile
@@ -73,7 +77,7 @@ jobs:
 
   template:
     needs: clients-base
-    uses: ls1intum/.github/.github/workflows/build-and-push-docker-image.yml@v1.1.0
+    uses: ls1intum/.github/.github/workflows/build-and-push-docker-image.yml@v1.1.1
     with:
       image-name: ghcr.io/ls1intum/prompt2/prompt-clients-template-component
       docker-file: clients/template_component/Dockerfile # Defaults to Dockerfile
@@ -86,7 +90,7 @@ jobs:
 
   interview:
     needs: clients-base
-    uses: ls1intum/.github/.github/workflows/build-and-push-docker-image.yml@v1.1.0
+    uses: ls1intum/.github/.github/workflows/build-and-push-docker-image.yml@v1.1.1
     with:
       image-name: ghcr.io/ls1intum/prompt2/prompt-clients-interview-component
       docker-file: clients/interview_component/Dockerfile # Defaults to Dockerfile
@@ -99,7 +103,7 @@ jobs:
 
   matching:
     needs: clients-base
-    uses: ls1intum/.github/.github/workflows/build-and-push-docker-image.yml@v1.1.0
+    uses: ls1intum/.github/.github/workflows/build-and-push-docker-image.yml@v1.1.1
     with:
       image-name: ghcr.io/ls1intum/prompt2/prompt-clients-matching-component
       docker-file: clients/matching_component/Dockerfile # Defaults to Dockerfile
@@ -112,7 +116,7 @@ jobs:
 
   intro-course-developer:
     needs: clients-base
-    uses: ls1intum/.github/.github/workflows/build-and-push-docker-image.yml@v1.1.0
+    uses: ls1intum/.github/.github/workflows/build-and-push-docker-image.yml@v1.1.1
     with:
       image-name: ghcr.io/ls1intum/prompt2/prompt-clients-intro-course-developer-component
       docker-file: clients/intro_course_developer_component/Dockerfile # Defaults to Dockerfile
@@ -125,7 +129,7 @@ jobs:
 
   assessment:
     needs: clients-base
-    uses: ls1intum/.github/.github/workflows/build-and-push-docker-image.yml@v1.1.0
+    uses: ls1intum/.github/.github/workflows/build-and-push-docker-image.yml@v1.1.1
     with:
       image-name: ghcr.io/ls1intum/prompt2/prompt-clients-assessment-component
       docker-file: clients/assessment_component/Dockerfile # Defaults to Dockerfile
@@ -138,7 +142,7 @@ jobs:
 
   devops-challenge:
     needs: clients-base
-    uses: ls1intum/.github/.github/workflows/build-and-push-docker-image.yml@v1.1.0
+    uses: ls1intum/.github/.github/workflows/build-and-push-docker-image.yml@v1.1.1
     with:
       image-name: ghcr.io/ls1intum/prompt2/prompt-clients-devops-challenge-component
       docker-file: clients/devops_challenge_component/Dockerfile # Defaults to Dockerfile
@@ -151,7 +155,7 @@ jobs:
 
   team-allocation:
     needs: clients-base
-    uses: ls1intum/.github/.github/workflows/build-and-push-docker-image.yml@v1.1.0
+    uses: ls1intum/.github/.github/workflows/build-and-push-docker-image.yml@v1.1.1
     with:
       image-name: ghcr.io/ls1intum/prompt2/prompt-clients-team-allocation-component
       docker-file: clients/team_allocation_component/Dockerfile # Defaults to Dockerfile
@@ -164,7 +168,7 @@ jobs:
 
   self-team-allocation:
       needs: clients-base
-      uses: ls1intum/.github/.github/workflows/build-and-push-docker-image.yml@v1.1.0
+      uses: ls1intum/.github/.github/workflows/build-and-push-docker-image.yml@v1.1.1
       with:
         image-name: ghcr.io/ls1intum/prompt2/prompt-clients-self-team-allocation-component
         docker-file: clients/self_team_allocation_component/Dockerfile # Defaults to Dockerfile

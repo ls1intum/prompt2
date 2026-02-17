@@ -45,7 +45,7 @@ export const AssessmentDiagram = ({
   scoreLevels,
   completions,
   assessmentType = AssessmentType.ASSESSMENT,
-}: AssessmentDiagramProps): JSX.Element => {
+}: AssessmentDiagramProps) => {
   const { chartData, totalAssessments } = React.useMemo(() => {
     const completed = participations.filter((p) =>
       completions?.find((c) => c.courseParticipationID === p.courseParticipationID && c.completed),
@@ -88,11 +88,11 @@ export const AssessmentDiagram = ({
           {(() => {
             switch (assessmentType) {
               case AssessmentType.SELF:
-                return 'self evaluations'
+                return 'self evaluations '
               case AssessmentType.PEER:
-                return 'peer evaluations'
+                return 'peer evaluations '
               default:
-                return 'assessments'
+                return 'assessments '
             }
           })()}
           and their status

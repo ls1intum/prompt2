@@ -3,7 +3,7 @@ import { InsideSidebarMenuItemCollapsable } from './InsideSidebarMenuItemCollaps
 
 interface InsideSidebarMenuItemProps {
   goToPath: string
-  icon: JSX.Element
+  icon
   title: string
   subitems?: {
     goToPath: string
@@ -11,7 +11,7 @@ interface InsideSidebarMenuItemProps {
   }[]
 }
 
-export const InsideSidebarMenuItem = (props: InsideSidebarMenuItemProps): JSX.Element => {
+export const InsideSidebarMenuItem = (props: InsideSidebarMenuItemProps) => {
   return (
     <>
       {props.subitems && props.subitems.length > 0 ? (
