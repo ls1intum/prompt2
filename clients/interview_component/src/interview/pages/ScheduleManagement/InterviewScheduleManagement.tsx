@@ -39,33 +39,7 @@ import {
 } from '@tumaet/prompt-ui-components'
 import { Calendar, Clock, MapPin, Users, Plus, Pencil, Trash2, X, UserPlus } from 'lucide-react'
 import { format } from 'date-fns'
-
-interface StudentInfo {
-  id: string
-  firstName: string
-  lastName: string
-  email: string
-}
-
-interface AssignmentInfo {
-  id: string
-  courseParticipationId: string
-  assignedAt: string
-  student?: StudentInfo
-}
-
-interface InterviewSlot {
-  id: string
-  coursePhaseId: string
-  startTime: string
-  endTime: string
-  location: string | null
-  capacity: number
-  assignedCount: number
-  assignments: AssignmentInfo[]
-  createdAt: string
-  updatedAt: string
-}
+import { InterviewSlotWithAssignments } from '../../interfaces/InterviewSlots'
 
 interface SlotFormData {
   startTime: string
@@ -82,13 +56,13 @@ export const InterviewScheduleManagement = () => {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
   const [isAssignDialogOpen, setIsAssignDialogOpen] = useState(false)
   const [isUnassignDialogOpen, setIsUnassignDialogOpen] = useState(false)
-  const [assigningSlot, setAssigningSlot] = useState<InterviewSlot | null>(null)
+  const [assigningSlot, setAssigningSlot] = useState<InterviewSlotWithAssignments | null>(null)
   const [unassigningInfo, setUnassigningInfo] = useState<{
     assignmentId: string
     studentName: string
   } | null>(null)
   const [selectedParticipationId, setSelectedParticipationId] = useState<string>('')
-  const [editingSlot, setEditingSlot] = useState<InterviewSlot | null>(null)
+  const [editingSlot, setEditingSlot] = useState<InterviewSlotWithAssignments | null>(null)
   const [formData, setFormData] = useState<SlotFormData>({
     startTime: '',
     endTime: '',
@@ -108,7 +82,7 @@ export const InterviewScheduleManagement = () => {
     data: slots,
     isLoading,
     isError,
-  } = useQuery<InterviewSlot[]>({
+  } = useQuery<InterviewSlotWithAssignments[]>({
     queryKey: ['interviewSlotsWithAssignments', phaseId],
     queryFn: async () => {
       const response = await interviewAxiosInstance.get(
@@ -295,13 +269,13 @@ export const InterviewScheduleManagement = () => {
     }
   }
 
-  const handleEditClick = (slot: InterviewSlot) => {
+  const handleEditClick = (slot: InterviewSlotWithAssignments) => {
     setEditingSlot(slot)
     setFormData({
       startTime: format(new Date(slot.startTime), "yyyy-MM-dd'T'HH:mm"),
       endTime: format(new Date(slot.endTime), "yyyy-MM-dd'T'HH:mm"),
       location: slot.location || '',
-      capacity: slot.capacity,
+      capacity: slot.capacity ?? 1,
     })
     setIsEditDialogOpen(true)
   }
@@ -316,7 +290,7 @@ export const InterviewScheduleManagement = () => {
     }
   }
 
-  const handleAssignClick = (slot: InterviewSlot) => {
+  const handleAssignClick = (slot: InterviewSlotWithAssignments) => {
     setAssigningSlot(slot)
     setSelectedParticipationId('')
     setIsAssignDialogOpen(true)
@@ -539,7 +513,7 @@ export const InterviewScheduleManagement = () => {
               </TableHeader>
               <TableBody>
                 {slots.map((slot) => {
-                  const isFull = slot.assignedCount >= slot.capacity
+                  const isFull = (slot.assignedCount ?? 0) >= (slot.capacity ?? 1)
                   const isPast = new Date(slot.endTime) < new Date()
 
                   return (
@@ -586,7 +560,7 @@ export const InterviewScheduleManagement = () => {
                         <div className='flex items-center gap-2'>
                           <Users className='h-4 w-4 text-muted-foreground' />
                           <span>
-                            {slot.assignedCount} / {slot.capacity}
+                            {slot.assignedCount ?? 0} / {slot.capacity ?? 1}
                           </span>
                         </div>
                       </TableCell>
@@ -686,7 +660,7 @@ export const InterviewScheduleManagement = () => {
                     dateStyle: 'medium',
                     timeStyle: 'short',
                   })}
-                  . This slot has {assigningSlot.assignedCount}/{assigningSlot.capacity} students
+                  . This slot has {assigningSlot.assignedCount ?? 0}/{assigningSlot.capacity ?? 1} students
                   assigned.
                 </>
               )}

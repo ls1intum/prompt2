@@ -11,20 +11,8 @@ import {
 } from '@tumaet/prompt-shared-state'
 import { getCoursePhase } from '@/network/queries/getCoursePhase'
 import { useCoursePhaseStore } from '../zustand/useCoursePhaseStore'
-import { InterviewSlot } from '../interfaces/InterviewSlots'
+import { InterviewSlot, InterviewSlotWithAssignments } from '../interfaces/InterviewSlots'
 import { interviewAxiosInstance } from '../network/interviewServerConfig'
-
-interface InterviewSlotWithAssignments {
-  id: string
-  startTime: string
-  endTime: string
-  location: string | null
-  assignments: Array<{
-    id: string
-    courseParticipationId: string
-    assignedAt: string
-  }>
-}
 
 interface InterviewDataShellProps {
   children: React.ReactNode
