@@ -8547,7 +8547,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint-plugin-n@npm:^17.23.2":
+"eslint-plugin-n@npm:^17.24.0":
   version: 17.24.0
   resolution: "eslint-plugin-n@npm:17.24.0"
   dependencies:
@@ -14230,7 +14230,7 @@ __metadata:
     eslint: "npm:^9.39.2"
     eslint-config-prettier: "npm:^10.1.8"
     eslint-plugin-import: "npm:^2.32.0"
-    eslint-plugin-n: "npm:^17.23.2"
+    eslint-plugin-n: "npm:^17.24.0"
     eslint-plugin-prettier: "npm:^5.5.5"
     eslint-plugin-react: "npm:^7.37.5"
     eslint-plugin-react-hooks: "npm:^7.0.1"
