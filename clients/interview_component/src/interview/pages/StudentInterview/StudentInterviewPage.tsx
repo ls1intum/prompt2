@@ -22,14 +22,14 @@ import { format } from 'date-fns'
 
 interface InterviewSlot {
   id: string
-  course_phase_id: string
-  start_time: string
-  end_time: string
+  coursePhaseId: string
+  startTime: string
+  endTime: string
   location: string | null
   capacity: number
-  assigned_count: number
-  created_at: string
-  updated_at: string
+  assignedCount: number
+  createdAt: string
+  updatedAt: string
 }
 
 interface InterviewAssignment {
@@ -146,8 +146,8 @@ export const StudentInterviewPage = () => {
     }
   }
 
-  const isSlotFull = (slot: InterviewSlot) => slot.assigned_count >= slot.capacity
-  const isSlotPast = (slot: InterviewSlot) => new Date(slot.start_time) < new Date()
+  const isSlotFull = (slot: InterviewSlot) => slot.assignedCount >= slot.capacity
+  const isSlotPast = (slot: InterviewSlot) => new Date(slot.startTime) < new Date()
 
   if (slotsLoading || assignmentLoading) {
     return (
@@ -219,7 +219,7 @@ export const StudentInterviewPage = () => {
                 <CardHeader>
                   <div className='flex justify-between items-start'>
                     <CardTitle className='text-lg'>
-                      {format(new Date(slot.start_time), 'EEE, MMM d')}
+                      {format(new Date(slot.startTime), 'EEE, MMM d')}
                     </CardTitle>
                     {isBooked ? (
                       <Badge className='bg-green-600'>Booked</Badge>
@@ -237,8 +237,8 @@ export const StudentInterviewPage = () => {
                     <div className='flex items-center gap-1 mt-1'>
                       <Clock className='h-3 w-3' />
                       <span className='text-sm'>
-                        {format(new Date(slot.start_time), 'HH:mm')} -{' '}
-                        {format(new Date(slot.end_time), 'HH:mm')}
+                        {format(new Date(slot.startTime), 'HH:mm')} -{' '}
+                        {format(new Date(slot.endTime), 'HH:mm')}
                       </span>
                     </div>
                   </CardDescription>
@@ -264,7 +264,7 @@ export const StudentInterviewPage = () => {
                   <div className='flex items-center gap-2 text-sm text-muted-foreground'>
                     <Users className='h-4 w-4' />
                     <span>
-                      {slot.assigned_count} / {slot.capacity} booked
+                      {slot.assignedCount} / {slot.capacity} booked
                     </span>
                   </div>
 

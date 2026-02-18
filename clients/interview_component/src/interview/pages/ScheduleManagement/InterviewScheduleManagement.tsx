@@ -56,20 +56,20 @@ interface AssignmentInfo {
 
 interface InterviewSlot {
   id: string
-  course_phase_id: string
-  start_time: string
-  end_time: string
+  coursePhaseId: string
+  startTime: string
+  endTime: string
   location: string | null
   capacity: number
-  assigned_count: number
+  assignedCount: number
   assignments: AssignmentInfo[]
-  created_at: string
-  updated_at: string
+  createdAt: string
+  updatedAt: string
 }
 
 interface SlotFormData {
-  start_time: string
-  end_time: string
+  startTime: string
+  endTime: string
   location: string
   capacity: number
 }
@@ -90,8 +90,8 @@ export const InterviewScheduleManagement = () => {
   const [selectedParticipationId, setSelectedParticipationId] = useState<string>('')
   const [editingSlot, setEditingSlot] = useState<InterviewSlot | null>(null)
   const [formData, setFormData] = useState<SlotFormData>({
-    start_time: '',
-    end_time: '',
+    startTime: '',
+    endTime: '',
     location: '',
     capacity: 1,
   })
@@ -125,8 +125,8 @@ export const InterviewScheduleManagement = () => {
       const response = await interviewAxiosInstance.post(
         `interview/api/course_phase/${phaseId}/interview-slots`,
         {
-          start_time: new Date(data.start_time).toISOString(),
-          end_time: new Date(data.end_time).toISOString(),
+          startTime: new Date(data.startTime).toISOString(),
+          endTime: new Date(data.endTime).toISOString(),
           location: data.location || null,
           capacity: data.capacity,
         },
@@ -157,8 +157,8 @@ export const InterviewScheduleManagement = () => {
       const response = await interviewAxiosInstance.put(
         `interview/api/course_phase/${phaseId}/interview-slots/${id}`,
         {
-          start_time: new Date(data.start_time).toISOString(),
-          end_time: new Date(data.end_time).toISOString(),
+          startTime: new Date(data.startTime).toISOString(),
+          endTime: new Date(data.endTime).toISOString(),
           location: data.location || null,
           capacity: data.capacity,
         },
@@ -271,17 +271,17 @@ export const InterviewScheduleManagement = () => {
 
   const resetForm = () => {
     setFormData({
-      start_time: '',
-      end_time: '',
+      startTime: '',
+      endTime: '',
       location: '',
       capacity: 1,
     })
   }
 
   const isTimeRangeValid =
-    !!formData.start_time &&
-    !!formData.end_time &&
-    new Date(formData.start_time) < new Date(formData.end_time)
+    !!formData.startTime &&
+    !!formData.endTime &&
+    new Date(formData.startTime) < new Date(formData.endTime)
 
   const handleCreateSlot = () => {
     if (!isTimeRangeValid) return
@@ -298,8 +298,8 @@ export const InterviewScheduleManagement = () => {
   const handleEditClick = (slot: InterviewSlot) => {
     setEditingSlot(slot)
     setFormData({
-      start_time: format(new Date(slot.start_time), "yyyy-MM-dd'T'HH:mm"),
-      end_time: format(new Date(slot.end_time), "yyyy-MM-dd'T'HH:mm"),
+      startTime: format(new Date(slot.startTime), "yyyy-MM-dd'T'HH:mm"),
+      endTime: format(new Date(slot.endTime), "yyyy-MM-dd'T'HH:mm"),
       location: slot.location || '',
       capacity: slot.capacity,
     })
@@ -394,23 +394,23 @@ export const InterviewScheduleManagement = () => {
             </DialogHeader>
             <div className='space-y-4 py-4'>
               <div className='space-y-2'>
-                <Label htmlFor='start_time'>Start Time</Label>
+                <Label htmlFor='startTime'>Start Time</Label>
                 <Input
-                  id='start_time'
+                  id='startTime'
                   type='datetime-local'
-                  value={formData.start_time}
-                  onChange={(e) => setFormData({ ...formData, start_time: e.target.value })}
+                  value={formData.startTime}
+                  onChange={(e) => setFormData({ ...formData, startTime: e.target.value })}
                 />
               </div>
               <div className='space-y-2'>
-                <Label htmlFor='end_time'>End Time</Label>
+                <Label htmlFor='endTime'>End Time</Label>
                 <Input
-                  id='end_time'
+                  id='endTime'
                   type='datetime-local'
-                  value={formData.end_time}
-                  onChange={(e) => setFormData({ ...formData, end_time: e.target.value })}
+                  value={formData.endTime}
+                  onChange={(e) => setFormData({ ...formData, endTime: e.target.value })}
                 />
-                {formData.start_time && formData.end_time && !isTimeRangeValid && (
+                {formData.startTime && formData.endTime && !isTimeRangeValid && (
                   <p className='text-sm text-destructive'>End time must be after start time.</p>
                 )}
               </div>
@@ -461,23 +461,23 @@ export const InterviewScheduleManagement = () => {
           </DialogHeader>
           <div className='space-y-4 py-4'>
             <div className='space-y-2'>
-              <Label htmlFor='edit_start_time'>Start Time</Label>
+              <Label htmlFor='edit_startTime'>Start Time</Label>
               <Input
-                id='edit_start_time'
+                id='edit_startTime'
                 type='datetime-local'
-                value={formData.start_time}
-                onChange={(e) => setFormData({ ...formData, start_time: e.target.value })}
+                value={formData.startTime}
+                onChange={(e) => setFormData({ ...formData, startTime: e.target.value })}
               />
             </div>
             <div className='space-y-2'>
-              <Label htmlFor='edit_end_time'>End Time</Label>
+              <Label htmlFor='edit_endTime'>End Time</Label>
               <Input
-                id='edit_end_time'
+                id='edit_endTime'
                 type='datetime-local'
-                value={formData.end_time}
-                onChange={(e) => setFormData({ ...formData, end_time: e.target.value })}
+                value={formData.endTime}
+                onChange={(e) => setFormData({ ...formData, endTime: e.target.value })}
               />
-              {formData.start_time && formData.end_time && !isTimeRangeValid && (
+              {formData.startTime && formData.endTime && !isTimeRangeValid && (
                 <p className='text-sm text-destructive'>End time must be after start time.</p>
               )}
             </div>
@@ -539,8 +539,8 @@ export const InterviewScheduleManagement = () => {
               </TableHeader>
               <TableBody>
                 {slots.map((slot) => {
-                  const isFull = slot.assigned_count >= slot.capacity
-                  const isPast = new Date(slot.end_time) < new Date()
+                  const isFull = slot.assignedCount >= slot.capacity
+                  const isPast = new Date(slot.endTime) < new Date()
 
                   return (
                     <TableRow key={slot.id}>
@@ -549,14 +549,14 @@ export const InterviewScheduleManagement = () => {
                           <div className='flex items-center gap-2'>
                             <Calendar className='h-4 w-4 text-muted-foreground' />
                             <span className='font-medium'>
-                              {format(new Date(slot.start_time), 'EEE, MMM d, yyyy')}
+                              {format(new Date(slot.startTime), 'EEE, MMM d, yyyy')}
                             </span>
                           </div>
                           <div className='flex items-center gap-2 text-sm text-muted-foreground'>
                             <Clock className='h-4 w-4' />
                             <span>
-                              {format(new Date(slot.start_time), 'HH:mm')} -{' '}
-                              {format(new Date(slot.end_time), 'HH:mm')}
+                              {format(new Date(slot.startTime), 'HH:mm')} -{' '}
+                              {format(new Date(slot.endTime), 'HH:mm')}
                             </span>
                           </div>
                         </div>
@@ -586,7 +586,7 @@ export const InterviewScheduleManagement = () => {
                         <div className='flex items-center gap-2'>
                           <Users className='h-4 w-4 text-muted-foreground' />
                           <span>
-                            {slot.assigned_count} / {slot.capacity}
+                            {slot.assignedCount} / {slot.capacity}
                           </span>
                         </div>
                       </TableCell>
@@ -682,11 +682,11 @@ export const InterviewScheduleManagement = () => {
               {assigningSlot && (
                 <>
                   Manually assign a student to the slot on{' '}
-                  {new Date(assigningSlot.start_time).toLocaleString('en-US', {
+                  {new Date(assigningSlot.startTime).toLocaleString('en-US', {
                     dateStyle: 'medium',
                     timeStyle: 'short',
                   })}
-                  . This slot has {assigningSlot.assigned_count}/{assigningSlot.capacity} students
+                  . This slot has {assigningSlot.assignedCount}/{assigningSlot.capacity} students
                   assigned.
                 </>
               )}

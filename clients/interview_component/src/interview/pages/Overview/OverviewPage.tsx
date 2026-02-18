@@ -9,14 +9,14 @@ import { interviewAxiosInstance } from '../../network/interviewServerConfig'
 
 interface AssignmentInfo {
   id: string
-  course_participation_id: string
-  assigned_at: string
+  courseParticipationId: string
+  assignedAt: string
 }
 
 interface InterviewSlotData {
   id: string
-  start_time: string
-  end_time: string
+  startTime: string
+  endTime: string
   location: string | null
   assignments: AssignmentInfo[]
 }
@@ -50,7 +50,7 @@ export const OverviewPage = () => {
   const participationToSlot = new Map<string, InterviewSlotData>()
   slots?.forEach((slot) => {
     slot.assignments.forEach((assignment) => {
-      participationToSlot.set(assignment.course_participation_id, slot)
+      participationToSlot.set(assignment.courseParticipationId, slot)
     })
   })
 
