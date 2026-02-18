@@ -49,8 +49,8 @@ interface StudentInfo {
 
 interface AssignmentInfo {
   id: string
-  course_participation_id: string
-  assigned_at: string
+  courseParticipationId: string
+  assignedAt: string
   student?: StudentInfo
 }
 
@@ -344,7 +344,7 @@ export const InterviewScheduleManagement = () => {
 
   // Get list of already assigned participation IDs
   const assignedParticipationIds = new Set(
-    slots?.flatMap((slot) => slot.assignments.map((a) => a.course_participation_id)) || [],
+    slots?.flatMap((slot) => slot.assignments.map((a) => a.courseParticipationId)) || [],
   )
 
   // Filter unassigned students
@@ -596,7 +596,7 @@ export const InterviewScheduleManagement = () => {
                             {slot.assignments.map((assignment) => {
                               const studentName = assignment.student
                                 ? `${assignment.student.firstName} ${assignment.student.lastName}`
-                                : assignment.course_participation_id
+                                : assignment.courseParticipationId
                               return (
                                 <Badge
                                   key={assignment.id}
