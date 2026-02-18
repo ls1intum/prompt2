@@ -1,10 +1,11 @@
+import { Link } from 'react-router-dom'
 import packageJSON from '../../../../../../package.json'
 
 export const PromptLogo = () => {
   const version = packageJSON.version
 
   return (
-    <div className='flex items-center'>
+    <Link to='/' className='flex items-center'>
       <img src='/prompt_logo.svg' alt='Prompt logo' className='size-8 -mr-1' />
       <div className='relative flex items-baseline'>
         <span className='text-lg font-extrabold tracking-wide text-primary drop-shadow-sm'>
@@ -12,6 +13,6 @@ export const PromptLogo = () => {
         </span>
         <span className='ml-1 text-xs font-normal text-gray-400'>{version}</span>
       </div>
-    </div>
+    </Link>
   )
 }
