@@ -49,7 +49,7 @@ export const StudentInterviewPage = () => {
   const { toast } = useToast()
 
   const { data: slots, isLoading: slotsLoading } = useQuery<InterviewSlot[]>({
-    queryKey: ['interviewSlots', phaseId],
+    queryKey: ['interviewSlotsWithAssignments', phaseId],
     queryFn: async () => {
       const response = await interviewAxiosInstance.get(
         `interview/api/course_phase/${phaseId}/interview-slots`,
@@ -91,7 +91,7 @@ export const StudentInterviewPage = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['myInterviewAssignment', phaseId] })
-      queryClient.invalidateQueries({ queryKey: ['interviewSlots', phaseId] })
+      queryClient.invalidateQueries({ queryKey: ['interviewSlotsWithAssignments', phaseId] })
       setSelectedSlotId(null)
       toast({
         title: 'Slot booked successfully',
@@ -118,7 +118,7 @@ export const StudentInterviewPage = () => {
       queryClient.setQueryData(['myInterviewAssignment', phaseId], null)
       await Promise.all([
         queryClient.refetchQueries({ queryKey: ['myInterviewAssignment', phaseId] }),
-        queryClient.refetchQueries({ queryKey: ['interviewSlots', phaseId] }),
+        queryClient.refetchQueries({ queryKey: ['interviewSlotsWithAssignments', phaseId] }),
       ])
       toast({
         title: 'Booking cancelled',

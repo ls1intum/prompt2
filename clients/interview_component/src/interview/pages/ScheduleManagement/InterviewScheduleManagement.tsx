@@ -109,7 +109,7 @@ export const InterviewScheduleManagement = () => {
     isLoading,
     isError,
   } = useQuery<InterviewSlot[]>({
-    queryKey: ['interviewSlots', phaseId],
+    queryKey: ['interviewSlotsWithAssignments', phaseId],
     queryFn: async () => {
       const response = await interviewAxiosInstance.get(
         `interview/api/course_phase/${phaseId}/interview-slots`,
@@ -134,7 +134,7 @@ export const InterviewScheduleManagement = () => {
       return response.data
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['interviewSlots', phaseId] })
+      queryClient.invalidateQueries({ queryKey: ['interviewSlotsWithAssignments', phaseId] })
       setIsCreateDialogOpen(false)
       resetForm()
       toast({
@@ -166,7 +166,7 @@ export const InterviewScheduleManagement = () => {
       return response.data
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['interviewSlots', phaseId] })
+      queryClient.invalidateQueries({ queryKey: ['interviewSlotsWithAssignments', phaseId] })
       setIsEditDialogOpen(false)
       setEditingSlot(null)
       resetForm()
@@ -192,7 +192,7 @@ export const InterviewScheduleManagement = () => {
       )
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['interviewSlots', phaseId] })
+      queryClient.invalidateQueries({ queryKey: ['interviewSlotsWithAssignments', phaseId] })
       toast({
         title: 'Slot deleted',
         description: 'Interview slot has been deleted successfully.',
@@ -226,7 +226,7 @@ export const InterviewScheduleManagement = () => {
       return response.data
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['interviewSlots', phaseId] })
+      queryClient.invalidateQueries({ queryKey: ['interviewSlotsWithAssignments', phaseId] })
       setIsAssignDialogOpen(false)
       setSelectedParticipationId('')
       setAssigningSlot(null)
@@ -252,7 +252,7 @@ export const InterviewScheduleManagement = () => {
       )
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['interviewSlots', phaseId] })
+      queryClient.invalidateQueries({ queryKey: ['interviewSlotsWithAssignments', phaseId] })
       setIsUnassignDialogOpen(false)
       setUnassigningInfo(null)
       toast({

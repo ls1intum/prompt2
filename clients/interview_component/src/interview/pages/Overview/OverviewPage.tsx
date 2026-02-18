@@ -36,7 +36,7 @@ export const OverviewPage = () => {
     isError,
     error,
   } = useQuery<InterviewSlotData[]>({
-    queryKey: ['interviewSlots', phaseId],
+    queryKey: ['interviewSlotsWithAssignments', phaseId],
     queryFn: async () => {
       const response = await interviewAxiosInstance.get(
         `interview/api/course_phase/${phaseId}/interview-slots`,

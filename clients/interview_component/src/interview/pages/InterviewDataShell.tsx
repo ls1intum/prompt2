@@ -71,7 +71,7 @@ export const InterviewDataShell = ({ children }: InterviewDataShellProps) => {
     enabled: !!phaseId,
   })
 
-  const isError = isParticipationsError || isCoursePhaseError || isInterviewSlotsError
+  const isError = isParticipationsError || isCoursePhaseError
   const isPending = isCoursePhaseParticipationsPending || isCoursePhasePending || isInterviewSlotsPending
   const refetch = () => {
     refetchCoursePhaseParticipations()
