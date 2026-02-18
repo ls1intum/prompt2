@@ -26,7 +26,6 @@ interface InterviewSlotWithAssignments {
   }>
 }
 
-
 interface InterviewDataShellProps {
   children: React.ReactNode
 }
