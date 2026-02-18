@@ -5,7 +5,7 @@ export const PromptLogo = () => {
   const version = packageJSON.version
 
   return (
-    <Link to='/' className='flex items-center'>
+    <Link to='/' className='flex items-center hover:opacity-80 transition-opacity duration-150'>
       <img src='/prompt_logo.svg' alt='Prompt logo' className='size-8 -mr-1' />
       <div className='relative flex items-baseline'>
         <span className='text-lg font-extrabold tracking-wide text-primary drop-shadow-sm'>
