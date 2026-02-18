@@ -54,7 +54,7 @@
     "dayjs": "^1.11.19",
     "dompurify": "^3.3.1",
     "file-saver": "^2.0.5",
-    "framer-motion": "^12.34.1",
+    "framer-motion": "^12.34.2",
     "jwt-decode": "^4.0.0",
     "keycloak-js": "25.0.6",
     "lowlight": "^3.3.0",
