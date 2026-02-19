@@ -6,7 +6,8 @@ import { updateCoursePhaseParticipation } from '@/network/mutations/updateCourse
 
 interface ParticipantData {
   id: string
-  interviewAnswers?: Record<string, any>
+  courseParticipationID?: string
+  restrictedData?: Record<string, any>
   [key: string]: any
 }
 
@@ -48,10 +49,13 @@ export const useUpdateCoursePhaseParticipation = (): UseMutationResult<
       // Optimistically update the specific participation
       if (previousParticipants) {
         const updatedParticipants = previousParticipants.map((participant) => {
-          if (participant.id === newParticipationData.id) {
+          if (participant.id === newParticipationData.courseParticipationID) {
             return {
               ...participant,
-              interviewAnswers: newParticipationData.interviewAnswers,
+              restrictedData: {
+                ...participant.restrictedData,
+                ...newParticipationData.restrictedData,
+              },
             }
           }
           return participant
