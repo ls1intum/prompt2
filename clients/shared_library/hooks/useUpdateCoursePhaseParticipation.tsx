@@ -4,20 +4,62 @@ import { useParams } from 'react-router-dom'
 import { UpdateCoursePhaseParticipation } from '@tumaet/prompt-shared-state'
 import { updateCoursePhaseParticipation } from '@/network/mutations/updateCoursePhaseParticipationMetaData'
 
+interface ParticipantData {
+  id: string
+  interviewAnswers?: Record<string, any>
+  [key: string]: any
+}
+
+interface MutationContext {
+  previousParticipants?: ParticipantData[]
+}
+
 export const useUpdateCoursePhaseParticipation = (): UseMutationResult<
   string | undefined,
   Error,
   UpdateCoursePhaseParticipation,
-  unknown
+  MutationContext
 > => {
   const { phaseId } = useParams<{ phaseId: string }>()
   const queryClient = useQueryClient()
   // TODO: This requires fixing through a shared library!!!
   const { toast } = useToast()
 
-  const mutation = useMutation({
+  const mutation = useMutation<
+    string | undefined,
+    Error,
+    UpdateCoursePhaseParticipation,
+    MutationContext
+  >({
     mutationFn: (coursePhaseParticipation: UpdateCoursePhaseParticipation) => {
       return updateCoursePhaseParticipation(coursePhaseParticipation)
+    },
+    // Optimistically update cache before server responds
+    onMutate: async (newParticipationData) => {
+      // Cancel any outgoing refetches
+      await queryClient.cancelQueries({ queryKey: ['participants', phaseId] })
+
+      // Snapshot the previous value
+      const previousParticipants = queryClient.getQueryData<ParticipantData[]>([
+        'participants',
+        phaseId,
+      ])
+
+      // Optimistically update the specific participation
+      if (previousParticipants) {
+        const updatedParticipants = previousParticipants.map((participant) => {
+          if (participant.id === newParticipationData.id) {
+            return {
+              ...participant,
+              interviewAnswers: newParticipationData.interviewAnswers,
+            }
+          }
+          return participant
+        })
+        queryClient.setQueryData(['participants', phaseId], updatedParticipants)
+      }
+
+      return { previousParticipants }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['participants', phaseId] })
@@ -26,7 +68,11 @@ export const useUpdateCoursePhaseParticipation = (): UseMutationResult<
         description: 'Successfully updated the course participation.',
       })
     },
-    onError: () => {
+    onError: (error, _newParticipation, context) => {
+      // Rollback on error
+      if (context?.previousParticipants) {
+        queryClient.setQueryData(['participants', phaseId], context.previousParticipants)
+      }
       toast({
         title: 'Error',
         description: 'Failed to update the course participation.',

@@ -1,5 +1,6 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, useCallback } from 'react'
 import { Loader2, Plus, GripVertical, Trash2 } from 'lucide-react'
+import { useDebouncedCallback } from 'use-debounce'
 import type { InterviewQuestion } from '../../interfaces/InterviewQuestion'
 import { useCoursePhaseStore } from '../../zustand/useCoursePhaseStore'
 import { useUpdateCoursePhaseMetaData } from '@/hooks/useUpdateCoursePhaseMetaData'
@@ -19,27 +20,42 @@ export const QuestionConfiguration = () => {
   const scrollRef = useRef<HTMLDivElement>(null)
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [toBeDeletedQuestionID, setToBeDeletedQuestionID] = useState<number | undefined>(undefined)
+  const isInitialLoadRef = useRef(true)
 
-  const { mutate } = useUpdateCoursePhaseMetaData()
+  const { mutate, isPending, error } = useUpdateCoursePhaseMetaData()
 
+  // Debounced save function to prevent rapid-fire mutations
+  const debouncedSave = useDebouncedCallback(
+    (questions: InterviewQuestion[]) => {
+      if (coursePhase && !isInitialLoadRef.current) {
+        mutate({
+          id: coursePhase.id,
+          restrictedData: {
+            interviewQuestions: questions,
+          },
+        })
+      }
+    },
+    500 // 500ms debounce
+  )
+
+  // Load initial questions from coursePhase
   useEffect(() => {
     if (coursePhase) {
       const questions = coursePhase.restrictedData?.interviewQuestions ?? []
       setInterviewQuestions(questions)
       setIsLoading(false)
+      // Mark initial load complete after state update
+      isInitialLoadRef.current = false
     }
-  }, [coursePhase])
+  }, [coursePhase?.id]) // Only depend on coursePhase.id, not the entire object
 
+  // Trigger save when questions change (but not on initial load)
   useEffect(() => {
-    if (coursePhase && !isLoading) {
-      mutate({
-        id: coursePhase.id,
-        restrictedData: {
-          interviewQuestions: interviewQuestions,
-        },
-      })
+    if (!isInitialLoadRef.current) {
+      debouncedSave(interviewQuestions)
     }
-  }, [interviewQuestions, coursePhase, mutate, isLoading])
+  }, [interviewQuestions, debouncedSave])
 
   const handleEnter = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
@@ -120,6 +136,18 @@ export const QuestionConfiguration = () => {
 
       {/* Scrollable content */}
       <div className='flex-grow overflow-auto h-[calc(100vh-300px)] p-4'>
+        {/* Saving indicator */}
+        {isPending && (
+          <div className='mb-2 text-xs text-muted-foreground flex items-center gap-1'>
+            <Loader2 className='h-3 w-3 animate-spin' />
+            Saving...
+          </div>
+        )}
+        {error && (
+          <div className='mb-2 text-xs text-destructive'>
+            Error: {error.message}
+          </div>
+        )}
         {isLoading ? (
           <div className='flex justify-center items-center h-64'>
             <Loader2 className='h-12 w-12 animate-spin text-primary' />
