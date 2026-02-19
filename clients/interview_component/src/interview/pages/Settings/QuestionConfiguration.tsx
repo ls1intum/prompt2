@@ -36,7 +36,7 @@ export const QuestionConfiguration = () => {
         })
       }
     },
-    500 // 500ms debounce
+    500, // 500ms debounce
   )
 
   // Load initial questions from coursePhase
@@ -48,6 +48,7 @@ export const QuestionConfiguration = () => {
       // Mark initial load complete after state update
       isInitialLoadRef.current = false
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [coursePhase?.id]) // Only depend on coursePhase.id, not the entire object
 
   // Trigger save when questions change (but not on initial load)
@@ -143,11 +144,7 @@ export const QuestionConfiguration = () => {
             Saving...
           </div>
         )}
-        {error && (
-          <div className='mb-2 text-xs text-destructive'>
-            Error: {error.message}
-          </div>
-        )}
+        {error && <div className='mb-2 text-xs text-destructive'>Error: {error.message}</div>}
         {isLoading ? (
           <div className='flex justify-center items-center h-64'>
             <Loader2 className='h-12 w-12 animate-spin text-primary' />
