@@ -4517,19 +4517,19 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@tumaet/prompt-shared-state@npm:^1.0.6":
-  version: 1.0.6
-  resolution: "@tumaet/prompt-shared-state@npm:1.0.6"
+"@tumaet/prompt-shared-state@npm:^1.0.7":
+  version: 1.0.7
+  resolution: "@tumaet/prompt-shared-state@npm:1.0.7"
   dependencies:
     typescript: "npm:^5.7.3"
     zustand: "npm:^5.0.10"
-  checksum: 10c0/04944e2c8a7d34c28a5458b549e96a28660068831b39ea9d48a8ce844f376016835bd0c60a9bd96bc7b1576a8d57f8adee4aed742ee232e46cb7f4a0cef5ce5c
+  checksum: 10c0/a70be99871a24432a71941b8e3ec80962ba93bb32e2f906bdde968ff289bb62398709987216740b8848a190c90f307ad0d2f2a38157eda7f022d2f9bc475161c
   languageName: node
   linkType: hard
 
-"@tumaet/prompt-ui-components@npm:^1.0.6":
-  version: 1.0.6
-  resolution: "@tumaet/prompt-ui-components@npm:1.0.6"
+"@tumaet/prompt-ui-components@npm:^1.0.7":
+  version: 1.0.7
+  resolution: "@tumaet/prompt-ui-components@npm:1.0.7"
   dependencies:
     "@hookform/resolvers": "npm:^3.9.1"
     "@radix-ui/react-accordion": "npm:^1.2.12"
@@ -4575,7 +4575,7 @@ __metadata:
     date-fns: "npm:^4.1.0"
     highlight.js: "npm:^11.11.1"
     lowlight: "npm:^3.3.0"
-    lucide-react: "npm:^0.563.0"
+    lucide-react: "npm:^0.575.0"
     postcss: "npm:^8.5.6"
     postcss-preset-env: "npm:^10.6.1"
     react: "npm:^19.2.3"
@@ -4589,7 +4589,7 @@ __metadata:
     tailwind-merge: "npm:^2.5.4"
     tsc-alias: "npm:^1.8.16"
     typescript: "npm:^5.7.3"
-  checksum: 10c0/480061ee84cfb68f5fc95f916f3c9445646d4373fad003daf34c980fc818af4581ee313453263bc907b33a4e53011216c68897db5fb244541523b2798f8b93b4
+  checksum: 10c0/ef16d16bc489a60b87ca02417c4fe9b1020cfac1de0a37da408ad11423872bc3ff25ca6ed2f480aee080fb53c96115b56878e30cbcd98420857bb17109b910e4
   languageName: node
   linkType: hard
 
@@ -11455,21 +11455,21 @@ __metadata:
   languageName: node
   linkType: hard
 
-"lucide-react@npm:^0.563.0":
-  version: 0.563.0
-  resolution: "lucide-react@npm:0.563.0"
-  peerDependencies:
-    react: ^16.5.1 || ^17.0.0 || ^18.0.0 || ^19.0.0
-  checksum: 10c0/4a2027be255755d64ce18040062426dec07a5da920c000d9cd330e383fa10716a584c927dc03e91daccc6e05f6f486d4f49d1bd009e5f7763aa6fcf704806554
-  languageName: node
-  linkType: hard
-
 "lucide-react@npm:^0.574.0":
   version: 0.574.0
   resolution: "lucide-react@npm:0.574.0"
   peerDependencies:
     react: ^16.5.1 || ^17.0.0 || ^18.0.0 || ^19.0.0
   checksum: 10c0/bfb9ed34520657faae130a00247dd35516ab77bf00eb1b2c6995bcbb6919de8edde3546f29c85b5cc6bd1c0f5dd7ea9147c7777f0d7e75208aee19997eb0f752
+  languageName: node
+  linkType: hard
+
+"lucide-react@npm:^0.575.0":
+  version: 0.575.0
+  resolution: "lucide-react@npm:0.575.0"
+  peerDependencies:
+    react: ^16.5.1 || ^17.0.0 || ^18.0.0 || ^19.0.0
+  checksum: 10c0/4f42e81c88f60c8f904b178c0b28e8ac9a99da8ef24eba5f26ed97b63124304a847baea2f71125629a272df58dbb61cd799ff6a7e4878e5a4c28d8a699b84730
   languageName: node
   linkType: hard
 
@@ -14208,8 +14208,8 @@ __metadata:
     "@tiptap/pm": "npm:^3.19.0"
     "@tiptap/react": "npm:^3.19.0"
     "@tiptap/starter-kit": "npm:^3.19.0"
-    "@tumaet/prompt-shared-state": "npm:^1.0.6"
-    "@tumaet/prompt-ui-components": "npm:^1.0.6"
+    "@tumaet/prompt-shared-state": "npm:^1.0.7"
+    "@tumaet/prompt-ui-components": "npm:^1.0.7"
     "@types/copy-webpack-plugin": "npm:^10.1.3"
     "@types/dotenv-webpack": "npm:^7.0.8"
     "@types/eslint": "npm:^9.6.1"
