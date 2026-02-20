@@ -13,7 +13,7 @@
   "dependencies": {
     "@dagrejs/dagre": "^1.1.8",
     "@sentry/react": "^10.39.0",
-    "@xyflow/react": "^12.10.0",
+    "@xyflow/react": "^12.10.1",
     "date-fns-tz": "^3.2.0",
     "external-remotes-plugin": "^1.0.0",
     "i18n-iso-countries": "^7.14.0",

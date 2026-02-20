@@ -5504,7 +5504,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@xyflow/react@npm:^12.10.0":
+"@xyflow/react@npm:^12.10.1":
   version: 12.10.1
   resolution: "@xyflow/react@npm:12.10.1"
   dependencies:
@@ -6660,7 +6660,7 @@ __metadata:
   dependencies:
     "@dagrejs/dagre": "npm:^1.1.8"
     "@sentry/react": "npm:^10.39.0"
-    "@xyflow/react": "npm:^12.10.0"
+    "@xyflow/react": "npm:^12.10.1"
     clean-webpack-plugin: "npm:^4.0.0"
     compression-webpack-plugin: "npm:^11.1.0"
     css-minimizer-webpack-plugin: "npm:^7.0.4"
