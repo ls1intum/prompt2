@@ -4,7 +4,7 @@ import { useDebouncedCallback } from 'use-debounce'
 import type { InterviewQuestion } from '../../interfaces/InterviewQuestion'
 import { useCoursePhaseStore } from '../../zustand/useCoursePhaseStore'
 import { useUpdateCoursePhaseMetaData } from '@/hooks/useUpdateCoursePhaseMetaData'
-import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd'
+import { DragDropContext, Droppable, Draggable, type DropResult } from '@hello-pangea/dnd'
 import {
   DeleteConfirmation,
   Input,
@@ -72,14 +72,16 @@ export const QuestionConfiguration = () => {
   }
 
   const deleteQuestion = () => {
-    if (!toBeDeletedQuestionID) return
-    const newQuestions = interviewQuestions.filter((q) => q.id !== toBeDeletedQuestionID)
+    if (toBeDeletedQuestionID == null) return
+    const newQuestions = interviewQuestions
+      .filter((q) => q.id !== toBeDeletedQuestionID)
+      .map((q, idx) => ({ ...q, orderNum: idx }))
     setInterviewQuestions(newQuestions)
     debouncedSave(newQuestions)
     setToBeDeletedQuestionID(undefined)
   }
 
-  const onDragEnd = (result: any) => {
+  const onDragEnd = (result: DropResult) => {
     if (!result.destination) return
 
     const newQuestions = Array.from(interviewQuestions)

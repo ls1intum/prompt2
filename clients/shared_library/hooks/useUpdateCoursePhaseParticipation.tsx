@@ -1,18 +1,14 @@
 import { useToast } from '@tumaet/prompt-ui-components'
 import { useMutation, UseMutationResult, useQueryClient } from '@tanstack/react-query'
 import { useParams } from 'react-router-dom'
-import { UpdateCoursePhaseParticipation } from '@tumaet/prompt-shared-state'
+import {
+  UpdateCoursePhaseParticipation,
+  CoursePhaseParticipationWithStudent,
+} from '@tumaet/prompt-shared-state'
 import { updateCoursePhaseParticipation } from '@/network/mutations/updateCoursePhaseParticipationMetaData'
 
-interface ParticipantData {
-  id: string
-  courseParticipationID?: string
-  restrictedData?: Record<string, any>
-  [key: string]: any
-}
-
 interface MutationContext {
-  previousParticipants?: ParticipantData[]
+  previousParticipants?: CoursePhaseParticipationWithStudent[]
 }
 
 export const useUpdateCoursePhaseParticipation = (): UseMutationResult<
@@ -41,7 +37,7 @@ export const useUpdateCoursePhaseParticipation = (): UseMutationResult<
       await queryClient.cancelQueries({ queryKey: ['participants', phaseId] })
 
       // Snapshot the previous value
-      const previousParticipants = queryClient.getQueryData<ParticipantData[]>([
+      const previousParticipants = queryClient.getQueryData<CoursePhaseParticipationWithStudent[]>([
         'participants',
         phaseId,
       ])
@@ -49,7 +45,7 @@ export const useUpdateCoursePhaseParticipation = (): UseMutationResult<
       // Optimistically update the specific participation
       if (previousParticipants) {
         const updatedParticipants = previousParticipants.map((participant) => {
-          if (participant.id === newParticipationData.courseParticipationID) {
+          if (participant.courseParticipationID === newParticipationData.courseParticipationID) {
             return {
               ...participant,
               restrictedData: {
@@ -66,7 +62,6 @@ export const useUpdateCoursePhaseParticipation = (): UseMutationResult<
       return { previousParticipants }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['participants', phaseId] })
       toast({
         title: 'Success',
         description: 'Successfully updated the course participation.',
@@ -82,6 +77,10 @@ export const useUpdateCoursePhaseParticipation = (): UseMutationResult<
         description: 'Failed to update the course participation.',
         variant: 'destructive',
       })
+    },
+    onSettled: () => {
+      // Re-sync with server to ensure cache reflects the true state after success or error
+      queryClient.invalidateQueries({ queryKey: ['participants', phaseId] })
     },
   })
 
