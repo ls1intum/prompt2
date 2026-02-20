@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
-import { useParams } from 'react-router-dom'
-import { Loader2 } from 'lucide-react'
-import { ErrorPage } from '@tumaet/prompt-ui-components'
+import { useLocation, useNavigate, useParams } from 'react-router-dom'
+import { ChevronLeft, ChevronRight, Loader2 } from 'lucide-react'
+import { Button, ErrorPage } from '@tumaet/prompt-ui-components'
 import { GetApplication } from '@core/interfaces/application/getApplication'
 import { getApplicationAssessment } from '@core/network/queries/applicationAssessment'
 import { ApplicationForm } from '../../../../interfaces/form/applicationForm'
@@ -16,15 +16,71 @@ import { CourseEnrollmentSummary } from '@core/managementConsole/shared/componen
 import { StudentCourseEnrollment } from '@core/managementConsole/shared/components/StudentDetail/StudentCourseEnrollment'
 import { CourseEnrollment } from '@core/network/queries/getStudentEnrollments'
 import { ApplicationDetailPageLayout } from './components/ApplicationDetailPageLayout'
+import { PassStatus } from '@tumaet/prompt-shared-state'
+import { useMemo } from 'react'
+
+interface ApplicationDetailsLocationState {
+  filteredApplicationIds?: string[]
+}
+
+function getNavigationButtonColorClass(status: PassStatus | undefined): string {
+  switch (status) {
+    case PassStatus.PASSED:
+      return 'border-green-600 text-green-700 hover:bg-green-50'
+    case PassStatus.FAILED:
+      return 'border-red-600 text-red-700 hover:bg-red-50'
+    case PassStatus.NOT_ASSESSED:
+    default:
+      return 'border-gray-500 text-gray-700 hover:bg-gray-50'
+  }
+}
 
 export const ApplicationDetailsPage = () => {
   const { phaseId, participationId } = useParams<{ phaseId: string; participationId: string }>()
+  const navigate = useNavigate()
+  const location = useLocation()
   const { participations } = useApplicationStore()
+  const navigationState = (location.state as ApplicationDetailsLocationState | null) ?? null
+  const filteredApplicationIds = navigationState?.filteredApplicationIds
 
   const participation = participations.find((p) => p.courseParticipationID === participationId)
   const status = participation?.passStatus
   const score = participation?.score ?? null
   const restrictedData = participation?.restrictedData ?? {}
+  const participationById = useMemo(
+    () => new Map(participations.map((p) => [p.courseParticipationID, p])),
+    [participations],
+  )
+  const navigationOrder = useMemo(() => {
+    const candidateIds = filteredApplicationIds ?? []
+    const validUniqueIds = candidateIds.filter(
+      (id, index) => Boolean(id) && participationById.has(id) && candidateIds.indexOf(id) === index,
+    )
+
+    if (validUniqueIds.length > 0) {
+      return validUniqueIds
+    }
+
+    return participations.map((p) => p.courseParticipationID)
+  }, [filteredApplicationIds, participationById, participations])
+  const currentIndex = navigationOrder.findIndex((id) => id === participationId)
+  const previousParticipation =
+    currentIndex === -1 || navigationOrder.length <= 1
+      ? undefined
+      : participationById.get(
+          navigationOrder[(currentIndex - 1 + navigationOrder.length) % navigationOrder.length],
+        )
+  const nextParticipation =
+    currentIndex === -1 || navigationOrder.length <= 1
+      ? undefined
+      : participationById.get(navigationOrder[(currentIndex + 1) % navigationOrder.length])
+
+  const navigateToParticipation = (nextParticipationId: string) => {
+    navigate(`../${nextParticipationId}`, {
+      relative: 'path',
+      state: { filteredApplicationIds: navigationOrder },
+    })
+  }
 
   const {
     data: fetchedApplication,
@@ -83,6 +139,28 @@ export const ApplicationDetailsPage = () => {
 
   return (
     <div className='space-y-6'>
+      {previousParticipation && nextParticipation && (
+        <div className='flex justify-between'>
+          <Button
+            variant='outline'
+            className={`gap-2 ${getNavigationButtonColorClass(previousParticipation.passStatus)}`}
+            onClick={() => navigateToParticipation(previousParticipation.courseParticipationID)}
+          >
+            <ChevronLeft className='h-4 w-4' />
+            {previousParticipation.student.firstName} {previousParticipation.student.lastName}
+          </Button>
+
+          <Button
+            variant='outline'
+            className={`gap-2 ${getNavigationButtonColorClass(nextParticipation.passStatus)}`}
+            onClick={() => navigateToParticipation(nextParticipation.courseParticipationID)}
+          >
+            {nextParticipation.student.firstName} {nextParticipation.student.lastName}
+            <ChevronRight className='h-4 w-4' />
+          </Button>
+        </div>
+      )}
+
       {fetchedApplication?.student && status && (
         <StudentProfile student={fetchedApplication.student} status={status} />
       )}
