@@ -20,14 +20,12 @@ export const QuestionConfiguration = () => {
   const scrollRef = useRef<HTMLDivElement>(null)
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [toBeDeletedQuestionID, setToBeDeletedQuestionID] = useState<number | undefined>(undefined)
-  const isInitialLoadRef = useRef(true)
-
   const { mutate, isPending, error } = useUpdateCoursePhaseMetaData()
 
   // Debounced save function to prevent rapid-fire mutations
   const debouncedSave = useDebouncedCallback(
     (questions: InterviewQuestion[]) => {
-      if (coursePhase && !isInitialLoadRef.current) {
+      if (coursePhase) {
         mutate({
           id: coursePhase.id,
           restrictedData: {
@@ -45,18 +43,9 @@ export const QuestionConfiguration = () => {
       const questions = coursePhase.restrictedData?.interviewQuestions ?? []
       setInterviewQuestions(questions)
       setIsLoading(false)
-      // Mark initial load complete after state update
-      isInitialLoadRef.current = false
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [coursePhase?.id]) // Only depend on coursePhase.id, not the entire object
-
-  // Trigger save when questions change (but not on initial load)
-  useEffect(() => {
-    if (!isInitialLoadRef.current) {
-      debouncedSave(interviewQuestions)
-    }
-  }, [interviewQuestions, debouncedSave])
 
   const handleEnter = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
@@ -67,14 +56,14 @@ export const QuestionConfiguration = () => {
 
   const addQuestion = () => {
     if (newQuestion.trim()) {
-      setInterviewQuestions((prev) => [
-        ...prev,
-        {
-          id: Date.now(),
-          question: newQuestion.trim(),
-          orderNum: prev.length,
-        },
-      ])
+      const newEntry = {
+        id: Date.now(),
+        question: newQuestion.trim(),
+        orderNum: interviewQuestions.length,
+      }
+      const newQuestions = [...interviewQuestions, newEntry]
+      setInterviewQuestions(newQuestions)
+      debouncedSave(newQuestions)
       setNewQuestion('')
       requestAnimationFrame(() => {
         scrollToBottom()
@@ -84,7 +73,9 @@ export const QuestionConfiguration = () => {
 
   const deleteQuestion = () => {
     if (!toBeDeletedQuestionID) return
-    setInterviewQuestions((prev) => prev.filter((q) => q.id !== toBeDeletedQuestionID))
+    const newQuestions = interviewQuestions.filter((q) => q.id !== toBeDeletedQuestionID)
+    setInterviewQuestions(newQuestions)
+    debouncedSave(newQuestions)
     setToBeDeletedQuestionID(undefined)
   }
 
@@ -95,7 +86,9 @@ export const QuestionConfiguration = () => {
     const [reorderedItem] = newQuestions.splice(result.source.index, 1)
     newQuestions.splice(result.destination.index, 0, reorderedItem)
 
-    setInterviewQuestions(newQuestions.map((q, idx) => ({ ...q, orderNum: idx })))
+    const reorderedQuestions = newQuestions.map((q, idx) => ({ ...q, orderNum: idx }))
+    setInterviewQuestions(reorderedQuestions)
+    debouncedSave(reorderedQuestions)
   }
 
   const scrollToBottom = () => {
