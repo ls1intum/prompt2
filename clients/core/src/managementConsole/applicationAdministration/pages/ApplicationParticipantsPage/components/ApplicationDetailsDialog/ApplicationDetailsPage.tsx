@@ -16,23 +16,11 @@ import { CourseEnrollmentSummary } from '@core/managementConsole/shared/componen
 import { StudentCourseEnrollment } from '@core/managementConsole/shared/components/StudentDetail/StudentCourseEnrollment'
 import { CourseEnrollment } from '@core/network/queries/getStudentEnrollments'
 import { ApplicationDetailPageLayout } from './components/ApplicationDetailPageLayout'
-import { PassStatus } from '@tumaet/prompt-shared-state'
 import { useMemo } from 'react'
+import { getApplicationNavigationButtonColorClass } from '../table/getApplicationStatusBadge'
 
 interface ApplicationDetailsLocationState {
   filteredApplicationIds?: string[]
-}
-
-function getNavigationButtonColorClass(status: PassStatus | undefined): string {
-  switch (status) {
-    case PassStatus.PASSED:
-      return 'border-green-600 text-green-700 hover:bg-green-50'
-    case PassStatus.FAILED:
-      return 'border-red-600 text-red-700 hover:bg-red-50'
-    case PassStatus.NOT_ASSESSED:
-    default:
-      return 'border-gray-500 text-gray-700 hover:bg-gray-50'
-  }
 }
 
 export const ApplicationDetailsPage = () => {
@@ -143,7 +131,7 @@ export const ApplicationDetailsPage = () => {
         <div className='flex justify-between'>
           <Button
             variant='outline'
-            className={`gap-2 ${getNavigationButtonColorClass(previousParticipation.passStatus)}`}
+            className={`gap-2 ${getApplicationNavigationButtonColorClass(previousParticipation.passStatus)}`}
             onClick={() => navigateToParticipation(previousParticipation.courseParticipationID)}
           >
             <ChevronLeft className='h-4 w-4' />
@@ -152,7 +140,7 @@ export const ApplicationDetailsPage = () => {
 
           <Button
             variant='outline'
-            className={`gap-2 ${getNavigationButtonColorClass(nextParticipation.passStatus)}`}
+            className={`gap-2 ${getApplicationNavigationButtonColorClass(nextParticipation.passStatus)}`}
             onClick={() => navigateToParticipation(nextParticipation.courseParticipationID)}
           >
             {nextParticipation.student.firstName} {nextParticipation.student.lastName}
