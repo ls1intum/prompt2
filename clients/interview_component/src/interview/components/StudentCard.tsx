@@ -19,8 +19,8 @@ import { format } from 'date-fns'
 
 interface InterviewSlotData {
   id: string
-  start_time: string
-  end_time: string
+  startTime: string
+  endTime: string
   location: string | null
 }
 
@@ -58,13 +58,13 @@ export function StudentCard({ participation, interviewSlot }: StudentCardProps) 
           <div className='mt-2 space-y-1'>
             <div className='flex items-center gap-2 text-sm text-muted-foreground'>
               <Calendar className='h-3 w-3' />
-              <span>{format(new Date(interviewSlot.start_time), 'PPP')}</span>
+              <span>{format(new Date(interviewSlot.startTime), 'PPP')}</span>
             </div>
             <div className='flex items-center gap-2 text-sm text-muted-foreground'>
               <Clock className='h-3 w-3' />
               <span>
-                {format(new Date(interviewSlot.start_time), 'p')} -{' '}
-                {format(new Date(interviewSlot.end_time), 'p')}
+                {format(new Date(interviewSlot.startTime), 'p')} -{' '}
+                {format(new Date(interviewSlot.endTime), 'p')}
               </span>
             </div>
             {interviewSlot.location && (
