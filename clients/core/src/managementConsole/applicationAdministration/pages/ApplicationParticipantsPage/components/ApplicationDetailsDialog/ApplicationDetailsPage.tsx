@@ -165,9 +165,11 @@ export const ApplicationDetailsPage = () => {
                 questions={[
                   ...fetchedApplicationForm.questionsMultiSelect,
                   ...fetchedApplicationForm.questionsText,
+                  ...fetchedApplicationForm.questionsFileUpload,
                 ]}
                 answersMultiSelect={fetchedApplication.answersMultiSelect}
                 answersText={fetchedApplication.answersText}
+                answersFileUpload={fetchedApplication.answersFileUpload}
               />
             )}
 
