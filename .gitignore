@@ -1,4 +1,6 @@
 **.env
+**.env.dev
+.claude/
 .vscode/
 .idea/
 postgres_data/
