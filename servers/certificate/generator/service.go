@@ -35,6 +35,54 @@ type CertificateData struct {
 	Date        string `json:"date"`
 }
 
+// writeDataFiles writes the certificate data JSON to both data.json and vars.json
+// in the given directory, so templates using either filename convention will work.
+func writeDataFiles(tempDir string, certData CertificateData) error {
+	dataJSON, err := json.Marshal(certData)
+	if err != nil {
+		return fmt.Errorf("failed to marshal certificate data: %w", err)
+	}
+	for _, name := range []string{"data.json", "vars.json"} {
+		path := filepath.Join(tempDir, name)
+		if err := os.WriteFile(path, dataJSON, 0644); err != nil {
+			return fmt.Errorf("failed to write %s: %w", name, err)
+		}
+	}
+	return nil
+}
+
+// TypstCompilationError represents a Typst template compilation failure
+// with the raw compiler output for display to the user.
+type TypstCompilationError struct {
+	Output string
+}
+
+func (e *TypstCompilationError) Error() string {
+	return fmt.Sprintf("typst compilation failed: %s", e.Output)
+}
+
+// compileTypst runs the typst compiler on the template and returns the generated PDF bytes.
+func compileTypst(ctx context.Context, tempDir, templatePath string) ([]byte, error) {
+	outputPath := filepath.Join(tempDir, "certificate.pdf")
+	cmd := exec.CommandContext(ctx, "typst", "compile", templatePath, outputPath)
+	cmd.Dir = tempDir
+
+	if out, err := cmd.CombinedOutput(); err != nil {
+		log.WithFields(log.Fields{
+			"error":  err,
+			"output": string(out),
+		}).Error("Typst compilation failed")
+		return nil, &TypstCompilationError{Output: string(out)}
+	}
+
+	pdfData, err := os.ReadFile(outputPath)
+	if err != nil {
+		log.WithError(err).Error("Failed to read generated PDF")
+		return nil, fmt.Errorf("failed to read generated PDF: %w", err)
+	}
+	return pdfData, nil
+}
+
 func GenerateCertificate(ctx context.Context, authHeader string, coursePhaseID, studentID uuid.UUID) ([]byte, error) {
 	// Get template content
 	templateContent, err := config.GetTemplateContent(ctx, coursePhaseID)
@@ -86,36 +134,16 @@ func GenerateCertificate(ctx context.Context, authHeader string, coursePhaseID, 
 		Date:        time.Now().Format("January 2, 2006"),
 	}
 
-	// Write data JSON file
-	dataPath := filepath.Join(tempDir, "data.json")
-	dataJSON, err := json.Marshal(certData)
+	// Write data JSON files (data.json + vars.json for template compatibility)
+	if err := writeDataFiles(tempDir, certData); err != nil {
+		log.WithError(err).Error("Failed to write data files")
+		return nil, err
+	}
+
+	// Compile template to PDF
+	pdfData, err := compileTypst(ctx, tempDir, templatePath)
 	if err != nil {
-		log.WithError(err).Error("Failed to marshal certificate data")
-		return nil, fmt.Errorf("failed to marshal certificate data: %w", err)
-	}
-	if err := os.WriteFile(dataPath, dataJSON, 0644); err != nil {
-		log.WithError(err).Error("Failed to write data file")
-		return nil, fmt.Errorf("failed to write data file: %w", err)
-	}
-
-	// Generate PDF using typst
-	outputPath := filepath.Join(tempDir, "certificate.pdf")
-	cmd := exec.CommandContext(ctx, "typst", "compile", "--input", fmt.Sprintf("data=%s", dataPath), templatePath, outputPath)
-	cmd.Dir = tempDir
-
-	if out, err := cmd.CombinedOutput(); err != nil {
-		log.WithFields(log.Fields{
-			"error":  err,
-			"output": string(out),
-		}).Error("Typst compilation failed")
-		return nil, fmt.Errorf("typst compilation failed: %w, output: %s", err, out)
-	}
-
-	// Read generated PDF
-	pdfData, err := os.ReadFile(outputPath)
-	if err != nil {
-		log.WithError(err).Error("Failed to read generated PDF")
-		return nil, fmt.Errorf("failed to read generated PDF: %w", err)
+		return nil, err
 	}
 
 	// Record the download
@@ -129,4 +157,47 @@ func GenerateCertificate(ctx context.Context, authHeader string, coursePhaseID, 
 	}
 
 	return pdfData, nil
+}
+
+// GeneratePreviewCertificate creates a certificate PDF using mock data and the saved template.
+// This is used by instructors to preview how the certificate will look.
+func GeneratePreviewCertificate(ctx context.Context, coursePhaseID uuid.UUID) ([]byte, error) {
+	// Get template content
+	templateContent, err := config.GetTemplateContent(ctx, coursePhaseID)
+	if err != nil {
+		log.WithError(err).Error("Failed to get template content")
+		return nil, fmt.Errorf("no template configured: %w", err)
+	}
+
+	// Create temp directory for processing
+	tempDir, err := os.MkdirTemp("", "certificate-preview-*")
+	if err != nil {
+		log.WithError(err).Error("Failed to create temp directory")
+		return nil, fmt.Errorf("failed to create temp directory: %w", err)
+	}
+	defer os.RemoveAll(tempDir)
+
+	// Write template to temp file
+	templatePath := filepath.Join(tempDir, "template.typ")
+	if err := os.WriteFile(templatePath, []byte(templateContent), 0644); err != nil {
+		log.WithError(err).Error("Failed to write template file")
+		return nil, fmt.Errorf("failed to write template file: %w", err)
+	}
+
+	// Create mock certificate data
+	certData := CertificateData{
+		StudentName: "Jane Doe",
+		CourseName:  "iPraktikum",
+		TeamName:    "Hermes",
+		Date:        time.Now().Format("January 2, 2006"),
+	}
+
+	// Write data JSON files (data.json + vars.json for template compatibility)
+	if err := writeDataFiles(tempDir, certData); err != nil {
+		log.WithError(err).Error("Failed to write data files")
+		return nil, err
+	}
+
+	// Compile template to PDF
+	return compileTypst(ctx, tempDir, templatePath)
 }

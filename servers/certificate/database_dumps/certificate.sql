@@ -34,7 +34,7 @@ INSERT INTO
     )
 VALUES (
         '10000000-0000-0000-0000-000000000001',
-        '#let data = json(sys.inputs.data)
+        '#let data = json("data.json")
 #set page(paper: "a4")
 = Certificate of Completion
 #v(2cm)
@@ -56,6 +56,22 @@ INSERT INTO
 VALUES (
         '10000000-0000-0000-0000-000000000002',
         NULL,
+        NOW(),
+        NOW()
+    );
+
+-- Seed: course phase config with invalid template (for testing compilation errors)
+INSERT INTO
+    course_phase_config (
+        course_phase_id,
+        template_content,
+        created_at,
+        updated_at
+    )
+VALUES (
+        '10000000-0000-0000-0000-000000000003',
+        '#let data = json("nonexistent.json")
+#data.studentName',
         NOW(),
         NOW()
     );

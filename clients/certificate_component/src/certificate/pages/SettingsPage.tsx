@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { Loader2, Upload, FileText, CheckCircle2 } from 'lucide-react'
+import { Loader2, Upload, FileText, CheckCircle2, Eye, AlertCircle, X } from 'lucide-react'
 
 import {
   Button,
@@ -13,10 +13,14 @@ import {
   Textarea,
   ManagementPageHeader,
   ErrorPage,
+  Alert,
+  AlertDescription,
+  AlertTitle,
   useToast,
 } from '@tumaet/prompt-ui-components'
 
 import { getConfig, updateConfig } from '../network/queries/getConfig'
+import { previewCertificate, type PreviewError } from '../network/queries/previewCertificate'
 
 export const SettingsPage = () => {
   const { phaseId } = useParams<{ phaseId: string }>()
@@ -24,6 +28,8 @@ export const SettingsPage = () => {
   const { toast } = useToast()
   const [templateContent, setTemplateContent] = useState('')
   const [hasChanges, setHasChanges] = useState(false)
+  const [isPreviewing, setIsPreviewing] = useState(false)
+  const [compilerError, setCompilerError] = useState<string | null>(null)
 
   const {
     data: config,
@@ -80,6 +86,45 @@ export const SettingsPage = () => {
   const handleSave = () => {
     if (templateContent) {
       updateMutation.mutate(templateContent)
+    }
+  }
+
+  const handlePreview = async () => {
+    if (!phaseId || !templateContent) return
+
+    setIsPreviewing(true)
+    setCompilerError(null)
+    try {
+      // Save first if there are unsaved changes
+      if (hasChanges) {
+        await updateConfig(phaseId, templateContent)
+        queryClient.invalidateQueries({ queryKey: ['config', phaseId] })
+        setHasChanges(false)
+        toast({
+          title: 'Template saved',
+          description: 'Template saved before generating preview',
+        })
+      }
+
+      const blob = await previewCertificate(phaseId)
+      const url = window.URL.createObjectURL(blob)
+      window.open(url, '_blank')
+      // Revoke after a delay to allow the tab to load
+      setTimeout(() => window.URL.revokeObjectURL(url), 10000)
+    } catch (error: unknown) {
+      console.error('Failed to generate preview:', error)
+      const previewError = error as PreviewError
+      if (previewError?.compilerOutput) {
+        setCompilerError(previewError.compilerOutput)
+      } else {
+        toast({
+          title: 'Preview failed',
+          description: 'Failed to generate certificate preview. Make sure the template is valid.',
+          variant: 'destructive',
+        })
+      }
+    } finally {
+      setIsPreviewing(false)
     }
   }
 
@@ -169,18 +214,60 @@ export const SettingsPage = () => {
               className='font-mono text-sm'
             />
 
-            <Button onClick={handleSave} disabled={!hasChanges || updateMutation.isPending}>
-              {updateMutation.isPending ? (
-                <>
-                  <Loader2 className='mr-2 h-4 w-4 animate-spin' />
-                  Saving...
-                </>
-              ) : (
-                'Save Template'
-              )}
-            </Button>
+            <div className='flex items-center gap-3'>
+              <Button onClick={handleSave} disabled={!hasChanges || updateMutation.isPending}>
+                {updateMutation.isPending ? (
+                  <>
+                    <Loader2 className='mr-2 h-4 w-4 animate-spin' />
+                    Saving...
+                  </>
+                ) : (
+                  'Save Template'
+                )}
+              </Button>
+
+              <Button
+                variant='outline'
+                onClick={handlePreview}
+                disabled={!templateContent || isPreviewing || updateMutation.isPending}
+              >
+                {isPreviewing ? (
+                  <>
+                    <Loader2 className='mr-2 h-4 w-4 animate-spin' />
+                    Generating...
+                  </>
+                ) : (
+                  <>
+                    <Eye className='mr-2 h-4 w-4' />
+                    Test Certificate
+                  </>
+                )}
+              </Button>
+            </div>
           </CardContent>
         </Card>
+
+        {compilerError && (
+          <Alert variant='destructive'>
+            <AlertCircle className='h-4 w-4' />
+            <AlertTitle className='flex items-center justify-between'>
+              Template Compilation Error
+              <Button
+                variant='ghost'
+                size='sm'
+                className='h-6 w-6 p-0'
+                onClick={() => setCompilerError(null)}
+              >
+                <X className='h-4 w-4' />
+              </Button>
+            </AlertTitle>
+            <AlertDescription>
+              <pre className='mt-2 whitespace-pre-wrap break-words rounded bg-destructive/10 p-3 font-mono text-xs'>
+                {compilerError}
+              </pre>
+            </AlertDescription>
+          </Alert>
+        )}
 
         <Card>
           <CardHeader>
@@ -199,6 +286,7 @@ export const SettingsPage = () => {
               <li>
                 Available fields: <code className='bg-muted px-1 rounded'>studentName</code>,{' '}
                 <code className='bg-muted px-1 rounded'>courseName</code>,{' '}
+                <code className='bg-muted px-1 rounded'>teamName</code>,{' '}
                 <code className='bg-muted px-1 rounded'>date</code>
               </li>
               <li>Template should be in A4 format</li>

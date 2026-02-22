@@ -3,9 +3,12 @@ package generator
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/gin-gonic/gin"
@@ -175,6 +178,164 @@ func assertJSONError(t *testing.T, body []byte) {
 	assert.NoError(t, err)
 	_, hasError := result["error"]
 	assert.True(t, hasError, "Response should contain an error field")
+}
+
+// --- Preview endpoint tests ---
+
+func (s *GeneratorRouterTestSuite) TestPreviewCertificate_InvalidCoursePhaseID() {
+	url := "/api/course_phase/not-a-uuid/certificate/preview"
+
+	req, _ := http.NewRequest("GET", url, nil)
+	resp := httptest.NewRecorder()
+	s.router.ServeHTTP(resp, req)
+
+	assert.Equal(s.T(), http.StatusBadRequest, resp.Code)
+	assertJSONError(s.T(), resp.Body.Bytes())
+}
+
+func (s *GeneratorRouterTestSuite) TestPreviewCertificate_NoTemplate() {
+	// Phase 2 has NULL template
+	coursePhaseID := uuid.MustParse("10000000-0000-0000-0000-000000000002")
+	url := fmt.Sprintf("/api/course_phase/%s/certificate/preview", coursePhaseID)
+
+	req, _ := http.NewRequest("GET", url, nil)
+	resp := httptest.NewRecorder()
+	s.router.ServeHTTP(resp, req)
+
+	assert.Equal(s.T(), http.StatusInternalServerError, resp.Code)
+	assertJSONError(s.T(), resp.Body.Bytes())
+}
+
+func (s *GeneratorRouterTestSuite) TestPreviewCertificate_NonExistentPhase() {
+	nonExistentID := uuid.New()
+	url := fmt.Sprintf("/api/course_phase/%s/certificate/preview", nonExistentID)
+
+	req, _ := http.NewRequest("GET", url, nil)
+	resp := httptest.NewRecorder()
+	s.router.ServeHTTP(resp, req)
+
+	assert.Equal(s.T(), http.StatusInternalServerError, resp.Code)
+}
+
+func (s *GeneratorRouterTestSuite) TestPreviewCertificate_Success() {
+	// Phase 1 has a valid template
+	coursePhaseID := uuid.MustParse("10000000-0000-0000-0000-000000000001")
+	url := fmt.Sprintf("/api/course_phase/%s/certificate/preview", coursePhaseID)
+
+	req, _ := http.NewRequest("GET", url, nil)
+	resp := httptest.NewRecorder()
+	s.router.ServeHTTP(resp, req)
+
+	assert.Equal(s.T(), http.StatusOK, resp.Code)
+	assert.Equal(s.T(), "application/pdf", resp.Header().Get("Content-Type"))
+	assert.Contains(s.T(), resp.Header().Get("Content-Disposition"), "certificate_preview.pdf")
+	// PDF files start with %PDF
+	assert.True(s.T(), len(resp.Body.Bytes()) > 0)
+	assert.Equal(s.T(), "%PDF", string(resp.Body.Bytes()[:4]))
+}
+
+func (s *GeneratorRouterTestSuite) TestPreviewCertificate_CompilationError() {
+	// Phase 3 has an invalid template (references nonexistent.json)
+	coursePhaseID := uuid.MustParse("10000000-0000-0000-0000-000000000003")
+	url := fmt.Sprintf("/api/course_phase/%s/certificate/preview", coursePhaseID)
+
+	req, _ := http.NewRequest("GET", url, nil)
+	resp := httptest.NewRecorder()
+	s.router.ServeHTTP(resp, req)
+
+	assert.Equal(s.T(), http.StatusUnprocessableEntity, resp.Code)
+
+	var result map[string]interface{}
+	err := json.Unmarshal(resp.Body.Bytes(), &result)
+	assert.NoError(s.T(), err)
+	assert.Equal(s.T(), "Template compilation failed", result["error"])
+	compilerOutput, ok := result["compilerOutput"].(string)
+	assert.True(s.T(), ok, "Response should contain compilerOutput")
+	assert.Contains(s.T(), compilerOutput, "nonexistent.json")
+}
+
+// --- Unit tests for helper functions ---
+
+func (s *GeneratorRouterTestSuite) TestWriteDataFiles() {
+	tempDir, err := os.MkdirTemp("", "test-write-data-*")
+	assert.NoError(s.T(), err)
+	defer os.RemoveAll(tempDir)
+
+	certData := CertificateData{
+		StudentName: "Alice Smith",
+		CourseName:  "Test Course",
+		TeamName:    "Alpha",
+		Date:        "January 1, 2026",
+	}
+
+	err = writeDataFiles(tempDir, certData)
+	assert.NoError(s.T(), err)
+
+	// Both files should exist with identical content
+	for _, name := range []string{"data.json", "vars.json"} {
+		content, err := os.ReadFile(filepath.Join(tempDir, name))
+		assert.NoError(s.T(), err)
+
+		var parsed CertificateData
+		err = json.Unmarshal(content, &parsed)
+		assert.NoError(s.T(), err)
+		assert.Equal(s.T(), certData, parsed)
+	}
+}
+
+func (s *GeneratorRouterTestSuite) TestTypstCompilationError_Interface() {
+	typstErr := &TypstCompilationError{Output: "error: unknown variable"}
+	assert.Contains(s.T(), typstErr.Error(), "unknown variable")
+
+	// Should be detectable with errors.As
+	var target *TypstCompilationError
+	assert.True(s.T(), errors.As(typstErr, &target))
+	assert.Equal(s.T(), "error: unknown variable", target.Output)
+}
+
+func (s *GeneratorRouterTestSuite) TestCompileTypst_InvalidTemplate() {
+	tempDir, err := os.MkdirTemp("", "test-compile-*")
+	assert.NoError(s.T(), err)
+	defer os.RemoveAll(tempDir)
+
+	// Write an invalid template
+	templatePath := filepath.Join(tempDir, "bad.typ")
+	err = os.WriteFile(templatePath, []byte(`#let x = json("missing.json")`), 0644)
+	assert.NoError(s.T(), err)
+
+	_, err = compileTypst(s.suiteCtx, tempDir, templatePath)
+	assert.Error(s.T(), err)
+
+	var typstErr *TypstCompilationError
+	assert.True(s.T(), errors.As(err, &typstErr))
+	assert.Contains(s.T(), typstErr.Output, "missing.json")
+}
+
+func (s *GeneratorRouterTestSuite) TestCompileTypst_ValidTemplate() {
+	tempDir, err := os.MkdirTemp("", "test-compile-*")
+	assert.NoError(s.T(), err)
+	defer os.RemoveAll(tempDir)
+
+	// Write data files
+	certData := CertificateData{
+		StudentName: "Bob",
+		CourseName:  "Testing",
+		TeamName:    "Beta",
+		Date:        "Today",
+	}
+	err = writeDataFiles(tempDir, certData)
+	assert.NoError(s.T(), err)
+
+	// Write a valid template
+	templatePath := filepath.Join(tempDir, "good.typ")
+	err = os.WriteFile(templatePath, []byte(`#let d = json("data.json")
+#d.studentName - #d.courseName`), 0644)
+	assert.NoError(s.T(), err)
+
+	pdfData, err := compileTypst(s.suiteCtx, tempDir, templatePath)
+	assert.NoError(s.T(), err)
+	assert.True(s.T(), len(pdfData) > 0)
+	assert.Equal(s.T(), "%PDF", string(pdfData[:4]))
 }
 
 func TestGeneratorRouterTestSuite(t *testing.T) {

@@ -1,4 +1,17 @@
 # Certificate Service
+###########################################
+todos 
+- Update readme
+- Add documentation for template format 
+- Add a test button to the admin interface to generate a certificate with mock data
+- Fix the settings window alignment and spacing issues
+- Fix the participants table - currenlty results in internal server error 
+- get rid of remaining minio parts 
+- Add option to include graphics in the certificate template (e.g. course logo, chair logo, etc.)
+- make sure the docker image is present, is working and built similar to the other services (e.g. with a multi-stage build and using the same base image as the other services) and includes the typst compiler 
+- make sure the docker image is built in the github workflow and pushed to the registry
+
+###########################################
 
 A microservice for generating and managing course completion certificates in the PROMPT platform.
 

@@ -1,6 +1,7 @@
 package generator
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 
@@ -23,6 +24,9 @@ func setupGeneratorRouter(routerGroup *gin.RouterGroup, authMiddleware func(allo
 
 	// Status endpoint for students
 	generatorRouter.GET("/status", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor, promptSDK.CourseStudent), getCertificateStatus)
+
+	// Preview endpoint for instructors - generates certificate with mock data
+	generatorRouter.GET("/preview", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), previewCertificate)
 }
 
 func downloadOwnCertificate(c *gin.Context) {
@@ -149,6 +153,34 @@ func getCertificateStatus(c *gin.Context) {
 		"lastDownload":  lastDownload,
 		"downloadCount": download.DownloadCount,
 	})
+}
+
+func previewCertificate(c *gin.Context) {
+	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
+	if err != nil {
+		log.WithError(err).Error("Failed to parse course phase ID")
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid course phase ID"})
+		return
+	}
+
+	pdfData, err := GeneratePreviewCertificate(c, coursePhaseID)
+	if err != nil {
+		log.WithError(err).Error("Failed to generate preview certificate")
+		var typstErr *TypstCompilationError
+		if errors.As(err, &typstErr) {
+			c.JSON(http.StatusUnprocessableEntity, gin.H{
+				"error":         "Template compilation failed",
+				"compilerOutput": typstErr.Output,
+			})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.Header("Content-Disposition", "inline; filename=certificate_preview.pdf")
+	c.Header("Content-Type", "application/pdf")
+	c.Data(http.StatusOK, "application/pdf", pdfData)
 }
 
 func getTemplateStatus(c *gin.Context, coursePhaseID uuid.UUID) (bool, error) {
