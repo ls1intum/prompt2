@@ -119,7 +119,6 @@ func SetupMockCoreService() (*httptest.Server, func()) {
 		}
 
 		c.JSON(http.StatusOK, gin.H{
-			// SDK resolution format
 			"participations": participationData,
 			"resolutions": []gin.H{
 				{
@@ -129,8 +128,6 @@ func SetupMockCoreService() (*httptest.Server, func()) {
 					"coursePhaseID": phaseID,
 				},
 			},
-			// Direct API format (used by participants service)
-			"coursePhaseParticipations": participationData,
 		})
 	})
 

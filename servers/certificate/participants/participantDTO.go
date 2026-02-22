@@ -21,7 +21,7 @@ type CoursePhaseParticipation struct {
 }
 
 type CoursePhaseParticipationsResponse struct {
-	CoursePhaseParticipations []CoursePhaseParticipation `json:"coursePhaseParticipations"`
+	CoursePhaseParticipations []CoursePhaseParticipation `json:"participations"`
 }
 
 type ParticipantWithDownloadStatus struct {
