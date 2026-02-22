@@ -1,22 +1,26 @@
 BEGIN;
 
--- Certificate metadata table to track generated certificates
-CREATE TABLE certificate_metadata (
+-- Course phase configuration for certificate settings
+CREATE TABLE course_phase_config (
+    course_phase_id     uuid PRIMARY KEY,
+    template_content    text,  -- Typst template content stored directly
+    created_at          timestamp with time zone NOT NULL DEFAULT NOW(),
+    updated_at          timestamp with time zone NOT NULL DEFAULT NOW()
+);
+
+-- Certificate download tracking per student per course phase
+CREATE TABLE certificate_download (
     id                  SERIAL PRIMARY KEY,
     student_id          uuid NOT NULL,
-    course_id           uuid NOT NULL,
-    generated_at        timestamp with time zone NOT NULL DEFAULT NOW(),
-    last_download       timestamp with time zone,
-    download_count      integer NOT NULL DEFAULT 0,
-    certificate_url     text NOT NULL,
-
--- Add indexes for performance
-CONSTRAINT idx_certificate_metadata_student_course UNIQUE (student_id, course_id)
+    course_phase_id     uuid NOT NULL,
+    first_download      timestamp with time zone NOT NULL DEFAULT NOW(),
+    last_download       timestamp with time zone NOT NULL DEFAULT NOW(),
+    download_count      integer NOT NULL DEFAULT 1,
+    CONSTRAINT idx_certificate_download_student_phase UNIQUE (student_id, course_phase_id)
 );
 
 -- Indexes
-CREATE INDEX idx_certificate_metadata_student_id ON certificate_metadata (student_id);
-
-CREATE INDEX idx_certificate_metadata_course_id ON certificate_metadata (course_id);
+CREATE INDEX idx_certificate_download_student_id ON certificate_download (student_id);
+CREATE INDEX idx_certificate_download_course_phase_id ON certificate_download (course_phase_id);
 
 COMMIT;

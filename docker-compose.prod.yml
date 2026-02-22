@@ -50,7 +50,8 @@ services:
       - prompt-network
     healthcheck:
       # BusyBox wget in nginx:alpine does not support --spider/--tries flags; use simple fetch instead
-      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1/ >/dev/null 2>&1 || exit 1"]
+      test:
+        ["CMD-SHELL", "wget -qO- http://127.0.0.1/ >/dev/null 2>&1 || exit 1"]
       interval: 30s
       timeout: 3s
       start_period: 5s
@@ -278,8 +279,8 @@ services:
       - CORE_HOST
       - SERVER_CORE_HOST
       - SERVER_ADDRESS
-      - DB_HOST=db-certificate
-      - DB_PORT=5432
+      - DB_HOST_CERTIFICATE=db-certificate
+      - DB_PORT_CERTIFICATE=5432
       - DB_USER
       - DB_NAME
       - DB_PASSWORD
@@ -291,6 +292,7 @@ services:
       - MINIO_SECRET_KEY
       - MINIO_BUCKET_NAME=certificates
       - MINIO_TEMPLATE_BUCKET_NAME=certificate-templates
+      - SENTRY_DSN_CERTIFICATE
     networks:
       - prompt-network
 
@@ -415,7 +417,7 @@ services:
       - prompt-network
 
   db-certificate:
-    image: "postgres:15.2-alpine"
+    image: "postgres:15.16-alpine"
     container_name: prompt-db-certificate
     environment:
       - POSTGRES_USER=${DB_USER}

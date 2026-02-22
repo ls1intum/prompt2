@@ -1,0 +1,162 @@
+import { useMemo, useState } from 'react'
+import { useParams } from 'react-router-dom'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { Download, Loader2, CheckCircle2, XCircle } from 'lucide-react'
+
+import { Button, ManagementPageHeader, ErrorPage, PromptTable } from '@tumaet/prompt-ui-components'
+import { ColumnDef } from '@tanstack/react-table'
+
+import { ParticipantWithDownloadStatus } from '../interfaces/participant'
+import { getParticipants } from '../network/queries/getParticipants'
+import {
+  downloadStudentCertificate,
+  triggerBlobDownload,
+} from '../network/queries/downloadCertificate'
+
+export const ParticipantsPage = () => {
+  const { phaseId } = useParams<{ phaseId: string }>()
+  const queryClient = useQueryClient()
+  const [downloadingId, setDownloadingId] = useState<string | null>(null)
+
+  const {
+    data: participants,
+    isPending,
+    isError,
+    refetch,
+  } = useQuery({
+    queryKey: ['participants', phaseId],
+    queryFn: () => getParticipants(phaseId ?? ''),
+    enabled: !!phaseId,
+  })
+
+  const handleDownload = async (studentId: string, lastName: string) => {
+    if (!phaseId) return
+
+    setDownloadingId(studentId)
+    try {
+      const blob = await downloadStudentCertificate(phaseId, studentId)
+      triggerBlobDownload(blob, `certificate_${lastName}.pdf`)
+      // Refresh participants to update download status
+      queryClient.invalidateQueries({ queryKey: ['participants', phaseId] })
+    } catch (error) {
+      console.error('Failed to download certificate:', error)
+    } finally {
+      setDownloadingId(null)
+    }
+  }
+
+  const columns: ColumnDef<ParticipantWithDownloadStatus>[] = useMemo(
+    () => [
+      {
+        accessorKey: 'firstName',
+        header: 'First Name',
+      },
+      {
+        accessorKey: 'lastName',
+        header: 'Last Name',
+      },
+      {
+        accessorKey: 'email',
+        header: 'Email',
+      },
+      {
+        accessorKey: 'hasDownloaded',
+        header: 'Download Status',
+        cell: ({ row }) => {
+          const hasDownloaded = row.original.hasDownloaded
+          return (
+            <div className='flex items-center gap-2'>
+              {hasDownloaded ? (
+                <>
+                  <CheckCircle2 className='h-4 w-4 text-green-500' />
+                  <span className='text-green-600'>Downloaded</span>
+                </>
+              ) : (
+                <>
+                  <XCircle className='h-4 w-4 text-muted-foreground' />
+                  <span className='text-muted-foreground'>Not downloaded</span>
+                </>
+              )}
+            </div>
+          )
+        },
+      },
+      {
+        accessorKey: 'lastDownload',
+        header: 'Last Download',
+        cell: ({ row }) => {
+          const lastDownload = row.original.lastDownload
+          if (!lastDownload) return <span className='text-muted-foreground'>-</span>
+          return new Date(lastDownload).toLocaleDateString()
+        },
+      },
+      {
+        accessorKey: 'downloadCount',
+        header: 'Downloads',
+        cell: ({ row }) => {
+          return row.original.downloadCount || 0
+        },
+      },
+      {
+        id: 'actions',
+        header: 'Actions',
+        cell: ({ row }) => {
+          const studentId = row.original.id
+          const isDownloading = downloadingId === studentId
+          return (
+            <Button
+              size='sm'
+              variant='outline'
+              onClick={() => handleDownload(studentId, row.original.lastName)}
+              disabled={isDownloading}
+            >
+              {isDownloading ? (
+                <Loader2 className='h-4 w-4 animate-spin' />
+              ) : (
+                <>
+                  <Download className='mr-2 h-4 w-4' />
+                  Download
+                </>
+              )}
+            </Button>
+          )
+        },
+      },
+    ],
+    [downloadingId, phaseId],
+  )
+
+  if (isError) {
+    return <ErrorPage message='Error loading participants' onRetry={refetch} />
+  }
+
+  if (isPending) {
+    return (
+      <div className='flex justify-center items-center h-64'>
+        <Loader2 className='h-12 w-12 animate-spin text-primary' />
+      </div>
+    )
+  }
+
+  const downloadedCount = participants?.filter((p) => p.hasDownloaded).length ?? 0
+  const totalCount = participants?.length ?? 0
+
+  return (
+    <div className='flex flex-col'>
+      <ManagementPageHeader>Certificate Participants</ManagementPageHeader>
+      <p className='text-sm text-muted-foreground mb-4'>
+        View and download certificates for all participants.
+      </p>
+
+      <div className='mb-4 p-4 bg-muted rounded-lg'>
+        <p className='text-sm'>
+          <span className='font-medium'>{downloadedCount}</span> of{' '}
+          <span className='font-medium'>{totalCount}</span> participants have downloaded their
+          certificate.
+        </p>
+      </div>
+
+      <PromptTable columns={columns} data={participants ?? []} />
+    </div>
+  )
+}
