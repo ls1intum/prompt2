@@ -3,12 +3,15 @@ package participants
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
 	"time"
 
 	"github.com/google/uuid"
+	promptSDK "github.com/ls1intum/prompt-sdk"
+	"github.com/ls1intum/prompt-sdk/promptTypes"
 	db "github.com/ls1intum/prompt2/servers/certificate/db/sqlc"
 	"github.com/ls1intum/prompt2/servers/certificate/utils"
 	log "github.com/sirupsen/logrus"
@@ -181,4 +184,164 @@ func GetStudentInfo(ctx context.Context, authHeader string, coursePhaseID, stude
 	}
 
 	return &participation.Student, nil
+}
+
+// GetStudentTeamName resolves the team name for a student in a given course phase.
+// It uses the prompt-sdk resolution system to fetch:
+// 1. The list of teams (with names) from the course phase data resolutions
+// 2. The student's team allocation UUID from participation resolutions
+// Then matches them to return the team name.
+// Returns empty string (no error) if no team is allocated.
+func GetStudentTeamName(ctx context.Context, authHeader string, coursePhaseID, studentID uuid.UUID) (string, error) {
+	coreURL := utils.GetCoreUrl()
+
+	// Fetch teams from course phase data resolutions
+	cpData, err := promptSDK.FetchAndMergeCoursePhaseWithResolution(coreURL, authHeader, coursePhaseID)
+	if err != nil {
+		log.WithError(err).Warn("Could not fetch course phase resolutions for teams")
+		return "", nil
+	}
+
+	teamsRaw, teamsExist := cpData["teams"]
+	if !teamsExist {
+		log.Debug("No teams found in course phase data")
+		return "", nil
+	}
+
+	teams, err := parseTeams(teamsRaw)
+	if err != nil {
+		log.WithError(err).Warn("Failed to parse teams from course phase data")
+		return "", nil
+	}
+
+	if len(teams) == 0 {
+		return "", nil
+	}
+
+	// Fetch all participations with resolutions to find the student's team allocation
+	participations, err := promptSDK.FetchAndMergeParticipationsWithResolutions(coreURL, authHeader, coursePhaseID)
+	if err != nil {
+		log.WithError(err).Warn("Could not fetch participations with resolutions for team lookup")
+		return "", nil
+	}
+
+	// Find the participation matching this student
+	var teamIDStr string
+	for _, p := range participations {
+		if p.Student.ID == studentID {
+			if val, ok := p.PrevData["teamAllocation"].(string); ok {
+				teamIDStr = val
+			}
+			break
+		}
+	}
+
+	if teamIDStr == "" {
+		log.Debug("No team allocation found for student")
+		return "", nil
+	}
+
+	teamID, err := uuid.Parse(teamIDStr)
+	if err != nil {
+		log.WithError(err).Warn("Invalid team allocation UUID")
+		return "", nil
+	}
+
+	// Find team name by ID
+	for _, team := range teams {
+		if team.ID == teamID {
+			return team.Name, nil
+		}
+	}
+
+	log.WithField("teamID", teamID).Warn("Team ID from allocation not found in teams list")
+	return "", nil
+}
+
+// parseTeams parses the teams slice from the course phase resolution metadata.
+func parseTeams(teamsRaw interface{}) ([]promptTypes.Team, error) {
+	teams := make([]promptTypes.Team, 0)
+	if teamsRaw == nil {
+		return teams, nil
+	}
+
+	teamsSlice, ok := teamsRaw.([]interface{})
+	if !ok {
+		return nil, errors.New("invalid teams data structure")
+	}
+
+	for i, teamData := range teamsSlice {
+		if team, ok := parseTeam(teamData, i); ok {
+			teams = append(teams, team)
+		}
+	}
+	return teams, nil
+}
+
+// parseTeam parses individual team data from a map interface.
+func parseTeam(teamData interface{}, index int) (promptTypes.Team, bool) {
+	teamMap, ok := teamData.(map[string]interface{})
+	if !ok {
+		log.Warnf("Skipping team at index %d: not a valid map", index)
+		return promptTypes.Team{}, false
+	}
+
+	teamIDStr, ok := teamMap["id"].(string)
+	if !ok {
+		log.Warnf("Skipping team at index %d: missing or invalid 'id'", index)
+		return promptTypes.Team{}, false
+	}
+	teamID, err := uuid.Parse(teamIDStr)
+	if err != nil {
+		log.Warnf("Skipping team at index %d: invalid UUID: %v", index, err)
+		return promptTypes.Team{}, false
+	}
+
+	teamName, ok := teamMap["name"].(string)
+	if !ok {
+		log.Warnf("Skipping team at index %d: missing or invalid 'name'", index)
+		return promptTypes.Team{}, false
+	}
+
+	members := parsePersons(teamMap["members"])
+	tutors := parsePersons(teamMap["tutors"])
+
+	return promptTypes.Team{
+		ID:      teamID,
+		Name:    teamName,
+		Members: members,
+		Tutors:  tutors,
+	}, true
+}
+
+// parsePersons parses a slice of person data from a raw interface.
+func parsePersons(personsRaw interface{}) []promptTypes.Person {
+	persons := make([]promptTypes.Person, 0)
+	if personsRaw == nil {
+		return persons
+	}
+
+	personsSlice, ok := personsRaw.([]interface{})
+	if !ok {
+		return persons
+	}
+
+	for _, personData := range personsSlice {
+		memberMap, ok := personData.(map[string]interface{})
+		if !ok {
+			continue
+		}
+		id, err := uuid.Parse(fmt.Sprintf("%v", memberMap["id"]))
+		if err != nil {
+			continue
+		}
+		firstName, _ := memberMap["firstName"].(string)
+		lastName, _ := memberMap["lastName"].(string)
+		persons = append(persons, promptTypes.Person{
+			ID:        id,
+			FirstName: firstName,
+			LastName:  lastName,
+		})
+	}
+	return persons
 }

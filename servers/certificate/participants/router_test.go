@@ -98,6 +98,33 @@ func (s *ParticipantsRouterTestSuite) TestGetParticipants_InvalidID() {
 	assert.Equal(s.T(), http.StatusBadRequest, resp.Code)
 }
 
+func (s *ParticipantsRouterTestSuite) TestGetStudentTeamName() {
+	coursePhaseID := uuid.MustParse("10000000-0000-0000-0000-000000000001")
+	studentID := uuid.MustParse("30000000-0000-0000-0000-000000000001")
+
+	teamName, err := GetStudentTeamName(s.suiteCtx, "Bearer mock-token", coursePhaseID, studentID)
+	assert.NoError(s.T(), err)
+	assert.Equal(s.T(), "BMW", teamName)
+}
+
+func (s *ParticipantsRouterTestSuite) TestGetStudentTeamName_SecondStudent() {
+	coursePhaseID := uuid.MustParse("10000000-0000-0000-0000-000000000001")
+	studentID := uuid.MustParse("30000000-0000-0000-0000-000000000002")
+
+	teamName, err := GetStudentTeamName(s.suiteCtx, "Bearer mock-token", coursePhaseID, studentID)
+	assert.NoError(s.T(), err)
+	assert.Equal(s.T(), "Siemens", teamName)
+}
+
+func (s *ParticipantsRouterTestSuite) TestGetStudentTeamName_UnknownStudent() {
+	coursePhaseID := uuid.MustParse("10000000-0000-0000-0000-000000000001")
+	unknownStudentID := uuid.New()
+
+	teamName, err := GetStudentTeamName(s.suiteCtx, "Bearer mock-token", coursePhaseID, unknownStudentID)
+	assert.NoError(s.T(), err)
+	assert.Empty(s.T(), teamName)
+}
+
 func TestParticipantsRouterTestSuite(t *testing.T) {
 	suite.Run(t, new(ParticipantsRouterTestSuite))
 }

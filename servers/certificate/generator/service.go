@@ -31,6 +31,7 @@ func NewGeneratorService(queries db.Queries) *GeneratorService {
 type CertificateData struct {
 	StudentName string `json:"studentName"`
 	CourseName  string `json:"courseName"`
+	TeamName    string `json:"teamName"`
 	Date        string `json:"date"`
 }
 
@@ -56,6 +57,12 @@ func GenerateCertificate(ctx context.Context, authHeader string, coursePhaseID, 
 		return nil, fmt.Errorf("failed to get course info: %w", err)
 	}
 
+	// Resolve team name (best-effort, non-fatal if not available)
+	teamName, err := participants.GetStudentTeamName(ctx, authHeader, coursePhaseID, studentID)
+	if err != nil {
+		log.WithError(err).Warn("Could not resolve team name, continuing without it")
+	}
+
 	// Create temp directory for processing
 	tempDir, err := os.MkdirTemp("", "certificate-*")
 	if err != nil {
@@ -75,6 +82,7 @@ func GenerateCertificate(ctx context.Context, authHeader string, coursePhaseID, 
 	certData := CertificateData{
 		StudentName: fmt.Sprintf("%s %s", student.FirstName, student.LastName),
 		CourseName:  coursePhase.Course.Name,
+		TeamName:    teamName,
 		Date:        time.Now().Format("January 2, 2006"),
 	}
 

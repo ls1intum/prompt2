@@ -13,6 +13,9 @@ func SetupMockCoreService() (*httptest.Server, func()) {
 	gin.SetMode(gin.TestMode)
 	router := gin.New()
 
+	// We need to create the server first to know its URL for resolution references
+	var serverURL string
+
 	// Mock course phases endpoint
 	router.GET("/api/course_phases/:id", func(c *gin.Context) {
 		phaseID := c.Param("id")
@@ -35,30 +38,114 @@ func SetupMockCoreService() (*httptest.Server, func()) {
 		})
 	})
 
-	// Mock participations endpoint
-	router.GET("/api/course_phases/:id/participations", func(c *gin.Context) {
+	// Mock course phase data endpoint (used by prompt-sdk resolution system)
+	// Returns prevData + resolutions pointing to our mock team service endpoint
+	router.GET("/api/course_phases/:id/course_phase_data", func(c *gin.Context) {
+		phaseID := c.Param("id")
+
 		c.JSON(http.StatusOK, gin.H{
-			"coursePhaseParticipations": []gin.H{
+			"prevData": gin.H{},
+			"resolutions": []gin.H{
 				{
-					"id":                    "40000000-0000-0000-0000-000000000001",
-					"courseParticipationId": "50000000-0000-0000-0000-000000000001",
-					"student": gin.H{
-						"id":        "30000000-0000-0000-0000-000000000001",
-						"firstName": "John",
-						"lastName":  "Doe",
-						"email":     "john.doe@example.com",
+					"dtoName":       "teams",
+					"baseURL":       serverURL,
+					"endpointPath":  "/team",
+					"coursePhaseID": phaseID,
+				},
+			},
+		})
+	})
+
+	// Mock team allocation service endpoint (called by SDK resolution)
+	// URL pattern: /course_phase/{coursePhaseID}/team
+	router.GET("/course_phase/:coursePhaseID/team", func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{
+			"teams": []gin.H{
+				{
+					"id":   "60000000-0000-0000-0000-000000000001",
+					"name": "BMW",
+					"members": []gin.H{
+						{"id": "30000000-0000-0000-0000-000000000001", "firstName": "John", "lastName": "Doe"},
 					},
+					"tutors": []gin.H{},
 				},
 				{
-					"id":                    "40000000-0000-0000-0000-000000000002",
-					"courseParticipationId": "50000000-0000-0000-0000-000000000002",
-					"student": gin.H{
-						"id":        "30000000-0000-0000-0000-000000000002",
-						"firstName": "Jane",
-						"lastName":  "Smith",
-						"email":     "jane.smith@example.com",
+					"id":   "60000000-0000-0000-0000-000000000002",
+					"name": "Siemens",
+					"members": []gin.H{
+						{"id": "30000000-0000-0000-0000-000000000002", "firstName": "Jane", "lastName": "Smith"},
 					},
+					"tutors": []gin.H{},
 				},
+			},
+		})
+	})
+
+	// Mock participations endpoint
+	// Returns both formats: "participations" (SDK resolution format) and
+	// "coursePhaseParticipations" (direct API format) so both code paths work
+	router.GET("/api/course_phases/:id/participations", func(c *gin.Context) {
+		phaseID := c.Param("id")
+
+		participationData := []gin.H{
+			{
+				"coursePhaseID":         phaseID,
+				"courseParticipationID": "50000000-0000-0000-0000-000000000001",
+				"passStatus":           "not_assessed",
+				"prevData":             gin.H{},
+				"restrictedData":       gin.H{},
+				"studentReadableData":  gin.H{},
+				"student": gin.H{
+					"id":        "30000000-0000-0000-0000-000000000001",
+					"firstName": "John",
+					"lastName":  "Doe",
+					"email":     "john.doe@example.com",
+				},
+			},
+			{
+				"coursePhaseID":         phaseID,
+				"courseParticipationID": "50000000-0000-0000-0000-000000000002",
+				"passStatus":           "not_assessed",
+				"prevData":             gin.H{},
+				"restrictedData":       gin.H{},
+				"studentReadableData":  gin.H{},
+				"student": gin.H{
+					"id":        "30000000-0000-0000-0000-000000000002",
+					"firstName": "Jane",
+					"lastName":  "Smith",
+					"email":     "jane.smith@example.com",
+				},
+			},
+		}
+
+		c.JSON(http.StatusOK, gin.H{
+			// SDK resolution format
+			"participations": participationData,
+			"resolutions": []gin.H{
+				{
+					"dtoName":       "teamAllocation",
+					"baseURL":       serverURL,
+					"endpointPath":  "/team-allocation",
+					"coursePhaseID": phaseID,
+				},
+			},
+			// Direct API format (used by participants service)
+			"coursePhaseParticipations": participationData,
+		})
+	})
+
+	// Mock team allocation resolution endpoint (returns per-participation team assignments)
+	// URL pattern: /course_phase/{coursePhaseID}/team-allocation
+	// Returns array of [{courseParticipationID, teamAllocation}]
+	router.GET("/course_phase/:coursePhaseID/team-allocation", func(c *gin.Context) {
+		c.JSON(http.StatusOK, []gin.H{
+			{
+				"courseParticipationID": "50000000-0000-0000-0000-000000000001",
+				"teamAllocation":       "60000000-0000-0000-0000-000000000001",
+			},
+			{
+				"courseParticipationID": "50000000-0000-0000-0000-000000000002",
+				"teamAllocation":       "60000000-0000-0000-0000-000000000002",
 			},
 		})
 	})
@@ -80,6 +167,7 @@ func SetupMockCoreService() (*httptest.Server, func()) {
 	})
 
 	server := httptest.NewServer(router)
+	serverURL = server.URL
 
 	oldCoreHost := os.Getenv("SERVER_CORE_HOST")
 	_ = os.Setenv("SERVER_CORE_HOST", server.URL)

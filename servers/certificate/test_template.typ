@@ -1,6 +1,6 @@
 // Self-contained certificate template for PROMPT 2.0
 // The generator writes data.json in the same directory as this template.
-// JSON fields: studentName, courseName, date
+// JSON fields: studentName, courseName, teamName, date
 
 #let TUM_blue = rgb("#0065BD")
 #let TUM_dark = rgb("#003359")
@@ -64,6 +64,20 @@
 #v(0.5cm)
 #align(center)[
   #text(weight: "bold", size: 22pt, fill: TUM_blue, upper(data.courseName))
+]
+
+// Show team name if available
+#if data.teamName != "" [
+  #v(0.3cm)
+  #align(center)[
+    #text(size: 13pt)[
+      in collaboration with
+    ]
+  ]
+  #v(0.2cm)
+  #align(center)[
+    #text(weight: "bold", size: 18pt, fill: TUM_blue, upper(data.teamName))
+  ]
 ]
 
 #v(0.5cm)
