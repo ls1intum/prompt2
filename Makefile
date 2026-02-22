@@ -26,7 +26,7 @@ db: ## Start database and Keycloak
 	docker-compose up -d db keycloak
 
 db-down: ## Stop database and Keycloak
-	docker-compose down
+	docker-compose stop db keycloak 
 
 # Code quality
 lint-clients: ## Lint all clients
