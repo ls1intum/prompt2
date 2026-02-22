@@ -12,7 +12,7 @@ This document provides essential context for AI assistants working on the PROMPT
 
 ## Repository Structure
 
-```
+```text
 clients/
   core/                    # Main React app shell (port 3000)
   shared_library/          # Shared UI components, hooks, network utilities
@@ -25,7 +25,6 @@ clients/
     - assessment_component (port 3007)
     - intro_course_developer_component (port 3005)
     - devops_challenge_component (port 3006)
-    - intro_course_tutor_component (port 3004)
 
 servers/
   core/                    # Main Go service (port 8080)
@@ -41,16 +40,29 @@ docs/                      # Docusaurus documentation
 
 ## Quick Start Commands
 
+Use the Makefile for cross-shell compatible commands:
+
 ```bash
-# Frontend - all micro-frontends simultaneously
-cd clients && yarn install && yarn run dev
+# Start all micro-frontends
+make clients
 
-# Backend - core server
-cd servers/core && go run main.go
+# Start core server (loads .env and .env.dev automatically)
+make server
 
-# Supporting services (PostgreSQL, Keycloak)
-docker-compose up db keycloak
+# Start database and Keycloak (detached)
+make db
+
+# Stop database and Keycloak
+make db-down
+
+# Run linting
+make lint
+
+# Run tests
+make test
 ```
+
+**Environment Setup:** Copy `.env.template` to `.env` and `.env.dev.template` to `.env.dev`. The `.env.dev` file contains localhost overrides for local development (vs Docker hostnames in `.env`).
 
 ## Technology Stack
 
@@ -88,7 +100,7 @@ import { getCoursePhase } from "@/network/queries/getCoursePhase";
 - Place type definitions at the beginning of files
 
 **Folder structure per component:**
-```
+```text
 components/   # Sub-components
 hooks/
 interfaces/
@@ -105,7 +117,7 @@ zustand/
 - snake_case: Database columns and tables
 
 **Module structure:**
-```
+```text
 module/
   moduleDTO/        # Request/response DTOs
   router.go         # Gin routes, auth middleware
@@ -192,7 +204,7 @@ Critical vars: `DB_*`, `KEYCLOAK_*`, `CORE_HOST`, `SERVER_CORE_HOST`, `DEBUG`
 3. Define schema in `db/migration/*.sql`
 4. Write queries in `db/query/*.sql`, run `sqlc generate`
 5. Implement logic in `service.go`, routes in `router.go`
-6. Add to `docker-compose.yml`
+6. Add to `docker-compose.yml` (service uses `docker compose` v2)
 
 ## Testing
 

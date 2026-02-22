@@ -23,10 +23,10 @@ clients: ## Start all client micro-frontends
 	cd clients && yarn install && yarn run dev
 
 db: ## Start database and Keycloak
-	docker-compose up -d db keycloak
+	docker compose up -d db keycloak
 
 db-down: ## Stop database and Keycloak
-	docker-compose stop db keycloak 
+	docker compose stop db keycloak 
 
 # Code quality
 lint: lint-clients lint-servers ## Lint all code
