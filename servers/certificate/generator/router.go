@@ -10,6 +10,7 @@ import (
 	promptSDK "github.com/ls1intum/prompt-sdk"
 	"github.com/ls1intum/prompt-sdk/keycloakTokenVerifier"
 	db "github.com/ls1intum/prompt2/servers/certificate/db/sqlc"
+	"github.com/ls1intum/prompt2/servers/certificate/participants"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -37,7 +38,7 @@ func downloadOwnCertificate(c *gin.Context) {
 		return
 	}
 
-	// Get user ID from token
+	// Get user info directly from JWT token (no core API call needed)
 	user, exists := keycloakTokenVerifier.GetTokenUser(c)
 	if !exists {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
@@ -51,8 +52,15 @@ func downloadOwnCertificate(c *gin.Context) {
 		return
 	}
 
+	student := &participants.Student{
+		ID:        studentID,
+		FirstName: user.FirstName,
+		LastName:  user.LastName,
+		Email:     user.Email,
+	}
+
 	authHeader := c.GetHeader("Authorization")
-	pdfData, err := GenerateCertificate(c, authHeader, coursePhaseID, studentID)
+	pdfData, err := GenerateCertificate(c, authHeader, coursePhaseID, student)
 	if err != nil {
 		log.WithError(err).Error("Failed to generate certificate")
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate certificate"})
@@ -81,7 +89,16 @@ func downloadStudentCertificate(c *gin.Context) {
 	}
 
 	authHeader := c.GetHeader("Authorization")
-	pdfData, err := GenerateCertificate(c, authHeader, coursePhaseID, studentID)
+
+	// Instructor fetching certificate for a specific student — look up student info from core
+	student, err := participants.GetStudentInfo(c, authHeader, coursePhaseID, studentID)
+	if err != nil {
+		log.WithError(err).Error("Failed to get student info")
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get student info"})
+		return
+	}
+
+	pdfData, err := GenerateCertificate(c, authHeader, coursePhaseID, student)
 	if err != nil {
 		log.WithError(err).Error("Failed to generate certificate")
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate certificate"})
@@ -120,9 +137,9 @@ func getCertificateStatus(c *gin.Context) {
 	_, err = getTemplateStatus(c, coursePhaseID)
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{
-			"available":    false,
+			"available":     false,
 			"hasDownloaded": false,
-			"message":      "Certificate template not configured",
+			"message":       "Certificate template not configured",
 		})
 		return
 	}
@@ -169,7 +186,7 @@ func previewCertificate(c *gin.Context) {
 		var typstErr *TypstCompilationError
 		if errors.As(err, &typstErr) {
 			c.JSON(http.StatusUnprocessableEntity, gin.H{
-				"error":         "Template compilation failed",
+				"error":          "Template compilation failed",
 				"compilerOutput": typstErr.Output,
 			})
 			return

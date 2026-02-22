@@ -83,19 +83,12 @@ func compileTypst(ctx context.Context, tempDir, templatePath string) ([]byte, er
 	return pdfData, nil
 }
 
-func GenerateCertificate(ctx context.Context, authHeader string, coursePhaseID, studentID uuid.UUID) ([]byte, error) {
+func GenerateCertificate(ctx context.Context, authHeader string, coursePhaseID uuid.UUID, student *participants.Student) ([]byte, error) {
 	// Get template content
 	templateContent, err := config.GetTemplateContent(ctx, coursePhaseID)
 	if err != nil {
 		log.WithError(err).Error("Failed to get template content")
 		return nil, fmt.Errorf("no template configured: %w", err)
-	}
-
-	// Get student info
-	student, err := participants.GetStudentInfo(ctx, authHeader, coursePhaseID, studentID)
-	if err != nil {
-		log.WithError(err).Error("Failed to get student info")
-		return nil, fmt.Errorf("failed to get student info: %w", err)
 	}
 
 	// Get course info
@@ -106,7 +99,7 @@ func GenerateCertificate(ctx context.Context, authHeader string, coursePhaseID, 
 	}
 
 	// Resolve team name (best-effort, non-fatal if not available)
-	teamName, err := participants.GetStudentTeamName(ctx, authHeader, coursePhaseID, studentID)
+	teamName, err := participants.GetStudentTeamName(ctx, authHeader, coursePhaseID, student.ID)
 	if err != nil {
 		log.WithError(err).Warn("Could not resolve team name, continuing without it")
 	}
@@ -148,7 +141,7 @@ func GenerateCertificate(ctx context.Context, authHeader string, coursePhaseID, 
 
 	// Record the download
 	_, err = GeneratorServiceSingleton.queries.RecordCertificateDownload(ctx, db.RecordCertificateDownloadParams{
-		StudentID:     studentID,
+		StudentID:     student.ID,
 		CoursePhaseID: coursePhaseID,
 	})
 	if err != nil {
