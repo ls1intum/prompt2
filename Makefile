@@ -1,4 +1,4 @@
-.PHONY: help server clients db lint test
+.PHONY: help server clients db db-down lint lint-clients lint-servers test test-core sqlc swagger install-clients install-hooks
 
 # Load .env file if it exists (base configuration)
 ifneq (,$(wildcard ./.env))
@@ -29,11 +29,15 @@ db-down: ## Stop database and Keycloak
 	docker-compose stop db keycloak 
 
 # Code quality
+lint: lint-clients lint-servers ## Lint all code
+
 lint-clients: ## Lint all clients
 	cd clients && yarn eslint "core" --config "core/eslint.config.mjs"
 
 lint-servers: ## Run go vet on servers
 	cd servers/core && go vet ./...
+
+test: test-core ## Run all tests
 
 test-core: ## Run core server tests
 	cd servers/core && go test ./...
