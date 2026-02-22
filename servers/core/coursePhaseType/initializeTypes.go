@@ -29,12 +29,17 @@ func initInterview() error {
 		qtx := CoursePhaseTypeServiceSingleton.queries.WithTx(tx)
 
 		// 1.) Create the phase
+		baseURL := "{CORE_HOST}/interview/api"
+		if CoursePhaseTypeServiceSingleton.isDevEnvironment {
+			baseURL = "http://localhost:8087/interview/api"
+		}
+
 		newInterviewPhase := db.CreateCoursePhaseTypeParams{
 			ID:           uuid.New(),
 			Name:         "Interview",
 			InitialPhase: false,
-			BaseUrl:      "core",
-			Description:  pgtype.Text{String: "A placeholder description for this course phase type. Detailed description will follow.", Valid: true},
+			BaseUrl:      baseURL,
+			Description:  pgtype.Text{String: "Interview phase for student assessments and scheduling.", Valid: true},
 		}
 		err = qtx.CreateCoursePhaseType(ctx, newInterviewPhase)
 		if err != nil {
@@ -76,7 +81,7 @@ func initInterview() error {
 			DtoName:           "score",
 			Specification:     scoreSpecificationBytes,
 			VersionNumber:     1,
-			EndpointPath:      "core",
+			EndpointPath:      baseURL,
 		}
 		err = qtx.CreateCoursePhaseTypeProvidedOutput(ctx, newProvidedOutput)
 		if err != nil {

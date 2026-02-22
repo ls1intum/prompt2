@@ -15,6 +15,8 @@ permissions:
 jobs:
   detect-changes:
     uses: ./.github/workflows/detect-changes.yml
+    with:
+      base_sha: ${{ github.event.before }}
     permissions:
       contents: read
       pull-requests: read
@@ -66,5 +68,6 @@ jobs:
       server_intro_course_image_tag: ${{ needs.build-servers.outputs.server_intro_course_image_tag }}
       server_team_allocation_image_tag: ${{ needs.build-servers.outputs.server_team_allocation_image_tag }}
       server_assessment_image_tag: ${{ needs.build-servers.outputs.server_assessment_image_tag }}
+      server_interview_image_tag: ${{ needs.build-servers.outputs.server_interview_image_tag }}
       devops_challenge_image_tag: ${{ needs.build-clients.outputs.devops_challenge_image_tag }}
       server_self_team_allocation_image_tag: ${{ needs.build-servers.outputs.server_self_team_allocation_image_tag }}

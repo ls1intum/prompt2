@@ -1,4 +1,4 @@
-import { ReactNode, useMemo } from 'react'
+import { ReactNode, useCallback, useMemo, useRef } from 'react'
 import { PromptTable, TableFilter } from '@tumaet/prompt-ui-components'
 
 import { useDeleteApplications } from '../../hooks/useDeleteApplications'
@@ -10,16 +10,14 @@ import { getApplicationActions } from './applicationActions'
 import { PassStatus } from '@tumaet/prompt-shared-state'
 import { useUpdateCoursePhaseParticipationBatch } from '@/hooks/useUpdateCoursePhaseParticipationBatch'
 import { ColumnDef } from '@tanstack/react-table'
+import { useNavigate, useParams } from 'react-router-dom'
 
-export const ApplicationParticipantsTable = ({
-  phaseId,
-  openDialog,
-}: {
-  phaseId: string
-  openDialog: (row: ApplicationRow) => void
-}): ReactNode => {
+export const ApplicationParticipantsTable = ({ phaseId }: { phaseId: string }): ReactNode => {
+  const { courseId } = useParams()
   const { participations, additionalScores } = useApplicationStore()
   const { mutate: deleteApplications } = useDeleteApplications()
+  const navigate = useNavigate()
+  const tableContainerRef = useRef<HTMLDivElement | null>(null)
 
   const data = useMemo(
     () => buildApplicationRows(participations, additionalScores),
@@ -36,6 +34,34 @@ export const ApplicationParticipantsTable = ({
     [additionalScores],
   )
 
+  const getVisibleApplicationIds = useCallback(() => {
+    const idsFromVisibleRows = Array.from(
+      tableContainerRef.current?.querySelectorAll('[data-application-participation-id]') ?? [],
+    )
+      .map((element) => element.getAttribute('data-application-participation-id') ?? '')
+      .filter((id, index, ids) => Boolean(id) && ids.indexOf(id) === index)
+
+    if (idsFromVisibleRows.length > 0) {
+      return idsFromVisibleRows
+    }
+
+    return data.map((row) => row.courseParticipationID)
+  }, [data])
+
+  const viewApplication = useCallback(
+    (row: ApplicationRow) => {
+      navigate(
+        `/management/course/${courseId}/${phaseId}/participants/${row.courseParticipationID}`,
+        {
+          state: {
+            filteredApplicationIds: getVisibleApplicationIds(),
+          },
+        },
+      )
+    },
+    [navigate, courseId, phaseId, getVisibleApplicationIds],
+  )
+
   const { mutate: updateBatch } = useUpdateCoursePhaseParticipationBatch()
 
   const actions = useMemo(() => {
@@ -50,19 +76,21 @@ export const ApplicationParticipantsTable = ({
         })),
       )
     }
-    return getApplicationActions(deleteApplications, openDialog, {
+    return getApplicationActions(deleteApplications, viewApplication, {
       setPassed: (r) => setStatus(PassStatus.PASSED, r),
       setFailed: (r) => setStatus(PassStatus.FAILED, r),
     })
-  }, [deleteApplications, openDialog, phaseId, updateBatch])
+  }, [deleteApplications, viewApplication, phaseId, updateBatch])
 
   return (
-    <PromptTable<ApplicationRow>
-      data={data}
-      columns={columns}
-      filters={filters}
-      actions={actions}
-      onRowClick={openDialog}
-    />
+    <div ref={tableContainerRef}>
+      <PromptTable<ApplicationRow>
+        data={data}
+        columns={columns}
+        filters={filters}
+        actions={actions}
+        onRowClick={viewApplication}
+      />
+    </div>
   )
 }

@@ -31,7 +31,7 @@
     "cmdk": "1.1.1",
     "date-fns": "^4.1.0",
     "i18n-iso-countries": "^7.14.0",
-    "react-day-picker": "9.13.0",
+    "react-day-picker": "9.13.2",
     "react-hook-form": "^7.71.1",
     "recharts": "^3.7.0",
     "zod": "^4.3.6"
@@ -42,8 +42,8 @@
   },
   "packageManager": "yarn@4.12.0",
   "devDependencies": {
-    "tailwindcss": "^4.1.18",
-    "webpack": "^5.105.0",
+    "tailwindcss": "^4.2.0",
+    "webpack": "^5.105.2",
     "webpack-cli": "^6.0.1",
     "webpack-dev-server": "^5.2.3"
   }

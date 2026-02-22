@@ -27,6 +27,6 @@ jobs:
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v7
         with:
-          version: v2.8.0
+          version: latest
           working-directory: servers/${{ matrix.module }}
           args: --timeout 5m

@@ -192,6 +192,32 @@ services:
       - DEBUG
       - SENTRY_DSN_TEMPLATE_SERVER
 
+  server-interview:
+    build:
+      context: ./servers/interview
+      dockerfile: ../Dockerfile
+    container_name: prompt-server-interview
+    depends_on:
+      db-interview:
+        condition: service_healthy
+    ports:
+      - "8087:8080"
+    extra_hosts:
+      - "localhost:host-gateway"
+    environment:
+      - CORE_HOST
+      - SERVER_CORE_HOST
+      - SERVER_ADDRESS
+      - DB_HOST_INTERVIEW=${DB_INTERVIEW_HOST}
+      - DB_PORT_INTERVIEW=${DB_INTERVIEW_PORT}
+      - DB_NAME=${DB_INTERVIEW_NAME}
+      - DB_USER=${DB_INTERVIEW_USER}
+      - DB_PASSWORD=${DB_INTERVIEW_PASSWORD}
+      - KEYCLOAK_HOST
+      - KEYCLOAK_REALM_NAME
+      - DEBUG
+      - SENTRY_DSN_INTERVIEW
+
   client-core:
     build:
       context: ./clients/core
@@ -300,7 +326,7 @@ services:
     image: base:latest
 
   db:
-    image: "postgres:15.2-alpine"
+    image: "postgres:15.16-alpine"
     container_name: prompt-db
     environment:
       - POSTGRES_USER=${DB_CORE_USER}
@@ -318,7 +344,7 @@ services:
       - "5432:5432"
 
   db-intro-course:
-    image: "postgres:15.2-alpine"
+    image: "postgres:15.16-alpine"
     container_name: prompt-db-intro-course
     environment:
       - POSTGRES_USER=${DB_INTRO_COURSE_USER}
@@ -336,7 +362,7 @@ services:
       - "5433:5432"
 
   db-team-allocation:
-    image: "postgres:15.2-alpine"
+    image: "postgres:15.16-alpine"
     container_name: prompt-db-team-allocation
     environment:
       - POSTGRES_USER=${DB_TEAM_ALLOCATION_USER}
@@ -354,7 +380,7 @@ services:
       - "5434:5432"
 
   db-assessment:
-    image: "postgres:15.2-alpine"
+    image: "postgres:15.16-alpine"
     container_name: prompt-db-assessment
     environment:
       - POSTGRES_USER=${DB_ASSESSMENT_USER}
@@ -373,7 +399,7 @@ services:
 
   # Database for the template server
   db-template-server:
-    image: "postgres:15.2-alpine"
+    image: "postgres:15.16-alpine"
     container_name: prompt-db-template-server
     environment:
       - POSTGRES_USER=${DB_TEMPLATE_USER:-prompt-postgres}
@@ -389,8 +415,25 @@ services:
     ports:
       - "5437:5432"
 
+  db-interview:
+    image: "postgres:15.16-alpine"
+    container_name: prompt-db-interview
+    environment:
+      - POSTGRES_USER=${DB_INTERVIEW_USER:-prompt-postgres}
+      - POSTGRES_PASSWORD=${DB_INTERVIEW_PASSWORD:-prompt-postgres}
+      - POSTGRES_DB=${DB_INTERVIEW_NAME:-prompt}
+      - TZ=Europe/Berlin
+    volumes:
+      - ./postgres_interview_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -d ${DB_INTERVIEW_NAME:-prompt} -U ${DB_INTERVIEW_USER:-prompt-postgres}"]
+      timeout: 5s
+      retries: 5
+    ports:
+      - "5438:5432"
+
   db-self-team-allocation:
-    image: "postgres:15.2-alpine"
+    image: "postgres:15.16-alpine"
     container_name: prompt-db-self-team-allocation
     environment:
       - POSTGRES_USER=${DB_SELF_TEAM_ALLOCATION_USER}
@@ -426,7 +469,7 @@ services:
       - "5437:5432"
 
   keycloak-db:
-    image: "postgres:15.2-alpine"
+    image: "postgres:15.16-alpine"
     container_name: prompt-keycloak-db
     environment:
       - POSTGRES_USER=${KEYCLOAK_DB_USER}
