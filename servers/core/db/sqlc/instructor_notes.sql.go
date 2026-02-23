@@ -13,18 +13,20 @@ import (
 )
 
 const createNote = `-- name: CreateNote :one
-INSERT INTO note (id, for_student, author, date_created, date_deleted, deleted_by)
-VALUES ($1, $2, $3, $4, $5, $6)
-RETURNING id, for_student, author, date_created, date_deleted, deleted_by
+INSERT INTO note (id, for_student, author, author_name, author_email, date_created, date_deleted, deleted_by)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+RETURNING id, for_student, author, author_name, author_email, date_created, date_deleted, deleted_by
 `
 
 type CreateNoteParams struct {
-	ID          uuid.UUID   `json:"id"`
-	ForStudent  uuid.UUID   `json:"for_student"`
-	Author      uuid.UUID   `json:"author"`
-	DateCreated pgtype.Date `json:"date_created"`
-	DateDeleted pgtype.Date `json:"date_deleted"`
-	DeletedBy   pgtype.UUID `json:"deleted_by"`
+	ID          uuid.UUID          `json:"id"`
+	ForStudent  uuid.UUID          `json:"for_student"`
+	Author      uuid.UUID          `json:"author"`
+	AuthorName  string             `json:"author_name"`
+	AuthorEmail string             `json:"author_email"`
+	DateCreated pgtype.Timestamptz `json:"date_created"`
+	DateDeleted pgtype.Timestamptz `json:"date_deleted"`
+	DeletedBy   pgtype.UUID        `json:"deleted_by"`
 }
 
 func (q *Queries) CreateNote(ctx context.Context, arg CreateNoteParams) (Note, error) {
@@ -32,6 +34,8 @@ func (q *Queries) CreateNote(ctx context.Context, arg CreateNoteParams) (Note, e
 		arg.ID,
 		arg.ForStudent,
 		arg.Author,
+		arg.AuthorName,
+		arg.AuthorEmail,
 		arg.DateCreated,
 		arg.DateDeleted,
 		arg.DeletedBy,
@@ -41,6 +45,8 @@ func (q *Queries) CreateNote(ctx context.Context, arg CreateNoteParams) (Note, e
 		&i.ID,
 		&i.ForStudent,
 		&i.Author,
+		&i.AuthorName,
+		&i.AuthorEmail,
 		&i.DateCreated,
 		&i.DateDeleted,
 		&i.DeletedBy,
@@ -55,11 +61,11 @@ RETURNING id, content, date_created, version_number, for_note
 `
 
 type CreateNoteVersionParams struct {
-	ID            uuid.UUID   `json:"id"`
-	Content       string      `json:"content"`
-	DateCreated   pgtype.Date `json:"date_created"`
-	VersionNumber int32       `json:"version_number"`
-	ForNote       uuid.UUID   `json:"for_note"`
+	ID            uuid.UUID          `json:"id"`
+	Content       string             `json:"content"`
+	DateCreated   pgtype.Timestamptz `json:"date_created"`
+	VersionNumber int32              `json:"version_number"`
+	ForNote       uuid.UUID          `json:"for_note"`
 }
 
 func (q *Queries) CreateNoteVersion(ctx context.Context, arg CreateNoteVersionParams) (NoteVersion, error) {
@@ -81,8 +87,37 @@ func (q *Queries) CreateNoteVersion(ctx context.Context, arg CreateNoteVersionPa
 	return i, err
 }
 
+const deleteNote = `-- name: DeleteNote :one
+UPDATE note 
+SET date_deleted = now(), deleted_by = $2
+WHERE id = $1
+AND date_deleted IS NULL
+RETURNING id, for_student, author, author_name, author_email, date_created, date_deleted, deleted_by
+`
+
+type DeleteNoteParams struct {
+	ID        uuid.UUID   `json:"id"`
+	DeletedBy pgtype.UUID `json:"deleted_by"`
+}
+
+func (q *Queries) DeleteNote(ctx context.Context, arg DeleteNoteParams) (Note, error) {
+	row := q.db.QueryRow(ctx, deleteNote, arg.ID, arg.DeletedBy)
+	var i Note
+	err := row.Scan(
+		&i.ID,
+		&i.ForStudent,
+		&i.Author,
+		&i.AuthorName,
+		&i.AuthorEmail,
+		&i.DateCreated,
+		&i.DateDeleted,
+		&i.DeletedBy,
+	)
+	return i, err
+}
+
 const getAllStudentNotes = `-- name: GetAllStudentNotes :many
-SELECT id, author, for_student, date_created, date_deleted, deleted_by, versions FROM note_with_versions
+SELECT id, author, author_name, author_email, for_student, date_created, date_deleted, deleted_by, versions FROM note_with_versions ORDER BY date_created DESC
 `
 
 func (q *Queries) GetAllStudentNotes(ctx context.Context) ([]NoteWithVersion, error) {
@@ -97,6 +132,8 @@ func (q *Queries) GetAllStudentNotes(ctx context.Context) ([]NoteWithVersion, er
 		if err := rows.Scan(
 			&i.ID,
 			&i.Author,
+			&i.AuthorName,
+			&i.AuthorEmail,
 			&i.ForStudent,
 			&i.DateCreated,
 			&i.DateDeleted,
@@ -120,9 +157,10 @@ SELECT
     jsonb_build_object(
       'id', n.id,
       'author', n.author,
-      'date_created', n.date_created,
-      'date_deleted', n.date_deleted,
-      'deleted_by', n.deleted_by,
+      'author', n.author,
+      'dateCreated', n.date_created,
+      'dateDeleted', n.date_deleted,
+      'deletedBy', n.deleted_by,
       'versions', n.versions
     )
   ) AS notes
@@ -172,8 +210,29 @@ func (q *Queries) GetLatestNoteVersionForNoteId(ctx context.Context, forNote uui
 	return version_number, err
 }
 
+const getSingleNoteWithVersionsByID = `-- name: GetSingleNoteWithVersionsByID :one
+SELECT id, author, author_name, author_email, for_student, date_created, date_deleted, deleted_by, versions FROM note_with_versions WHERE id = $1 LIMIT 1
+`
+
+func (q *Queries) GetSingleNoteWithVersionsByID(ctx context.Context, id uuid.UUID) (NoteWithVersion, error) {
+	row := q.db.QueryRow(ctx, getSingleNoteWithVersionsByID, id)
+	var i NoteWithVersion
+	err := row.Scan(
+		&i.ID,
+		&i.Author,
+		&i.AuthorName,
+		&i.AuthorEmail,
+		&i.ForStudent,
+		&i.DateCreated,
+		&i.DateDeleted,
+		&i.DeletedBy,
+		&i.Versions,
+	)
+	return i, err
+}
+
 const getSingleStudentNoteByID = `-- name: GetSingleStudentNoteByID :one
-SELECT id, for_student, author, date_created, date_deleted, deleted_by FROM note WHERE id = $1 LIMIT 1
+SELECT id, for_student, author, author_name, author_email, date_created, date_deleted, deleted_by FROM note WHERE id = $1 LIMIT 1
 `
 
 func (q *Queries) GetSingleStudentNoteByID(ctx context.Context, id uuid.UUID) (Note, error) {
@@ -183,6 +242,8 @@ func (q *Queries) GetSingleStudentNoteByID(ctx context.Context, id uuid.UUID) (N
 		&i.ID,
 		&i.ForStudent,
 		&i.Author,
+		&i.AuthorName,
+		&i.AuthorEmail,
 		&i.DateCreated,
 		&i.DateDeleted,
 		&i.DeletedBy,
@@ -191,7 +252,7 @@ func (q *Queries) GetSingleStudentNoteByID(ctx context.Context, id uuid.UUID) (N
 }
 
 const getStudentNotesForStudent = `-- name: GetStudentNotesForStudent :many
-SELECT id, author, for_student, date_created, date_deleted, deleted_by, versions FROM note_with_versions WHERE for_student = $1
+SELECT id, author, author_name, author_email, for_student, date_created, date_deleted, deleted_by, versions FROM note_with_versions WHERE for_student = $1 ORDER BY date_created ASC
 `
 
 func (q *Queries) GetStudentNotesForStudent(ctx context.Context, forStudent uuid.UUID) ([]NoteWithVersion, error) {
@@ -206,6 +267,8 @@ func (q *Queries) GetStudentNotesForStudent(ctx context.Context, forStudent uuid
 		if err := rows.Scan(
 			&i.ID,
 			&i.Author,
+			&i.AuthorName,
+			&i.AuthorEmail,
 			&i.ForStudent,
 			&i.DateCreated,
 			&i.DateDeleted,

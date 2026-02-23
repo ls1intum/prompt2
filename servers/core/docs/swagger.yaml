@@ -826,6 +826,10 @@ definitions:
     properties:
       author:
         type: string
+      authorEmail:
+        type: string
+      authorName:
+        type: string
       dateCreated:
         type: string
       dateDeleted:
@@ -2672,14 +2676,64 @@ paths:
       summary: Get template courses
       tags:
       - courses
-  /instructor-notes/{student-uuid}:
+  /instructor-notes:
+    get:
+      description: Get all instructor notes with note versions
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/instructorNoteDTO.InstructorNote'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      summary: Get all notes
+      tags:
+      - instructorNotes
+  /instructor-notes/{note-uuid}:
+    delete:
+      description: Delete an instructor note by UUID
+      parameters:
+      - description: Note UUID
+        in: path
+        name: note-uuid
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/instructorNoteDTO.InstructorNote'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      summary: Delete an instructor Note
+      tags:
+      - instructorNotes
+  /instructor-notes/s/{student-uuid}:
     get:
       description: Get all instructor notes with note versions for a specific student,
         provided the student ID
       parameters:
       - description: Student UUID
         in: path
-        name: uuid
+        name: student-uuid
         required: true
         type: string
       produces:
@@ -2705,6 +2759,12 @@ paths:
     post:
       description: Create a new instructor note or a new edit for a specific student
         given its ID
+      parameters:
+      - description: Student UUID
+        in: path
+        name: student-uuid
+        required: true
+        type: string
       produces:
       - application/json
       responses:

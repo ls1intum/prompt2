@@ -1,11 +1,14 @@
 -- name: GetStudentNotesForStudent :many
-SELECT * FROM note_with_versions WHERE for_student = $1;
+SELECT * FROM note_with_versions WHERE for_student = $1 ORDER BY date_created ASC;
 
 -- name: GetAllStudentNotes :many
-SELECT * FROM note_with_versions;
+SELECT * FROM note_with_versions ORDER BY date_created DESC;
 
 -- name: GetSingleStudentNoteByID :one
 SELECT * FROM note WHERE id = $1 LIMIT 1;
+
+-- name: GetSingleNoteWithVersionsByID :one
+SELECT * FROM note_with_versions WHERE id = $1 LIMIT 1;
 
 -- name: GetAllStudentNotesGroupByStudent :many
 SELECT
@@ -14,9 +17,10 @@ SELECT
     jsonb_build_object(
       'id', n.id,
       'author', n.author,
-      'date_created', n.date_created,
-      'date_deleted', n.date_deleted,
-      'deleted_by', n.deleted_by,
+      'author', n.author,
+      'dateCreated', n.date_created,
+      'dateDeleted', n.date_deleted,
+      'deletedBy', n.deleted_by,
       'versions', n.versions
     )
   ) AS notes
@@ -38,8 +42,14 @@ VALUES ($1, $2, $3, $4, $5)
 RETURNING *;
 
 -- name: CreateNote :one
-INSERT INTO note (id, for_student, author, date_created, date_deleted, deleted_by)
-VALUES ($1, $2, $3, $4, $5, $6)
+INSERT INTO note (id, for_student, author, author_name, author_email, date_created, date_deleted, deleted_by)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
 RETURNING *;
 
+-- name: DeleteNote :one
+UPDATE note 
+SET date_deleted = now(), deleted_by = $2
+WHERE id = $1
+AND date_deleted IS NULL
+RETURNING *;
 

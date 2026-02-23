@@ -2392,7 +2392,42 @@ const docTemplate = `{
                 }
             }
         },
-        "/instructor-notes/{student-uuid}": {
+        "/instructor-notes": {
+            "get": {
+                "description": "Get all instructor notes with note versions",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "instructorNotes"
+                ],
+                "summary": "Get all notes",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/instructorNoteDTO.InstructorNote"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/instructor-notes/s/{student-uuid}": {
             "get": {
                 "description": "Get all instructor notes with note versions for a specific student, provided the student ID",
                 "produces": [
@@ -2406,7 +2441,7 @@ const docTemplate = `{
                     {
                         "type": "string",
                         "description": "Student UUID",
-                        "name": "uuid",
+                        "name": "student-uuid",
                         "in": "path",
                         "required": true
                     }
@@ -2444,6 +2479,15 @@ const docTemplate = `{
                     "instructorNotes"
                 ],
                 "summary": "Create an instructor Note for a student",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Student UUID",
+                        "name": "student-uuid",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -2452,6 +2496,47 @@ const docTemplate = `{
                             "items": {
                                 "$ref": "#/definitions/instructorNoteDTO.InstructorNote"
                             }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/instructor-notes/{note-uuid}": {
+            "delete": {
+                "description": "Delete an instructor note by UUID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "instructorNotes"
+                ],
+                "summary": "Delete an instructor Note",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Note UUID",
+                        "name": "note-uuid",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/instructorNoteDTO.InstructorNote"
                         }
                     },
                     "400": {
@@ -4270,6 +4355,12 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "author": {
+                    "type": "string"
+                },
+                "authorEmail": {
+                    "type": "string"
+                },
+                "authorName": {
                     "type": "string"
                 },
                 "dateCreated": {

@@ -18,6 +18,8 @@ type NoteVersion struct {
 type InstructorNote struct {
 	ID          uuid.UUID      `json:"id"`
 	Author      uuid.UUID      `json:"author"`
+  AuthorName  string         `json:"authorName"`
+  AuthorEmail string         `json:"authorEmail"`
 	ForStudent  uuid.UUID      `json:"forStudent"`
 	DateCreated time.Time      `json:"dateCreated"`
 	DateDeleted *time.Time     `json:"dateDeleted,omitempty"`
@@ -52,6 +54,8 @@ func GetInstructorNoteDTOFromDBModel(model db.NoteWithVersion) (InstructorNote, 
 	return InstructorNote{
 		ID:          model.ID,
 		Author:      model.Author,
+    AuthorName:  model.AuthorName,
+    AuthorEmail: model.AuthorEmail,
 		ForStudent:  model.ForStudent,
 		DateCreated: model.DateCreated.Time,
 		DateDeleted: dateDeleted,

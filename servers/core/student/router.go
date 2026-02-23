@@ -208,29 +208,3 @@ func handleError(c *gin.Context, statusCode int, err error) {
 		Error: err.Error(),
 	})
 }
-
-// getStudentEnrollments godoc
-// @Summary Get student enrollments by ID
-// @Description Get all of a students enrollments, provide student UUID
-// @Tags students
-// @Produce json
-// @Param uuid path string true "Student UUID"
-// @Success 200 {object} studentDTO.StudentEnrollmentsDTO
-// @Failure 400 {object} utils.ErrorResponse
-// @Failure 500 {object} utils.ErrorResponse
-// @Router /students/{uuid}/enrollments [get]
-func getStudentEnrollments(c *gin.Context) {
-	id, err := uuid.Parse(c.Param("uuid"))
-	if err != nil {
-		handleError(c, http.StatusBadRequest, err)
-		return
-	}
-
-	studentEnrollments, err := GetStudentEnrollmentsByID(c, id)
-	if err != nil {
-		handleError(c, http.StatusInternalServerError, err)
-		return
-	}
-
-	c.IndentedJSON(http.StatusOK, studentEnrollments)
-}

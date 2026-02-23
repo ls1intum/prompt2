@@ -4,15 +4,17 @@ CREATE TABLE note (
   id             uuid PRIMARY KEY,
   for_student    uuid NOT NULL REFERENCES student(id),
   author         uuid NOT NULL,
-  date_created   date NOT NULL,
-  date_deleted   date,
+  author_name    text NOT NULL,
+  author_email   text NOT NULL,
+  date_created   timestamptz NOT NULL default now(),
+  date_deleted   timestamptz,
   deleted_by     uuid
 );
 
 CREATE TABLE note_version (
   id             uuid PRIMARY KEY,
   content        text NOT NULL,
-  date_created   date NOT NULL,
+  date_created   timestamptz NOT NULL default now(),
   version_number int NOT NULL,
   for_note       uuid NOT NULL REFERENCES note(id)
 );
@@ -36,6 +38,8 @@ CREATE VIEW note_with_versions AS
 SELECT
   n.id,
   n.author,
+  n.author_name,
+  n.author_email,
   n.for_student,
   n.date_created,
   n.date_deleted,
@@ -44,8 +48,8 @@ SELECT
     jsonb_build_object(
       'id', nv.id,
       'content', nv.content,
-      'date_created', nv.date_created,
-      'version_number', nv.version_number
+      'dateCreated', nv.date_created,
+      'versionNumber', nv.version_number
     )
     ORDER BY nv.version_number
   ) AS versions

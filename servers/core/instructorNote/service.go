@@ -42,12 +42,11 @@ func GetSingleNoteByID(ctx context.Context, id uuid.UUID) (db.Note, error) {
   return note, nil
 }
 
-
-func NewStudentNote(ctx context.Context, studentID uuid.UUID, params instructorNoteDTO.CreateInstructorNote, signedInUserUUID uuid.UUID) (instructorNoteDTO.InstructorNote, error) {
+func NewStudentNote(ctx context.Context, studentID uuid.UUID, params instructorNoteDTO.CreateInstructorNote, signedInUserUUID uuid.UUID, authorName string, authorEmail string) (instructorNoteDTO.InstructorNote, error) {
 
   versionNumber := 0
   noteID := uuid.UUID{}
-  rightNow := pgtype.Date{Time: time.Now(), Valid: true}
+  rightNow := pgtype.Timestamptz{ Time: time.Now(), Valid: true }
 
   if (params.New) {
     newNoteId, err := uuid.NewRandom()
@@ -58,12 +57,15 @@ func NewStudentNote(ctx context.Context, studentID uuid.UUID, params instructorN
       ID: newNoteId,
       ForStudent: studentID,
       Author: signedInUserUUID,
+      AuthorName: authorName,
+      AuthorEmail: authorEmail,
       DateCreated: rightNow,
-      DateDeleted: pgtype.Date{},
+      DateDeleted: pgtype.Timestamptz{},
       DeletedBy: pgtype.UUID{},
     })
     noteID = newNoteId
   } else {
+    noteID = params.ForNote
     latestVersionNumber, err := InstructorNoteServiceSingleton.queries.GetLatestNoteVersionForNoteId(ctx, params.ForNote)
     if err != nil {
       return instructorNoteDTO.InstructorNote{}, err
@@ -71,8 +73,14 @@ func NewStudentNote(ctx context.Context, studentID uuid.UUID, params instructorN
     versionNumber = int(latestVersionNumber) + 1
   }
 
-  _, err := InstructorNoteServiceSingleton.queries.CreateNoteVersion(ctx, db.CreateNoteVersionParams{
-    ID: noteID,
+  // Generate a new UUID for the version record
+  versionID, err := uuid.NewRandom()
+  if err != nil {
+    return instructorNoteDTO.InstructorNote{}, err
+  }
+
+  _, err = InstructorNoteServiceSingleton.queries.CreateNoteVersion(ctx, db.CreateNoteVersionParams{
+    ID: versionID,
     Content: params.Content,
     DateCreated: rightNow,
     VersionNumber: int32(versionNumber),
@@ -83,4 +91,23 @@ func NewStudentNote(ctx context.Context, studentID uuid.UUID, params instructorN
   }
   return instructorNoteDTO.InstructorNote{}, err
 
+}
+
+func DeleteInstructorNote(ctx context.Context, noteID uuid.UUID, authorID uuid.UUID) (instructorNoteDTO.InstructorNote, error) {
+  _, err := InstructorNoteServiceSingleton.queries.DeleteNote(ctx, db.DeleteNoteParams{
+    ID: noteID,
+    DeletedBy: pgtype.UUID{ Bytes: authorID, Valid: true},
+  })
+  if err != nil {
+    return instructorNoteDTO.InstructorNote{}, err
+  }
+
+  // Fetch the deleted note with versions to return to client
+  deletedNoteWithVersions, err := InstructorNoteServiceSingleton.queries.GetSingleNoteWithVersionsByID(ctx, noteID)
+  if err != nil {
+    return instructorNoteDTO.InstructorNote{}, err
+  }
+
+  // Convert to DTO
+  return instructorNoteDTO.GetInstructorNoteDTOFromDBModel(deletedNoteWithVersions)
 }

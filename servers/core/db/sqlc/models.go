@@ -324,12 +324,14 @@ type CoursePhaseTypePhaseRequiredInputDto struct {
 }
 
 type Note struct {
-	ID          uuid.UUID   `json:"id"`
-	ForStudent  uuid.UUID   `json:"for_student"`
-	Author      uuid.UUID   `json:"author"`
-	DateCreated pgtype.Date `json:"date_created"`
-	DateDeleted pgtype.Date `json:"date_deleted"`
-	DeletedBy   pgtype.UUID `json:"deleted_by"`
+	ID          uuid.UUID          `json:"id"`
+	ForStudent  uuid.UUID          `json:"for_student"`
+	Author      uuid.UUID          `json:"author"`
+	AuthorName  string             `json:"author_name"`
+	AuthorEmail string             `json:"author_email"`
+	DateCreated pgtype.Timestamptz `json:"date_created"`
+	DateDeleted pgtype.Timestamptz `json:"date_deleted"`
+	DeletedBy   pgtype.UUID        `json:"deleted_by"`
 }
 
 type NoteTag struct {
@@ -343,21 +345,23 @@ type NoteTagRelation struct {
 }
 
 type NoteVersion struct {
-	ID            uuid.UUID   `json:"id"`
-	Content       string      `json:"content"`
-	DateCreated   pgtype.Date `json:"date_created"`
-	VersionNumber int32       `json:"version_number"`
-	ForNote       uuid.UUID   `json:"for_note"`
+	ID            uuid.UUID          `json:"id"`
+	Content       string             `json:"content"`
+	DateCreated   pgtype.Timestamptz `json:"date_created"`
+	VersionNumber int32              `json:"version_number"`
+	ForNote       uuid.UUID          `json:"for_note"`
 }
 
 type NoteWithVersion struct {
-	ID          uuid.UUID   `json:"id"`
-	Author      uuid.UUID   `json:"author"`
-	ForStudent  uuid.UUID   `json:"for_student"`
-	DateCreated pgtype.Date `json:"date_created"`
-	DateDeleted pgtype.Date `json:"date_deleted"`
-	DeletedBy   pgtype.UUID `json:"deleted_by"`
-	Versions    []byte      `json:"versions"`
+	ID          uuid.UUID          `json:"id"`
+	Author      uuid.UUID          `json:"author"`
+	AuthorName  string             `json:"author_name"`
+	AuthorEmail string             `json:"author_email"`
+	ForStudent  uuid.UUID          `json:"for_student"`
+	DateCreated pgtype.Timestamptz `json:"date_created"`
+	DateDeleted pgtype.Timestamptz `json:"date_deleted"`
+	DeletedBy   pgtype.UUID        `json:"deleted_by"`
+	Versions    []byte             `json:"versions"`
 }
 
 type ParticipationDataDependencyGraph struct {

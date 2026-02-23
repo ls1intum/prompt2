@@ -1,4 +1,3 @@
-import { CourseEnrollment } from '@core/network/queries/getStudentEnrollments'
 import { useParams } from 'react-router-dom'
 import { StudentCourseEnrollment } from '../shared/components/StudentDetail/StudentCourseEnrollment'
 import { useStudent } from '@core/network/hooks/useStudent'
@@ -9,6 +8,7 @@ import { InstructorNotes } from '../shared/components/InstructorNote/InstructorN
 import { StudentDetailContentLayout } from '../shared/components/StudentDetail/StudentDetailContentLayout'
 import { CourseEnrollmentSummary } from '../shared/components/StudentDetail/CourseEnrollmentSummary'
 import { EmptyPage } from '../shared/components/EmptyPage'
+import { CourseEnrollment } from '../shared/interfaces/StudentEnrollment'
 
 export const StudentDetailPage = () => {
   const { studentId } = useParams<{ studentId: string }>()
@@ -45,7 +45,7 @@ export const StudentDetailPage = () => {
             )}
           </div>
         }
-        instructorNotes={<InstructorNotes />}
+        instructorNotes={<InstructorNotes studentId={studentId} />}
       />
     </div>
   )

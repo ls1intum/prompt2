@@ -1,13 +1,10 @@
 import { PhaseStudentDetailMapping } from '@core/managementConsole/PhaseMapping/PhaseStudentDetailMapping'
-import {
-  CourseEnrollment,
-  CoursePhaseEnrollment,
-} from '@core/network/queries/getStudentEnrollments'
 import { Suspense } from 'react'
 import { ProgressIndicator } from './PhaseProgressIndicator'
 import { LinkHeading } from './LinkHeading'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@tumaet/prompt-ui-components'
 import { PassStatus } from '@tumaet/prompt-shared-state'
+import { CoursePhaseEnrollment, CourseEnrollment } from '../../interfaces/StudentEnrollment'
 
 export function parsePostgresTimestamp(ts: string): Date {
   return new Date(ts.replace(' ', 'T') + 'Z')

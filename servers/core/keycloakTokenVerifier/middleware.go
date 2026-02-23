@@ -74,6 +74,16 @@ func KeycloakMiddleware() gin.HandlerFunc {
 			log.Error("Failed to extract user university login (sub) from token claims")
 		}
 
+		firstName, ok := claims["given_name"].(string)
+		if !ok {
+			log.Error("Failed to extract user given name from token claims")
+		}
+
+		lastName, ok := claims["family_name"].(string)
+		if !ok {
+			log.Error("Failed to extract user family name from token claims")
+		}
+
 		// Retrieve all user's roles from the token (if any) for the audience prompt-server (clientID)
 		userRoles, err := checkKeycloakRoles(claims)
 		if err != nil {
@@ -105,6 +115,8 @@ func KeycloakMiddleware() gin.HandlerFunc {
 		c.Set(CtxUserEmail, userEmail)
 		c.Set(CtxMatriculationNumber, matriculationNumber)
 		c.Set(CtxUniversityLogin, universityLogin)
+		c.Set(CtxFirstName, firstName)
+		c.Set(CtxLastName, lastName)
 		c.Next()
 	}
 }
