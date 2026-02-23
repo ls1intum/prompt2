@@ -551,21 +551,3 @@ services:
       timeout: 10s
       retries: 1
       start_period: 90s
-
-  minio:
-    image: minio/minio
-    container_name: prompt-minio
-    command: server /data
-    environment:
-      - MINIO_ROOT_USER=prompt-minio
-      - MINIO_ROOT_PASSWORD=prompt-minio
-    volumes:
-      - ./minio_data:/data
-    ports:
-      - "9000:9000"
-      - "9001:9001"
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
-      interval: 5s
-      timeout: 5s
-      retries: 3

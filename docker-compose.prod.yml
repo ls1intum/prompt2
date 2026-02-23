@@ -429,21 +429,6 @@ services:
     networks:
       - prompt-network
 
-  minio:
-    image: minio/minio:latest
-    container_name: prompt-minio
-    command: server /data --console-address ":9001"
-    environment:
-      - MINIO_ROOT_USER=${MINIO_ACCESS_KEY}
-      - MINIO_ROOT_PASSWORD=${MINIO_SECRET_KEY}
-    volumes:
-      - ./minio_data:/data
-    ports:
-      - "127.0.0.1:9000:9000"
-      - "127.0.0.1:9001:9001"
-    networks:
-      - prompt-network
-
   client-assessment-component:
     image: "ghcr.io/ls1intum/prompt2/prompt-clients-assessment-component:${ASSESSMENT_IMAGE_TAG}"
     container_name: prompt-client-assessment-component
