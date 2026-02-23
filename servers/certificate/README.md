@@ -16,6 +16,7 @@ todos
 - The download counter in the paricipants table is currently not updated when a student downloads their certificate - fix this
 - Add an option for instructors to add a text that is shown to the students on the certificate download page (e.g. to inform them about the release date or to provide instructions on how to download the certificate).
 - Fix the download button in the participants table - currentlytly results in an internal server error
+- Make sure that students can be passed / failed in the participants table similarl to the other phases 
 ###########################################
 
 A microservice for generating and managing course completion certificates in the PROMPT platform.

@@ -163,6 +163,40 @@ func SetupMockCoreService() (*httptest.Server, func()) {
 		})
 	})
 
+	// Mock students endpoint (returns all students in a course phase by their core student ID)
+	router.GET("/api/course_phases/:id/participations/students", func(c *gin.Context) {
+		c.JSON(http.StatusOK, []gin.H{
+			{
+				"id":        "30000000-0000-0000-0000-000000000001",
+				"firstName": "John",
+				"lastName":  "Doe",
+				"email":     "john.doe@example.com",
+			},
+			{
+				"id":        "30000000-0000-0000-0000-000000000002",
+				"firstName": "Jane",
+				"lastName":  "Smith",
+				"email":     "jane.smith@example.com",
+			},
+		})
+	})
+
+	// Mock self participation endpoint (returns the student's own participation with core student ID)
+	router.GET("/api/course_phases/:id/participations/self", func(c *gin.Context) {
+		phaseID := c.Param("id")
+
+		c.JSON(http.StatusOK, gin.H{
+			"coursePhaseID":         phaseID,
+			"courseParticipationID": "50000000-0000-0000-0000-000000000001",
+			"student": gin.H{
+				"id":        "30000000-0000-0000-0000-000000000001",
+				"firstName": "John",
+				"lastName":  "Doe",
+				"email":     "john.doe@example.com",
+			},
+		})
+	})
+
 	server := httptest.NewServer(router)
 	serverURL = server.URL
 

@@ -39,7 +39,7 @@ func downloadOwnCertificate(c *gin.Context) {
 		return
 	}
 
-	// Get user info directly from JWT token (no core API call needed)
+	// Get user info from JWT token for role-based checks
 	user, exists := keycloakTokenVerifier.GetTokenUser(c)
 	if !exists {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
@@ -55,21 +55,17 @@ func downloadOwnCertificate(c *gin.Context) {
 		}
 	}
 
-	studentID, err := uuid.Parse(user.ID)
+	authHeader := c.GetHeader("Authorization")
+
+	// Fetch student info from core's /self endpoint to get the correct core student ID
+	// (the Keycloak UUID from JWT differs from the core student UUID)
+	student, err := participants.GetOwnStudentInfo(c, authHeader, coursePhaseID)
 	if err != nil {
-		log.WithError(err).Error("Failed to parse user ID")
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID"})
+		log.WithError(err).Error("Failed to get own student info from core")
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get student info"})
 		return
 	}
 
-	student := &participants.Student{
-		ID:        studentID,
-		FirstName: user.FirstName,
-		LastName:  user.LastName,
-		Email:     user.Email,
-	}
-
-	authHeader := c.GetHeader("Authorization")
 	pdfData, err := GenerateCertificate(c, authHeader, coursePhaseID, student)
 	if err != nil {
 		log.WithError(err).Error("Failed to generate certificate")
@@ -77,7 +73,16 @@ func downloadOwnCertificate(c *gin.Context) {
 		return
 	}
 
-	filename := fmt.Sprintf("certificate_%s.pdf", user.LastName)
+	// Record the download — only student self-downloads are tracked
+	_, recordErr := GeneratorServiceSingleton.queries.RecordCertificateDownload(c, db.RecordCertificateDownloadParams{
+		StudentID:     student.ID,
+		CoursePhaseID: coursePhaseID,
+	})
+	if recordErr != nil {
+		log.WithError(recordErr).Warn("Failed to record certificate download")
+	}
+
+	filename := fmt.Sprintf("certificate_%s.pdf", student.LastName)
 	c.Header("Content-Disposition", fmt.Sprintf("attachment; filename=%s", filename))
 	c.Header("Content-Type", "application/pdf")
 	c.Data(http.StatusOK, "application/pdf", pdfData)

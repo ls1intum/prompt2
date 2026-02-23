@@ -139,16 +139,6 @@ func GenerateCertificate(ctx context.Context, authHeader string, coursePhaseID u
 		return nil, err
 	}
 
-	// Record the download
-	_, err = GeneratorServiceSingleton.queries.RecordCertificateDownload(ctx, db.RecordCertificateDownloadParams{
-		StudentID:     student.ID,
-		CoursePhaseID: coursePhaseID,
-	})
-	if err != nil {
-		log.WithError(err).Warn("Failed to record certificate download")
-		// Don't fail the generation, just log the error
-	}
-
 	return pdfData, nil
 }
 

@@ -158,12 +158,13 @@ func GetCoursePhaseWithCourse(ctx context.Context, authHeader string, coursePhas
 func GetStudentInfo(ctx context.Context, authHeader string, coursePhaseID, studentID uuid.UUID) (*Student, error) {
 	s := ParticipantsServiceSingleton
 
-	url := fmt.Sprintf("%s/api/course_phases/%s/participations/%s", s.coreURL, coursePhaseID.String(), studentID.String())
-	log.WithField("url", url).Debug("Fetching student info from core service")
+	// Use the /participations/students endpoint which returns students by their core student ID
+	url := fmt.Sprintf("%s/api/course_phases/%s/participations/students", s.coreURL, coursePhaseID.String())
+	log.WithField("url", url).Debug("Fetching students from core service")
 
 	resp, err := s.makeAuthenticatedRequest(ctx, "GET", url, authHeader)
 	if err != nil {
-		log.WithError(err).Error("Failed to fetch student info from core service")
+		log.WithError(err).Error("Failed to fetch students from core service")
 		return nil, err
 	}
 	defer resp.Body.Close()
@@ -173,14 +174,54 @@ func GetStudentInfo(ctx context.Context, authHeader string, coursePhaseID, stude
 		log.WithFields(log.Fields{
 			"status": resp.Status,
 			"body":   string(body),
-		}).Error("Failed to fetch student info from core service")
-		return nil, fmt.Errorf("failed to fetch student info: %s", resp.Status)
+		}).Error("Failed to fetch students from core service")
+		return nil, fmt.Errorf("failed to fetch students: %s", resp.Status)
 	}
 
-	var participation CoursePhaseParticipation
+	var students []Student
+	if err := json.NewDecoder(resp.Body).Decode(&students); err != nil {
+		log.WithError(err).Error("Failed to decode students response")
+		return nil, fmt.Errorf("failed to decode students response: %w", err)
+	}
+
+	for _, student := range students {
+		if student.ID == studentID {
+			return &student, nil
+		}
+	}
+
+	return nil, fmt.Errorf("student %s not found in course phase %s", studentID, coursePhaseID)
+}
+
+// GetOwnStudentInfo fetches the current student's info from the core's /self endpoint.
+// This returns the core student ID (not the Keycloak UUID), which is needed for
+// correctly recording certificate downloads.
+func GetOwnStudentInfo(ctx context.Context, authHeader string, coursePhaseID uuid.UUID) (*Student, error) {
+	s := ParticipantsServiceSingleton
+
+	url := fmt.Sprintf("%s/api/course_phases/%s/participations/self", s.coreURL, coursePhaseID.String())
+	log.WithField("url", url).Debug("Fetching own student info from core service")
+
+	resp, err := s.makeAuthenticatedRequest(ctx, "GET", url, authHeader)
+	if err != nil {
+		log.WithError(err).Error("Failed to fetch own student info from core service")
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		body, _ := io.ReadAll(resp.Body)
+		log.WithFields(log.Fields{
+			"status": resp.Status,
+			"body":   string(body),
+		}).Error("Failed to fetch own student info from core service")
+		return nil, fmt.Errorf("failed to fetch own student info: %s", resp.Status)
+	}
+
+	var participation CoursePhaseParticipationSelf
 	if err := json.NewDecoder(resp.Body).Decode(&participation); err != nil {
-		log.WithError(err).Error("Failed to decode student response")
-		return nil, fmt.Errorf("failed to decode student response: %w", err)
+		log.WithError(err).Error("Failed to decode own student response")
+		return nil, fmt.Errorf("failed to decode own student response: %w", err)
 	}
 
 	return &participation.Student, nil

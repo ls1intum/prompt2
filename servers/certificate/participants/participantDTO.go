@@ -45,3 +45,10 @@ type CoursePhaseWithCourse struct {
 	CourseID uuid.UUID `json:"courseId"`
 	Course   Course    `json:"course"`
 }
+
+// CoursePhaseParticipationSelf is the response from core's /participations/self endpoint
+type CoursePhaseParticipationSelf struct {
+	CoursePhaseID         uuid.UUID `json:"coursePhaseID"`
+	CourseParticipationID uuid.UUID `json:"courseParticipationID"`
+	Student               Student   `json:"student"`
+}
