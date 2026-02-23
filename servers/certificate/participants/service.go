@@ -63,7 +63,7 @@ func GetParticipationsForCoursePhase(ctx context.Context, authHeader string, cou
 		log.WithError(err).Error("Failed to fetch participations from core service")
 		return nil, err
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode != http.StatusOK {
 		body, _ := io.ReadAll(resp.Body)
@@ -132,7 +132,7 @@ func GetCoursePhaseWithCourse(ctx context.Context, authHeader string, coursePhas
 		log.WithError(err).Error("Failed to fetch course phase info from core service")
 		return nil, err
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode != http.StatusOK {
 		body, _ := io.ReadAll(resp.Body)
@@ -164,7 +164,7 @@ func GetStudentInfo(ctx context.Context, authHeader string, coursePhaseID, stude
 		log.WithError(err).Error("Failed to fetch students from core service")
 		return nil, err
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode != http.StatusOK {
 		body, _ := io.ReadAll(resp.Body)
@@ -204,7 +204,7 @@ func GetOwnStudentInfo(ctx context.Context, authHeader string, coursePhaseID uui
 		log.WithError(err).Error("Failed to fetch own student info from core service")
 		return nil, err
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode != http.StatusOK {
 		body, _ := io.ReadAll(resp.Body)

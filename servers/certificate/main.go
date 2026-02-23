@@ -117,7 +117,7 @@ func main() {
 	defer sentry.Flush(2 * time.Second)
 
 	databaseURL := getDatabaseURL()
-	log.Debug("Connecting to database at:", databaseURL)
+	log.Debug("Connecting to database")
 
 	runMigrations(databaseURL)
 

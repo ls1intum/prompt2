@@ -5,7 +5,7 @@ import App from './App'
 const remoteElement = document.getElementById('certificate-root') as unknown as HTMLElement
 const remote = createRoot(remoteElement)
 remote.render(
-    <React.StrictMode>
-        <App />
-    </React.StrictMode>,
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>,
 )

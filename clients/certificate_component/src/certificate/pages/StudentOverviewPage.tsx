@@ -15,10 +15,7 @@ import {
 } from '@tumaet/prompt-ui-components'
 
 import { getCertificateStatus } from '../network/queries/getCertificateStatus'
-import {
-  downloadOwnCertificate,
-  triggerBlobDownload,
-} from '../network/queries/downloadCertificate'
+import { downloadOwnCertificate, triggerBlobDownload } from '../network/queries/downloadCertificate'
 
 export const StudentOverviewPage = () => {
   const { phaseId } = useParams<{ phaseId: string }>()
@@ -67,9 +64,7 @@ export const StudentOverviewPage = () => {
   return (
     <div className='space-y-4'>
       <ManagementPageHeader>Course Certificate</ManagementPageHeader>
-      <p className='text-muted-foreground'>
-        Download your course completion certificate.
-      </p>
+      <p className='text-muted-foreground'>Download your course completion certificate.</p>
 
       <Card>
         <CardHeader>

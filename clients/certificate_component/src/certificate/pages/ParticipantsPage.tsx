@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useCallback, useMemo } from 'react'
 import { useParams } from 'react-router-dom'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { Download, Loader2, CheckCircle2, XCircle } from 'lucide-react'
@@ -21,7 +21,6 @@ import {
 export const ParticipantsPage = () => {
   const { phaseId } = useParams<{ phaseId: string }>()
   const queryClient = useQueryClient()
-  const [downloadingId, setDownloadingId] = useState<string | null>(null)
 
   const {
     data: participants,
@@ -34,20 +33,21 @@ export const ParticipantsPage = () => {
     enabled: !!phaseId,
   })
 
-  const handleDownload = async (studentId: string, lastName: string) => {
-    if (!phaseId) return
+  const handleDownload = useCallback(
+    (studentId: string, lastName: string) => {
+      if (!phaseId) return
 
-    setDownloadingId(studentId)
-    try {
-      const blob = await downloadStudentCertificate(phaseId, studentId)
-      triggerBlobDownload(blob, `certificate_${lastName}.pdf`)
-      queryClient.invalidateQueries({ queryKey: ['participants', phaseId] })
-    } catch (error) {
-      console.error('Failed to download certificate:', error)
-    } finally {
-      setDownloadingId(null)
-    }
-  }
+      downloadStudentCertificate(phaseId, studentId)
+        .then((blob) => {
+          triggerBlobDownload(blob, `certificate_${lastName}.pdf`)
+          queryClient.invalidateQueries({ queryKey: ['participants', phaseId] })
+        })
+        .catch((error) => {
+          console.error('Failed to download certificate:', error)
+        })
+    },
+    [phaseId, queryClient],
+  )
 
   // Build a lookup map of download data by student ID
   const downloadDataMap = useMemo(() => {
@@ -107,9 +107,7 @@ export const ParticipantsPage = () => {
         extraData: (participants ?? []).map((p) => ({
           courseParticipationID: p.courseParticipationID,
           value: p.lastDownload,
-          stringValue: p.lastDownload
-            ? new Date(p.lastDownload).toLocaleDateString()
-            : '-',
+          stringValue: p.lastDownload ? new Date(p.lastDownload).toLocaleDateString() : '-',
         })),
         cell: ({ row }: { row: { original: ParticipantRow } }) => {
           const p = downloadDataMap.get(row.original.courseParticipationID)
@@ -135,7 +133,7 @@ export const ParticipantsPage = () => {
         },
       },
     ],
-    [phaseId],
+    [handleDownload],
   )
 
   if (isError) {
@@ -156,9 +154,7 @@ export const ParticipantsPage = () => {
   return (
     <div className='space-y-4'>
       <ManagementPageHeader>Certificate Participants</ManagementPageHeader>
-      <p className='text-muted-foreground'>
-        View and download certificates for all participants.
-      </p>
+      <p className='text-muted-foreground'>View and download certificates for all participants.</p>
 
       <div className='p-4 bg-muted rounded-lg'>
         <p className='text-sm'>

@@ -259,7 +259,7 @@ func (s *GeneratorRouterTestSuite) TestPreviewCertificate_CompilationError() {
 func (s *GeneratorRouterTestSuite) TestWriteDataFiles() {
 	tempDir, err := os.MkdirTemp("", "test-write-data-*")
 	assert.NoError(s.T(), err)
-	defer os.RemoveAll(tempDir)
+	defer func() { _ = os.RemoveAll(tempDir) }()
 
 	certData := CertificateData{
 		StudentName: "Alice Smith",
@@ -296,7 +296,7 @@ func (s *GeneratorRouterTestSuite) TestTypstCompilationError_Interface() {
 func (s *GeneratorRouterTestSuite) TestCompileTypst_InvalidTemplate() {
 	tempDir, err := os.MkdirTemp("", "test-compile-*")
 	assert.NoError(s.T(), err)
-	defer os.RemoveAll(tempDir)
+	defer func() { _ = os.RemoveAll(tempDir) }()
 
 	// Write an invalid template
 	templatePath := filepath.Join(tempDir, "bad.typ")
@@ -314,7 +314,7 @@ func (s *GeneratorRouterTestSuite) TestCompileTypst_InvalidTemplate() {
 func (s *GeneratorRouterTestSuite) TestCompileTypst_ValidTemplate() {
 	tempDir, err := os.MkdirTemp("", "test-compile-*")
 	assert.NoError(s.T(), err)
-	defer os.RemoveAll(tempDir)
+	defer func() { _ = os.RemoveAll(tempDir) }()
 
 	// Write data files
 	certData := CertificateData{

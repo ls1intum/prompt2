@@ -267,7 +267,10 @@ export const SettingsPage = () => {
                     <ul className='list-disc pl-4 space-y-2 text-sm text-muted-foreground'>
                       <li>File must be a valid Typst (.typ) file</li>
                       <li>
-                        Use <code className='bg-muted px-1 py-0.5 rounded text-xs'>json("data.json")</code>{' '}
+                        Use{' '}
+                        <code className='bg-muted px-1 py-0.5 rounded text-xs'>
+                          json(&quot;data.json&quot;)
+                        </code>{' '}
                         to access certificate data
                       </li>
                       <li>
@@ -292,12 +295,7 @@ export const SettingsPage = () => {
               <label className='cursor-pointer'>
                 <Upload className='mr-2 h-4 w-4' />
                 Upload .typ file
-                <input
-                  type='file'
-                  accept='.typ'
-                  onChange={handleFileUpload}
-                  className='hidden'
-                />
+                <input type='file' accept='.typ' onChange={handleFileUpload} className='hidden' />
               </label>
             </Button>
             <span className='text-sm text-muted-foreground'>or paste content below</span>
@@ -375,8 +373,8 @@ export const SettingsPage = () => {
             <div>
               <CardTitle>Release Date</CardTitle>
               <CardDescription>
-                Set a date after which students can download their certificates. Leave empty to allow
-                downloads immediately.
+                Set a date after which students can download their certificates. Leave empty to
+                allow downloads immediately.
               </CardDescription>
             </div>
             {config?.releaseDate && (
@@ -412,7 +410,11 @@ export const SettingsPage = () => {
                 'Save'
               )}
             </Button>
-            <Button variant='outline' onClick={handleReleaseNow} disabled={releaseDateMutation.isPending}>
+            <Button
+              variant='outline'
+              onClick={handleReleaseNow}
+              disabled={releaseDateMutation.isPending}
+            >
               <CalendarCheck className='mr-2 h-4 w-4' />
               Release Now
             </Button>
