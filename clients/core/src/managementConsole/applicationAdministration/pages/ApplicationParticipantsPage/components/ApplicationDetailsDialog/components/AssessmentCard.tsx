@@ -199,11 +199,7 @@ export const AssessmentCard = ({
               className='flex-grow'
               rows={3}
             />
-            <Button
-              size='sm'
-              disabled={!newComment}
-              onClick={submitComment}
-            >
+            <Button size='sm' disabled={!newComment} onClick={submitComment}>
               <Send className='h-4 w-4 mr-2' />
               Send
             </Button>
