@@ -75,19 +75,21 @@ func (s *ConfigServiceTestSuite) TestUpdateCoursePhaseConfig() {
 	coursePhaseID := uuid.MustParse("10000000-0000-0000-0000-000000000002")
 	template := "= Updated Template\nHello World"
 
-	cfg, err := UpdateCoursePhaseConfig(s.suiteCtx, coursePhaseID, template)
+	cfg, err := UpdateCoursePhaseConfig(s.suiteCtx, coursePhaseID, template, "Test User")
 	assert.NoError(s.T(), err)
 	assert.Equal(s.T(), coursePhaseID, cfg.CoursePhaseID)
 	assert.True(s.T(), cfg.HasTemplate)
 	assert.NotNil(s.T(), cfg.TemplateContent)
 	assert.Equal(s.T(), template, *cfg.TemplateContent)
+	assert.NotNil(s.T(), cfg.UpdatedBy)
+	assert.Equal(s.T(), "Test User", *cfg.UpdatedBy)
 }
 
 func (s *ConfigServiceTestSuite) TestUpdateCoursePhaseConfig_Upsert() {
 	newID := uuid.New()
 	template := "= New Template"
 
-	cfg, err := UpdateCoursePhaseConfig(s.suiteCtx, newID, template)
+	cfg, err := UpdateCoursePhaseConfig(s.suiteCtx, newID, template, "Another User")
 	assert.NoError(s.T(), err)
 	assert.Equal(s.T(), newID, cfg.CoursePhaseID)
 	assert.True(s.T(), cfg.HasTemplate)

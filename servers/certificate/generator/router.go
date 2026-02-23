@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -43,6 +44,15 @@ func downloadOwnCertificate(c *gin.Context) {
 	if !exists {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
 		return
+	}
+
+	// Check release date — students can only download after the release date
+	if !user.Roles[promptSDK.PromptAdmin] && !user.Roles[promptSDK.CourseLecturer] && !user.Roles[promptSDK.CourseEditor] {
+		config, err := GeneratorServiceSingleton.queries.GetCoursePhaseConfig(c, coursePhaseID)
+		if err == nil && config.ReleaseDate.Valid && config.ReleaseDate.Time.After(time.Now()) {
+			c.JSON(http.StatusForbidden, gin.H{"error": "Certificate is not yet available for download"})
+			return
+		}
 	}
 
 	studentID, err := uuid.Parse(user.ID)
@@ -140,6 +150,17 @@ func getCertificateStatus(c *gin.Context) {
 			"available":     false,
 			"hasDownloaded": false,
 			"message":       "Certificate template not configured",
+		})
+		return
+	}
+
+	// Check release date for students
+	config, configErr := GeneratorServiceSingleton.queries.GetCoursePhaseConfig(c, coursePhaseID)
+	if configErr == nil && config.ReleaseDate.Valid && config.ReleaseDate.Time.After(time.Now()) {
+		c.JSON(http.StatusOK, gin.H{
+			"available":     false,
+			"hasDownloaded": false,
+			"message":       "Certificate will be available after " + config.ReleaseDate.Time.Format("02.01.2006 15:04"),
 		})
 		return
 	}

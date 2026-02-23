@@ -142,13 +142,13 @@ export const ParticipantsPage = () => {
   const totalCount = participants?.length ?? 0
 
   return (
-    <div className='flex flex-col'>
+    <div className='space-y-4'>
       <ManagementPageHeader>Certificate Participants</ManagementPageHeader>
-      <p className='text-sm text-muted-foreground mb-4'>
+      <p className='text-muted-foreground'>
         View and download certificates for all participants.
       </p>
 
-      <div className='mb-4 p-4 bg-muted rounded-lg'>
+      <div className='p-4 bg-muted rounded-lg'>
         <p className='text-sm'>
           <span className='font-medium'>{downloadedCount}</span> of{' '}
           <span className='font-medium'>{totalCount}</span> participants have downloaded their

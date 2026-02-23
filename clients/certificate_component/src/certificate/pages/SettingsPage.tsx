@@ -1,7 +1,17 @@
 import { useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { Loader2, Upload, FileText, CheckCircle2, Eye, AlertCircle, X } from 'lucide-react'
+import {
+  Loader2,
+  Upload,
+  CheckCircle2,
+  Eye,
+  AlertCircle,
+  X,
+  HelpCircle,
+  AlertTriangle,
+  CalendarCheck,
+} from 'lucide-react'
 
 import {
   Button,
@@ -11,6 +21,10 @@ import {
   CardHeader,
   CardTitle,
   Textarea,
+  DatePicker,
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
   ManagementPageHeader,
   ErrorPage,
   Alert,
@@ -19,8 +33,22 @@ import {
   useToast,
 } from '@tumaet/prompt-ui-components'
 
-import { getConfig, updateConfig } from '../network/queries/getConfig'
+import { getConfig, updateConfig, updateReleaseDate } from '../network/queries/getConfig'
 import { previewCertificate, type PreviewError } from '../network/queries/previewCertificate'
+
+/**
+ * Format a date string to European format: DD.MM.YYYY HH:mm
+ */
+const formatEuropeanDate = (dateString: string): string => {
+  const date = new Date(dateString)
+  return date.toLocaleString('de-DE', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  })
+}
 
 export const SettingsPage = () => {
   const { phaseId } = useParams<{ phaseId: string }>()
@@ -30,6 +58,8 @@ export const SettingsPage = () => {
   const [hasChanges, setHasChanges] = useState(false)
   const [isPreviewing, setIsPreviewing] = useState(false)
   const [compilerError, setCompilerError] = useState<string | null>(null)
+  const [selectedReleaseDate, setSelectedReleaseDate] = useState<Date | undefined>(undefined)
+  const [releaseDateDirty, setReleaseDateDirty] = useState(false)
 
   const {
     data: config,
@@ -56,6 +86,24 @@ export const SettingsPage = () => {
       toast({
         title: 'Error',
         description: 'Failed to update certificate template',
+        variant: 'destructive',
+      })
+    },
+  })
+
+  const releaseDateMutation = useMutation({
+    mutationFn: (releaseDate: string | null) => updateReleaseDate(phaseId ?? '', releaseDate),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['config', phaseId] })
+      toast({
+        title: 'Success',
+        description: 'Release date updated successfully',
+      })
+    },
+    onError: () => {
+      toast({
+        title: 'Error',
+        description: 'Failed to update release date',
         variant: 'destructive',
       })
     },
@@ -109,7 +157,6 @@ export const SettingsPage = () => {
       const blob = await previewCertificate(phaseId)
       const url = window.URL.createObjectURL(blob)
       window.open(url, '_blank')
-      // Revoke after a delay to allow the tab to load
       setTimeout(() => window.URL.revokeObjectURL(url), 10000)
     } catch (error: unknown) {
       console.error('Failed to generate preview:', error)
@@ -126,6 +173,28 @@ export const SettingsPage = () => {
     } finally {
       setIsPreviewing(false)
     }
+  }
+
+  const handleSaveReleaseDate = () => {
+    if (selectedReleaseDate) {
+      releaseDateMutation.mutate(selectedReleaseDate.toISOString())
+    } else {
+      releaseDateMutation.mutate(null)
+    }
+    setReleaseDateDirty(false)
+  }
+
+  const handleReleaseNow = () => {
+    const now = new Date()
+    setSelectedReleaseDate(now)
+    releaseDateMutation.mutate(now.toISOString())
+    setReleaseDateDirty(false)
+  }
+
+  const handleClearReleaseDate = () => {
+    setSelectedReleaseDate(undefined)
+    releaseDateMutation.mutate(null)
+    setReleaseDateDirty(false)
   }
 
   // Initialize template content from config
@@ -146,155 +215,221 @@ export const SettingsPage = () => {
   }
 
   return (
-    <div className='flex flex-col'>
+    <div className='space-y-4'>
       <ManagementPageHeader>Certificate Settings</ManagementPageHeader>
-      <p className='text-sm text-muted-foreground mb-6'>
+      <p className='text-muted-foreground'>
         Configure the certificate template for this course phase.
       </p>
 
-      <div className='grid gap-6 max-w-4xl'>
-        <Card>
-          <CardHeader>
-            <CardTitle className='flex items-center gap-2'>
-              <FileText className='h-5 w-5' />
-              Template Status
-            </CardTitle>
-            <CardDescription>
-              {config?.hasTemplate ? (
-                <span className='flex items-center gap-2 text-green-600'>
-                  <CheckCircle2 className='h-4 w-4' />
-                  Template configured
-                </span>
-              ) : (
-                'No template configured yet'
-              )}
-            </CardDescription>
-          </CardHeader>
-          {config?.hasTemplate && config.updatedAt && (
-            <CardContent>
-              <p className='text-sm text-muted-foreground'>
-                Last updated: {new Date(config.updatedAt).toLocaleDateString()}
-              </p>
-            </CardContent>
-          )}
-        </Card>
+      {/* Warning: template changed after students downloaded */}
+      {config?.hasDownloads && hasChanges && (
+        <Alert variant='destructive'>
+          <AlertTriangle className='h-4 w-4' />
+          <AlertTitle>Students have already downloaded certificates</AlertTitle>
+          <AlertDescription>
+            Changing the template will affect all future downloads. Students who already downloaded
+            their certificate will not automatically receive the updated version.
+          </AlertDescription>
+        </Alert>
+      )}
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Upload Template</CardTitle>
-            <CardDescription>
-              Upload a Typst (.typ) file or paste the template content directly.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className='space-y-4'>
-            <div className='flex items-center gap-4'>
-              <Button variant='outline' asChild>
-                <label className='cursor-pointer'>
-                  <Upload className='mr-2 h-4 w-4' />
-                  Upload .typ file
-                  <input
-                    type='file'
-                    accept='.typ'
-                    onChange={handleFileUpload}
-                    className='hidden'
-                  />
-                </label>
-              </Button>
-              <span className='text-sm text-muted-foreground'>or paste content below</span>
+      <Card>
+        <CardHeader>
+          <div className='flex items-center justify-between'>
+            <div>
+              <CardTitle>Certificate Template</CardTitle>
+              <CardDescription>
+                Upload a Typst (.typ) file or paste the template content directly.
+              </CardDescription>
             </div>
-
-            <Textarea
-              placeholder='Paste your Typst template content here...'
-              value={templateContent}
-              onChange={(e) => {
-                setTemplateContent(e.target.value)
-                setHasChanges(true)
-              }}
-              rows={15}
-              className='font-mono text-sm'
-            />
-
             <div className='flex items-center gap-3'>
-              <Button onClick={handleSave} disabled={!hasChanges || updateMutation.isPending}>
-                {updateMutation.isPending ? (
-                  <>
-                    <Loader2 className='mr-2 h-4 w-4 animate-spin' />
-                    Saving...
-                  </>
-                ) : (
-                  'Save Template'
-                )}
-              </Button>
-
-              <Button
-                variant='outline'
-                onClick={handlePreview}
-                disabled={!templateContent || isPreviewing || updateMutation.isPending}
-              >
-                {isPreviewing ? (
-                  <>
-                    <Loader2 className='mr-2 h-4 w-4 animate-spin' />
-                    Generating...
-                  </>
-                ) : (
-                  <>
-                    <Eye className='mr-2 h-4 w-4' />
-                    Test Certificate
-                  </>
-                )}
-              </Button>
+              {config?.hasTemplate && (
+                <span className='flex items-center gap-2 text-sm text-green-600'>
+                  <CheckCircle2 className='h-4 w-4' />
+                  Configured
+                  {config.updatedAt && (
+                    <span className='text-muted-foreground'>
+                      · {formatEuropeanDate(config.updatedAt)}
+                      {config.updatedBy && ` by ${config.updatedBy}`}
+                    </span>
+                  )}
+                </span>
+              )}
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant='ghost' size='sm' className='h-8 w-8 p-0'>
+                    <HelpCircle className='h-4 w-4 text-muted-foreground' />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className='w-80' align='end'>
+                  <div className='space-y-3 p-1'>
+                    <h4 className='font-medium text-sm'>Template Requirements</h4>
+                    <ul className='list-disc pl-4 space-y-2 text-sm text-muted-foreground'>
+                      <li>File must be a valid Typst (.typ) file</li>
+                      <li>
+                        Use <code className='bg-muted px-1 py-0.5 rounded text-xs'>json("data.json")</code>{' '}
+                        to access certificate data
+                      </li>
+                      <li>
+                        Available fields:{' '}
+                        <code className='bg-muted px-1 py-0.5 rounded text-xs'>studentName</code>,{' '}
+                        <code className='bg-muted px-1 py-0.5 rounded text-xs'>courseName</code>,{' '}
+                        <code className='bg-muted px-1 py-0.5 rounded text-xs'>teamName</code>,{' '}
+                        <code className='bg-muted px-1 py-0.5 rounded text-xs'>date</code>
+                      </li>
+                      <li>Template should be in A4 format</li>
+                      <li>Ensure all used fonts are included or are system fonts</li>
+                    </ul>
+                  </div>
+                </PopoverContent>
+              </Popover>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </CardHeader>
+        <CardContent className='space-y-4'>
+          <div className='flex items-center gap-4'>
+            <Button variant='outline' asChild>
+              <label className='cursor-pointer'>
+                <Upload className='mr-2 h-4 w-4' />
+                Upload .typ file
+                <input
+                  type='file'
+                  accept='.typ'
+                  onChange={handleFileUpload}
+                  className='hidden'
+                />
+              </label>
+            </Button>
+            <span className='text-sm text-muted-foreground'>or paste content below</span>
+          </div>
 
-        {compilerError && (
-          <Alert variant='destructive'>
-            <AlertCircle className='h-4 w-4' />
-            <AlertTitle className='flex items-center justify-between'>
-              Template Compilation Error
+          <Textarea
+            placeholder='Paste your Typst template content here...'
+            value={templateContent}
+            onChange={(e) => {
+              setTemplateContent(e.target.value)
+              setHasChanges(true)
+            }}
+            rows={15}
+            className='font-mono text-sm'
+          />
+
+          <div className='flex items-center gap-3'>
+            <Button onClick={handleSave} disabled={!hasChanges || updateMutation.isPending}>
+              {updateMutation.isPending ? (
+                <>
+                  <Loader2 className='mr-2 h-4 w-4 animate-spin' />
+                  Saving...
+                </>
+              ) : (
+                'Save Template'
+              )}
+            </Button>
+
+            <Button
+              variant='outline'
+              onClick={handlePreview}
+              disabled={!templateContent || isPreviewing || updateMutation.isPending}
+            >
+              {isPreviewing ? (
+                <>
+                  <Loader2 className='mr-2 h-4 w-4 animate-spin' />
+                  Generating...
+                </>
+              ) : (
+                <>
+                  <Eye className='mr-2 h-4 w-4' />
+                  Test Certificate
+                </>
+              )}
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      {compilerError && (
+        <Alert variant='destructive'>
+          <AlertCircle className='h-4 w-4' />
+          <AlertTitle className='flex items-center justify-between'>
+            Template Compilation Error
+            <Button
+              variant='ghost'
+              size='sm'
+              className='h-6 w-6 p-0'
+              onClick={() => setCompilerError(null)}
+            >
+              <X className='h-4 w-4' />
+            </Button>
+          </AlertTitle>
+          <AlertDescription>
+            <pre className='mt-2 whitespace-pre-wrap break-words rounded bg-destructive/10 p-3 font-mono text-xs'>
+              {compilerError}
+            </pre>
+          </AlertDescription>
+        </Alert>
+      )}
+
+      <Card>
+        <CardHeader>
+          <div className='flex items-center justify-between'>
+            <div>
+              <CardTitle>Release Date</CardTitle>
+              <CardDescription>
+                Set a date after which students can download their certificates. Leave empty to allow
+                downloads immediately.
+              </CardDescription>
+            </div>
+            {config?.releaseDate && (
+              <span className='flex items-center gap-2 text-sm text-muted-foreground'>
+                {formatEuropeanDate(config.releaseDate)}
+                {config.updatedBy && ` by ${config.updatedBy}`}
+              </span>
+            )}
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className='flex items-center gap-4'>
+            <DatePicker
+              date={
+                selectedReleaseDate ??
+                (config?.releaseDate ? new Date(config.releaseDate) : undefined)
+              }
+              onSelect={(date) => {
+                setSelectedReleaseDate(date)
+                setReleaseDateDirty(true)
+              }}
+            />
+            <Button
+              onClick={handleSaveReleaseDate}
+              disabled={!releaseDateDirty || releaseDateMutation.isPending}
+            >
+              {releaseDateMutation.isPending ? (
+                <>
+                  <Loader2 className='mr-2 h-4 w-4 animate-spin' />
+                  Saving...
+                </>
+              ) : (
+                'Save'
+              )}
+            </Button>
+            <Button variant='outline' onClick={handleReleaseNow} disabled={releaseDateMutation.isPending}>
+              <CalendarCheck className='mr-2 h-4 w-4' />
+              Release Now
+            </Button>
+            {(selectedReleaseDate || config?.releaseDate) && (
               <Button
                 variant='ghost'
                 size='sm'
-                className='h-6 w-6 p-0'
-                onClick={() => setCompilerError(null)}
+                onClick={handleClearReleaseDate}
+                disabled={releaseDateMutation.isPending}
               >
-                <X className='h-4 w-4' />
+                <X className='mr-1 h-4 w-4' />
+                Clear
               </Button>
-            </AlertTitle>
-            <AlertDescription>
-              <pre className='mt-2 whitespace-pre-wrap break-words rounded bg-destructive/10 p-3 font-mono text-xs'>
-                {compilerError}
-              </pre>
-            </AlertDescription>
-          </Alert>
-        )}
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Template Requirements</CardTitle>
-            <CardDescription>
-              Your Typst template should follow these requirements:
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <ul className='list-disc pl-6 space-y-2 text-sm'>
-              <li>File must be a valid Typst (.typ) file</li>
-              <li>
-                Use <code className='bg-muted px-1 rounded'>json("data.json")</code> to access
-                certificate data
-              </li>
-              <li>
-                Available fields: <code className='bg-muted px-1 rounded'>studentName</code>,{' '}
-                <code className='bg-muted px-1 rounded'>courseName</code>,{' '}
-                <code className='bg-muted px-1 rounded'>teamName</code>,{' '}
-                <code className='bg-muted px-1 rounded'>date</code>
-              </li>
-              <li>Template should be in A4 format</li>
-              <li>Ensure all used fonts are included or are system fonts</li>
-            </ul>
-          </CardContent>
-        </Card>
-      </div>
+            )}
+          </div>
+        </CardContent>
+      </Card>
     </div>
   )
 }

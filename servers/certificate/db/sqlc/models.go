@@ -23,4 +23,6 @@ type CoursePhaseConfig struct {
 	TemplateContent pgtype.Text        `json:"template_content"`
 	CreatedAt       pgtype.Timestamptz `json:"created_at"`
 	UpdatedAt       pgtype.Timestamptz `json:"updated_at"`
+	UpdatedBy       pgtype.Text        `json:"updated_by"`
+	ReleaseDate     pgtype.Timestamptz `json:"release_date"`
 }

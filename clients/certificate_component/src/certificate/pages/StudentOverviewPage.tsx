@@ -65,13 +65,13 @@ export const StudentOverviewPage = () => {
   }
 
   return (
-    <div className='flex flex-col'>
+    <div className='space-y-4'>
       <ManagementPageHeader>Course Certificate</ManagementPageHeader>
-      <p className='text-sm text-muted-foreground mb-6'>
+      <p className='text-muted-foreground'>
         Download your course completion certificate.
       </p>
 
-      <Card className='max-w-xl'>
+      <Card>
         <CardHeader>
           <CardTitle className='flex items-center gap-2'>
             <FileCheck2 className='h-5 w-5' />

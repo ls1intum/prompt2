@@ -18,3 +18,14 @@ export const updateConfig = async (
   )
   return response.data
 }
+
+export const updateReleaseDate = async (
+  coursePhaseId: string,
+  releaseDate: string | null,
+): Promise<CoursePhaseConfig> => {
+  const response = await certificateAxiosInstance.put(
+    `certificate/api/course_phase/${coursePhaseId}/config/release-date`,
+    { releaseDate },
+  )
+  return response.data
+}

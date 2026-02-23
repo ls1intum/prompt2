@@ -12,8 +12,26 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const countDownloadsByCoursePhase = `-- name: CountDownloadsByCoursePhase :one
+SELECT COUNT(*) AS download_count
+FROM certificate_download
+WHERE
+    course_phase_id = $1
+`
+
+func (q *Queries) CountDownloadsByCoursePhase(ctx context.Context, coursePhaseID uuid.UUID) (int64, error) {
+	row := q.db.QueryRow(ctx, countDownloadsByCoursePhase, coursePhaseID)
+	var download_count int64
+	err := row.Scan(&download_count)
+	return download_count, err
+}
+
 const createCoursePhaseConfig = `-- name: CreateCoursePhaseConfig :one
-INSERT INTO course_phase_config (course_phase_id) VALUES ($1) RETURNING course_phase_id, template_content, created_at, updated_at
+INSERT INTO
+    course_phase_config (course_phase_id)
+VALUES ($1)
+RETURNING
+    course_phase_id, template_content, created_at, updated_at, updated_by, release_date
 `
 
 func (q *Queries) CreateCoursePhaseConfig(ctx context.Context, coursePhaseID uuid.UUID) (CoursePhaseConfig, error) {
@@ -24,12 +42,17 @@ func (q *Queries) CreateCoursePhaseConfig(ctx context.Context, coursePhaseID uui
 		&i.TemplateContent,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.UpdatedBy,
+		&i.ReleaseDate,
 	)
 	return i, err
 }
 
 const deleteCertificateDownload = `-- name: DeleteCertificateDownload :exec
-DELETE FROM certificate_download WHERE student_id = $1 AND course_phase_id = $2
+DELETE FROM certificate_download
+WHERE
+    student_id = $1
+    AND course_phase_id = $2
 `
 
 type DeleteCertificateDownloadParams struct {
@@ -43,8 +66,11 @@ func (q *Queries) DeleteCertificateDownload(ctx context.Context, arg DeleteCerti
 }
 
 const getCertificateDownload = `-- name: GetCertificateDownload :one
-SELECT id, student_id, course_phase_id, first_download, last_download, download_count FROM certificate_download
-WHERE student_id = $1 AND course_phase_id = $2
+SELECT id, student_id, course_phase_id, first_download, last_download, download_count
+FROM certificate_download
+WHERE
+    student_id = $1
+    AND course_phase_id = $2
 LIMIT 1
 `
 
@@ -68,7 +94,7 @@ func (q *Queries) GetCertificateDownload(ctx context.Context, arg GetCertificate
 }
 
 const getCoursePhaseConfig = `-- name: GetCoursePhaseConfig :one
-SELECT course_phase_id, template_content, created_at, updated_at FROM course_phase_config WHERE course_phase_id = $1 LIMIT 1
+SELECT course_phase_id, template_content, created_at, updated_at, updated_by, release_date FROM course_phase_config WHERE course_phase_id = $1 LIMIT 1
 `
 
 func (q *Queries) GetCoursePhaseConfig(ctx context.Context, coursePhaseID uuid.UUID) (CoursePhaseConfig, error) {
@@ -79,13 +105,33 @@ func (q *Queries) GetCoursePhaseConfig(ctx context.Context, coursePhaseID uuid.U
 		&i.TemplateContent,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.UpdatedBy,
+		&i.ReleaseDate,
 	)
 	return i, err
 }
 
+const hasDownloads = `-- name: HasDownloads :one
+SELECT EXISTS (
+        SELECT 1
+        FROM certificate_download
+        WHERE
+            course_phase_id = $1
+    ) AS has_downloads
+`
+
+func (q *Queries) HasDownloads(ctx context.Context, coursePhaseID uuid.UUID) (bool, error) {
+	row := q.db.QueryRow(ctx, hasDownloads, coursePhaseID)
+	var has_downloads bool
+	err := row.Scan(&has_downloads)
+	return has_downloads, err
+}
+
 const listCertificateDownloadsByCoursePhase = `-- name: ListCertificateDownloadsByCoursePhase :many
-SELECT id, student_id, course_phase_id, first_download, last_download, download_count FROM certificate_download
-WHERE course_phase_id = $1
+SELECT id, student_id, course_phase_id, first_download, last_download, download_count
+FROM certificate_download
+WHERE
+    course_phase_id = $1
 ORDER BY last_download DESC
 `
 
@@ -117,11 +163,22 @@ func (q *Queries) ListCertificateDownloadsByCoursePhase(ctx context.Context, cou
 }
 
 const recordCertificateDownload = `-- name: RecordCertificateDownload :one
-INSERT INTO certificate_download (student_id, course_phase_id, first_download, last_download, download_count)
+INSERT INTO
+    certificate_download (
+        student_id,
+        course_phase_id,
+        first_download,
+        last_download,
+        download_count
+    )
 VALUES ($1, $2, NOW(), NOW(), 1)
-ON CONFLICT (student_id, course_phase_id) DO UPDATE
-SET last_download = NOW(), download_count = certificate_download.download_count + 1
-RETURNING id, student_id, course_phase_id, first_download, last_download, download_count
+ON CONFLICT (student_id, course_phase_id) DO
+UPDATE
+SET
+    last_download = NOW(),
+    download_count = certificate_download.download_count + 1
+RETURNING
+    id, student_id, course_phase_id, first_download, last_download, download_count
 `
 
 type RecordCertificateDownloadParams struct {
@@ -145,49 +202,103 @@ func (q *Queries) RecordCertificateDownload(ctx context.Context, arg RecordCerti
 
 const updateCoursePhaseConfig = `-- name: UpdateCoursePhaseConfig :one
 UPDATE course_phase_config
-SET template_content = $2, updated_at = NOW()
-WHERE course_phase_id = $1
-RETURNING course_phase_id, template_content, created_at, updated_at
+SET
+    template_content = $2,
+    updated_at = NOW(),
+    updated_by = $3
+WHERE
+    course_phase_id = $1
+RETURNING
+    course_phase_id, template_content, created_at, updated_at, updated_by, release_date
 `
 
 type UpdateCoursePhaseConfigParams struct {
 	CoursePhaseID   uuid.UUID   `json:"course_phase_id"`
 	TemplateContent pgtype.Text `json:"template_content"`
+	UpdatedBy       pgtype.Text `json:"updated_by"`
 }
 
 func (q *Queries) UpdateCoursePhaseConfig(ctx context.Context, arg UpdateCoursePhaseConfigParams) (CoursePhaseConfig, error) {
-	row := q.db.QueryRow(ctx, updateCoursePhaseConfig, arg.CoursePhaseID, arg.TemplateContent)
+	row := q.db.QueryRow(ctx, updateCoursePhaseConfig, arg.CoursePhaseID, arg.TemplateContent, arg.UpdatedBy)
 	var i CoursePhaseConfig
 	err := row.Scan(
 		&i.CoursePhaseID,
 		&i.TemplateContent,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.UpdatedBy,
+		&i.ReleaseDate,
+	)
+	return i, err
+}
+
+const updateReleaseDate = `-- name: UpdateReleaseDate :one
+UPDATE course_phase_config
+SET
+    release_date = $2,
+    updated_at = NOW(),
+    updated_by = $3
+WHERE
+    course_phase_id = $1
+RETURNING
+    course_phase_id, template_content, created_at, updated_at, updated_by, release_date
+`
+
+type UpdateReleaseDateParams struct {
+	CoursePhaseID uuid.UUID          `json:"course_phase_id"`
+	ReleaseDate   pgtype.Timestamptz `json:"release_date"`
+	UpdatedBy     pgtype.Text        `json:"updated_by"`
+}
+
+func (q *Queries) UpdateReleaseDate(ctx context.Context, arg UpdateReleaseDateParams) (CoursePhaseConfig, error) {
+	row := q.db.QueryRow(ctx, updateReleaseDate, arg.CoursePhaseID, arg.ReleaseDate, arg.UpdatedBy)
+	var i CoursePhaseConfig
+	err := row.Scan(
+		&i.CoursePhaseID,
+		&i.TemplateContent,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.UpdatedBy,
+		&i.ReleaseDate,
 	)
 	return i, err
 }
 
 const upsertCoursePhaseConfig = `-- name: UpsertCoursePhaseConfig :one
-INSERT INTO course_phase_config (course_phase_id, template_content, updated_at)
-VALUES ($1, $2, NOW())
-ON CONFLICT (course_phase_id) DO UPDATE
-SET template_content = EXCLUDED.template_content, updated_at = NOW()
-RETURNING course_phase_id, template_content, created_at, updated_at
+INSERT INTO
+    course_phase_config (
+        course_phase_id,
+        template_content,
+        updated_at,
+        updated_by
+    )
+VALUES ($1, $2, NOW(), $3)
+ON CONFLICT (course_phase_id) DO
+UPDATE
+SET
+    template_content = EXCLUDED.template_content,
+    updated_at = NOW(),
+    updated_by = EXCLUDED.updated_by
+RETURNING
+    course_phase_id, template_content, created_at, updated_at, updated_by, release_date
 `
 
 type UpsertCoursePhaseConfigParams struct {
 	CoursePhaseID   uuid.UUID   `json:"course_phase_id"`
 	TemplateContent pgtype.Text `json:"template_content"`
+	UpdatedBy       pgtype.Text `json:"updated_by"`
 }
 
 func (q *Queries) UpsertCoursePhaseConfig(ctx context.Context, arg UpsertCoursePhaseConfigParams) (CoursePhaseConfig, error) {
-	row := q.db.QueryRow(ctx, upsertCoursePhaseConfig, arg.CoursePhaseID, arg.TemplateContent)
+	row := q.db.QueryRow(ctx, upsertCoursePhaseConfig, arg.CoursePhaseID, arg.TemplateContent, arg.UpdatedBy)
 	var i CoursePhaseConfig
 	err := row.Scan(
 		&i.CoursePhaseID,
 		&i.TemplateContent,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.UpdatedBy,
+		&i.ReleaseDate,
 	)
 	return i, err
 }

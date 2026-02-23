@@ -6,13 +6,16 @@ todos
 - Update readme
 - Add documentation for template format
 - [x] Add a test button to the admin interface to generate a certificate with mock data
-- Fix the settings window alignment and spacing issues
+- [x] Fix the settings window alignment and spacing issues
 - [x] Fix the participants table - currenlty results in internal server error
 - get rid of remaining minio parts
 - Add option to include graphics in the certificate template (e.g. course logo, chair logo, etc.)
 - make sure the docker image is present, is working and built similar to the other services (e.g. with a multi-stage build and using the same base image as the other services) and includes the typst compiler
 - make sure the docker image is built in the github workflow and pushed to the registry
 - make sure students can download their certificates - store errors in the database and display them for instructors in the participants table
+- The download counter in the paricipants table is currently not updated when a student downloads their certificate - fix this
+- Add an option for instructors to add a text that is shown to the students on the certificate download page (e.g. to inform them about the release date or to provide instructions on how to download the certificate).
+- Fix the download button in the participants table - currentlytly results in an internal server error
 ###########################################
 
 A microservice for generating and managing course completion certificates in the PROMPT platform.

@@ -23,4 +23,7 @@ export interface CoursePhaseConfig {
   hasTemplate: boolean
   createdAt: string
   updatedAt: string
+  updatedBy?: string
+  releaseDate?: string
+  hasDownloads: boolean
 }

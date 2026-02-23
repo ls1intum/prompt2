@@ -6,7 +6,9 @@ CREATE TABLE IF NOT EXISTS course_phase_config (
     course_phase_id uuid PRIMARY KEY,
     template_content text,
     created_at timestamp with time zone NOT NULL DEFAULT NOW(),
-    updated_at timestamp with time zone NOT NULL DEFAULT NOW()
+    updated_at timestamp with time zone NOT NULL DEFAULT NOW(),
+    updated_by text,
+    release_date timestamp with time zone
 );
 
 -- Certificate download tracking per student per course phase
@@ -30,7 +32,8 @@ INSERT INTO
         course_phase_id,
         template_content,
         created_at,
-        updated_at
+        updated_at,
+        updated_by
     )
 VALUES (
         '10000000-0000-0000-0000-000000000001',
@@ -42,7 +45,8 @@ This certifies that *#data.studentName* has successfully completed the course *#
 #v(1cm)
 Date: #data.date',
         NOW(),
-        NOW()
+        NOW(),
+        'Test Admin'
     );
 
 -- Seed: course phase config without template
