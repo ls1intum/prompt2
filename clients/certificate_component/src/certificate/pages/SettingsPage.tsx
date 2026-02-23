@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useParams } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import {
@@ -95,6 +95,7 @@ export const SettingsPage = () => {
     mutationFn: (releaseDate: string | null) => updateReleaseDate(phaseId ?? '', releaseDate),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['config', phaseId] })
+      setReleaseDateDirty(false)
       toast({
         title: 'Success',
         description: 'Release date updated successfully',
@@ -145,13 +146,22 @@ export const SettingsPage = () => {
     try {
       // Save first if there are unsaved changes
       if (hasChanges) {
-        await updateConfig(phaseId, templateContent)
-        queryClient.invalidateQueries({ queryKey: ['config', phaseId] })
-        setHasChanges(false)
-        toast({
-          title: 'Template saved',
-          description: 'Template saved before generating preview',
-        })
+        try {
+          await updateConfig(phaseId, templateContent)
+          queryClient.invalidateQueries({ queryKey: ['config', phaseId] })
+          setHasChanges(false)
+          toast({
+            title: 'Template saved',
+            description: 'Template saved before generating preview',
+          })
+        } catch {
+          toast({
+            title: 'Save failed',
+            description: 'Failed to save template before preview.',
+            variant: 'destructive',
+          })
+          return
+        }
       }
 
       const blob = await previewCertificate(phaseId)
@@ -181,26 +191,27 @@ export const SettingsPage = () => {
     } else {
       releaseDateMutation.mutate(null)
     }
-    setReleaseDateDirty(false)
   }
 
   const handleReleaseNow = () => {
     const now = new Date()
     setSelectedReleaseDate(now)
     releaseDateMutation.mutate(now.toISOString())
-    setReleaseDateDirty(false)
   }
 
   const handleClearReleaseDate = () => {
     setSelectedReleaseDate(undefined)
     releaseDateMutation.mutate(null)
-    setReleaseDateDirty(false)
   }
 
   // Initialize template content from config
-  if (config?.templateContent && !templateContent && !hasChanges) {
-    setTemplateContent(config.templateContent)
-  }
+  const initialized = useRef(false)
+  useEffect(() => {
+    if (config?.templateContent && !initialized.current) {
+      setTemplateContent(config.templateContent)
+      initialized.current = true
+    }
+  }, [config?.templateContent])
 
   if (isError) {
     return <ErrorPage message='Error loading configuration' onRetry={refetch} />

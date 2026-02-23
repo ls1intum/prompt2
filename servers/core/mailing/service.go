@@ -247,35 +247,6 @@ func SendMail(courseMailingSettings mailingDTO.CourseMailingSettings, recipientA
 		log.Debug("No SMTP authentication configured")
 	}
 
-	// Enable STARTTLS if the server supports it (required for port 587)
-	if ok, _ := client.Extension("STARTTLS"); ok {
-		log.Debug("STARTTLS is supported, enabling TLS")
-		config := &tls.Config{
-			ServerName: MailingServiceSingleton.smtpHost,
-			MinVersion: tls.VersionTLS12,
-		}
-		if err = client.StartTLS(config); err != nil {
-			log.Error("failed to start TLS: ", err)
-			return fmt.Errorf("failed to establish TLS connection with %s: %v", MailingServiceSingleton.smtpHost, err)
-		}
-		log.Debug("TLS connection established")
-	} else {
-		log.Debug("STARTTLS not supported by server")
-	}
-
-	// Use SMTP authentication if username and password are provided
-	if MailingServiceSingleton.smtpUsername != "" && MailingServiceSingleton.smtpPassword != "" {
-		log.Debug("Authenticating with SMTP server")
-		auth := smtp.PlainAuth("", MailingServiceSingleton.smtpUsername, MailingServiceSingleton.smtpPassword, MailingServiceSingleton.smtpHost)
-		if err := client.Auth(auth); err != nil {
-			log.Error("failed to authenticate with SMTP server: ", err)
-			return fmt.Errorf("SMTP authentication failed for user '%s' on server %s: %v", MailingServiceSingleton.smtpUsername, MailingServiceSingleton.smtpHost, err)
-		}
-		log.Debug("SMTP authentication successful")
-	} else {
-		log.Debug("No SMTP authentication configured")
-	}
-
 	// Set the sender and recipient
 	log.Debug("Setting sender and recipients")
 	if err := client.Mail(MailingServiceSingleton.senderEmail.Address); err != nil {

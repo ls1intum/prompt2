@@ -12,6 +12,7 @@ import {
   CardTitle,
   ManagementPageHeader,
   ErrorPage,
+  useToast,
 } from '@tumaet/prompt-ui-components'
 
 import { getCertificateStatus } from '../network/queries/getCertificateStatus'
@@ -20,11 +21,12 @@ import { downloadOwnCertificate, triggerBlobDownload } from '../network/queries/
 export const StudentOverviewPage = () => {
   const { phaseId } = useParams<{ phaseId: string }>()
   const queryClient = useQueryClient()
+  const { toast } = useToast()
   const [isDownloading, setIsDownloading] = useState(false)
 
   const {
     data: status,
-    isPending,
+    isLoading,
     isError,
     refetch,
   } = useQuery({
@@ -44,6 +46,11 @@ export const StudentOverviewPage = () => {
       queryClient.invalidateQueries({ queryKey: ['certificateStatus', phaseId] })
     } catch (error) {
       console.error('Failed to download certificate:', error)
+      toast({
+        title: 'Download failed',
+        description: 'Failed to download your certificate. Please try again.',
+        variant: 'destructive',
+      })
     } finally {
       setIsDownloading(false)
     }
@@ -53,7 +60,7 @@ export const StudentOverviewPage = () => {
     return <ErrorPage message='Error loading certificate status' onRetry={refetch} />
   }
 
-  if (isPending) {
+  if (isLoading) {
     return (
       <div className='flex justify-center items-center h-64'>
         <Loader2 className='h-12 w-12 animate-spin text-primary' />

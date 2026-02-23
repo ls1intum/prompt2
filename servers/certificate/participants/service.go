@@ -23,6 +23,8 @@ type ParticipantsService struct {
 	coreURL    string
 }
 
+var ErrServiceNotInitialized = errors.New("participants service not initialized")
+
 var ParticipantsServiceSingleton *ParticipantsService
 
 func NewParticipantsService(queries db.Queries) *ParticipantsService {
@@ -54,6 +56,9 @@ func (s *ParticipantsService) makeAuthenticatedRequest(ctx context.Context, meth
 
 func GetParticipationsForCoursePhase(ctx context.Context, authHeader string, coursePhaseID uuid.UUID) ([]ParticipantWithDownloadStatus, error) {
 	s := ParticipantsServiceSingleton
+	if s == nil {
+		return nil, ErrServiceNotInitialized
+	}
 
 	url := fmt.Sprintf("%s/api/course_phases/%s/participations", s.coreURL, coursePhaseID.String())
 	log.WithField("url", url).Debug("Fetching participations from core service")
@@ -123,6 +128,9 @@ func GetParticipationsForCoursePhase(ctx context.Context, authHeader string, cou
 
 func GetCoursePhaseWithCourse(ctx context.Context, authHeader string, coursePhaseID uuid.UUID) (*CoursePhaseWithCourse, error) {
 	s := ParticipantsServiceSingleton
+	if s == nil {
+		return nil, ErrServiceNotInitialized
+	}
 
 	url := fmt.Sprintf("%s/api/course_phases/%s", s.coreURL, coursePhaseID.String())
 	log.WithField("url", url).Debug("Fetching course phase info from core service")
@@ -154,6 +162,9 @@ func GetCoursePhaseWithCourse(ctx context.Context, authHeader string, coursePhas
 
 func GetStudentInfo(ctx context.Context, authHeader string, coursePhaseID, studentID uuid.UUID) (*Student, error) {
 	s := ParticipantsServiceSingleton
+	if s == nil {
+		return nil, ErrServiceNotInitialized
+	}
 
 	// Use the /participations/students endpoint which returns students by their core student ID
 	url := fmt.Sprintf("%s/api/course_phases/%s/participations/students", s.coreURL, coursePhaseID.String())
@@ -195,6 +206,9 @@ func GetStudentInfo(ctx context.Context, authHeader string, coursePhaseID, stude
 // correctly recording certificate downloads.
 func GetOwnStudentInfo(ctx context.Context, authHeader string, coursePhaseID uuid.UUID) (*Student, error) {
 	s := ParticipantsServiceSingleton
+	if s == nil {
+		return nil, ErrServiceNotInitialized
+	}
 
 	url := fmt.Sprintf("%s/api/course_phases/%s/participations/self", s.coreURL, coursePhaseID.String())
 	log.WithField("url", url).Debug("Fetching own student info from core service")
@@ -231,7 +245,11 @@ func GetOwnStudentInfo(ctx context.Context, authHeader string, coursePhaseID uui
 // Then matches them to return the team name.
 // Returns empty string (no error) if no team is allocated.
 func GetStudentTeamName(ctx context.Context, authHeader string, coursePhaseID, studentID uuid.UUID) (string, error) {
-	coreURL := utils.GetCoreUrl()
+	s := ParticipantsServiceSingleton
+	if s == nil {
+		return "", ErrServiceNotInitialized
+	}
+	coreURL := s.coreURL
 
 	// Fetch teams from course phase data resolutions
 	cpData, err := promptSDK.FetchAndMergeCoursePhaseWithResolution(coreURL, authHeader, coursePhaseID)

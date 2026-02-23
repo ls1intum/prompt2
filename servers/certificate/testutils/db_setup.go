@@ -53,10 +53,12 @@ func SetupTestDB(ctx context.Context, sqlDumpPath string) (*TestDB, func(), erro
 	dbURL := fmt.Sprintf("postgres://testuser:testpass@%s:%s/prompt?sslmode=disable", host, port.Port())
 
 	var conn *pgxpool.Pool
+	var pingErr error
 	for i := 0; i < 5; i++ {
 		conn, err = pgxpool.New(ctx, dbURL)
 		if err == nil {
-			if pingErr := conn.Ping(ctx); pingErr == nil {
+			pingErr = conn.Ping(ctx)
+			if pingErr == nil {
 				break
 			}
 			conn.Close()
@@ -66,6 +68,10 @@ func SetupTestDB(ctx context.Context, sqlDumpPath string) (*TestDB, func(), erro
 	if err != nil {
 		_ = container.Terminate(ctx)
 		return nil, nil, fmt.Errorf("failed to connect to the database after retries: %w", err)
+	}
+	if pingErr != nil {
+		_ = container.Terminate(ctx)
+		return nil, nil, fmt.Errorf("failed to ping the database after retries: %w", pingErr)
 	}
 
 	if err := runSQLDump(conn, sqlDumpPath); err != nil {

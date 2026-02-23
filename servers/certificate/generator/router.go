@@ -134,20 +134,6 @@ func getCertificateStatus(c *gin.Context) {
 		return
 	}
 
-	// Get user ID from token
-	user, exists := keycloakTokenVerifier.GetTokenUser(c)
-	if !exists {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
-		return
-	}
-
-	studentID, err := uuid.Parse(user.ID)
-	if err != nil {
-		log.WithError(err).Error("Failed to parse user ID")
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID"})
-		return
-	}
-
 	// Check if template is configured
 	_, err = getTemplateStatus(c, coursePhaseID)
 	if err != nil {
@@ -170,9 +156,18 @@ func getCertificateStatus(c *gin.Context) {
 		return
 	}
 
+	// Resolve core student ID (Keycloak UUID from JWT differs from core student UUID)
+	authHeader := c.GetHeader("Authorization")
+	student, err := participants.GetOwnStudentInfo(c, authHeader, coursePhaseID)
+	if err != nil {
+		log.WithError(err).Error("Failed to get own student info for status check")
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get student info"})
+		return
+	}
+
 	// Check download status
 	download, err := GeneratorServiceSingleton.queries.GetCertificateDownload(c, db.GetCertificateDownloadParams{
-		StudentID:     studentID,
+		StudentID:     student.ID,
 		CoursePhaseID: coursePhaseID,
 	})
 

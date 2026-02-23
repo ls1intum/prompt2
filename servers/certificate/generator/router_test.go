@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"testing"
 
@@ -153,15 +154,19 @@ func (s *GeneratorRouterTestSuite) TestCertificateStatusEndpoint_NoTemplate() {
 	// Use a phase that has no template configured
 	newPhaseID := uuid.New()
 
-	// We need to mock keycloak token user - since we use MockPermissionMiddleware
-	// which doesn't set the token user, this will return 401
 	url := fmt.Sprintf("/api/course_phase/%s/certificate/status", newPhaseID)
 	req, _ := http.NewRequest("GET", url, nil)
 	resp := httptest.NewRecorder()
 	s.router.ServeHTTP(resp, req)
 
-	// Without a mocked token user, it returns 401
-	assert.Equal(s.T(), http.StatusUnauthorized, resp.Code)
+	// Without a configured template, the endpoint returns 200 with available=false
+	assert.Equal(s.T(), http.StatusOK, resp.Code)
+
+	var result map[string]interface{}
+	err := json.Unmarshal(resp.Body.Bytes(), &result)
+	assert.NoError(s.T(), err)
+	assert.Equal(s.T(), false, result["available"])
+	assert.Equal(s.T(), false, result["hasDownloaded"])
 }
 
 // newGinContext creates a minimal gin.Context for unit-testing service functions.
@@ -230,7 +235,7 @@ func (s *GeneratorRouterTestSuite) TestPreviewCertificate_Success() {
 	assert.Equal(s.T(), "application/pdf", resp.Header().Get("Content-Type"))
 	assert.Contains(s.T(), resp.Header().Get("Content-Disposition"), "certificate_preview.pdf")
 	// PDF files start with %PDF
-	assert.True(s.T(), len(resp.Body.Bytes()) > 0)
+	assert.GreaterOrEqual(s.T(), len(resp.Body.Bytes()), 4, "PDF output should be at least 4 bytes")
 	assert.Equal(s.T(), "%PDF", string(resp.Body.Bytes()[:4]))
 }
 
@@ -294,6 +299,10 @@ func (s *GeneratorRouterTestSuite) TestTypstCompilationError_Interface() {
 }
 
 func (s *GeneratorRouterTestSuite) TestCompileTypst_InvalidTemplate() {
+	if _, err := exec.LookPath("typst"); err != nil {
+		s.T().Skip("typst binary not available, skipping compilation test")
+	}
+
 	tempDir, err := os.MkdirTemp("", "test-compile-*")
 	assert.NoError(s.T(), err)
 	defer func() { _ = os.RemoveAll(tempDir) }()
@@ -312,6 +321,10 @@ func (s *GeneratorRouterTestSuite) TestCompileTypst_InvalidTemplate() {
 }
 
 func (s *GeneratorRouterTestSuite) TestCompileTypst_ValidTemplate() {
+	if _, err := exec.LookPath("typst"); err != nil {
+		s.T().Skip("typst binary not available, skipping compilation test")
+	}
+
 	tempDir, err := os.MkdirTemp("", "test-compile-*")
 	assert.NoError(s.T(), err)
 	defer func() { _ = os.RemoveAll(tempDir) }()
@@ -334,7 +347,7 @@ func (s *GeneratorRouterTestSuite) TestCompileTypst_ValidTemplate() {
 
 	pdfData, err := compileTypst(s.suiteCtx, tempDir, templatePath)
 	assert.NoError(s.T(), err)
-	assert.True(s.T(), len(pdfData) > 0)
+	assert.GreaterOrEqual(s.T(), len(pdfData), 4, "PDF output should be at least 4 bytes")
 	assert.Equal(s.T(), "%PDF", string(pdfData[:4]))
 }
 

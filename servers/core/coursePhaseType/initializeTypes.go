@@ -7,7 +7,6 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 	promptSDK "github.com/ls1intum/prompt-sdk"
-	sdkUtils "github.com/ls1intum/prompt-sdk/utils"
 	db "github.com/ls1intum/prompt2/servers/core/db/sqlc"
 	"github.com/ls1intum/prompt2/servers/core/meta"
 	log "github.com/sirupsen/logrus"
@@ -486,18 +485,19 @@ func initCertificate() error {
 			log.Error("failed to begin transaction: ", err)
 			return err
 		}
-		defer sdkUtils.DeferRollback(tx, ctx)
+		defer promptSDK.DeferDBRollback(tx, ctx)
 		qtx := CoursePhaseTypeServiceSingleton.queries.WithTx(tx)
 
 		// 1.) Create the phase
 		baseURL := "{CORE_HOST}/certificate/api"
 		if CoursePhaseTypeServiceSingleton.isDevEnvironment {
-			baseURL = "http://localhost:8083/certificate/api"
+			baseURL = "http://localhost:8088/certificate/api"
 		}
 
 		newCertificate := db.CreateCoursePhaseTypeParams{
 			ID:           uuid.New(),
 			Name:         "Certificate",
+			Description:  pgtype.Text{String: "Certificate of completion generation and distribution.", Valid: true},
 			InitialPhase: false,
 			BaseUrl:      baseURL,
 		}
