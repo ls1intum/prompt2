@@ -80,10 +80,10 @@ func (s *ParticipantsRouterTestSuite) TestGetParticipants() {
 
 	// Check that download status is enriched from DB
 	for _, p := range participants {
-		studentID := p.ID
-		if studentID == uuid.MustParse("30000000-0000-0000-0000-000000000001") {
+		if p.Student.ID == uuid.MustParse("30000000-0000-0000-0000-000000000001") {
 			assert.True(s.T(), p.HasDownloaded)
 			assert.Equal(s.T(), int32(3), p.DownloadCount)
+			assert.NotEmpty(s.T(), p.PassStatus)
 		}
 	}
 }

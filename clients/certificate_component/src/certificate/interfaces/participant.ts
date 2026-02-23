@@ -1,8 +1,6 @@
-export interface ParticipantWithDownloadStatus {
-  id: string
-  firstName: string
-  lastName: string
-  email: string
+import { CoursePhaseParticipationWithStudent } from '@tumaet/prompt-shared-state'
+
+export interface ParticipantWithDownloadStatus extends CoursePhaseParticipationWithStudent {
   hasDownloaded: boolean
   firstDownload?: string
   lastDownload?: string

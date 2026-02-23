@@ -3,8 +3,13 @@ import { useParams } from 'react-router-dom'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { Download, Loader2, CheckCircle2, XCircle } from 'lucide-react'
 
-import { Button, ManagementPageHeader, ErrorPage, PromptTable } from '@tumaet/prompt-ui-components'
-import { ColumnDef } from '@tanstack/react-table'
+import { ManagementPageHeader, ErrorPage } from '@tumaet/prompt-ui-components'
+import { CoursePhaseParticipationsTable } from '@/components/pages/CoursePhaseParticipationsTable/CoursePhaseParticipationsTable'
+import {
+  ExtraParticipantColumn,
+  ParticipantRow,
+} from '@/components/pages/CoursePhaseParticipationsTable/table/participationRow'
+import { RowAction } from '@tumaet/prompt-ui-components'
 
 import { ParticipantWithDownloadStatus } from '../interfaces/participant'
 import { getParticipants } from '../network/queries/getParticipants'
@@ -36,7 +41,6 @@ export const ParticipantsPage = () => {
     try {
       const blob = await downloadStudentCertificate(phaseId, studentId)
       triggerBlobDownload(blob, `certificate_${lastName}.pdf`)
-      // Refresh participants to update download status
       queryClient.invalidateQueries({ queryKey: ['participants', phaseId] })
     } catch (error) {
       console.error('Failed to download certificate:', error)
@@ -45,25 +49,28 @@ export const ParticipantsPage = () => {
     }
   }
 
-  const columns: ColumnDef<ParticipantWithDownloadStatus>[] = useMemo(
+  // Build a lookup map of download data by student ID
+  const downloadDataMap = useMemo(() => {
+    const map = new Map<string, ParticipantWithDownloadStatus>()
+    for (const p of participants ?? []) {
+      map.set(p.courseParticipationID, p)
+    }
+    return map
+  }, [participants])
+
+  const extraColumns: ExtraParticipantColumn<any>[] = useMemo(
     () => [
       {
-        accessorKey: 'firstName',
-        header: 'First Name',
-      },
-      {
-        accessorKey: 'lastName',
-        header: 'Last Name',
-      },
-      {
-        accessorKey: 'email',
-        header: 'Email',
-      },
-      {
-        accessorKey: 'hasDownloaded',
+        id: 'downloadStatus',
         header: 'Download Status',
-        cell: ({ row }) => {
-          const hasDownloaded = row.original.hasDownloaded
+        extraData: (participants ?? []).map((p) => ({
+          courseParticipationID: p.courseParticipationID,
+          value: p.hasDownloaded,
+          stringValue: p.hasDownloaded ? 'Downloaded' : 'Not downloaded',
+        })),
+        cell: ({ row }: { row: { original: ParticipantRow } }) => {
+          const p = downloadDataMap.get(row.original.courseParticipationID)
+          const hasDownloaded = p?.hasDownloaded ?? false
           return (
             <div className='flex items-center gap-2'>
               {hasDownloaded ? (
@@ -82,48 +89,53 @@ export const ParticipantsPage = () => {
         },
       },
       {
-        accessorKey: 'lastDownload',
-        header: 'Last Download',
-        cell: ({ row }) => {
-          const lastDownload = row.original.lastDownload
-          if (!lastDownload) return <span className='text-muted-foreground'>-</span>
-          return new Date(lastDownload).toLocaleDateString()
-        },
-      },
-      {
-        accessorKey: 'downloadCount',
+        id: 'downloadCount',
         header: 'Downloads',
-        cell: ({ row }) => {
-          return row.original.downloadCount || 0
+        extraData: (participants ?? []).map((p) => ({
+          courseParticipationID: p.courseParticipationID,
+          value: p.downloadCount,
+          stringValue: String(p.downloadCount ?? 0),
+        })),
+        cell: ({ row }: { row: { original: ParticipantRow } }) => {
+          const p = downloadDataMap.get(row.original.courseParticipationID)
+          return p?.downloadCount ?? 0
         },
       },
       {
-        id: 'actions',
-        header: 'Actions',
-        cell: ({ row }) => {
-          const studentId = row.original.id
-          const isDownloading = downloadingId === studentId
-          return (
-            <Button
-              size='sm'
-              variant='outline'
-              onClick={() => handleDownload(studentId, row.original.lastName)}
-              disabled={isDownloading}
-            >
-              {isDownloading ? (
-                <Loader2 className='h-4 w-4 animate-spin' />
-              ) : (
-                <>
-                  <Download className='mr-2 h-4 w-4' />
-                  Download
-                </>
-              )}
-            </Button>
-          )
+        id: 'lastDownload',
+        header: 'Last Download',
+        extraData: (participants ?? []).map((p) => ({
+          courseParticipationID: p.courseParticipationID,
+          value: p.lastDownload,
+          stringValue: p.lastDownload
+            ? new Date(p.lastDownload).toLocaleDateString()
+            : '-',
+        })),
+        cell: ({ row }: { row: { original: ParticipantRow } }) => {
+          const p = downloadDataMap.get(row.original.courseParticipationID)
+          if (!p?.lastDownload) return <span className='text-muted-foreground'>-</span>
+          return new Date(p.lastDownload).toLocaleDateString()
         },
       },
     ],
-    [downloadingId, phaseId],
+    [participants, downloadDataMap],
+  )
+
+  const extraActions: RowAction<ParticipantRow>[] = useMemo(
+    () => [
+      {
+        label: 'Download Certificate',
+        icon: <Download className='h-4 w-4' />,
+        onAction: (rows) => {
+          for (const row of rows) {
+            if (row.student?.id) {
+              handleDownload(row.student.id, row.lastName)
+            }
+          }
+        },
+      },
+    ],
+    [phaseId],
   )
 
   if (isError) {
@@ -156,7 +168,12 @@ export const ParticipantsPage = () => {
         </p>
       </div>
 
-      <PromptTable columns={columns} data={participants ?? []} />
+      <CoursePhaseParticipationsTable
+        phaseId={phaseId!}
+        participants={participants ?? []}
+        extraColumns={extraColumns}
+        extraActions={extraActions}
+      />
     </div>
   )
 }

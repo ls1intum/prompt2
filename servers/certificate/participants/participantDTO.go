@@ -15,20 +15,23 @@ type Student struct {
 }
 
 type CoursePhaseParticipation struct {
-	ID                    uuid.UUID `json:"id"`
-	CourseParticipationID uuid.UUID `json:"courseParticipationId"`
-	Student               Student   `json:"student"`
+	CoursePhaseID         uuid.UUID              `json:"coursePhaseID"`
+	CourseParticipationID uuid.UUID              `json:"courseParticipationID"`
+	PassStatus            string                 `json:"passStatus"`
+	RestrictedData        map[string]interface{} `json:"restrictedData"`
+	StudentReadableData   map[string]interface{} `json:"studentReadableData"`
+	PrevData              map[string]interface{} `json:"prevData"`
+	Student               Student                `json:"student"`
 }
 
 type CoursePhaseParticipationsResponse struct {
 	CoursePhaseParticipations []CoursePhaseParticipation `json:"participations"`
 }
 
+// ParticipantWithDownloadStatus is the enriched response returned by the participants endpoint.
+// It extends CoursePhaseParticipation with download-tracking fields.
 type ParticipantWithDownloadStatus struct {
-	ID            uuid.UUID  `json:"id"`
-	FirstName     string     `json:"firstName"`
-	LastName      string     `json:"lastName"`
-	Email         string     `json:"email"`
+	CoursePhaseParticipation
 	HasDownloaded bool       `json:"hasDownloaded"`
 	FirstDownload *time.Time `json:"firstDownload,omitempty"`
 	LastDownload  *time.Time `json:"lastDownload,omitempty"`

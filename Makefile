@@ -53,6 +53,9 @@ client-assessment: ## Start only the assessment client
 client-interview: ## Start only the interview client
 	cd clients/interview_component && yarn dev
 
+client-matching: ## Start only the matching client
+	cd clients/matching_component && yarn dev
+
 db: ## Start database and Keycloak
 	docker-compose up -d db keycloak
 

@@ -97,12 +97,9 @@ func GetParticipationsForCoursePhase(ctx context.Context, authHeader string, cou
 	result := make([]ParticipantWithDownloadStatus, 0, len(participationsResp.CoursePhaseParticipations))
 	for _, p := range participationsResp.CoursePhaseParticipations {
 		participant := ParticipantWithDownloadStatus{
-			ID:            p.Student.ID,
-			FirstName:     p.Student.FirstName,
-			LastName:      p.Student.LastName,
-			Email:         p.Student.Email,
-			HasDownloaded: false,
-			DownloadCount: 0,
+			CoursePhaseParticipation: p,
+			HasDownloaded:            false,
+			DownloadCount:            0,
 		}
 
 		if download, found := downloadMap[p.Student.ID]; found {
