@@ -974,7 +974,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@eslint/js@npm:9.39.3, @eslint/js@npm:^9.39.2":
+"@eslint/js@npm:9.39.3, @eslint/js@npm:^9.39.3":
   version: 9.39.3
   resolution: "@eslint/js@npm:9.39.3"
   checksum: 10c0/df1c70d6681c8daf4a3c86dfac159fcd98a73c4620c4fbe2be6caab1f30a34c7de0ad88ab0e81162376d2cde1a2eed1c32eff5f917ca369870930a51f8e818f1
@@ -11464,12 +11464,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"lucide-react@npm:^0.574.0":
-  version: 0.574.0
-  resolution: "lucide-react@npm:0.574.0"
+"lucide-react@npm:^0.575.0":
+  version: 0.575.0
+  resolution: "lucide-react@npm:0.575.0"
   peerDependencies:
     react: ^16.5.1 || ^17.0.0 || ^18.0.0 || ^19.0.0
-  checksum: 10c0/bfb9ed34520657faae130a00247dd35516ab77bf00eb1b2c6995bcbb6919de8edde3546f29c85b5cc6bd1c0f5dd7ea9147c7777f0d7e75208aee19997eb0f752
+  checksum: 10c0/4f42e81c88f60c8f904b178c0b28e8ac9a99da8ef24eba5f26ed97b63124304a847baea2f71125629a272df58dbb61cd799ff6a7e4878e5a4c28d8a699b84730
   languageName: node
   linkType: hard
 
@@ -14188,7 +14188,7 @@ __metadata:
   dependencies:
     "@eslint/compat": "npm:^2.0.2"
     "@eslint/eslintrc": "npm:^3.3.3"
-    "@eslint/js": "npm:^9.39.2"
+    "@eslint/js": "npm:^9.39.3"
     "@hello-pangea/dnd": "npm:^18.0.1"
     "@radix-ui/react-icons": "npm:^1.3.2"
     "@radix-ui/react-toolbar": "npm:^1.1.11"
@@ -14241,7 +14241,7 @@ __metadata:
     keycloak-js: "npm:25.0.6"
     lerna: "npm:^9.0.4"
     lowlight: "npm:^3.3.0"
-    lucide-react: "npm:^0.574.0"
+    lucide-react: "npm:^0.575.0"
     postcss: "npm:^8.5.6"
     postcss-loader: "npm:8.2.1"
     postcss-preset-env: "npm:^10.6.1"
