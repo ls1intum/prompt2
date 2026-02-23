@@ -425,7 +425,7 @@ services:
       timeout: 5s
       retries: 5
     ports:
-      - "127.0.0.1:5437:5432"
+      - "127.0.0.1:5439:5432"
     networks:
       - prompt-network
 

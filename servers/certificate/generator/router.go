@@ -66,7 +66,7 @@ func downloadOwnCertificate(c *gin.Context) {
 		return
 	}
 
-	pdfData, err := GenerateCertificate(c, authHeader, coursePhaseID, student)
+	pdfData, err := GeneratorServiceSingleton.GenerateCertificate(c, authHeader, coursePhaseID, student)
 	if err != nil {
 		log.WithError(err).Error("Failed to generate certificate")
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate certificate"})
@@ -83,7 +83,7 @@ func downloadOwnCertificate(c *gin.Context) {
 	}
 
 	filename := fmt.Sprintf("certificate_%s.pdf", student.LastName)
-	c.Header("Content-Disposition", fmt.Sprintf("attachment; filename=%s", filename))
+	c.Header("Content-Disposition", fmt.Sprintf(`attachment; filename="%s"`, filename))
 	c.Header("Content-Type", "application/pdf")
 	c.Data(http.StatusOK, "application/pdf", pdfData)
 }
@@ -113,7 +113,7 @@ func downloadStudentCertificate(c *gin.Context) {
 		return
 	}
 
-	pdfData, err := GenerateCertificate(c, authHeader, coursePhaseID, student)
+	pdfData, err := GeneratorServiceSingleton.GenerateCertificate(c, authHeader, coursePhaseID, student)
 	if err != nil {
 		log.WithError(err).Error("Failed to generate certificate")
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate certificate"})
@@ -121,7 +121,7 @@ func downloadStudentCertificate(c *gin.Context) {
 	}
 
 	filename := fmt.Sprintf("certificate_%s.pdf", studentID.String())
-	c.Header("Content-Disposition", fmt.Sprintf("attachment; filename=%s", filename))
+	c.Header("Content-Disposition", fmt.Sprintf(`attachment; filename="%s"`, filename))
 	c.Header("Content-Type", "application/pdf")
 	c.Data(http.StatusOK, "application/pdf", pdfData)
 }
@@ -141,6 +141,23 @@ func getCertificateStatus(c *gin.Context) {
 			"available":     false,
 			"hasDownloaded": false,
 			"message":       "Certificate template not configured",
+		})
+		return
+	}
+
+	// Get user info from JWT token for role-based checks
+	user, exists := keycloakTokenVerifier.GetTokenUser(c)
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
+	}
+
+	// Admins, lecturers, and editors don't have student enrollment records,
+	// so we return a simple "available" status for them.
+	if user.Roles[promptSDK.PromptAdmin] || user.Roles[promptSDK.CourseLecturer] || user.Roles[promptSDK.CourseEditor] {
+		c.JSON(http.StatusOK, gin.H{
+			"available":     true,
+			"hasDownloaded": false,
 		})
 		return
 	}
@@ -201,7 +218,7 @@ func previewCertificate(c *gin.Context) {
 		return
 	}
 
-	pdfData, err := GeneratePreviewCertificate(c, coursePhaseID)
+	pdfData, err := GeneratorServiceSingleton.GeneratePreviewCertificate(c, coursePhaseID)
 	if err != nil {
 		log.WithError(err).Error("Failed to generate preview certificate")
 		var typstErr *TypstCompilationError

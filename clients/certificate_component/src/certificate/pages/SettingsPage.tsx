@@ -133,7 +133,7 @@ export const SettingsPage = () => {
   }
 
   const handleSave = () => {
-    if (templateContent) {
+    if (templateContent !== undefined && templateContent !== null) {
       updateMutation.mutate(templateContent)
     }
   }

@@ -223,6 +223,10 @@ func (s *GeneratorRouterTestSuite) TestPreviewCertificate_NonExistentPhase() {
 }
 
 func (s *GeneratorRouterTestSuite) TestPreviewCertificate_Success() {
+	if _, err := exec.LookPath("typst"); err != nil {
+		s.T().Skip("typst binary not available, skipping preview test")
+	}
+
 	// Phase 1 has a valid template
 	coursePhaseID := uuid.MustParse("10000000-0000-0000-0000-000000000001")
 	url := fmt.Sprintf("/api/course_phase/%s/certificate/preview", coursePhaseID)
@@ -240,6 +244,10 @@ func (s *GeneratorRouterTestSuite) TestPreviewCertificate_Success() {
 }
 
 func (s *GeneratorRouterTestSuite) TestPreviewCertificate_CompilationError() {
+	if _, err := exec.LookPath("typst"); err != nil {
+		s.T().Skip("typst binary not available, skipping preview test")
+	}
+
 	// Phase 3 has an invalid template (references nonexistent.json)
 	coursePhaseID := uuid.MustParse("10000000-0000-0000-0000-000000000003")
 	url := fmt.Sprintf("/api/course_phase/%s/certificate/preview", coursePhaseID)

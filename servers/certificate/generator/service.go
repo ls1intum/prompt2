@@ -44,7 +44,7 @@ func writeDataFiles(tempDir string, certData CertificateData) error {
 	}
 	for _, name := range []string{"data.json", "vars.json"} {
 		path := filepath.Join(tempDir, name)
-		if err := os.WriteFile(path, dataJSON, 0644); err != nil {
+		if err := os.WriteFile(path, dataJSON, 0600); err != nil {
 			return fmt.Errorf("failed to write %s: %w", name, err)
 		}
 	}
@@ -62,7 +62,12 @@ func (e *TypstCompilationError) Error() string {
 }
 
 // compileTypst runs the typst compiler on the template and returns the generated PDF bytes.
+// A 30-second timeout is applied to prevent hung or infinite-loop Typst invocations.
 func compileTypst(ctx context.Context, tempDir, templatePath string) ([]byte, error) {
+	compilationTimeout := 30 * time.Second
+	ctx, cancel := context.WithTimeout(ctx, compilationTimeout)
+	defer cancel()
+
 	outputPath := filepath.Join(tempDir, "certificate.pdf")
 	cmd := exec.CommandContext(ctx, "typst", "compile", templatePath, outputPath)
 	cmd.Dir = tempDir
@@ -83,7 +88,7 @@ func compileTypst(ctx context.Context, tempDir, templatePath string) ([]byte, er
 	return pdfData, nil
 }
 
-func GenerateCertificate(ctx context.Context, authHeader string, coursePhaseID uuid.UUID, student *participants.Student) ([]byte, error) {
+func (s *GeneratorService) GenerateCertificate(ctx context.Context, authHeader string, coursePhaseID uuid.UUID, student *participants.Student) ([]byte, error) {
 	// Get template content
 	templateContent, err := config.GetTemplateContent(ctx, coursePhaseID)
 	if err != nil {
@@ -104,6 +109,13 @@ func GenerateCertificate(ctx context.Context, authHeader string, coursePhaseID u
 		log.WithError(err).Warn("Could not resolve team name, continuing without it")
 	}
 
+	// Determine certificate date: use the configured release date for consistency,
+	// so every download shows the same date. Fall back to today if not set.
+	certDate := time.Now().Format("January 2, 2006")
+	if phaseConfig, configErr := config.GetCoursePhaseConfig(ctx, coursePhaseID); configErr == nil && phaseConfig.ReleaseDate != nil {
+		certDate = phaseConfig.ReleaseDate.Format("January 2, 2006")
+	}
+
 	// Create temp directory for processing
 	tempDir, err := os.MkdirTemp("", "certificate-*")
 	if err != nil {
@@ -114,7 +126,7 @@ func GenerateCertificate(ctx context.Context, authHeader string, coursePhaseID u
 
 	// Write template to temp file
 	templatePath := filepath.Join(tempDir, "template.typ")
-	if err := os.WriteFile(templatePath, []byte(templateContent), 0644); err != nil {
+	if err := os.WriteFile(templatePath, []byte(templateContent), 0600); err != nil {
 		log.WithError(err).Error("Failed to write template file")
 		return nil, fmt.Errorf("failed to write template file: %w", err)
 	}
@@ -124,7 +136,7 @@ func GenerateCertificate(ctx context.Context, authHeader string, coursePhaseID u
 		StudentName: fmt.Sprintf("%s %s", student.FirstName, student.LastName),
 		CourseName:  coursePhase.Course.Name,
 		TeamName:    teamName,
-		Date:        time.Now().Format("January 2, 2006"),
+		Date:        certDate,
 	}
 
 	// Write data JSON files (data.json + vars.json for template compatibility)
@@ -144,7 +156,7 @@ func GenerateCertificate(ctx context.Context, authHeader string, coursePhaseID u
 
 // GeneratePreviewCertificate creates a certificate PDF using mock data and the saved template.
 // This is used by instructors to preview how the certificate will look.
-func GeneratePreviewCertificate(ctx context.Context, coursePhaseID uuid.UUID) ([]byte, error) {
+func (s *GeneratorService) GeneratePreviewCertificate(ctx context.Context, coursePhaseID uuid.UUID) ([]byte, error) {
 	// Get template content
 	templateContent, err := config.GetTemplateContent(ctx, coursePhaseID)
 	if err != nil {
@@ -162,7 +174,7 @@ func GeneratePreviewCertificate(ctx context.Context, coursePhaseID uuid.UUID) ([
 
 	// Write template to temp file
 	templatePath := filepath.Join(tempDir, "template.typ")
-	if err := os.WriteFile(templatePath, []byte(templateContent), 0644); err != nil {
+	if err := os.WriteFile(templatePath, []byte(templateContent), 0600); err != nil {
 		log.WithError(err).Error("Failed to write template file")
 		return nil, fmt.Errorf("failed to write template file: %w", err)
 	}
