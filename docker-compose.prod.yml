@@ -271,8 +271,6 @@ services:
     depends_on:
       db-certificate:
         condition: service_healthy
-      minio:
-        condition: service_started
     expose:
       - "8080"
     environment:
@@ -287,11 +285,6 @@ services:
       - KEYCLOAK_HOST
       - KEYCLOAK_REALM_NAME
       - KEYCLOAK_AUTHORIZED_PARTY
-      - MINIO_ENDPOINT=minio:9000
-      - MINIO_ACCESS_KEY
-      - MINIO_SECRET_KEY
-      - MINIO_BUCKET_NAME=certificates
-      - MINIO_TEMPLATE_BUCKET_NAME=certificate-templates
       - SENTRY_DSN_CERTIFICATE
     networks:
       - prompt-network

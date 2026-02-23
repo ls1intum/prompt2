@@ -148,8 +148,6 @@ services:
     depends_on:
       db-certificate:
         condition: service_healthy
-      minio:
-        condition: service_healthy
     ports:
       - "8088:8080"
     extra_hosts:
@@ -167,11 +165,6 @@ services:
       - KEYCLOAK_REALM_NAME
       - DEBUG
       - SENTRY_DSN_CERTIFICATE
-      - MINIO_ENDPOINT=${MINIO_ENDPOINT}
-      - MINIO_ACCESS_KEY=${MINIO_ACCESS_KEY}
-      - MINIO_SECRET_KEY=${MINIO_SECRET_KEY}
-      - MINIO_BUCKET_NAME=${MINIO_BUCKET_NAME}
-      - MINIO_TEMPLATE_BUCKET_NAME=${MINIO_TEMPLATE_BUCKET_NAME}
 
   # Template server (example service)
   server-template:

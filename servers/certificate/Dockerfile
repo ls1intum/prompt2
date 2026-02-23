@@ -1,12 +1,22 @@
-# Build stage
-FROM golang:1.24-alpine AS builder
+# Stage 1: Build Go binary
+FROM golang:1.26-alpine AS builder
 
 # Install dependencies
-RUN apk add --no-cache curl
+RUN apk add --no-cache curl xz
 
 # Install migrate
 RUN curl -L https://github.com/golang-migrate/migrate/releases/download/v4.18.1/migrate.linux-amd64.tar.gz | tar xvz && \
     mv migrate /usr/local/bin/
+
+# Download pre-built Typst binary (musl-linked, no libc dependency)
+ARG TYPST_VERSION=v0.14.2
+ARG TARGETARCH=amd64
+RUN if [ "$TARGETARCH" = "arm64" ]; then \
+      TYPST_ARCH="aarch64-unknown-linux-musl"; \
+    else \
+      TYPST_ARCH="x86_64-unknown-linux-musl"; \
+    fi && \
+    curl -L "https://github.com/typst/typst/releases/download/${TYPST_VERSION}/typst-${TYPST_ARCH}.tar.xz" | tar xJ --strip-components=1 -C /usr/local/bin/
 
 WORKDIR /app
 COPY go.mod go.sum ./
@@ -15,33 +25,17 @@ RUN go mod download
 COPY . .
 RUN CGO_ENABLED=0 GOOS=linux go build -o certificate-service
 
-# Typst stage - install typst
-FROM rust:1.75-alpine AS typst-builder
-RUN apk add --no-cache git musl-dev
-RUN cargo install --git https://github.com/typst/typst.git --tag v0.11.1
+# Stage 2: Final (distroless)
+FROM gcr.io/distroless/static-debian12
 
-# Final stage
-FROM alpine:3.18
-
-# Install ca-certificates for HTTPS requests
-RUN apk add --no-cache ca-certificates
-
-# Copy migrate tool
-COPY --from=builder /usr/local/bin/migrate /usr/local/bin/migrate
-
-# Copy typst from builder
-COPY --from=typst-builder /usr/local/cargo/bin/typst /usr/local/bin/typst
-
-# Copy our service
 WORKDIR /app
-COPY --from=builder /app/certificate-service .
-COPY --from=builder /app/db/migration ./db/migration
-COPY sample_template.typ ./
 
-# Create directories for fonts and temporary files
-RUN mkdir -p /app/fonts /tmp
+# Copy the built binary and necessary files
+COPY --from=builder /app/certificate-service /app/certificate-service
+COPY --from=builder /usr/local/bin/migrate /usr/local/bin/migrate
+COPY --from=builder /usr/local/bin/typst /usr/local/bin/typst
+COPY --from=builder /app/db/migration /app/db/migration
 
-ENV PORT=8080
 EXPOSE 8080
 
-CMD ["./certificate-service"]
+CMD ["/app/certificate-service"]

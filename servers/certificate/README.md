@@ -1,228 +1,241 @@
 # Certificate Service
 
-###########################################
-todos
-
-- Update readme
-- Add documentation for template format
-- [x] Add a test button to the admin interface to generate a certificate with mock data
-- [x] Fix the settings window alignment and spacing issues
-- [x] Fix the participants table - currenlty results in internal server error
-- get rid of remaining minio parts
-- Add option to include graphics in the certificate template (e.g. course logo, chair logo, etc.)
-- make sure the docker image is present, is working and built similar to the other services (e.g. with a multi-stage build and using the same base image as the other services) and includes the typst compiler
-- make sure the docker image is built in the github workflow and pushed to the registry
-- make sure students can download their certificates - store errors in the database and display them for instructors in the participants table
-- The download counter in the paricipants table is currently not updated when a student downloads their certificate - fix this
-- Add an option for instructors to add a text that is shown to the students on the certificate download page (e.g. to inform them about the release date or to provide instructions on how to download the certificate).
-- Fix the download button in the participants table - currentlytly results in an internal server error
-- Make sure that students can be passed / failed in the participants table similarl to the other phases 
-###########################################
-
-A microservice for generating and managing course completion certificates in the PROMPT platform.
+A microservice for generating and managing course completion certificates in the PROMPT platform using [Typst](https://typst.app/) for PDF generation.
 
 ## Features
 
 - Upload and manage certificate templates (Typst format)
-- Generate certificates in bulk for all students in a course
-- Download certificates for students and instructors
-- Track certificate downloads
-- S3-compatible storage (MinIO) integration
+- Preview certificates with mock data before releasing to students
+- Generate certificates on-demand for individual students
+- Track student certificate downloads
+- Configurable release date for student access
+- Compilation error reporting for template debugging
 
 ## Architecture
 
-- **Server**: Go service using sqlc for database operations
-- **Client**: React micro-frontend with TypeScript and shadcn/ui components
-- **Database**: PostgreSQL for certificate metadata
-- **Storage**: MinIO for templates and generated PDFs
-- **Template Engine**: Typst for PDF generation
+- **Server**: Go service (Gin framework) with sqlc for type-safe database operations
+- **Client**: React micro-frontend (Webpack Module Federation) with TypeScript and shadcn/ui
+- **Database**: PostgreSQL for template storage, configuration, and download tracking
+- **Template Engine**: Typst compiler for PDF generation (included in Docker image)
 
 ## Development Setup
 
 ### Prerequisites
 
-- Go 1.24+
+- Go 1.26+
 - Node.js 18+
 - Docker and Docker Compose
 - PostgreSQL
-- MinIO
-- Typst compiler
+- Typst compiler (`brew install typst` on macOS)
 - golang-migrate CLI tool
 
 ### Environment Variables
 
 ```bash
 # Database
-DB_HOST=localhost
-DB_PORT=5432
+DB_HOST_CERTIFICATE=localhost
+DB_PORT_CERTIFICATE=5439
 DB_USER=prompt-postgres
 DB_PASSWORD=prompt-postgres
-DB_NAME=prompt
-SSL_MODE=disable
-DB_TIMEZONE=Europe/Berlin
-
-# MinIO Storage
-MINIO_ENDPOINT=localhost:9000
-MINIO_ACCESS_KEY=minioadmin
-MINIO_SECRET_KEY=minioadmin
-MINIO_BUCKET_NAME=certificates
-MINIO_TEMPLATE_BUCKET_NAME=certificate-templates
+DB_NAME=prompt_certificate
 
 # Service
-PORT=8080
+SERVER_ADDRESS=localhost:8088
 CORE_HOST=http://localhost:3000
+SERVER_CORE_HOST=http://localhost:8080
 
 # Keycloak
-KEYCLOAK_URL=http://localhost:8282
-KEYCLOAK_REALM=prompt
-KEYCLOAK_CLIENT_ID=prompt-client
+KEYCLOAK_HOST=http://localhost:8282
+KEYCLOAK_REALM_NAME=prompt
+```
+
+### Running Locally
+
+**Server:**
+
+```bash
+cd servers/certificate
+go run main.go
+```
+
+**Client (as part of all micro-frontends):**
+
+```bash
+cd clients && yarn install && yarn run dev
+```
+
+**Supporting Services:**
+
+```bash
+docker-compose up db-certificate keycloak
 ```
 
 ### Database Setup
 
-1. Run migrations:
+Migrations run automatically on server startup. To run manually:
 
 ```bash
-cd servers/certificate_service
-migrate -path ./db/migration -database "postgres://prompt-postgres:prompt-postgres@localhost:5432/prompt?sslmode=disable" up
+migrate -path ./db/migration -database "postgres://prompt-postgres:prompt-postgres@localhost:5439/prompt_certificate?sslmode=disable" up
 ```
 
-1. Generate sqlc code:
+Regenerate sqlc code after modifying queries:
 
 ```bash
+cd servers/certificate
 sqlc generate
 ```
 
-### Server Development
+### Testing
 
 ```bash
-cd servers/certificate_service
-
-# Install dependencies
-go mod download
-
-# Build and run
-go build .
-./certificate-service
+cd servers/certificate
+go test ./... -v
 ```
 
-### Client Development
-
-```bash
-cd clients/certificate_component
-
-# Install dependencies
-npm install
-
-# Development server
-npm run dev
-
-# Build for production
-npm run build
-```
-
-### Docker Development
-
-Start all services with MinIO:
-
-```bash
-cd prompt2
-docker-compose up -d minio certificate-service
-```
+Tests use `testcontainers-go` for database isolation — Docker must be running.
 
 ## API Endpoints
 
-### Student Endpoints
+All endpoints are under `/certificate/api/course_phase/:coursePhaseID/`.
 
-- `GET /api/certificate/status?courseId={id}` - Get certificate availability status
-- `GET /api/certificate/download?studentId={id}` - Download certificate
+### Configuration (Instructor)
 
-### Instructor Endpoints (requires lecturer role)
+| Method | Path | Description |
+|--------|------|-------------|
+| `GET` | `/config` | Get certificate configuration |
+| `PUT` | `/config` | Update certificate template |
+| `PUT` | `/config/release-date` | Set/clear release date |
+| `GET` | `/config/template` | Download raw template file |
 
-- `GET /api/certificate/students?courseId={id}` - List students and certificate status
-- `POST /api/certificate/generate?courseId={id}` - Generate certificates for all students
-- `POST /api/certificate/template?courseId={id}` - Upload certificate template
-- `GET /api/certificate/template?courseId={id}` - Download certificate template
+### Certificate Generation
+
+| Method | Path | Roles | Description |
+|--------|------|-------|-------------|
+| `GET` | `/certificate/download` | All | Student downloads own certificate |
+| `GET` | `/certificate/download/:studentID` | Admin, Lecturer, Editor | Download certificate for a student |
+| `GET` | `/certificate/preview` | Admin, Lecturer | Preview with mock data |
+| `GET` | `/certificate/status` | All | Check availability and download status |
+
+### Participants
+
+| Method | Path | Roles | Description |
+|--------|------|-------|-------------|
+| `GET` | `/participants` | Admin, Lecturer, Editor | List participants with download status |
 
 ## Template Format
 
-Certificate templates use the Typst format. The template should include variables for:
+Certificate templates use the [Typst](https://typst.app/) markup language. Templates receive data via a JSON file.
 
-- `studentName` - Student's full name
-- `courseName` - Course title
-- `teamName` - Team name
-- `date` - Certificate generation date
+### Data Access
 
-Example template:
+Load certificate data in your template:
 
 ```typst
-#let vars = json("vars.json")
+#let data = json("data.json")
+```
 
-#align(center)[
-  #text(size: 24pt, weight: "bold")[Certificate of Completion]
-  
-  #text(size: 20pt)[#vars.studentName]
-  
-  #text(size: 18pt)[#vars.courseName]
+### Available Fields
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `studentName` | string | Student's full name (first + last) |
+| `courseName` | string | Course name from PROMPT |
+| `teamName` | string | Team name (empty if not allocated) |
+| `date` | string | Generation date (e.g., "January 2, 2006") |
+
+### Example Template
+
+```typst
+#let data = json("data.json")
+
+#set page(paper: "a4")
+#set text(font: "Linux Libertine")
+
+#align(center + horizon)[
+  #text(size: 28pt, weight: "bold")[Certificate of Completion]
+
+  #v(2em)
+
+  #text(size: 18pt)[This certifies that]
+
+  #v(1em)
+
+  #text(size: 24pt, weight: "bold")[#data.studentName]
+
+  #v(1em)
+
+  #text(size: 18pt)[has successfully completed the course]
+
+  #v(1em)
+
+  #text(size: 22pt, style: "italic")[#data.courseName]
+
+  #if data.teamName != "" [
+    #v(1em)
+    #text(size: 16pt)[as a member of team #data.teamName]
+  ]
+
+  #v(3em)
+
+  #text(size: 14pt)[#data.date]
 ]
 ```
 
+### Template Requirements
+
+- Must be a valid Typst (`.typ`) file
+- Use `json("data.json")` to access certificate data (a `vars.json` symlink is also created for compatibility)
+- Should target A4 page format
+- Fonts must be system fonts or bundled with the template
+- Use the **Test Certificate** button in the settings page to verify your template compiles correctly
+
 ## Database Schema
 
-The service uses a single table `certificate_metadata`:
+### `course_phase_config`
+
+Stores the certificate template and configuration per course phase.
 
 ```sql
-CREATE TABLE certificate_metadata (
-    id                  SERIAL PRIMARY KEY,
-    student_id          uuid NOT NULL,
-    course_id           uuid NOT NULL,
-    generated_at        timestamp with time zone NOT NULL DEFAULT NOW(),
-    last_download       timestamp with time zone,
-    download_count      integer NOT NULL DEFAULT 0,
-    certificate_url     text NOT NULL,
-    
-    CONSTRAINT idx_certificate_metadata_student_course UNIQUE (student_id, course_id)
+CREATE TABLE course_phase_config (
+    course_phase_id     uuid PRIMARY KEY,
+    template_content    text,
+    created_at          timestamp with time zone NOT NULL DEFAULT NOW(),
+    updated_at          timestamp with time zone NOT NULL DEFAULT NOW(),
+    updated_by          text,
+    release_date        timestamp with time zone
 );
 ```
 
-## Deployment
+### `certificate_download`
 
-The service is containerized and can be deployed using the provided Dockerfile. Make sure to:
+Tracks student certificate downloads (only self-downloads are recorded, not instructor downloads).
 
-1. Set all required environment variables
-2. Ensure database migrations are run
-3. Configure MinIO buckets
-4. Install Typst compiler in the container
+```sql
+CREATE TABLE certificate_download (
+    id                  SERIAL PRIMARY KEY,
+    student_id          uuid NOT NULL,
+    course_phase_id     uuid NOT NULL,
+    first_download      timestamp with time zone NOT NULL DEFAULT NOW(),
+    last_download       timestamp with time zone NOT NULL DEFAULT NOW(),
+    download_count      integer NOT NULL DEFAULT 1,
+    CONSTRAINT idx_certificate_download_student_phase UNIQUE (student_id, course_phase_id)
+);
+```
 
-## Limitations
+## Docker
 
-- **Mock Data**: Currently uses mock student data for certificate generation due to async operation token handling complexity
-- **Token Management**: Real data integration requires service account tokens for API calls during async certificate generation
-- Templates are stored per course but not versioned
+The certificate service uses a custom Dockerfile (unlike other services which share `servers/Dockerfile`) because it needs the Typst compiler bundled in the image.
 
-### Enabling Real Data Integration
+```bash
+# Build
+docker build -t prompt-server-certificate ./servers/certificate
 
-To enable real student data integration from the core API:
-
-1. **Service Account Setup**: Configure a service account in Keycloak with appropriate permissions to read student and course data
-
-2. **Token Configuration**: Add service account credentials to environment variables:
-
-   ```bash
-   SERVICE_ACCOUNT_CLIENT_ID=certificate-service
-   SERVICE_ACCOUNT_CLIENT_SECRET=your-secret
-   ```
-
-3. **Update Core API Client**: Modify `core_api.go` to use service account tokens instead of user tokens
-
-4. **Replace Mock Data**: In `generator.go`, replace the call to `getMockStudentData()` with a call to the core API
-
-The infrastructure for real data integration is already in place in `core_api.go`. The main challenge is handling authentication for async operations where user tokens are not available.
-
-## Future Improvements
-
-- Integration with core service API for student data
-- Template versioning
-- Batch download functionality
-- Certificate validation/verification
-- Email notifications when certificates are ready
+# Run
+docker run -p 8088:8080 \
+  -e DB_HOST_CERTIFICATE=host.docker.internal \
+  -e DB_PORT_CERTIFICATE=5439 \
+  -e DB_USER=prompt-postgres \
+  -e DB_PASSWORD=prompt-postgres \
+  -e DB_NAME=prompt_certificate \
+  prompt-server-certificate
+```
