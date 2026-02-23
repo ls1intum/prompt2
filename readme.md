@@ -125,7 +125,7 @@ The `.env` file contains Docker/production configuration. The `.env.dev` file co
 #### 3. Start Database & Keycloak
 
 ```bash
-docker-compose up db keycloak
+docker compose up -d db keycloak
 ```
 
 #### 4. Configure Keycloak (first time only)
@@ -174,7 +174,7 @@ The `.env` file is not automatically loaded by Go. Use one of these methods:
 2. **Manual export** (bash/zsh only):
 
    ```bash
-   set -a && source .env && set +a
+   set -a && source .env.dev && set +a
    cd servers/core && go run main.go
    ```
 
