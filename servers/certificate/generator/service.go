@@ -110,7 +110,7 @@ func GenerateCertificate(ctx context.Context, authHeader string, coursePhaseID u
 		log.WithError(err).Error("Failed to create temp directory")
 		return nil, fmt.Errorf("failed to create temp directory: %w", err)
 	}
-	defer os.RemoveAll(tempDir)
+	defer func() { _ = os.RemoveAll(tempDir) }()
 
 	// Write template to temp file
 	templatePath := filepath.Join(tempDir, "template.typ")
@@ -158,7 +158,7 @@ func GeneratePreviewCertificate(ctx context.Context, coursePhaseID uuid.UUID) ([
 		log.WithError(err).Error("Failed to create temp directory")
 		return nil, fmt.Errorf("failed to create temp directory: %w", err)
 	}
-	defer os.RemoveAll(tempDir)
+	defer func() { _ = os.RemoveAll(tempDir) }()
 
 	// Write template to temp file
 	templatePath := filepath.Join(tempDir, "template.typ")
