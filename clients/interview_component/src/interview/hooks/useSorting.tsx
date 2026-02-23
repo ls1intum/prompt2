@@ -20,7 +20,7 @@ export const useSorting = (sortBy: string | undefined) => {
           // Participations without slots go to the end
           const aStartTime = aSlot?.startTime
           const bStartTime = bSlot?.startTime
-          
+
           if (!aStartTime && !bStartTime) return 0
           if (!aStartTime) return 1
           if (!bStartTime) return -1

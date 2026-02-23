@@ -60,7 +60,8 @@ export const InterviewDataShell = ({ children }: InterviewDataShellProps) => {
   })
 
   const isError = isParticipationsError || isCoursePhaseError || isInterviewSlotsError
-  const isPending = isCoursePhaseParticipationsPending || isCoursePhasePending || isInterviewSlotsPending
+  const isPending =
+    isCoursePhaseParticipationsPending || isCoursePhasePending || isInterviewSlotsPending
   const refetch = () => {
     refetchCoursePhaseParticipations()
     refetchCoursePhase()
@@ -84,7 +85,7 @@ export const InterviewDataShell = ({ children }: InterviewDataShellProps) => {
       // Transform the slots with assignments into a flat array
       // where each assignment creates an entry with courseParticipationID
       const flattenedSlots: InterviewSlot[] = []
-      
+
       interviewSlotsWithAssignments.forEach((slot) => {
         slot.assignments.forEach((assignment) => {
           flattenedSlots.push({
@@ -95,7 +96,7 @@ export const InterviewDataShell = ({ children }: InterviewDataShellProps) => {
           })
         })
       })
-      
+
       setInterviewSlots(flattenedSlots)
     }
   }, [interviewSlotsWithAssignments, setInterviewSlots])
