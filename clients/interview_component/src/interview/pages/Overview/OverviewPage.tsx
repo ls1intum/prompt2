@@ -6,20 +6,7 @@ import { SortDropdownMenu } from '../../components/SortDropdownMenu'
 import { useSorting } from '../../hooks/useSorting'
 import { useQuery } from '@tanstack/react-query'
 import { interviewAxiosInstance } from '../../network/interviewServerConfig'
-
-interface AssignmentInfo {
-  id: string
-  course_participation_id: string
-  assigned_at: string
-}
-
-interface InterviewSlotData {
-  id: string
-  start_time: string
-  end_time: string
-  location: string | null
-  assignments: AssignmentInfo[]
-}
+import { InterviewSlotWithAssignments } from '../../interfaces/InterviewSlots'
 
 export const OverviewPage = () => {
   const { phaseId } = useParams<{ phaseId: string }>()
@@ -30,13 +17,8 @@ export const OverviewPage = () => {
   const orderedParticipations = useSorting(sortBy)
 
   // Fetch interview slots with assignments
-  const {
-    data: slots,
-    isLoading,
-    isError,
-    error,
-  } = useQuery<InterviewSlotData[]>({
-    queryKey: ['interviewSlots', phaseId],
+  const { data: slots } = useQuery<InterviewSlotWithAssignments[]>({
+    queryKey: ['interviewSlotsWithAssignments', phaseId],
     queryFn: async () => {
       const response = await interviewAxiosInstance.get(
         `interview/api/course_phase/${phaseId}/interview-slots`,
@@ -47,34 +29,12 @@ export const OverviewPage = () => {
   })
 
   // Create a map of participation ID to interview slot
-  const participationToSlot = new Map<string, InterviewSlotData>()
+  const participationToSlot = new Map<string, InterviewSlotWithAssignments>()
   slots?.forEach((slot) => {
     slot.assignments.forEach((assignment) => {
-      participationToSlot.set(assignment.course_participation_id, slot)
+      participationToSlot.set(assignment.courseParticipationId, slot)
     })
   })
-
-  if (isLoading) {
-    return (
-      <div>
-        <ManagementPageHeader>Interview</ManagementPageHeader>
-        <div className='flex justify-center items-center mt-8'>
-          <p>Loading interview slots...</p>
-        </div>
-      </div>
-    )
-  }
-
-  if (isError) {
-    return (
-      <div>
-        <ManagementPageHeader>Interview</ManagementPageHeader>
-        <div className='flex justify-center items-center mt-8 text-red-600'>
-          <p>Error loading interview slots: {error?.message || 'Unknown error'}</p>
-        </div>
-      </div>
-    )
-  }
 
   return (
     <div>

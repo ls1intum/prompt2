@@ -8,7 +8,7 @@ import (
 
 type AssignmentInfo struct {
 	ID                    uuid.UUID    `json:"id"`
-	CourseParticipationID uuid.UUID    `json:"course_participation_id"`
-	AssignedAt            time.Time    `json:"assigned_at"`
+	CourseParticipationID uuid.UUID    `json:"courseParticipationId"`
+	AssignedAt            time.Time    `json:"assignedAt"`
 	Student               *StudentInfo `json:"student,omitempty"`
 }

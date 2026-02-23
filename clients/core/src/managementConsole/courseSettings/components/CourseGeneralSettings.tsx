@@ -1,16 +1,10 @@
+import { useForm } from 'react-hook-form'
 import { useEffect } from 'react'
 import { useParams } from 'react-router-dom'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useForm } from 'react-hook-form'
 import {
   Button,
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-  DialogDescription,
   Form,
   FormControl,
   FormField,
@@ -26,29 +20,53 @@ import {
   Input,
   Textarea,
   useToast,
+  CardFooter,
+  CardContent,
+  LoadingPage,
+  ErrorPage,
 } from '@tumaet/prompt-ui-components'
 import { CourseType, CourseTypeDetails, useCourseStore } from '@tumaet/prompt-shared-state'
 import { EditCourseFormValues, editCourseSchema } from '@core/validations/editCourse'
 import { updateCourseData } from '@core/network/mutations/updateCourseData'
 import type { Course, UpdateCourseData } from '@tumaet/prompt-shared-state'
-import { IconSelector } from '../AddingCourse/components/IconSelector'
 import {
   DEFAULT_COURSE_COLOR,
   DEFAULT_COURSE_ICON,
   courseAppearanceColors,
 } from '@core/managementConsole/courseOverview/constants/courseAppearance'
+import { IconSelector } from '@core/managementConsole/courseOverview/AddingCourse/components/IconSelector'
+import { FileText, Loader2, Save } from 'lucide-react'
+import { SettingsCard } from '@/components/SettingsCard'
+import { getAllCourses } from '@core/network/queries/course'
 
-interface CourseEditDialogProps {
-  isOpen: boolean
-  onClose: () => void
-}
-
-export const EditCourseDialog = ({ isOpen, onClose }: CourseEditDialogProps) => {
+export function CourseGeneralSettings() {
   const { courseId } = useParams<{ courseId: string }>()
-  const { courses } = useCourseStore()
-  const course = courses.find((c) => c.id === courseId) as Course | undefined
+  const { courses, setCourses } = useCourseStore()
   const { toast } = useToast()
   const queryClient = useQueryClient()
+
+  // Fetch courses if not in store (handles direct page load)
+  const {
+    data: fetchedCourses,
+    isPending: isLoadingCourses,
+    isError: isCoursesError,
+    refetch: refetchCourses,
+  } = useQuery<Course[]>({
+    queryKey: ['courses'],
+    queryFn: () => getAllCourses(),
+  })
+
+  // Update store when data arrives
+  useEffect(() => {
+    if (fetchedCourses) {
+      setCourses([...fetchedCourses])
+    }
+  }, [fetchedCourses, setCourses])
+
+  // Use fetched data or store data
+  const allCourses = fetchedCourses || courses
+  const course = allCourses.find((c) => c.id === courseId) as Course | undefined
+
   const initialColor = (course?.studentReadableData?.['bg-color'] as string) || DEFAULT_COURSE_COLOR
   const initialIcon = (course?.studentReadableData?.['icon'] as string) || DEFAULT_COURSE_ICON
 
@@ -71,6 +89,28 @@ export const EditCourseDialog = ({ isOpen, onClose }: CourseEditDialogProps) => 
   const selectedCourseType = form.watch('courseType')
   const isEctsDisabled = CourseTypeDetails[selectedCourseType]?.ects !== undefined
 
+  // Reset form when course data becomes available
+  useEffect(() => {
+    if (course) {
+      const newInitialColor =
+        (course.studentReadableData?.['bg-color'] as string) || DEFAULT_COURSE_COLOR
+      const newInitialIcon = (course.studentReadableData?.['icon'] as string) || DEFAULT_COURSE_ICON
+
+      form.reset({
+        dateRange: {
+          from: course.startDate ? new Date(course.startDate) : new Date(),
+          to: course.endDate ? new Date(course.endDate) : new Date(),
+        },
+        courseType: course.courseType,
+        ects: course.ects ?? 0,
+        shortDescription: course.shortDescription || '',
+        longDescription: course.longDescription || '',
+        color: newInitialColor,
+        icon: newInitialIcon,
+      })
+    }
+  }, [course, form])
+
   useEffect(() => {
     const ectsValue = CourseTypeDetails[selectedCourseType]?.ects
     if (ectsValue !== undefined) {
@@ -78,7 +118,7 @@ export const EditCourseDialog = ({ isOpen, onClose }: CourseEditDialogProps) => 
     }
   }, [selectedCourseType, form])
 
-  const { mutate: mutateCourse } = useMutation({
+  const { mutate: mutateCourse, isPending: isSaving } = useMutation({
     mutationFn: (courseData: UpdateCourseData) => {
       return updateCourseData(courseId ?? 'undefined', courseData)
     },
@@ -97,6 +137,9 @@ export const EditCourseDialog = ({ isOpen, onClose }: CourseEditDialogProps) => 
     },
   })
 
+  // Track if form has been modified
+  const isModified = form.formState.isDirty
+
   const onSubmit = (data: EditCourseFormValues) => {
     const updateData: UpdateCourseData = {
       startDate: data.dateRange.from,
@@ -111,28 +154,54 @@ export const EditCourseDialog = ({ isOpen, onClose }: CourseEditDialogProps) => 
       },
     }
     mutateCourse(updateData)
-    onClose()
+  }
+
+  // Handle loading state
+  if (isLoadingCourses) {
+    return <LoadingPage />
+  }
+
+  // Handle error state
+  if (isCoursesError) {
+    return (
+      <ErrorPage
+        onRetry={() => refetchCourses()}
+        onLogout={() => {
+          /* Add logout handler if needed */
+        }}
+      />
+    )
+  }
+
+  // Handle course not found
+  if (!course) {
+    return (
+      <SettingsCard
+        icon={<FileText className='w-5 h-5' />}
+        title='General Course Settings'
+        description='Course not found.'
+      >
+        <CardContent>
+          <p className='text-muted-foreground'>
+            The course you are looking for does not exist or you do not have access to it.
+          </p>
+        </CardContent>
+      </SettingsCard>
+    )
   }
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className='max-w-2xl max-h-[90vh] overflow-y-auto'>
-        <DialogHeader>
-          <DialogTitle className='text-2xl'>Edit {course?.name}</DialogTitle>
-          <DialogDescription>The course name and semester tag cannot be changed.</DialogDescription>
-        </DialogHeader>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-6'>
-            {/* Course Basics Section */}
+    <SettingsCard
+      icon={<FileText className='w-5 h-5' />}
+      title='General Course Settings'
+      description='The course name and semester tag cannot be changed.'
+    >
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-6'>
+          {/* Course Basics Section */}
+          <CardContent>
             <div className='space-y-6'>
               <div className='space-y-4'>
-                <div>
-                  <h3 className='text-sm font-semibold text-foreground'>Course Details</h3>
-                  <p className='text-sm text-muted-foreground mt-1'>
-                    Customize the basic information about this course
-                  </p>
-                </div>
-
                 <FormField
                   control={form.control}
                   name='dateRange'
@@ -292,16 +361,25 @@ export const EditCourseDialog = ({ isOpen, onClose }: CourseEditDialogProps) => 
                 </div>
               </div>
             </div>
+          </CardContent>
 
-            <DialogFooter className='pt-2 gap-2'>
-              <Button type='button' variant='outline' onClick={onClose}>
-                Cancel
-              </Button>
-              <Button type='submit'>Save Changes</Button>
-            </DialogFooter>
-          </form>
-        </Form>
-      </DialogContent>
-    </Dialog>
+          <CardFooter className='flex justify-end'>
+            <Button type='submit' disabled={!isModified || isSaving} className='w-full sm:w-auto'>
+              {isSaving ? (
+                <>
+                  <Loader2 className='mr-2 h-4 w-4 animate-spin' />
+                  Saving...
+                </>
+              ) : (
+                <>
+                  <Save className='mr-2 h-4 w-4' />
+                  Save Changes{' '}
+                </>
+              )}
+            </Button>
+          </CardFooter>
+        </form>
+      </Form>
+    </SettingsCard>
   )
 }

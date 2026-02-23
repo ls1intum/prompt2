@@ -19,8 +19,8 @@ import { format } from 'date-fns'
 
 interface InterviewSlotData {
   id: string
-  start_time: string
-  end_time: string
+  startTime: string
+  endTime: string
   location: string | null
 }
 
@@ -58,19 +58,30 @@ export function StudentCard({ participation, interviewSlot }: StudentCardProps) 
           <div className='mt-2 space-y-1'>
             <div className='flex items-center gap-2 text-sm text-muted-foreground'>
               <Calendar className='h-3 w-3' />
-              <span>{format(new Date(interviewSlot.start_time), 'PPP')}</span>
+              <span>{format(new Date(interviewSlot.startTime), 'PPP')}</span>
             </div>
             <div className='flex items-center gap-2 text-sm text-muted-foreground'>
               <Clock className='h-3 w-3' />
               <span>
-                {format(new Date(interviewSlot.start_time), 'p')} -{' '}
-                {format(new Date(interviewSlot.end_time), 'p')}
+                {format(new Date(interviewSlot.startTime), 'p')} -{' '}
+                {format(new Date(interviewSlot.endTime), 'p')}
               </span>
             </div>
             {interviewSlot.location && (
               <div className='flex items-center gap-2 text-sm text-muted-foreground'>
-                <MapPin className='h-3 w-3' />
-                <span>{interviewSlot.location}</span>
+                <MapPin className='h-3 w-3 flex-shrink-0' />
+                {interviewSlot.location.match(/^https?:\/\//) ? (
+                  <a
+                    href={interviewSlot.location}
+                    target='_blank'
+                    rel='noopener noreferrer'
+                    className='text-blue-600 hover:underline truncate min-w-0'
+                  >
+                    {interviewSlot.location}
+                  </a>
+                ) : (
+                  <span className='truncate min-w-0'>{interviewSlot.location}</span>
+                )}
               </div>
             )}
           </div>

@@ -65,6 +65,11 @@ export const AssessmentCard = ({
     mutateAssessment(assessment)
   }
 
+  const submitComment = () => {
+    handleCommentSubmit(newComment)
+    setNewComment('')
+  }
+
   const handleDeleteComment = (comment: InstructorComment) => {
     const filteredComments = comments.filter(
       (c) => !(c.author == comment.author && c.timestamp === comment.timestamp),
@@ -184,18 +189,17 @@ export const AssessmentCard = ({
               id='new-comment'
               value={newComment}
               onChange={(e) => setNewComment(e.target.value)}
+              onKeyDown={(e) => {
+                if ((e.metaKey || e.ctrlKey) && e.key === 'Enter' && newComment.trim()) {
+                  e.preventDefault()
+                  submitComment()
+                }
+              }}
               placeholder='Type your comment here...'
               className='flex-grow'
               rows={3}
             />
-            <Button
-              size='sm'
-              disabled={!newComment}
-              onClick={() => {
-                handleCommentSubmit(newComment)
-                setNewComment('')
-              }}
-            >
+            <Button size='sm' disabled={!newComment} onClick={submitComment}>
               <Send className='h-4 w-4 mr-2' />
               Send
             </Button>

@@ -93,7 +93,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/interviewSlotDTO.CreateInterviewAssignmentRequest"
+                            "$ref": "#/definitions/interviewAssignmentDTO.CreateInterviewAssignmentRequest"
                         }
                     }
                 ],
@@ -101,7 +101,7 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/interviewSlotDTO.InterviewAssignmentResponse"
+                            "$ref": "#/definitions/interviewAssignmentDTO.InterviewAssignmentResponse"
                         }
                     },
                     "400": {
@@ -166,7 +166,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/interviewSlotDTO.CreateInterviewAssignmentAdminRequest"
+                            "$ref": "#/definitions/interviewAssignmentDTO.CreateInterviewAssignmentAdminRequest"
                         }
                     }
                 ],
@@ -174,7 +174,7 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/interviewSlotDTO.InterviewAssignmentResponse"
+                            "$ref": "#/definitions/interviewAssignmentDTO.InterviewAssignmentResponse"
                         }
                     },
                     "400": {
@@ -235,7 +235,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/interviewSlotDTO.InterviewAssignmentResponse"
+                            "$ref": "#/definitions/interviewAssignmentDTO.InterviewAssignmentResponse"
                         }
                     },
                     "404": {
@@ -648,24 +648,7 @@ const docTemplate = `{
                 }
             }
         },
-        "interviewSlotDTO.AssignmentInfo": {
-            "type": "object",
-            "properties": {
-                "assigned_at": {
-                    "type": "string"
-                },
-                "course_participation_id": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "student": {
-                    "$ref": "#/definitions/interviewSlotDTO.StudentInfo"
-                }
-            }
-        },
-        "interviewSlotDTO.CreateInterviewAssignmentAdminRequest": {
+        "interviewAssignmentDTO.CreateInterviewAssignmentAdminRequest": {
             "type": "object",
             "required": [
                 "course_participation_id",
@@ -680,7 +663,7 @@ const docTemplate = `{
                 }
             }
         },
-        "interviewSlotDTO.CreateInterviewAssignmentRequest": {
+        "interviewAssignmentDTO.CreateInterviewAssignmentRequest": {
             "type": "object",
             "required": [
                 "interview_slot_id"
@@ -691,30 +674,7 @@ const docTemplate = `{
                 }
             }
         },
-        "interviewSlotDTO.CreateInterviewSlotRequest": {
-            "type": "object",
-            "required": [
-                "capacity",
-                "end_time",
-                "start_time"
-            ],
-            "properties": {
-                "capacity": {
-                    "type": "integer",
-                    "minimum": 1
-                },
-                "end_time": {
-                    "type": "string"
-                },
-                "location": {
-                    "type": "string"
-                },
-                "start_time": {
-                    "type": "string"
-                }
-            }
-        },
-        "interviewSlotDTO.InterviewAssignmentResponse": {
+        "interviewAssignmentDTO.InterviewAssignmentResponse": {
             "type": "object",
             "properties": {
                 "assigned_at": {
@@ -734,10 +694,50 @@ const docTemplate = `{
                 }
             }
         },
+        "interviewSlotDTO.AssignmentInfo": {
+            "type": "object",
+            "properties": {
+                "assignedAt": {
+                    "type": "string"
+                },
+                "courseParticipationId": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "student": {
+                    "$ref": "#/definitions/interviewSlotDTO.StudentInfo"
+                }
+            }
+        },
+        "interviewSlotDTO.CreateInterviewSlotRequest": {
+            "type": "object",
+            "required": [
+                "capacity",
+                "endTime",
+                "startTime"
+            ],
+            "properties": {
+                "capacity": {
+                    "type": "integer",
+                    "minimum": 1
+                },
+                "endTime": {
+                    "type": "string"
+                },
+                "location": {
+                    "type": "string"
+                },
+                "startTime": {
+                    "type": "string"
+                }
+            }
+        },
         "interviewSlotDTO.InterviewSlotResponse": {
             "type": "object",
             "properties": {
-                "assigned_count": {
+                "assignedCount": {
                     "type": "integer"
                 },
                 "assignments": {
@@ -749,13 +749,13 @@ const docTemplate = `{
                 "capacity": {
                     "type": "integer"
                 },
-                "course_phase_id": {
+                "coursePhaseId": {
                     "type": "string"
                 },
-                "created_at": {
+                "createdAt": {
                     "type": "string"
                 },
-                "end_time": {
+                "endTime": {
                     "type": "string"
                 },
                 "id": {
@@ -764,10 +764,10 @@ const docTemplate = `{
                 "location": {
                     "type": "string"
                 },
-                "start_time": {
+                "startTime": {
                     "type": "string"
                 },
-                "updated_at": {
+                "updatedAt": {
                     "type": "string"
                 }
             }
@@ -793,21 +793,21 @@ const docTemplate = `{
             "type": "object",
             "required": [
                 "capacity",
-                "end_time",
-                "start_time"
+                "endTime",
+                "startTime"
             ],
             "properties": {
                 "capacity": {
                     "type": "integer",
                     "minimum": 1
                 },
-                "end_time": {
+                "endTime": {
                     "type": "string"
                 },
                 "location": {
                     "type": "string"
                 },
-                "start_time": {
+                "startTime": {
                     "type": "string"
                 }
             }
