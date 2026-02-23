@@ -6,13 +6,14 @@ import type { ApplicationParticipation } from '../../applicationAdministration/i
 
 import { getApplicationParticipations } from '@core/network/queries/applicationParticipations'
 import { getStatusString } from '../../applicationAdministration/pages/ApplicationParticipantsPage/utils/getStatusBadge'
+import { Link } from 'react-router-dom'
 
 export const ApplicationStudentDetailComponent: React.FC<CoursePhaseStudentIdentifierProps> = ({
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   studentId: _studentId,
   coursePhaseId,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  courseId: _courseId,
+
+  courseId,
   courseParticipationId,
 }) => {
   const { data: participations, isPending } = useQuery<ApplicationParticipation[]>({
@@ -28,12 +29,19 @@ export const ApplicationStudentDetailComponent: React.FC<CoursePhaseStudentIdent
 
   if (isPending || !application) return null
 
+  const applicationURL = `/management/course/${courseId}/${coursePhaseId}/participants/${courseParticipationId}`
+
   return (
     <div className='text-sm'>
-      <span className='text-muted-foreground'>Application: </span>
-      <span className='font-medium'>{getStatusString(application.passStatus)}</span>
-      <span className='text-muted-foreground'> · Score: </span>
-      <span className='font-medium'>{application.score ?? '-'}</span>
+      <div>
+        <span className='text-muted-foreground'>Application: </span>
+        <span className='font-medium'>{getStatusString(application.passStatus)}</span>
+        <span className='text-muted-foreground'> · Score: </span>
+        <span className='font-medium'>{application.score ?? '-'}</span>
+      </div>
+      <Link to={applicationURL} className='mt-2 text-blue-600'>
+        Application
+      </Link>
     </div>
   )
 }
