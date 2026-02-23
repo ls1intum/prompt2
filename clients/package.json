@@ -76,6 +76,7 @@
     "ts-loader": "^9.5.4",
     "ts-node": "^10.9.2",
     "ts-node-register": "^1.0.0",
+    "use-debounce": "^10.1.0",
     "zustand": "^5.0.11"
   },
   "resolutions": {
