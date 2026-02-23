@@ -660,8 +660,8 @@ export const InterviewScheduleManagement = () => {
                     dateStyle: 'medium',
                     timeStyle: 'short',
                   })}
-                  . This slot has {assigningSlot.assignedCount ?? 0}/{assigningSlot.capacity ?? 1} students
-                  assigned.
+                  . This slot has {assigningSlot.assignedCount ?? 0}/{assigningSlot.capacity ?? 1}{' '}
+                  students assigned.
                 </>
               )}
             </DialogDescription>
