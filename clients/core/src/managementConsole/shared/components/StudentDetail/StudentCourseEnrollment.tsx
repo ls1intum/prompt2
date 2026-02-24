@@ -3,7 +3,7 @@ import { PassStatus } from '@tumaet/prompt-shared-state'
 import { useState } from 'react'
 import { Button } from '@tumaet/prompt-ui-components'
 import { CourseDetail } from './CourseDetail'
-import { CourseEnrollment } from '../../interfaces/StudentEnrollment'
+import { CourseEnrollment } from '@core/managementConsole/shared/interfaces/StudentEnrollment'
 
 export function StudentCourseEnrollment({
   courseEnrollment,

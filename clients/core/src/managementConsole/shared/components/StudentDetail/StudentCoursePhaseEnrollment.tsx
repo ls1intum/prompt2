@@ -4,7 +4,10 @@ import { ProgressIndicator } from './PhaseProgressIndicator'
 import { LinkHeading } from './LinkHeading'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@tumaet/prompt-ui-components'
 import { PassStatus } from '@tumaet/prompt-shared-state'
-import { CoursePhaseEnrollment, CourseEnrollment } from '../../interfaces/StudentEnrollment'
+import {
+  CourseEnrollment,
+  CoursePhaseEnrollment,
+} from '@core/managementConsole/shared/interfaces/StudentEnrollment'
 
 export function parsePostgresTimestamp(ts: string): Date {
   return new Date(ts.replace(' ', 'T') + 'Z')
