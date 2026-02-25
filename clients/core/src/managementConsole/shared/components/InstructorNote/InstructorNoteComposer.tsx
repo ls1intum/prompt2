@@ -109,7 +109,7 @@ export function NoteComposer({
         }}
       />
 
-      <div className='flex items-center justify-between'>
+      <div className='flex items-start justify-between'>
         {tagPicker}
         {isEditMode ? (
           <div className='flex gap-2'>
