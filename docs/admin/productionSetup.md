@@ -251,6 +251,15 @@ PROMPT now stores uploaded files in an S3-compatible bucket (SeaweedFS S3 gatewa
 - **`S3_FORCE_PATH_STYLE`**  
   Set to `true` for SeaweedFS/MinIO. Set to `false` for AWS S3.
 
+- **`S3_PRESIGN_UPLOAD_TTL_SECONDS`**  
+  Presigned upload URL TTL in seconds (default: `900`).
+
+- **`S3_PRESIGN_DOWNLOAD_TTL_SECONDS`**  
+  Presigned download URL TTL in seconds (default: `30`).
+
+- **`S3_PRESIGN_TTL_SECONDS`** (Legacy optional)  
+  Fallback TTL used only if the specific upload/download TTL variables are not set.
+
 - **`MAX_FILE_UPLOAD_SIZE_MB`**  
   Maximum allowed file size for uploads (default: `50`).
 

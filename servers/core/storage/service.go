@@ -208,7 +208,7 @@ func (s *StorageService) PresignUpload(ctx context.Context, req PresignUploadReq
 	uniqueFilename := fmt.Sprintf("%s-%s", uuid.New().String(), safeOriginal)
 	storageKey := buildStorageKey(req.CoursePhaseID, uniqueFilename)
 
-	uploadURL, err := s.storageAdapter.GetUploadURL(ctx, storageKey, req.ContentType, presignTTLSeconds())
+	uploadURL, err := s.storageAdapter.GetUploadURL(ctx, storageKey, req.ContentType, presignUploadTTLSeconds())
 	if err != nil {
 		return nil, err
 	}
@@ -484,7 +484,7 @@ func (s *StorageService) isAllowedType(contentType string) bool {
 // convertToFileResponse converts a database file record to an API response
 func (s *StorageService) convertToFileResponse(ctx context.Context, file db.File) *FileResponse {
 	// Generate download URL
-	downloadURL, err := s.storageAdapter.GetURL(ctx, file.StorageKey, presignTTLSeconds())
+	downloadURL, err := s.storageAdapter.GetURL(ctx, file.StorageKey, presignDownloadTTLSeconds())
 	if err != nil {
 		log.WithError(err).WithField("storageKey", file.StorageKey).Warn("Failed to generate download URL")
 		downloadURL = ""
@@ -524,11 +524,30 @@ func (s *StorageService) convertToFileResponse(ctx context.Context, file db.File
 	return response
 }
 
-func presignTTLSeconds() int {
-	value := utils.GetEnv("S3_PRESIGN_TTL_SECONDS", "900")
-	ttl, err := strconv.Atoi(value)
-	if err != nil || ttl <= 0 {
-		return 900
+func presignUploadTTLSeconds() int {
+	return resolvePresignTTLSeconds("S3_PRESIGN_UPLOAD_TTL_SECONDS", 900)
+}
+
+func presignDownloadTTLSeconds() int {
+	return resolvePresignTTLSeconds("S3_PRESIGN_DOWNLOAD_TTL_SECONDS", 30)
+}
+
+func resolvePresignTTLSeconds(envKey string, defaultTTL int) int {
+	primaryValue := strings.TrimSpace(utils.GetEnv(envKey, ""))
+	if primaryValue != "" {
+		ttl, err := strconv.Atoi(primaryValue)
+		if err == nil && ttl > 0 {
+			return ttl
+		}
 	}
-	return ttl
+
+	legacyValue := strings.TrimSpace(utils.GetEnv("S3_PRESIGN_TTL_SECONDS", ""))
+	if legacyValue != "" {
+		ttl, err := strconv.Atoi(legacyValue)
+		if err == nil && ttl > 0 {
+			return ttl
+		}
+	}
+
+	return defaultTTL
 }

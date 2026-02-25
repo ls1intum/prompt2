@@ -12,15 +12,14 @@ export const openFileDownload = async ({
     return
   }
 
-  const opened = window.open(downloadUrl, '_blank', 'noopener,noreferrer')
-  if (!opened) {
-    const link = document.createElement('a')
-    link.href = downloadUrl
-    if (fileName) {
-      link.download = fileName
-    }
-    document.body.appendChild(link)
-    link.click()
-    link.remove()
+  const link = document.createElement('a')
+  link.href = downloadUrl
+  link.target = '_blank'
+  link.rel = 'noopener noreferrer'
+  if (fileName) {
+    link.download = fileName
   }
+  document.body.appendChild(link)
+  link.click()
+  link.remove()
 }

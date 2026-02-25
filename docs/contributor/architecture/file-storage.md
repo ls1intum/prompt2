@@ -58,7 +58,7 @@ All client-facing file access uses **presigned URLs**, which embed a time-limite
 
 1. **Upload**: The client requests a presigned PUT URL from the core server (`POST /apply/:coursePhaseID/files/presign`). The server generates a presigned URL using the S3 credentials and returns it. The client uploads the file directly to SeaweedFS using this URL, then calls `/files/complete` so the server verifies the file exists and records its metadata in the database.
 
-2. **Download**: When a file needs to be accessed, the core server generates a presigned GET URL (default TTL: 15 minutes, configurable via `S3_PRESIGN_TTL_SECONDS`). The browser fetches the file directly from SeaweedFS using this URL.
+2. **Download**: When a file needs to be accessed, the core server generates a presigned GET URL (default TTL: 30 seconds, configurable via `S3_PRESIGN_DOWNLOAD_TTL_SECONDS`). The browser fetches the file directly from SeaweedFS using this URL.
 
 3. **Expiry**: Presigned URLs expire after their TTL. Without a valid signature, SeaweedFS rejects the request. This means **no file is accessible without the core server explicitly granting a time-limited URL**.
 
@@ -90,6 +90,9 @@ To deploy SeaweedFS via the CI/CD pipeline, the following variables and secrets 
 | `S3_ENDPOINT`             | `http://seaweedfs-s3:8333`             | Internal Docker endpoint for the S3 gateway                                 |
 | `S3_PUBLIC_ENDPOINT`      | `https://s3.prompt.ase.cit.tum.de`     | Public endpoint for presigned URLs (must resolve to S3 gateway via Traefik) |
 | `S3_FORCE_PATH_STYLE`     | `true`                                 | Must be `true` for SeaweedFS/MinIO                                          |
+| `S3_PRESIGN_UPLOAD_TTL_SECONDS`   | `900`                                  | Presigned upload URL TTL in seconds                                          |
+| `S3_PRESIGN_DOWNLOAD_TTL_SECONDS` | `30`                                   | Presigned download URL TTL in seconds                                        |
+| `S3_PRESIGN_TTL_SECONDS`          | (optional legacy)                      | Legacy fallback TTL used if the specific upload/download TTLs are not set    |
 | `MAX_FILE_UPLOAD_SIZE_MB` | `50`                                   | Maximum upload size in MB                                                   |
 | `ALLOWED_FILE_TYPES`      | `application/pdf,image/jpeg,image/png` | Comma-separated MIME types (empty = allow all)                              |
 
