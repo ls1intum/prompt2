@@ -822,6 +822,13 @@ definitions:
     x-enum-varnames:
     - StudyDegreeBachelor
     - StudyDegreeMaster
+  instructorNoteDTO.CreateNoteTag:
+    properties:
+      color:
+        type: string
+      name:
+        type: string
+    type: object
   instructorNoteDTO.InstructorNote:
     properties:
       author:
@@ -868,6 +875,13 @@ definitions:
         type: string
       versionNumber:
         type: integer
+    type: object
+  instructorNoteDTO.UpdateNoteTag:
+    properties:
+      color:
+        type: string
+      name:
+        type: string
     type: object
   keycloakRealmDTO.AddStudentsToGroup:
     properties:
@@ -2815,6 +2829,94 @@ paths:
           schema:
             $ref: '#/definitions/utils.ErrorResponse'
       summary: Get all note tags
+      tags:
+      - instructorNotes
+    post:
+      consumes:
+      - application/json
+      description: Create a new note tag with a name and color
+      parameters:
+      - description: Tag to create
+        in: body
+        name: tag
+        required: true
+        schema:
+          $ref: '#/definitions/instructorNoteDTO.CreateNoteTag'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/instructorNoteDTO.NoteTag'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      summary: Create a note tag
+      tags:
+      - instructorNotes
+  /instructor-notes/tags/{tag-uuid}:
+    delete:
+      description: Delete a note tag by UUID
+      parameters:
+      - description: Tag UUID
+        in: path
+        name: tag-uuid
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      summary: Delete a note tag
+      tags:
+      - instructorNotes
+    put:
+      consumes:
+      - application/json
+      description: Update the name and color of an existing note tag
+      parameters:
+      - description: Tag UUID
+        in: path
+        name: tag-uuid
+        required: true
+        type: string
+      - description: Updated tag data
+        in: body
+        name: tag
+        required: true
+        schema:
+          $ref: '#/definitions/instructorNoteDTO.UpdateNoteTag'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/instructorNoteDTO.NoteTag'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      summary: Update a note tag
       tags:
       - instructorNotes
   /keycloak/{courseID}/group:

@@ -14,6 +14,9 @@ func setupInstructorNoteRouter(router *gin.RouterGroup, authMiddleware func() gi
 	instructorNoteRouter := router.Group("/instructor-notes", authMiddleware())
 	instructorNoteRouter.GET("/", permissionRoleMiddleware(permissionValidation.PromptAdmin, permissionValidation.PromptLecturer), getAllInstructorNotes)
 	instructorNoteRouter.GET("/tags", permissionRoleMiddleware(permissionValidation.PromptAdmin, permissionValidation.PromptLecturer), getAllNoteTags)
+	instructorNoteRouter.POST("/tags", permissionRoleMiddleware(permissionValidation.PromptAdmin), createNoteTag)
+	instructorNoteRouter.PUT("/tags/:tag-uuid", permissionRoleMiddleware(permissionValidation.PromptAdmin), updateNoteTag)
+	instructorNoteRouter.DELETE("/tags/:tag-uuid", permissionRoleMiddleware(permissionValidation.PromptAdmin), deleteNoteTag)
 	instructorNoteRouter.GET("/s/:student-uuid", permissionRoleMiddleware(permissionValidation.PromptAdmin, permissionValidation.PromptLecturer), getInstructorNoteForStudentByID)
 	instructorNoteRouter.POST("/s/:student-uuid", permissionRoleMiddleware(permissionValidation.PromptAdmin, permissionValidation.PromptLecturer), createInstructorNoteForStudentByID)
 	instructorNoteRouter.DELETE("/:note-uuid", permissionRoleMiddleware(permissionValidation.PromptAdmin, permissionValidation.PromptLecturer), deleteInstructorNote)
@@ -153,6 +156,89 @@ func deleteInstructorNote(c *gin.Context) {
 }
 
 
+
+// createNoteTag godoc
+// @Summary Create a note tag
+// @Description Create a new note tag with a name and color
+// @Tags instructorNotes
+// @Accept json
+// @Produce json
+// @Param tag body instructorNoteDTO.CreateNoteTag true "Tag to create"
+// @Success 200 {object} instructorNoteDTO.NoteTag
+// @Failure 400 {object} utils.ErrorResponse
+// @Failure 500 {object} utils.ErrorResponse
+// @Router /instructor-notes/tags [post]
+func createNoteTag(c *gin.Context) {
+	var newTag instructorNoteDTO.CreateNoteTag
+	if err := c.BindJSON(&newTag); err != nil {
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	tag, err := CreateNoteTag(c, newTag)
+	if err != nil {
+		handleError(c, http.StatusInternalServerError, err)
+		return
+	}
+	c.IndentedJSON(http.StatusOK, tag)
+}
+
+// updateNoteTag godoc
+// @Summary Update a note tag
+// @Description Update the name and color of an existing note tag
+// @Tags instructorNotes
+// @Accept json
+// @Produce json
+// @Param tag-uuid path string true "Tag UUID"
+// @Param tag body instructorNoteDTO.UpdateNoteTag true "Updated tag data"
+// @Success 200 {object} instructorNoteDTO.NoteTag
+// @Failure 400 {object} utils.ErrorResponse
+// @Failure 500 {object} utils.ErrorResponse
+// @Router /instructor-notes/tags/{tag-uuid} [put]
+func updateNoteTag(c *gin.Context) {
+	id, err := uuid.Parse(c.Param("tag-uuid"))
+	if err != nil {
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	var updatedTag instructorNoteDTO.UpdateNoteTag
+	if err := c.BindJSON(&updatedTag); err != nil {
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	tag, err := UpdateNoteTag(c, id, updatedTag)
+	if err != nil {
+		handleError(c, http.StatusInternalServerError, err)
+		return
+	}
+	c.IndentedJSON(http.StatusOK, tag)
+}
+
+// deleteNoteTag godoc
+// @Summary Delete a note tag
+// @Description Delete a note tag by UUID
+// @Tags instructorNotes
+// @Produce json
+// @Param tag-uuid path string true "Tag UUID"
+// @Success 204
+// @Failure 400 {object} utils.ErrorResponse
+// @Failure 500 {object} utils.ErrorResponse
+// @Router /instructor-notes/tags/{tag-uuid} [delete]
+func deleteNoteTag(c *gin.Context) {
+	id, err := uuid.Parse(c.Param("tag-uuid"))
+	if err != nil {
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	if err := DeleteNoteTag(c, id); err != nil {
+		handleError(c, http.StatusInternalServerError, err)
+		return
+	}
+	c.Status(http.StatusNoContent)
+}
 
 // getAllNoteTags godoc
 // @Summary Get all note tags

@@ -403,3 +403,20 @@ func (q *Queries) RemoveTagFromNote(ctx context.Context, arg RemoveTagFromNotePa
 	_, err := q.db.Exec(ctx, removeTagFromNote, arg.NoteID, arg.TagID)
 	return err
 }
+
+const updateTag = `-- name: UpdateTag :one
+UPDATE note_tag SET name = $2, color = $3 WHERE id = $1 RETURNING id, name, color
+`
+
+type UpdateTagParams struct {
+	ID    uuid.UUID    `json:"id"`
+	Name  string       `json:"name"`
+	Color NoteTagColor `json:"color"`
+}
+
+func (q *Queries) UpdateTag(ctx context.Context, arg UpdateTagParams) (NoteTag, error) {
+	row := q.db.QueryRow(ctx, updateTag, arg.ID, arg.Name, arg.Color)
+	var i NoteTag
+	err := row.Scan(&i.ID, &i.Name, &i.Color)
+	return i, err
+}

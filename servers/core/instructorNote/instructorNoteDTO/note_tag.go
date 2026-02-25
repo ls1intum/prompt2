@@ -16,6 +16,11 @@ type CreateNoteTag struct {
 	Color string `json:"color"`
 }
 
+type UpdateNoteTag struct {
+	Name  string `json:"name"`
+	Color string `json:"color"`
+}
+
 func NoteTagFromDBModel(model db.NoteTag) NoteTag {
 	return NoteTag{
 		ID:    model.ID,

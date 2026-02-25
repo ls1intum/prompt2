@@ -121,6 +121,38 @@ func NewStudentNote(ctx context.Context, studentID uuid.UUID, params instructorN
 
 }
 
+func CreateNoteTag(ctx context.Context, tag instructorNoteDTO.CreateNoteTag) (instructorNoteDTO.NoteTag, error) {
+  id, err := uuid.NewRandom()
+  if err != nil {
+    return instructorNoteDTO.NoteTag{}, err
+  }
+  result, err := InstructorNoteServiceSingleton.queries.CreateTag(ctx, db.CreateTagParams{
+    ID:    id,
+    Name:  tag.Name,
+    Color: db.NoteTagColor(tag.Color),
+  })
+  if err != nil {
+    return instructorNoteDTO.NoteTag{}, err
+  }
+  return instructorNoteDTO.NoteTagFromDBModel(result), nil
+}
+
+func UpdateNoteTag(ctx context.Context, id uuid.UUID, tag instructorNoteDTO.UpdateNoteTag) (instructorNoteDTO.NoteTag, error) {
+  result, err := InstructorNoteServiceSingleton.queries.UpdateTag(ctx, db.UpdateTagParams{
+    ID:    id,
+    Name:  tag.Name,
+    Color: db.NoteTagColor(tag.Color),
+  })
+  if err != nil {
+    return instructorNoteDTO.NoteTag{}, err
+  }
+  return instructorNoteDTO.NoteTagFromDBModel(result), nil
+}
+
+func DeleteNoteTag(ctx context.Context, id uuid.UUID) error {
+  return InstructorNoteServiceSingleton.queries.DeleteTag(ctx, id)
+}
+
 func DeleteInstructorNote(ctx context.Context, noteID uuid.UUID, authorID uuid.UUID) (instructorNoteDTO.InstructorNote, error) {
   _, err := InstructorNoteServiceSingleton.queries.DeleteNote(ctx, db.DeleteNoteParams{
     ID: noteID,

@@ -62,6 +62,9 @@ SELECT id, name, color FROM note_tag WHERE id = $1 LIMIT 1;
 -- name: CreateTag :one
 INSERT INTO note_tag (id, name, color) VALUES ($1, $2, $3) RETURNING id, name, color;
 
+-- name: UpdateTag :one
+UPDATE note_tag SET name = $2, color = $3 WHERE id = $1 RETURNING id, name, color;
+
 -- name: DeleteTag :exec
 DELETE FROM note_tag WHERE id = $1;
 

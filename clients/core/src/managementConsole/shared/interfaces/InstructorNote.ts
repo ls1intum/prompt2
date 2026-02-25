@@ -13,6 +13,16 @@ export interface NoteTag {
   color: NoteTagColor
 }
 
+export interface CreateNoteTag {
+  name: string
+  color: NoteTagColor
+}
+
+export interface UpdateNoteTag {
+  name: string
+  color: NoteTagColor
+}
+
 export interface InstructorNote {
   id: string
   author: string
