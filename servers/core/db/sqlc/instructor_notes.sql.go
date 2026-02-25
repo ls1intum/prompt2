@@ -102,18 +102,19 @@ func (q *Queries) CreateNoteVersion(ctx context.Context, arg CreateNoteVersionPa
 }
 
 const createTag = `-- name: CreateTag :one
-INSERT INTO note_tag (id, name) VALUES ($1, $2) RETURNING id, name
+INSERT INTO note_tag (id, name, color) VALUES ($1, $2, $3) RETURNING id, name, color
 `
 
 type CreateTagParams struct {
-	ID   uuid.UUID `json:"id"`
-	Name string    `json:"name"`
+	ID    uuid.UUID    `json:"id"`
+	Name  string       `json:"name"`
+	Color NoteTagColor `json:"color"`
 }
 
 func (q *Queries) CreateTag(ctx context.Context, arg CreateTagParams) (NoteTag, error) {
-	row := q.db.QueryRow(ctx, createTag, arg.ID, arg.Name)
+	row := q.db.QueryRow(ctx, createTag, arg.ID, arg.Name, arg.Color)
 	var i NoteTag
-	err := row.Scan(&i.ID, &i.Name)
+	err := row.Scan(&i.ID, &i.Name, &i.Color)
 	return i, err
 }
 
@@ -236,7 +237,7 @@ func (q *Queries) GetAllStudentNotesGroupByStudent(ctx context.Context) ([]GetAl
 }
 
 const getAllTags = `-- name: GetAllTags :many
-SELECT id, name FROM note_tag ORDER BY name ASC
+SELECT id, name, color FROM note_tag ORDER BY name ASC
 `
 
 func (q *Queries) GetAllTags(ctx context.Context) ([]NoteTag, error) {
@@ -248,7 +249,7 @@ func (q *Queries) GetAllTags(ctx context.Context) ([]NoteTag, error) {
 	var items []NoteTag
 	for rows.Next() {
 		var i NoteTag
-		if err := rows.Scan(&i.ID, &i.Name); err != nil {
+		if err := rows.Scan(&i.ID, &i.Name, &i.Color); err != nil {
 			return nil, err
 		}
 		items = append(items, i)
@@ -352,18 +353,18 @@ func (q *Queries) GetStudentNotesForStudent(ctx context.Context, forStudent uuid
 }
 
 const getTagByID = `-- name: GetTagByID :one
-SELECT id, name FROM note_tag WHERE id = $1 LIMIT 1
+SELECT id, name, color FROM note_tag WHERE id = $1 LIMIT 1
 `
 
 func (q *Queries) GetTagByID(ctx context.Context, id uuid.UUID) (NoteTag, error) {
 	row := q.db.QueryRow(ctx, getTagByID, id)
 	var i NoteTag
-	err := row.Scan(&i.ID, &i.Name)
+	err := row.Scan(&i.ID, &i.Name, &i.Color)
 	return i, err
 }
 
 const getTagsForNote = `-- name: GetTagsForNote :many
-SELECT nt.id, nt.name FROM note_tag nt
+SELECT nt.id, nt.name, nt.color FROM note_tag nt
 JOIN note_tag_relation ntr ON ntr.tag_id = nt.id
 WHERE ntr.note_id = $1
 ORDER BY nt.name ASC
@@ -378,7 +379,7 @@ func (q *Queries) GetTagsForNote(ctx context.Context, noteID uuid.UUID) ([]NoteT
 	var items []NoteTag
 	for rows.Next() {
 		var i NoteTag
-		if err := rows.Scan(&i.ID, &i.Name); err != nil {
+		if err := rows.Scan(&i.ID, &i.Name, &i.Color); err != nil {
 			return nil, err
 		}
 		items = append(items, i)

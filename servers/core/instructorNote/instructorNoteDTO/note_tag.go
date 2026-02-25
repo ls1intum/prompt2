@@ -6,18 +6,21 @@ import (
 )
 
 type NoteTag struct {
-	ID   uuid.UUID `json:"id"`
-	Name string    `json:"name"`
+	ID    uuid.UUID `json:"id"`
+	Name  string    `json:"name"`
+	Color string    `json:"color"`
 }
 
 type CreateNoteTag struct {
-	Name string `json:"name"`
+	Name  string `json:"name"`
+	Color string `json:"color"`
 }
 
 func NoteTagFromDBModel(model db.NoteTag) NoteTag {
 	return NoteTag{
-		ID:   model.ID,
-		Name: model.Name,
+		ID:    model.ID,
+		Name:  model.Name,
+		Color: string(model.Color),
 	}
 }
 

@@ -851,6 +851,8 @@ definitions:
     type: object
   instructorNoteDTO.NoteTag:
     properties:
+      color:
+        type: string
       id:
         type: string
       name:

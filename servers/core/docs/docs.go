@@ -4424,6 +4424,9 @@ const docTemplate = `{
         "instructorNoteDTO.NoteTag": {
             "type": "object",
             "properties": {
+                "color": {
+                    "type": "string"
+                },
                 "id": {
                     "type": "string"
                 },

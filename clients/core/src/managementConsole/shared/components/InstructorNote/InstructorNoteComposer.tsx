@@ -79,7 +79,7 @@ export function NoteComposer({
                 className='flex items-center gap-2 w-full text-left px-2 py-1 text-sm rounded hover:bg-gray-100 transition-colors'
               >
                 <Check className={`w-3 h-3 shrink-0 ${isSelected ? 'opacity-100' : 'opacity-0'}`} />
-                {tag.name}
+                <InstructorNoteTag tag={tag} />
               </button>
             )
           })
@@ -93,7 +93,7 @@ export function NoteComposer({
       {selectedTags.length > 0 && (
         <div className='flex items-center flex-wrap gap-1'>
           {selectedTags.map((tag) => (
-            <InstructorNoteTag key={tag.id}>{tag.name}</InstructorNoteTag>
+            <InstructorNoteTag key={tag.id} tag={tag} />
           ))}
         </div>
       )}

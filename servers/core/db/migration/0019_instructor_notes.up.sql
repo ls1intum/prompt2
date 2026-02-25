@@ -19,9 +19,12 @@ CREATE TABLE note_version (
   for_note       uuid NOT NULL REFERENCES note(id)
 );
 
+CREATE TYPE note_tag_color AS ENUM ('blue', 'green', 'red', 'yellow', 'orange', 'pink');
+
 CREATE TABLE note_tag (
-  id   uuid PRIMARY KEY,
-  name text NOT NULL UNIQUE
+  id    uuid           PRIMARY KEY,
+  name  text           NOT NULL UNIQUE,
+  color note_tag_color NOT NULL
 );
 
 CREATE TABLE note_tag_relation (
@@ -55,7 +58,7 @@ SELECT
   ) AS versions,
   COALESCE(
     (
-      SELECT jsonb_agg(jsonb_build_object('id', nt.id, 'name', nt.name) ORDER BY nt.name)
+      SELECT jsonb_agg(jsonb_build_object('id', nt.id, 'name', nt.name, 'color', nt.color) ORDER BY nt.name)
       FROM note_tag_relation ntr
       JOIN note_tag nt ON nt.id = ntr.tag_id
       WHERE ntr.note_id = n.id

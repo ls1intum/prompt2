@@ -54,19 +54,19 @@ AND date_deleted IS NULL
 RETURNING *;
 
 -- name: GetAllTags :many
-SELECT id, name FROM note_tag ORDER BY name ASC;
+SELECT id, name, color FROM note_tag ORDER BY name ASC;
 
 -- name: GetTagByID :one
-SELECT id, name FROM note_tag WHERE id = $1 LIMIT 1;
+SELECT id, name, color FROM note_tag WHERE id = $1 LIMIT 1;
 
 -- name: CreateTag :one
-INSERT INTO note_tag (id, name) VALUES ($1, $2) RETURNING id, name;
+INSERT INTO note_tag (id, name, color) VALUES ($1, $2, $3) RETURNING id, name, color;
 
 -- name: DeleteTag :exec
 DELETE FROM note_tag WHERE id = $1;
 
 -- name: GetTagsForNote :many
-SELECT nt.id, nt.name FROM note_tag nt
+SELECT nt.id, nt.name, nt.color FROM note_tag nt
 JOIN note_tag_relation ntr ON ntr.tag_id = nt.id
 WHERE ntr.note_id = $1
 ORDER BY nt.name ASC;

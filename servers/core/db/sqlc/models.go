@@ -99,6 +99,52 @@ func (ns NullGender) Value() (driver.Value, error) {
 	return string(ns.Gender), nil
 }
 
+type NoteTagColor string
+
+const (
+	NoteTagColorBlue   NoteTagColor = "blue"
+	NoteTagColorGreen  NoteTagColor = "green"
+	NoteTagColorRed    NoteTagColor = "red"
+	NoteTagColorYellow NoteTagColor = "yellow"
+	NoteTagColorOrange NoteTagColor = "orange"
+	NoteTagColorPink   NoteTagColor = "pink"
+)
+
+func (e *NoteTagColor) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = NoteTagColor(s)
+	case string:
+		*e = NoteTagColor(s)
+	default:
+		return fmt.Errorf("unsupported scan type for NoteTagColor: %T", src)
+	}
+	return nil
+}
+
+type NullNoteTagColor struct {
+	NoteTagColor NoteTagColor `json:"note_tag_color"`
+	Valid        bool         `json:"valid"` // Valid is true if NoteTagColor is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullNoteTagColor) Scan(value interface{}) error {
+	if value == nil {
+		ns.NoteTagColor, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.NoteTagColor.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullNoteTagColor) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.NoteTagColor), nil
+}
+
 type PassStatus string
 
 const (
@@ -335,8 +381,9 @@ type Note struct {
 }
 
 type NoteTag struct {
-	ID   uuid.UUID `json:"id"`
-	Name string    `json:"name"`
+	ID    uuid.UUID    `json:"id"`
+	Name  string       `json:"name"`
+	Color NoteTagColor `json:"color"`
 }
 
 type NoteTagRelation struct {

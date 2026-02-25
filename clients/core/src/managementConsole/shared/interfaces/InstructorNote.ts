@@ -5,9 +5,12 @@ export interface NoteVersion {
   versionNumber: number
 }
 
+export type NoteTagColor = 'blue' | 'green' | 'red' | 'yellow' | 'orange' | 'pink'
+
 export interface NoteTag {
   id: string
   name: string
+  color: NoteTagColor
 }
 
 export interface InstructorNote {
