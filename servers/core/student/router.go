@@ -193,13 +193,12 @@ func searchStudents(c *gin.Context) {
 // @Failure 500 {object} utils.ErrorResponse
 // @Router /students/{uuid}/enrollments [get]
 func getStudentEnrollments(c *gin.Context) {
-	id, err := uuid.Parse(c.Param("uuid"))
-	if err != nil {
-		handleError(c, http.StatusBadRequest, err)
+	id, parseErr := uuid.Parse(c.Param("uuid"))
+	if parseErr != nil {
+		handleError(c, http.StatusBadRequest, parseErr)
 		return
 	}
-
-	studentEnrollments, err := GetStudentEnrollmentsByID(c, id)
+  studentEnrollments, err := GetStudentEnrollmentsByID(c, id)
 	if err != nil {
 		handleError(c, http.StatusBadRequest, err)
 		return

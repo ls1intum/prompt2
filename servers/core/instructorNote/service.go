@@ -54,7 +54,8 @@ func GetSingleNoteByID(ctx context.Context, id uuid.UUID) (db.Note, error) {
 func NewStudentNote(ctx context.Context, studentID uuid.UUID, params instructorNoteDTO.CreateInstructorNote, signedInUserUUID uuid.UUID, authorName string, authorEmail string) (instructorNoteDTO.InstructorNote, error) {
 
   versionNumber := 0
-  noteID := uuid.UUID{}
+  var noteID uuid.UUID
+  var err error
   rightNow := pgtype.Timestamptz{ Time: time.Now(), Valid: true }
 
   if (params.New) {
@@ -62,7 +63,7 @@ func NewStudentNote(ctx context.Context, studentID uuid.UUID, params instructorN
     if err != nil {
       return instructorNoteDTO.InstructorNote{}, err
     }
-    InstructorNoteServiceSingleton.queries.CreateNote(ctx, db.CreateNoteParams{
+    _, err = InstructorNoteServiceSingleton.queries.CreateNote(ctx, db.CreateNoteParams{
       ID: newNoteId,
       ForStudent: studentID,
       Author: signedInUserUUID,
@@ -72,6 +73,9 @@ func NewStudentNote(ctx context.Context, studentID uuid.UUID, params instructorN
       DateDeleted: pgtype.Timestamptz{},
       DeletedBy: pgtype.UUID{},
     })
+    if err != nil {
+      return instructorNoteDTO.InstructorNote{}, err
+    }
     noteID = newNoteId
   } else {
     noteID = params.ForNote

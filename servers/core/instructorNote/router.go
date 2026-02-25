@@ -105,7 +105,11 @@ func createInstructorNoteForStudentByID(c *gin.Context) {
 		return
 	}
 
-  NewStudentNote(c, id, newNote, userID, authorName, authorEmail)
+  _, err = NewStudentNote(c, id, newNote, userID, authorName, authorEmail)
+	if err != nil {
+		handleError(c, http.StatusInternalServerError, err)
+		return
+	}
 
 	studentNotes, err := GetStudentNotesByID(c, id)
 	if err != nil {

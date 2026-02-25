@@ -10,7 +10,7 @@ import (
 
 func ValidateCreateNote(createNoteRequest instructorNoteDTO.CreateInstructorNote) error {
   if !createNoteRequest.New && createNoteRequest.ForNote == uuid.Nil {
-    return errors.New("For editing existing notes, a note id must be provided")
+    return errors.New("for editing existing notes, a note id must be provided")
   }
   return nil
 }
@@ -25,7 +25,7 @@ func ValidateReferencedNote(createRequest instructorNoteDTO.CreateInstructorNote
       return err
     }
     if note.Author != SignedInUserID {
-      return errors.New("The user that performed the request is not the author of the InstructorNote")
+      return errors.New("the user that performed the request is not the author of the InstructorNote")
     }
   }
   return nil
