@@ -47,9 +47,33 @@ VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
 RETURNING *;
 
 -- name: DeleteNote :one
-UPDATE note 
+UPDATE note
 SET date_deleted = now(), deleted_by = $2
 WHERE id = $1
 AND date_deleted IS NULL
 RETURNING *;
+
+-- name: GetAllTags :many
+SELECT id, name FROM note_tag ORDER BY name ASC;
+
+-- name: GetTagByID :one
+SELECT id, name FROM note_tag WHERE id = $1 LIMIT 1;
+
+-- name: CreateTag :one
+INSERT INTO note_tag (id, name) VALUES ($1, $2) RETURNING id, name;
+
+-- name: DeleteTag :exec
+DELETE FROM note_tag WHERE id = $1;
+
+-- name: GetTagsForNote :many
+SELECT nt.id, nt.name FROM note_tag nt
+JOIN note_tag_relation ntr ON ntr.tag_id = nt.id
+WHERE ntr.note_id = $1
+ORDER BY nt.name ASC;
+
+-- name: AddTagToNote :exec
+INSERT INTO note_tag_relation (note_id, tag_id) VALUES ($1, $2) ON CONFLICT DO NOTHING;
+
+-- name: RemoveTagFromNote :exec
+DELETE FROM note_tag_relation WHERE note_id = $1 AND tag_id = $2;
 

@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import { ChevronLeft, ChevronRight, Loader2 } from 'lucide-react'
-import { Button, CardTitle, ErrorPage } from '@tumaet/prompt-ui-components'
+import { Button, Card, CardTitle, ErrorPage } from '@tumaet/prompt-ui-components'
 import { GetApplication } from '@core/interfaces/application/getApplication'
 import { getApplicationAssessment } from '@core/network/queries/applicationAssessment'
 import { ApplicationForm } from '../../../../interfaces/form/applicationForm'
@@ -14,7 +14,6 @@ import { useApplicationStore } from '@core/managementConsole/applicationAdminist
 import { CourseEnrollments } from '@core/managementConsole/shared/components/StudentDetail/CourseEnrollmentList'
 import { ApplicationDetailPageLayout } from './components/ApplicationDetailPageLayout'
 import { InstructorNotes } from '@core/managementConsole/shared/components/InstructorNote/InstructorNotes'
-import { StudentDetailContentLayout } from '@core/managementConsole/shared/components/StudentDetail/StudentDetailContentLayout'
 import { useMemo } from 'react'
 import { getApplicationNavigationButtonColorClass } from '../table/getApplicationStatusBadge'
 
@@ -151,49 +150,42 @@ export const ApplicationDetailsPage = () => {
         <StudentProfile student={fetchedApplication.student} status={status} />
       )}
 
-      {fetchedApplication?.student && !fetchedApplication.student.hasUniversityAccount && (
-        <MissingUniversityData student={fetchedApplication.student} />
-      )}
-
       <ApplicationDetailPageLayout
-        applicationAnswers={
-          fetchedApplication && fetchedApplicationForm ? (
-            <ApplicationAnswersTable
-              questions={[
-                ...fetchedApplicationForm.questionsMultiSelect,
-                ...fetchedApplicationForm.questionsText,
-              ]}
-              answersMultiSelect={fetchedApplication.answersMultiSelect}
-              answersText={fetchedApplication.answersText}
-            />
-          ) : null
+        left={
+          <>
+            {fetchedApplication?.student && !fetchedApplication.student.hasUniversityAccount && (
+              <MissingUniversityData student={fetchedApplication.student} />
+            )}
+            {status && (
+              <AssessmentCard
+                score={score}
+                restrictedData={restrictedData}
+                acceptanceStatus={status}
+                courseParticipationID={participationId ?? ''}
+              />
+            )}
+            {fetchedApplication && fetchedApplicationForm && (
+              <ApplicationAnswersTable
+                questions={[
+                  ...fetchedApplicationForm.questionsMultiSelect,
+                  ...fetchedApplicationForm.questionsText,
+                ]}
+                answersMultiSelect={fetchedApplication.answersMultiSelect}
+                answersText={fetchedApplication.answersText}
+              />
+            )}
+          </>
         }
-        assessment={
-          status ? (
-            <AssessmentCard
-              score={score}
-              restrictedData={restrictedData}
-              acceptanceStatus={status}
-              courseParticipationID={participationId ?? ''}
-            />
-          ) : null
+        right={
+          <>
+            <Card className='p-3'>
+              {studentId ? <InstructorNotes studentId={studentId} /> : null}
+            </Card>
+            <Card className='p-3'>
+              {studentId ? <CourseEnrollments studentId={studentId} /> : null}
+            </Card>
+          </>
         }
-      />
-
-      <StudentDetailContentLayout
-        courseEnrollment={
-          <div className='p-1'>
-            <CardTitle className='mb-3'>Enrollment History</CardTitle>
-            {studentId ? <CourseEnrollments studentId={studentId} /> : null}
-          </div>
-        }
-        instructorNotes={
-          <div className='p-1'>
-            <CardTitle className='mb-3'>Instructor Notes</CardTitle>
-            {studentId ? <InstructorNotes studentId={studentId} /> : <></>}
-          </div>
-        }
-        defaultTab='instructorNotes'
       />
     </div>
   )

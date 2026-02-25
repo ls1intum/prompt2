@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Trash2 } from 'lucide-react'
+import { Check, Trash2, X } from 'lucide-react'
 import {
   Button,
   Card,
@@ -83,7 +83,7 @@ export const AssessmentCard = ({
                 onChange={(e) =>
                   setCurrentScore(e.target.value === '' ? null : Number(e.target.value))
                 }
-                className='w-28'
+                className='w-28 h-9'
               />
               <Button
                 disabled={!currentScore || currentScore === score}
@@ -98,23 +98,25 @@ export const AssessmentCard = ({
             <Label htmlFor='resolution' className='text-sm font-medium'>
               Resolution
             </Label>
-            <div className='flex items-center space-x-4 mt-2'>
+            <div className='flex items-center space-x-4 mt-1'>
               <Button
                 variant='outline'
-                size='lg'
+                size='sm'
                 disabled={acceptanceStatus === PassStatus.FAILED}
-                className='border-red-500 text-red-500 hover:bg-red-50 hover:text-red-600'
+                // className='border-red-500 text-red-500 hover:bg-red-50 hover:text-red-600'
                 onClick={() => handleAcceptanceStatusChange(PassStatus.FAILED)}
               >
+                <X />
                 Reject
               </Button>
               <Button
                 variant='default'
-                size='lg'
+                size='sm'
                 disabled={acceptanceStatus === PassStatus.PASSED}
-                className='bg-green-500 hover:bg-green-600 text-white'
+                // className='bg-green-500 hover:bg-green-600 text-white'
                 onClick={() => handleAcceptanceStatusChange(PassStatus.PASSED)}
               >
+                <Check />
                 Accept
               </Button>
             </div>

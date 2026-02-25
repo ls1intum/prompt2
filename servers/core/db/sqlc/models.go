@@ -362,6 +362,7 @@ type NoteWithVersion struct {
 	DateDeleted pgtype.Timestamptz `json:"date_deleted"`
 	DeletedBy   pgtype.UUID        `json:"deleted_by"`
 	Versions    []byte             `json:"versions"`
+	Tags        interface{}        `json:"tags"`
 }
 
 type ParticipationDataDependencyGraph struct {

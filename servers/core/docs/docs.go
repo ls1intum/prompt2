@@ -2513,6 +2513,35 @@ const docTemplate = `{
                 }
             }
         },
+        "/instructor-notes/tags": {
+            "get": {
+                "description": "Get all available note tags",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "instructorNotes"
+                ],
+                "summary": "Get all note tags",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/instructorNoteDTO.NoteTag"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/instructor-notes/{note-uuid}": {
             "delete": {
                 "description": "Delete an instructor note by UUID",
@@ -4378,11 +4407,28 @@ const docTemplate = `{
                 "id": {
                     "type": "string"
                 },
+                "tags": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/instructorNoteDTO.NoteTag"
+                    }
+                },
                 "versions": {
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/instructorNoteDTO.NoteVersion"
                     }
+                }
+            }
+        },
+        "instructorNoteDTO.NoteTag": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
                 }
             }
         },

@@ -3,7 +3,8 @@ import { useAuthStore } from '@tumaet/prompt-shared-state'
 import { InstructorNote } from '../../interfaces/InstructorNote'
 import { formatNoteDate } from '@core/utils/formatDate'
 import { ProfilePicture } from '@/components/StudentProfilePicture'
-import { NoteActionButtons } from './NoteActionButtons'
+import { NoteActionButtons } from './InstructorNoteActionButtons'
+import { InstructorNoteTags } from './InstructorNoteTag'
 
 interface NoteWrapperProps {
   note: InstructorNote
@@ -14,10 +15,6 @@ interface NoteWrapperProps {
   showVersions?: boolean
   onToggleVersions?: () => void
   children: ReactNode
-}
-
-function MetaSeparator() {
-  return <span className='mx-1'>·</span>
 }
 
 export function NoteWrapper({
@@ -40,7 +37,7 @@ export function NoteWrapper({
 
   return (
     <div
-      className={`flex gap-3 transition-all rounded-2xl ${showVersions ? 'bg-gray-50 p-2' : 'p-0'}`}
+      className={`relative flex gap-3 transition-all rounded-2xl ${showVersions ? 'bg-gray-50 p-2' : 'p-0'}`}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
@@ -51,34 +48,44 @@ export function NoteWrapper({
         size='md'
       />
 
-      <div className='flex-1'>
-        <div className='text-sm font-medium flex items-center justify-between'>
-          <div>
-            <span className='font-semibold'>{note.authorName}</span>
-            <MetaSeparator />
-            {formatNoteDate(latestVersion.dateCreated)}
-            {!isEditing && note.versions.length > 1 && onToggleVersions && (
-              <>
-                <MetaSeparator />
-                <span className='text-blue-500 hover:cursor-pointer' onClick={onToggleVersions}>
-                  {showVersions ? 'hide edits' : 'edited'}
-                </span>
-              </>
-            )}
-          </div>
+      <div className='flex-1 min-w-0' style={{ lineHeight: '11px' }}>
+        <div className='text-sm flex items-center'>
+          <span className='font-semibold'>{note.authorName}</span>
+          {!isEditing && note.versions.length > 1 && onToggleVersions && (
+            <>
+              <span className='mx-1'>·</span>
+              <span className='hover:text-blue-500 hover:cursor-pointer' onClick={onToggleVersions}>
+                {showVersions ? 'hide edits' : 'edited'}
+              </span>
+            </>
+          )}
+        </div>
 
+        <div className='flex-col gap-1'>
+          <InstructorNoteTags tags={note.tags} />
+          {children}
+        </div>
+      </div>
+
+      {!showVersions && (
+        <div
+          className={`absolute right-0 top-0 flex items-center gap-1 px-1 h-6
+          bg-white shadow-[-12px_0_12px_2px_white] [clip-path:inset(0_0_0_-50px)] transform -translate-y-[2px]
+          transition-opacity ${isHovered && !isEditing ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+        >
+          <span className='text-muted-foreground font-normal text-xs'>
+            {formatNoteDate(latestVersion.dateCreated)}
+          </span>
           {isOwner && !isDeleted && (
             <NoteActionButtons
-              isVisible={isHovered && !isEditing}
+              isVisible={true}
               onEdit={onEdit}
               onDelete={onDelete}
               isDeleting={isDeleting}
             />
           )}
         </div>
-
-        {children}
-      </div>
+      )}
     </div>
   )
 }

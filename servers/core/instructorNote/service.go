@@ -2,6 +2,7 @@ package instructorNote
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/google/uuid"
@@ -32,6 +33,14 @@ func GetStudentNotesByID(ctx context.Context, id uuid.UUID) ([]instructorNoteDTO
     return nil, err
   }
   return instructorNoteDTO.InstructorNotesFromDBModelToDTO(instructorNotes)
+}
+
+func GetAllTags(ctx context.Context) ([]instructorNoteDTO.NoteTag, error) {
+  tags, err := InstructorNoteServiceSingleton.queries.GetAllTags(ctx)
+  if err != nil {
+    return nil, err
+  }
+  return instructorNoteDTO.NoteTagsFromDBModels(tags), nil
 }
 
 func GetSingleNoteByID(ctx context.Context, id uuid.UUID) (db.Note, error) {
@@ -89,6 +98,21 @@ func NewStudentNote(ctx context.Context, studentID uuid.UUID, params instructorN
   if err != nil {
     return instructorNoteDTO.InstructorNote{}, err
   }
+
+  if params.New {
+    for _, tagID := range params.Tags {
+      if _, err := InstructorNoteServiceSingleton.queries.GetTagByID(ctx, tagID); err != nil {
+        return instructorNoteDTO.InstructorNote{}, fmt.Errorf("tag %s does not exist", tagID)
+      }
+      if err := InstructorNoteServiceSingleton.queries.AddTagToNote(ctx, db.AddTagToNoteParams{
+        NoteID: noteID,
+        TagID:  tagID,
+      }); err != nil {
+        return instructorNoteDTO.InstructorNote{}, err
+      }
+    }
+  }
+
   return instructorNoteDTO.InstructorNote{}, err
 
 }

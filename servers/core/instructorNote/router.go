@@ -13,6 +13,7 @@ import (
 func setupInstructorNoteRouter(router *gin.RouterGroup, authMiddleware func() gin.HandlerFunc, permissionRoleMiddleware func(allowedRoles ...string) gin.HandlerFunc) {
 	instructorNoteRouter := router.Group("/instructor-notes", authMiddleware())
 	instructorNoteRouter.GET("/", permissionRoleMiddleware(permissionValidation.PromptAdmin, permissionValidation.PromptLecturer), getAllInstructorNotes)
+	instructorNoteRouter.GET("/tags", permissionRoleMiddleware(permissionValidation.PromptAdmin, permissionValidation.PromptLecturer), getAllNoteTags)
 	instructorNoteRouter.GET("/s/:student-uuid", permissionRoleMiddleware(permissionValidation.PromptAdmin, permissionValidation.PromptLecturer), getInstructorNoteForStudentByID)
 	instructorNoteRouter.POST("/s/:student-uuid", permissionRoleMiddleware(permissionValidation.PromptAdmin, permissionValidation.PromptLecturer), createInstructorNoteForStudentByID)
 	instructorNoteRouter.DELETE("/:note-uuid", permissionRoleMiddleware(permissionValidation.PromptAdmin, permissionValidation.PromptLecturer), deleteInstructorNote)
@@ -148,6 +149,23 @@ func deleteInstructorNote(c *gin.Context) {
 }
 
 
+
+// getAllNoteTags godoc
+// @Summary Get all note tags
+// @Description Get all available note tags
+// @Tags instructorNotes
+// @Produce json
+// @Success 200 {object} []instructorNoteDTO.NoteTag
+// @Failure 500 {object} utils.ErrorResponse
+// @Router /instructor-notes/tags [get]
+func getAllNoteTags(c *gin.Context) {
+	tags, err := GetAllTags(c)
+	if err != nil {
+		handleError(c, http.StatusInternalServerError, err)
+		return
+	}
+	c.IndentedJSON(http.StatusOK, tags)
+}
 
 func handleError(c *gin.Context, statusCode int, err error) {
 	c.JSON(statusCode, utils.ErrorResponse{

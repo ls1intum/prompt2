@@ -5,6 +5,11 @@ export interface NoteVersion {
   versionNumber: number
 }
 
+export interface NoteTag {
+  id: string
+  name: string
+}
+
 export interface InstructorNote {
   id: string
   author: string
@@ -15,10 +20,12 @@ export interface InstructorNote {
   dateDeleted: string | null
   deletedBy: string | null
   versions: NoteVersion[]
+  tags: NoteTag[]
 }
 
 export interface CreateInstructorNote {
   content: string
   new: boolean
   forNote?: string
+  tags?: string[]
 }

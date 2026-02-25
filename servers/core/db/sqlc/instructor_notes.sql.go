@@ -12,6 +12,20 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const addTagToNote = `-- name: AddTagToNote :exec
+INSERT INTO note_tag_relation (note_id, tag_id) VALUES ($1, $2) ON CONFLICT DO NOTHING
+`
+
+type AddTagToNoteParams struct {
+	NoteID uuid.UUID `json:"note_id"`
+	TagID  uuid.UUID `json:"tag_id"`
+}
+
+func (q *Queries) AddTagToNote(ctx context.Context, arg AddTagToNoteParams) error {
+	_, err := q.db.Exec(ctx, addTagToNote, arg.NoteID, arg.TagID)
+	return err
+}
+
 const createNote = `-- name: CreateNote :one
 INSERT INTO note (id, for_student, author, author_name, author_email, date_created, date_deleted, deleted_by)
 VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
@@ -87,8 +101,24 @@ func (q *Queries) CreateNoteVersion(ctx context.Context, arg CreateNoteVersionPa
 	return i, err
 }
 
+const createTag = `-- name: CreateTag :one
+INSERT INTO note_tag (id, name) VALUES ($1, $2) RETURNING id, name
+`
+
+type CreateTagParams struct {
+	ID   uuid.UUID `json:"id"`
+	Name string    `json:"name"`
+}
+
+func (q *Queries) CreateTag(ctx context.Context, arg CreateTagParams) (NoteTag, error) {
+	row := q.db.QueryRow(ctx, createTag, arg.ID, arg.Name)
+	var i NoteTag
+	err := row.Scan(&i.ID, &i.Name)
+	return i, err
+}
+
 const deleteNote = `-- name: DeleteNote :one
-UPDATE note 
+UPDATE note
 SET date_deleted = now(), deleted_by = $2
 WHERE id = $1
 AND date_deleted IS NULL
@@ -116,8 +146,17 @@ func (q *Queries) DeleteNote(ctx context.Context, arg DeleteNoteParams) (Note, e
 	return i, err
 }
 
+const deleteTag = `-- name: DeleteTag :exec
+DELETE FROM note_tag WHERE id = $1
+`
+
+func (q *Queries) DeleteTag(ctx context.Context, id uuid.UUID) error {
+	_, err := q.db.Exec(ctx, deleteTag, id)
+	return err
+}
+
 const getAllStudentNotes = `-- name: GetAllStudentNotes :many
-SELECT id, author, author_name, author_email, for_student, date_created, date_deleted, deleted_by, versions FROM note_with_versions ORDER BY date_created DESC
+SELECT id, author, author_name, author_email, for_student, date_created, date_deleted, deleted_by, versions, tags FROM note_with_versions ORDER BY date_created DESC
 `
 
 func (q *Queries) GetAllStudentNotes(ctx context.Context) ([]NoteWithVersion, error) {
@@ -139,6 +178,7 @@ func (q *Queries) GetAllStudentNotes(ctx context.Context) ([]NoteWithVersion, er
 			&i.DateDeleted,
 			&i.DeletedBy,
 			&i.Versions,
+			&i.Tags,
 		); err != nil {
 			return nil, err
 		}
@@ -195,6 +235,30 @@ func (q *Queries) GetAllStudentNotesGroupByStudent(ctx context.Context) ([]GetAl
 	return items, nil
 }
 
+const getAllTags = `-- name: GetAllTags :many
+SELECT id, name FROM note_tag ORDER BY name ASC
+`
+
+func (q *Queries) GetAllTags(ctx context.Context) ([]NoteTag, error) {
+	rows, err := q.db.Query(ctx, getAllTags)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []NoteTag
+	for rows.Next() {
+		var i NoteTag
+		if err := rows.Scan(&i.ID, &i.Name); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getLatestNoteVersionForNoteId = `-- name: GetLatestNoteVersionForNoteId :one
 SELECT nv.version_number
 FROM note_version nv
@@ -211,7 +275,7 @@ func (q *Queries) GetLatestNoteVersionForNoteId(ctx context.Context, forNote uui
 }
 
 const getSingleNoteWithVersionsByID = `-- name: GetSingleNoteWithVersionsByID :one
-SELECT id, author, author_name, author_email, for_student, date_created, date_deleted, deleted_by, versions FROM note_with_versions WHERE id = $1 LIMIT 1
+SELECT id, author, author_name, author_email, for_student, date_created, date_deleted, deleted_by, versions, tags FROM note_with_versions WHERE id = $1 LIMIT 1
 `
 
 func (q *Queries) GetSingleNoteWithVersionsByID(ctx context.Context, id uuid.UUID) (NoteWithVersion, error) {
@@ -227,6 +291,7 @@ func (q *Queries) GetSingleNoteWithVersionsByID(ctx context.Context, id uuid.UUI
 		&i.DateDeleted,
 		&i.DeletedBy,
 		&i.Versions,
+		&i.Tags,
 	)
 	return i, err
 }
@@ -252,7 +317,7 @@ func (q *Queries) GetSingleStudentNoteByID(ctx context.Context, id uuid.UUID) (N
 }
 
 const getStudentNotesForStudent = `-- name: GetStudentNotesForStudent :many
-SELECT id, author, author_name, author_email, for_student, date_created, date_deleted, deleted_by, versions FROM note_with_versions WHERE for_student = $1 ORDER BY date_created ASC
+SELECT id, author, author_name, author_email, for_student, date_created, date_deleted, deleted_by, versions, tags FROM note_with_versions WHERE for_student = $1 ORDER BY date_created ASC
 `
 
 func (q *Queries) GetStudentNotesForStudent(ctx context.Context, forStudent uuid.UUID) ([]NoteWithVersion, error) {
@@ -274,6 +339,7 @@ func (q *Queries) GetStudentNotesForStudent(ctx context.Context, forStudent uuid
 			&i.DateDeleted,
 			&i.DeletedBy,
 			&i.Versions,
+			&i.Tags,
 		); err != nil {
 			return nil, err
 		}
@@ -283,4 +349,56 @@ func (q *Queries) GetStudentNotesForStudent(ctx context.Context, forStudent uuid
 		return nil, err
 	}
 	return items, nil
+}
+
+const getTagByID = `-- name: GetTagByID :one
+SELECT id, name FROM note_tag WHERE id = $1 LIMIT 1
+`
+
+func (q *Queries) GetTagByID(ctx context.Context, id uuid.UUID) (NoteTag, error) {
+	row := q.db.QueryRow(ctx, getTagByID, id)
+	var i NoteTag
+	err := row.Scan(&i.ID, &i.Name)
+	return i, err
+}
+
+const getTagsForNote = `-- name: GetTagsForNote :many
+SELECT nt.id, nt.name FROM note_tag nt
+JOIN note_tag_relation ntr ON ntr.tag_id = nt.id
+WHERE ntr.note_id = $1
+ORDER BY nt.name ASC
+`
+
+func (q *Queries) GetTagsForNote(ctx context.Context, noteID uuid.UUID) ([]NoteTag, error) {
+	rows, err := q.db.Query(ctx, getTagsForNote, noteID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []NoteTag
+	for rows.Next() {
+		var i NoteTag
+		if err := rows.Scan(&i.ID, &i.Name); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const removeTagFromNote = `-- name: RemoveTagFromNote :exec
+DELETE FROM note_tag_relation WHERE note_id = $1 AND tag_id = $2
+`
+
+type RemoveTagFromNoteParams struct {
+	NoteID uuid.UUID `json:"note_id"`
+	TagID  uuid.UUID `json:"tag_id"`
+}
+
+func (q *Queries) RemoveTagFromNote(ctx context.Context, arg RemoveTagFromNoteParams) error {
+	_, err := q.db.Exec(ctx, removeTagFromNote, arg.NoteID, arg.TagID)
+	return err
 }

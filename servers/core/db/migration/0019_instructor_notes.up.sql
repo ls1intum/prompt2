@@ -52,7 +52,16 @@ SELECT
       'versionNumber', nv.version_number
     )
     ORDER BY nv.version_number
-  ) AS versions
+  ) AS versions,
+  COALESCE(
+    (
+      SELECT jsonb_agg(jsonb_build_object('id', nt.id, 'name', nt.name) ORDER BY nt.name)
+      FROM note_tag_relation ntr
+      JOIN note_tag nt ON nt.id = ntr.tag_id
+      WHERE ntr.note_id = n.id
+    ),
+    '[]'::jsonb
+  ) AS tags
 FROM note n
 JOIN note_version nv ON nv.for_note = n.id
 GROUP BY n.id;

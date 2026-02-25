@@ -25,12 +25,23 @@ type InstructorNote struct {
 	DateDeleted *time.Time     `json:"dateDeleted,omitempty"`
 	DeletedBy   *uuid.UUID     `json:"deletedBy,omitempty"`
 	Versions    []NoteVersion  `json:"versions"`
+	Tags        []NoteTag      `json:"tags"`
 }
 
 func GetInstructorNoteDTOFromDBModel(model db.NoteWithVersion) (InstructorNote, error) {
 	// Parse versions JSONB
 	var versions []NoteVersion
 	if err := json.Unmarshal(model.Versions, &versions); err != nil {
+		return InstructorNote{}, err
+	}
+
+	// Parse tags JSONB (pgx returns interface{} for COALESCE subquery)
+	var tags []NoteTag
+	tagsJSON, err := json.Marshal(model.Tags)
+	if err != nil {
+		return InstructorNote{}, err
+	}
+	if err := json.Unmarshal(tagsJSON, &tags); err != nil {
 		return InstructorNote{}, err
 	}
 
@@ -61,6 +72,7 @@ func GetInstructorNoteDTOFromDBModel(model db.NoteWithVersion) (InstructorNote, 
 		DateDeleted: dateDeleted,
 		DeletedBy:   deletedBy,
 		Versions:    versions,
+		Tags:        tags,
 	}, nil
 }
 

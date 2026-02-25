@@ -1,8 +1,7 @@
-import { useState } from 'react'
-import { Button, Textarea } from '@tumaet/prompt-ui-components'
 import { useAuthStore } from '@tumaet/prompt-shared-state'
 import { useCreateInstructorNote } from '@core/network/hooks/useInstructorNotes'
 import { ProfilePicture } from '@/components/StudentProfilePicture'
+import { NoteComposer } from './InstructorNoteComposer'
 
 interface InstructorNotesCreateFormProps {
   studentId: string
@@ -14,26 +13,7 @@ export function InstructorNotesCreateForm({
   className = '',
 }: InstructorNotesCreateFormProps) {
   const { user } = useAuthStore()
-  const [content, setContent] = useState('')
   const createNote = useCreateInstructorNote(studentId)
-
-  console.log(user)
-
-  const handleSubmit = () => {
-    if (!content.trim()) return
-
-    createNote.mutate(
-      {
-        content: content.trim(),
-        new: true,
-      },
-      {
-        onSuccess: () => {
-          setContent('')
-        },
-      },
-    )
-  }
 
   return (
     <div className={`flex gap-3 ${className}`}>
@@ -50,20 +30,12 @@ export function InstructorNotesCreateForm({
             {user?.firstName} {user?.lastName}
           </span>
         </div>
-
-        <Textarea
-          placeholder='Leave an instructor note'
-          className='w-full mt-1'
-          value={content}
-          onChange={(e) => setContent(e.target.value)}
+        <NoteComposer
+          onSubmit={async (content, tagIds) => {
+            await createNote.mutateAsync({ content, new: true, tags: tagIds })
+          }}
+          isPending={createNote.isPending}
         />
-
-        <div className='flex justify-end items-center text-sm text-muted-foreground gap-3 mt-2'>
-          <p>Notes are auditable. Edits and removals will be visible to others.</p>
-          <Button onClick={handleSubmit} disabled={!content.trim() || createNote.isPending}>
-            {createNote.isPending ? 'Submitting...' : 'Submit'}
-          </Button>
-        </div>
       </div>
     </div>
   )
