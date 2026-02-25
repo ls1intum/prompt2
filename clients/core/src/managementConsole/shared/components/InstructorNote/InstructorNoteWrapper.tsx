@@ -51,7 +51,7 @@ export function NoteWrapper({
       <div className='flex-1 min-w-0' style={{ lineHeight: '11px' }}>
         <div className='text-sm flex items-center'>
           <span className='font-semibold'>{note.authorName}</span>
-          {!isEditing && note.versions.length > 1 && onToggleVersions && (
+          {!isEditing && !isDeleted && note.versions.length > 1 && onToggleVersions && (
             <>
               <span className='mx-1'>·</span>
               <span className='hover:text-blue-500 hover:cursor-pointer' onClick={onToggleVersions}>
