@@ -87,7 +87,7 @@ func createInstructorNoteForStudentByID(c *gin.Context) {
 
 	var newNote instructorNoteDTO.CreateInstructorNote
 	if err := c.BindJSON(&newNote); err != nil {
-		handleError(c, http.StatusInternalServerError, err)
+		handleError(c, http.StatusBadRequest, err)
 		return
 	}
 
