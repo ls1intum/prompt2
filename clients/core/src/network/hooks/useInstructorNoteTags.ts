@@ -4,7 +4,10 @@ import { getNoteTags } from '../queries/getNoteTags'
 import { postNoteTag } from '../mutations/postNoteTag'
 import { putNoteTag } from '../mutations/putNoteTag'
 import { deleteNoteTag } from '../mutations/deleteNoteTag'
-import type { CreateNoteTag, UpdateNoteTag } from '@core/managementConsole/shared/interfaces/InstructorNote'
+import type {
+  CreateNoteTag,
+  UpdateNoteTag,
+} from '@core/managementConsole/shared/interfaces/InstructorNote'
 
 export const useNoteTags = () => {
   return useQuery({
