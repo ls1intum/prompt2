@@ -1100,6 +1100,15 @@ definitions:
           $ref: '#/definitions/studentDTO.CourseEnrollmentDTO'
         type: array
     type: object
+  studentDTO.StudentNoteTagDTO:
+    properties:
+      color:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+    type: object
   studentDTO.StudentWithCourseParticipationsDTO:
     properties:
       courses:
@@ -1118,6 +1127,10 @@ definitions:
         type: string
       lastName:
         type: string
+      noteTags:
+        items:
+          $ref: '#/definitions/studentDTO.StudentNoteTagDTO'
+        type: array
       studyProgram:
         type: string
     type: object

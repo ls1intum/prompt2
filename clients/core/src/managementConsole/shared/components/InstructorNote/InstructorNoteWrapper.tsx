@@ -75,7 +75,7 @@ export function NoteWrapper({
         >
           {latestVersion && (
             <span className='text-muted-foreground font-normal text-xs'>
-              {formatNoteDate(latestVersion.dateCreated)}
+              {formatNoteDate(note.dateCreated)}
             </span>
           )}
           {isOwner && !isDeleted && (

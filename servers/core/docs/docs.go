@@ -4952,6 +4952,20 @@ const docTemplate = `{
                 }
             }
         },
+        "studentDTO.StudentNoteTagDTO": {
+            "type": "object",
+            "properties": {
+                "color": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
         "studentDTO.StudentWithCourseParticipationsDTO": {
             "type": "object",
             "properties": {
@@ -4978,6 +4992,12 @@ const docTemplate = `{
                 },
                 "lastName": {
                     "type": "string"
+                },
+                "noteTags": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/studentDTO.StudentNoteTagDTO"
+                    }
                 },
                 "studyProgram": {
                     "type": "string"
