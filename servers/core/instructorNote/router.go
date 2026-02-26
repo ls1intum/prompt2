@@ -53,7 +53,7 @@ func getAllInstructorNotes(c *gin.Context) {
 func getInstructorNoteForStudentByID(c *gin.Context) {
 	id, err := uuid.Parse(c.Param("student-uuid"))
 	if err != nil {
-		handleError(c, http.StatusInternalServerError, err)
+		handleError(c, http.StatusBadRequest, err)
 		return
 	}
 
@@ -70,8 +70,10 @@ func getInstructorNoteForStudentByID(c *gin.Context) {
 // @Summary Create an instructor Note for a student
 // @Description Create a new instructor note or a new edit for a specific student given its ID
 // @Tags instructorNotes
+// @Accept json
 // @Produce json
 // @Param student-uuid path string true "Student UUID"
+// @Param note body instructorNoteDTO.CreateInstructorNote true "Note to create"
 // @Success 200 {object} []instructorNoteDTO.InstructorNote
 // @Failure 400 {object} utils.ErrorResponse
 // @Failure 500 {object} utils.ErrorResponse

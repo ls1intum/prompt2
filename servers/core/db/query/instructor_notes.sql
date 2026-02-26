@@ -17,7 +17,6 @@ SELECT
     jsonb_build_object(
       'id', n.id,
       'author', n.author,
-      'author', n.author,
       'dateCreated', n.date_created,
       'dateDeleted', n.date_deleted,
       'deletedBy', n.deleted_by,

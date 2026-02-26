@@ -822,6 +822,19 @@ definitions:
     x-enum-varnames:
     - StudyDegreeBachelor
     - StudyDegreeMaster
+  instructorNoteDTO.CreateInstructorNote:
+    properties:
+      content:
+        type: string
+      forNote:
+        type: string
+      new:
+        type: boolean
+      tags:
+        items:
+          type: string
+        type: array
+    type: object
   instructorNoteDTO.CreateNoteTag:
     properties:
       color:
@@ -2784,6 +2797,8 @@ paths:
       tags:
       - instructorNotes
     post:
+      consumes:
+      - application/json
       description: Create a new instructor note or a new edit for a specific student
         given its ID
       parameters:
@@ -2792,6 +2807,12 @@ paths:
         name: student-uuid
         required: true
         type: string
+      - description: Note to create
+        in: body
+        name: note
+        required: true
+        schema:
+          $ref: '#/definitions/instructorNoteDTO.CreateInstructorNote'
       produces:
       - application/json
       responses:

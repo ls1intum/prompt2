@@ -2472,6 +2472,9 @@ const docTemplate = `{
             },
             "post": {
                 "description": "Create a new instructor note or a new edit for a specific student given its ID",
+                "consumes": [
+                    "application/json"
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -2486,6 +2489,15 @@ const docTemplate = `{
                         "name": "student-uuid",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "description": "Note to create",
+                        "name": "note",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/instructorNoteDTO.CreateInstructorNote"
+                        }
                     }
                 ],
                 "responses": {
@@ -4512,6 +4524,26 @@ const docTemplate = `{
                 "StudyDegreeBachelor",
                 "StudyDegreeMaster"
             ]
+        },
+        "instructorNoteDTO.CreateInstructorNote": {
+            "type": "object",
+            "properties": {
+                "content": {
+                    "type": "string"
+                },
+                "forNote": {
+                    "type": "string"
+                },
+                "new": {
+                    "type": "boolean"
+                },
+                "tags": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
         },
         "instructorNoteDTO.CreateNoteTag": {
             "type": "object",

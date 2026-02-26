@@ -73,9 +73,11 @@ export function NoteWrapper({
           bg-white shadow-[-12px_0_12px_2px_white] [clip-path:inset(0_0_0_-50px)] transform -translate-y-[2px]
           transition-opacity ${isHovered && !isEditing ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
         >
-          <span className='text-muted-foreground font-normal text-xs'>
-            {formatNoteDate(latestVersion.dateCreated)}
-          </span>
+          {latestVersion && (
+            <span className='text-muted-foreground font-normal text-xs'>
+              {formatNoteDate(latestVersion.dateCreated)}
+            </span>
+          )}
           {isOwner && !isDeleted && (
             <NoteActionButtons
               isVisible={true}

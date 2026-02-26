@@ -16,7 +16,8 @@ CREATE TABLE note_version (
   content        text NOT NULL,
   date_created   timestamptz NOT NULL default now(),
   version_number int NOT NULL,
-  for_note       uuid NOT NULL REFERENCES note(id)
+  for_note       uuid NOT NULL REFERENCES note(id),
+  UNIQUE (for_note, version_number)
 );
 
 CREATE TYPE note_tag_color AS ENUM ('blue', 'green', 'red', 'yellow', 'orange', 'pink');
@@ -29,7 +30,8 @@ CREATE TABLE note_tag (
 
 CREATE TABLE note_tag_relation (
   note_id uuid NOT NULL REFERENCES note(id) ON DELETE CASCADE,
-  tag_id  uuid NOT NULL REFERENCES note_tag(id) ON DELETE CASCADE
+  tag_id  uuid NOT NULL REFERENCES note_tag(id) ON DELETE CASCADE,
+  PRIMARY KEY(note_id, tag_id)
 );
 
 CREATE INDEX idx_note_tag_tag_id ON note_tag_relation(tag_id);

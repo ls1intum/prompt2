@@ -5,11 +5,15 @@ import (
 	"fmt"
 	"time"
 
+	"errors"
+
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
 	db "github.com/ls1intum/prompt2/servers/core/db/sqlc"
 	"github.com/ls1intum/prompt2/servers/core/instructorNote/instructorNoteDTO"
+	promptSDK "github.com/ls1intum/prompt-sdk"
 )
 
 type InstructorNoteService struct {
@@ -52,26 +56,31 @@ func GetSingleNoteByID(ctx context.Context, id uuid.UUID) (db.Note, error) {
 }
 
 func NewStudentNote(ctx context.Context, studentID uuid.UUID, params instructorNoteDTO.CreateInstructorNote, signedInUserUUID uuid.UUID, authorName string, authorEmail string) (instructorNoteDTO.InstructorNote, error) {
+  tx, err := InstructorNoteServiceSingleton.conn.Begin(ctx)
+  if err != nil {
+    return instructorNoteDTO.InstructorNote{}, err
+  }
+  defer promptSDK.DeferDBRollback(tx, ctx)
+  qtx := InstructorNoteServiceSingleton.queries.WithTx(tx)
 
   versionNumber := 0
   var noteID uuid.UUID
-  var err error
-  rightNow := pgtype.Timestamptz{ Time: time.Now(), Valid: true }
+  rightNow := pgtype.Timestamptz{Time: time.Now(), Valid: true}
 
-  if (params.New) {
+  if params.New {
     newNoteId, err := uuid.NewRandom()
     if err != nil {
       return instructorNoteDTO.InstructorNote{}, err
     }
-    _, err = InstructorNoteServiceSingleton.queries.CreateNote(ctx, db.CreateNoteParams{
-      ID: newNoteId,
-      ForStudent: studentID,
-      Author: signedInUserUUID,
-      AuthorName: authorName,
+    _, err = qtx.CreateNote(ctx, db.CreateNoteParams{
+      ID:          newNoteId,
+      ForStudent:  studentID,
+      Author:      signedInUserUUID,
+      AuthorName:  authorName,
       AuthorEmail: authorEmail,
       DateCreated: rightNow,
       DateDeleted: pgtype.Timestamptz{},
-      DeletedBy: pgtype.UUID{},
+      DeletedBy:   pgtype.UUID{},
     })
     if err != nil {
       return instructorNoteDTO.InstructorNote{}, err
@@ -79,25 +88,24 @@ func NewStudentNote(ctx context.Context, studentID uuid.UUID, params instructorN
     noteID = newNoteId
   } else {
     noteID = params.ForNote
-    latestVersionNumber, err := InstructorNoteServiceSingleton.queries.GetLatestNoteVersionForNoteId(ctx, params.ForNote)
+    latestVersionNumber, err := qtx.GetLatestNoteVersionForNoteId(ctx, params.ForNote)
     if err != nil {
       return instructorNoteDTO.InstructorNote{}, err
     }
     versionNumber = int(latestVersionNumber) + 1
   }
 
-  // Generate a new UUID for the version record
   versionID, err := uuid.NewRandom()
   if err != nil {
     return instructorNoteDTO.InstructorNote{}, err
   }
 
-  _, err = InstructorNoteServiceSingleton.queries.CreateNoteVersion(ctx, db.CreateNoteVersionParams{
-    ID: versionID,
-    Content: params.Content,
-    DateCreated: rightNow,
+  _, err = qtx.CreateNoteVersion(ctx, db.CreateNoteVersionParams{
+    ID:            versionID,
+    Content:       params.Content,
+    DateCreated:   rightNow,
     VersionNumber: int32(versionNumber),
-    ForNote: noteID,
+    ForNote:       noteID,
   })
   if err != nil {
     return instructorNoteDTO.InstructorNote{}, err
@@ -105,10 +113,13 @@ func NewStudentNote(ctx context.Context, studentID uuid.UUID, params instructorN
 
   if params.New {
     for _, tagID := range params.Tags {
-      if _, err := InstructorNoteServiceSingleton.queries.GetTagByID(ctx, tagID); err != nil {
-        return instructorNoteDTO.InstructorNote{}, fmt.Errorf("tag %s does not exist", tagID)
+      if _, err := qtx.GetTagByID(ctx, tagID); err != nil {
+        if errors.Is(err, pgx.ErrNoRows) {
+          return instructorNoteDTO.InstructorNote{}, fmt.Errorf("tag %s does not exist", tagID)
+        }
+        return instructorNoteDTO.InstructorNote{}, err
       }
-      if err := InstructorNoteServiceSingleton.queries.AddTagToNote(ctx, db.AddTagToNoteParams{
+      if err := qtx.AddTagToNote(ctx, db.AddTagToNoteParams{
         NoteID: noteID,
         TagID:  tagID,
       }); err != nil {
@@ -117,8 +128,15 @@ func NewStudentNote(ctx context.Context, studentID uuid.UUID, params instructorN
     }
   }
 
-  return instructorNoteDTO.InstructorNote{}, err
+  if err := tx.Commit(ctx); err != nil {
+    return instructorNoteDTO.InstructorNote{}, fmt.Errorf("failed to commit transaction: %w", err)
+  }
 
+  createdNote, err := InstructorNoteServiceSingleton.queries.GetSingleNoteWithVersionsByID(ctx, noteID)
+  if err != nil {
+    return instructorNoteDTO.InstructorNote{}, err
+  }
+  return instructorNoteDTO.GetInstructorNoteDTOFromDBModel(createdNote)
 }
 
 func CreateNoteTag(ctx context.Context, tag instructorNoteDTO.CreateNoteTag) (instructorNoteDTO.NoteTag, error) {

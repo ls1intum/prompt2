@@ -200,7 +200,7 @@ func getStudentEnrollments(c *gin.Context) {
 	}
   studentEnrollments, err := GetStudentEnrollmentsByID(c, id)
 	if err != nil {
-		handleError(c, http.StatusBadRequest, err)
+		handleError(c, http.StatusInternalServerError, err)
 		return
 	}
 	c.IndentedJSON(http.StatusOK, studentEnrollments)

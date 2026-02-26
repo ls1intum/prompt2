@@ -31,7 +31,7 @@ export function InstructorNote({ note, studentId }: NoteProps) {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
 
   const isDeleted = note.dateDeleted != null
-  const latestVersion = note.versions.at(-1)
+  const latestVersion = note.versions[note.versions.length - 1]
   const olderVersions = latestVersion ? note.versions.slice(0, -1).reverse() : []
 
   const handleDelete = () => {
