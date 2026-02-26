@@ -54,9 +54,9 @@ export function NoteWrapper({
           {!isEditing && !isDeleted && note.versions.length > 1 && onToggleVersions && (
             <>
               <span className='mx-1'>·</span>
-              <span className='hover:text-blue-500 hover:cursor-pointer' onClick={onToggleVersions}>
+              <button className='hover:text-blue-500' onClick={onToggleVersions}>
                 {showVersions ? 'hide edits' : 'edited'}
-              </span>
+              </button>
             </>
           )}
         </div>
