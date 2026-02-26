@@ -32,14 +32,6 @@ export function getStudentTableFilters(studentsWithCourses: StudentWithCourses[]
           ).values(),
         )
 
-        const toggleCourse = (courseName: string) => {
-          const next = selected.includes(courseName)
-            ? selected.filter((c) => c !== courseName)
-            : [...selected, courseName]
-
-          column.setFilterValue(next.length === 0 ? undefined : next)
-        }
-
         return (
           <DropdownMenuSub>
             <DropdownMenuSubTrigger>Course</DropdownMenuSubTrigger>
@@ -48,7 +40,12 @@ export function getStudentTableFilters(studentsWithCourses: StudentWithCourses[]
                 <DropdownMenuCheckboxItem
                   key={course.courseId}
                   checked={selected.includes(course.courseName)}
-                  onClick={() => toggleCourse(course.courseName)}
+                  onCheckedChange={(checked) => {
+                    const next = checked
+                      ? [...selected, course.courseName]
+                      : selected.filter((c) => c !== course.courseName)
+                    column.setFilterValue(next.length === 0 ? undefined : next)
+                  }}
                 >
                   <StudentCoursePreview studentCourseParticipation={course} />
                 </DropdownMenuCheckboxItem>
@@ -70,14 +67,6 @@ export function getStudentTableFilters(studentsWithCourses: StudentWithCourses[]
       render: ({ column }) => {
         const selected = (column.getFilterValue() as string[]) ?? []
 
-        const toggleTag = (tagId: string) => {
-          const next = selected.includes(tagId)
-            ? selected.filter((id) => id !== tagId)
-            : [...selected, tagId]
-
-          column.setFilterValue(next.length === 0 ? undefined : next)
-        }
-
         return (
           <DropdownMenuSub>
             <DropdownMenuSubTrigger>Tag</DropdownMenuSubTrigger>
@@ -86,7 +75,12 @@ export function getStudentTableFilters(studentsWithCourses: StudentWithCourses[]
                 <DropdownMenuCheckboxItem
                   key={tag.id}
                   checked={selected.includes(tag.id)}
-                  onClick={() => toggleTag(tag.id)}
+                  onCheckedChange={(checked) => {
+                    const next = checked
+                      ? [...selected, tag.id]
+                      : selected.filter((id) => id !== tag.id)
+                    column.setFilterValue(next.length === 0 ? undefined : next)
+                  }}
                 >
                   <InstructorNoteTag
                     tag={{ id: tag.id, name: tag.name, color: tag.color as NoteTagColor }}

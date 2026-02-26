@@ -35,13 +35,9 @@ func GetInstructorNoteDTOFromDBModel(model db.NoteWithVersion) (InstructorNote, 
 		return InstructorNote{}, err
 	}
 
-	// Parse tags JSONB (pgx returns interface{} for COALESCE subquery)
+	// Parse tags JSONB
 	var tags []NoteTag
-	tagsJSON, err := json.Marshal(model.Tags)
-	if err != nil {
-		return InstructorNote{}, err
-	}
-	if err := json.Unmarshal(tagsJSON, &tags); err != nil {
+	if err := json.Unmarshal(model.Tags, &tags); err != nil {
 		return InstructorNote{}, err
 	}
 

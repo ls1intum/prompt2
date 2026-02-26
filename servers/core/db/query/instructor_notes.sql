@@ -10,23 +10,6 @@ SELECT * FROM note WHERE id = $1 LIMIT 1;
 -- name: GetSingleNoteWithVersionsByID :one
 SELECT * FROM note_with_versions WHERE id = $1 LIMIT 1;
 
--- name: GetAllStudentNotesGroupByStudent :many
-SELECT
-  s.id,
-  jsonb_agg(
-    jsonb_build_object(
-      'id', n.id,
-      'author', n.author,
-      'dateCreated', n.date_created,
-      'dateDeleted', n.date_deleted,
-      'deletedBy', n.deleted_by,
-      'versions', n.versions
-    )
-  ) AS notes
-FROM student s
-LEFT JOIN note_with_versions n
-  ON n.for_student = s.id
-GROUP BY s.id;
 
 -- name: GetLatestNoteVersionForNoteId :one
 SELECT nv.version_number

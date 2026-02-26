@@ -191,50 +191,6 @@ func (q *Queries) GetAllStudentNotes(ctx context.Context) ([]NoteWithVersion, er
 	return items, nil
 }
 
-const getAllStudentNotesGroupByStudent = `-- name: GetAllStudentNotesGroupByStudent :many
-SELECT
-  s.id,
-  jsonb_agg(
-    jsonb_build_object(
-      'id', n.id,
-      'author', n.author,
-      'dateCreated', n.date_created,
-      'dateDeleted', n.date_deleted,
-      'deletedBy', n.deleted_by,
-      'versions', n.versions
-    )
-  ) AS notes
-FROM student s
-LEFT JOIN note_with_versions n
-  ON n.for_student = s.id
-GROUP BY s.id
-`
-
-type GetAllStudentNotesGroupByStudentRow struct {
-	ID    uuid.UUID `json:"id"`
-	Notes []byte    `json:"notes"`
-}
-
-func (q *Queries) GetAllStudentNotesGroupByStudent(ctx context.Context) ([]GetAllStudentNotesGroupByStudentRow, error) {
-	rows, err := q.db.Query(ctx, getAllStudentNotesGroupByStudent)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []GetAllStudentNotesGroupByStudentRow
-	for rows.Next() {
-		var i GetAllStudentNotesGroupByStudentRow
-		if err := rows.Scan(&i.ID, &i.Notes); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
 const getAllTags = `-- name: GetAllTags :many
 SELECT id, name, color FROM note_tag ORDER BY name ASC
 `

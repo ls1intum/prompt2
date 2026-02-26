@@ -36,6 +36,7 @@ CREATE TABLE note_tag_relation (
 
 CREATE INDEX idx_note_tag_tag_id ON note_tag_relation(tag_id);
 CREATE INDEX idx_note_tag_note_id ON note_tag_relation(note_id);
+CREATE INDEX idx_note_for_student_deleted ON note(for_student, date_deleted);
 
 -- view: reusable CTE
 
@@ -49,24 +50,32 @@ SELECT
   n.date_created,
   n.date_deleted,
   n.deleted_by,
-  jsonb_agg(
-    jsonb_build_object(
-      'id', nv.id,
-      'content', nv.content,
-      'dateCreated', nv.date_created,
-      'versionNumber', nv.version_number
-    )
-    ORDER BY nv.version_number
-  ) AS versions,
-  COALESCE(
-    (
-      SELECT jsonb_agg(jsonb_build_object('id', nt.id, 'name', nt.name, 'color', nt.color) ORDER BY nt.name)
-      FROM note_tag_relation ntr
-      JOIN note_tag nt ON nt.id = ntr.tag_id
-      WHERE ntr.note_id = n.id
-    ),
-    '[]'::jsonb
-  ) AS tags
+  CASE
+    WHEN n.date_deleted IS NULL THEN
+      jsonb_agg(
+        jsonb_build_object(
+          'id', nv.id,
+          'content', nv.content,
+          'dateCreated', nv.date_created,
+          'versionNumber', nv.version_number
+        )
+        ORDER BY nv.version_number
+      )
+    ELSE '[]'::jsonb
+  END AS versions,
+  CASE
+    WHEN n.date_deleted IS NULL THEN
+      COALESCE(
+        (
+          SELECT jsonb_agg(jsonb_build_object('id', nt.id, 'name', nt.name, 'color', nt.color) ORDER BY nt.name)
+          FROM note_tag_relation ntr
+          JOIN note_tag nt ON nt.id = ntr.tag_id
+          WHERE ntr.note_id = n.id
+        ),
+        '[]'::jsonb
+      )
+    ELSE '[]'::jsonb
+  END AS tags
 FROM note n
 JOIN note_version nv ON nv.for_note = n.id
 GROUP BY n.id;

@@ -17,7 +17,7 @@ import {
   Button,
 } from '@tumaet/prompt-ui-components'
 
-type NoteProps = {
+interface NoteProps {
   note: InstructorNoteType
   studentId: string
 }

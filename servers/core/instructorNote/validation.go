@@ -24,6 +24,9 @@ func ValidateReferencedNote(createRequest instructorNoteDTO.CreateInstructorNote
     if err != nil {
       return err
     }
+    if note.DateDeleted.Valid {
+      return errors.New("cannot edit a deleted note")
+    }
     if note.Author != SignedInUserID {
       return errors.New("the user that performed the request is not the author of the InstructorNote")
     }

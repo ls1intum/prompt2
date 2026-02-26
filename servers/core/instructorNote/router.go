@@ -81,13 +81,13 @@ func getInstructorNoteForStudentByID(c *gin.Context) {
 func createInstructorNoteForStudentByID(c *gin.Context) {
 	id, err := uuid.Parse(c.Param("student-uuid"))
 	if err != nil {
-		handleError(c, http.StatusInternalServerError, err)
+		handleError(c, http.StatusBadRequest, err)
 		return
 	}
 
 	var newNote instructorNoteDTO.CreateInstructorNote
 	if err := c.BindJSON(&newNote); err != nil {
-		handleError(c, http.StatusBadRequest, err)
+		handleError(c, http.StatusInternalServerError, err)
 		return
 	}
 
