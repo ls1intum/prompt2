@@ -25,6 +25,8 @@ export function NoteActionButtons({
         size='icon'
         className='h-6 w-6 text-muted-foreground hover:text-blue-500'
         onClick={onEdit}
+        aria-label='Edit note'
+        title='Edit note'
       >
         <Pencil className='h-4 w-4' />
       </Button>
@@ -34,6 +36,8 @@ export function NoteActionButtons({
         className='h-6 w-6 text-muted-foreground hover:text-destructive'
         onClick={onDelete}
         disabled={isDeleting}
+        aria-label='Delete note'
+        title='Delete note'
       >
         <Trash2 className='h-4 w-4' />
       </Button>
