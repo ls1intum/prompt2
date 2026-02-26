@@ -79,3 +79,6 @@ INSERT INTO note_tag_relation (note_id, tag_id) VALUES ($1, $2) ON CONFLICT DO N
 -- name: RemoveTagFromNote :exec
 DELETE FROM note_tag_relation WHERE note_id = $1 AND tag_id = $2;
 
+-- name: RemoveAllTagsFromNote :exec
+DELETE FROM note_tag_relation WHERE note_id = $1;
+

@@ -62,7 +62,7 @@ export function NoteWrapper({
         </div>
 
         <div className='flex-col gap-1'>
-          <InstructorNoteTags tags={note.tags} />
+          {!isEditing && <InstructorNoteTags tags={note.tags} />}
           {children}
         </div>
       </div>

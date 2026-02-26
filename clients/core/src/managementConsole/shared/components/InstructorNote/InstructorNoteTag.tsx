@@ -23,5 +23,11 @@ export function InstructorNoteTag({ tag }: { tag: NoteTag }) {
 }
 
 export function InstructorNoteTags({ tags }: { tags: NoteTag[] }) {
-  return tags.map((tag: NoteTag) => <InstructorNoteTag key={tag.id} tag={tag} />)
+  return (
+    <div className='flex gap-2'>
+      {tags.map((tag: NoteTag) => (
+        <InstructorNoteTag key={tag.id} tag={tag} />
+      ))}
+    </div>
+  )
 }

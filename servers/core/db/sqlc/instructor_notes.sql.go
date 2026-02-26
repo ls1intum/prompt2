@@ -198,7 +198,6 @@ SELECT
     jsonb_build_object(
       'id', n.id,
       'author', n.author,
-      'author', n.author,
       'dateCreated', n.date_created,
       'dateDeleted', n.date_deleted,
       'deletedBy', n.deleted_by,
@@ -388,6 +387,15 @@ func (q *Queries) GetTagsForNote(ctx context.Context, noteID uuid.UUID) ([]NoteT
 		return nil, err
 	}
 	return items, nil
+}
+
+const removeAllTagsFromNote = `-- name: RemoveAllTagsFromNote :exec
+DELETE FROM note_tag_relation WHERE note_id = $1
+`
+
+func (q *Queries) RemoveAllTagsFromNote(ctx context.Context, noteID uuid.UUID) error {
+	_, err := q.db.Exec(ctx, removeAllTagsFromNote, noteID)
+	return err
 }
 
 const removeTagFromNote = `-- name: RemoveTagFromNote :exec

@@ -111,20 +111,23 @@ func NewStudentNote(ctx context.Context, studentID uuid.UUID, params instructorN
     return instructorNoteDTO.InstructorNote{}, err
   }
 
-  if params.New {
-    for _, tagID := range params.Tags {
-      if _, err := qtx.GetTagByID(ctx, tagID); err != nil {
-        if errors.Is(err, pgx.ErrNoRows) {
-          return instructorNoteDTO.InstructorNote{}, fmt.Errorf("tag %s does not exist", tagID)
-        }
-        return instructorNoteDTO.InstructorNote{}, err
+  if !params.New {
+    if err := qtx.RemoveAllTagsFromNote(ctx, noteID); err != nil {
+      return instructorNoteDTO.InstructorNote{}, err
+    }
+  }
+  for _, tagID := range params.Tags {
+    if _, err := qtx.GetTagByID(ctx, tagID); err != nil {
+      if errors.Is(err, pgx.ErrNoRows) {
+        return instructorNoteDTO.InstructorNote{}, fmt.Errorf("tag %s does not exist", tagID)
       }
-      if err := qtx.AddTagToNote(ctx, db.AddTagToNoteParams{
-        NoteID: noteID,
-        TagID:  tagID,
-      }); err != nil {
-        return instructorNoteDTO.InstructorNote{}, err
-      }
+      return instructorNoteDTO.InstructorNote{}, err
+    }
+    if err := qtx.AddTagToNote(ctx, db.AddTagToNoteParams{
+      NoteID: noteID,
+      TagID:  tagID,
+    }); err != nil {
+      return instructorNoteDTO.InstructorNote{}, err
     }
   }
 
