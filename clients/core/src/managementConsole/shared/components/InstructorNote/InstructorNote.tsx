@@ -31,8 +31,8 @@ export function InstructorNote({ note, studentId }: NoteProps) {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
 
   const isDeleted = note.dateDeleted != null
-  const latestVersion = note.versions[note.versions.length - 1]
-  const olderVersions = note.versions.slice(0, -1).reverse()
+  const latestVersion = note.versions.at(-1)
+  const olderVersions = latestVersion ? note.versions.slice(0, -1).reverse() : []
 
   const handleDelete = () => {
     setShowDeleteDialog(true)
@@ -58,7 +58,7 @@ export function InstructorNote({ note, studentId }: NoteProps) {
           <p className='text-sm text-muted-foreground italic'>This note was deleted</p>
         ) : isEditing ? (
           <NoteComposer
-            initialContent={latestVersion.content}
+            initialContent={latestVersion?.content ?? ''}
             initialTags={note.tags}
             onSubmit={async (content, tagIds) => {
               await createNote.mutateAsync({ content, new: false, forNote: note.id, tags: tagIds })
@@ -69,7 +69,7 @@ export function InstructorNote({ note, studentId }: NoteProps) {
             autoFocus
           />
         ) : (
-          <p className='text-sm whitespace-pre-wrap'>{latestVersion.content}</p>
+          <p className='text-sm whitespace-pre-wrap'>{latestVersion?.content ?? ''}</p>
         )}
 
         {!isEditing && showVersions && olderVersions.length > 0 && (
