@@ -143,13 +143,13 @@ const config: (env: Record<string, string>) => container.Configuration = (env) =
       IS_PERF && new BundleAnalyzerPlugin(),
       new CleanWebpackPlugin(),
       !IS_DEV &&
-      new CompressionPlugin({
-        filename: '[path][base].gz',
-        algorithm: 'gzip',
-        test: /\.(js|css|html|svg)$/,
-        threshold: 10240,
-        minRatio: 0.8,
-      }),
+        new CompressionPlugin({
+          filename: '[path][base].gz',
+          algorithm: 'gzip',
+          test: /\.(js|css|html|svg)$/,
+          threshold: 10240,
+          minRatio: 0.8,
+        }),
     ].filter(Boolean),
     optimization: {
       minimize: !IS_DEV,

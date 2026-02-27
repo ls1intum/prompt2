@@ -268,7 +268,12 @@ export const SettingsPage = () => {
               )}
               <Popover>
                 <PopoverTrigger asChild>
-                  <Button variant='ghost' size='sm' className='h-8 w-8 p-0' aria-label='Template requirements help'>
+                  <Button
+                    variant='ghost'
+                    size='sm'
+                    className='h-8 w-8 p-0'
+                    aria-label='Template requirements help'
+                  >
                     <HelpCircle className='h-4 w-4 text-muted-foreground' />
                   </Button>
                 </PopoverTrigger>
@@ -324,7 +329,10 @@ export const SettingsPage = () => {
           />
 
           <div className='flex items-center gap-3'>
-            <Button onClick={handleSave} disabled={!hasChanges || !templateContent || updateMutation.isPending}>
+            <Button
+              onClick={handleSave}
+              disabled={!hasChanges || !templateContent || updateMutation.isPending}
+            >
               {updateMutation.isPending ? (
                 <>
                   <Loader2 className='mr-2 h-4 w-4 animate-spin' />

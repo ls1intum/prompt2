@@ -56,6 +56,9 @@ export default [
       'node_modules/**', // Ignore node_modules
       '**/dist/**', // Ignore distribution folders
       '**/build/**', // Ignore build folders
+      '**/postcss.config.js',
+      '**/env.js',
+      '**/env.template.js',
     ],
 
     plugins: {
