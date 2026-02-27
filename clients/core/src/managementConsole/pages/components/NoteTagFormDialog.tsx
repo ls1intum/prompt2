@@ -15,18 +15,12 @@ import {
   SelectValue,
 } from '@tumaet/prompt-ui-components'
 import { NoteTagColor } from '../../shared/interfaces/InstructorNote'
-import { InstructorNoteTag } from '../../shared/components/InstructorNote/InstructorNoteTag'
+import {
+  InstructorNoteTag,
+  InstructorNoteTagColor,
+} from '../../shared/components/InstructorNote/InstructorNoteTag'
 
 const NOTE_TAG_COLORS: NoteTagColor[] = ['blue', 'green', 'red', 'yellow', 'orange', 'pink']
-
-const dotColorClass: Record<NoteTagColor, string> = {
-  blue: 'bg-blue-400',
-  green: 'bg-green-400',
-  red: 'bg-red-400',
-  yellow: 'bg-yellow-400',
-  orange: 'bg-orange-400',
-  pink: 'bg-pink-400',
-}
 
 interface NoteTagFormDialogProps {
   open: boolean
@@ -88,10 +82,7 @@ export const NoteTagFormDialog = ({
               <SelectContent>
                 {NOTE_TAG_COLORS.map((c) => (
                   <SelectItem key={c} value={c}>
-                    <div className='flex items-center gap-2'>
-                      <span className={`inline-block h-3 w-3 rounded-full ${dotColorClass[c]}`} />
-                      <span className='capitalize'>{c}</span>
-                    </div>
+                    <InstructorNoteTagColor color={c} />
                   </SelectItem>
                 ))}
               </SelectContent>

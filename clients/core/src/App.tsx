@@ -24,7 +24,7 @@ import { TemplateCoursesPage } from './managementConsole/pages/TemplateCoursesPa
 import { ArchivedCoursesPage } from './managementConsole/pages/ArchivedCoursesPage'
 import { StudentsPage } from './managementConsole/pages/StudentsPage'
 import { StudentDetailPage } from './managementConsole/pages/StudentDetailPage'
-import { StudentNoteTagsPage } from './managementConsole/pages/StudentNoteTagsPage'
+import { StudentNoteTagsPage } from './managementConsole/pages/InstructorNoteTagsPage'
 
 const queryClient = new QueryClient({
   defaultOptions: {

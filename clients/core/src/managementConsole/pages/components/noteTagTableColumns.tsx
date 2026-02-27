@@ -1,6 +1,6 @@
 import { ColumnDef } from '@tanstack/react-table'
 import { NoteTag } from '../../shared/interfaces/InstructorNote'
-import { InstructorNoteTag } from '../../shared/components/InstructorNote/InstructorNoteTag'
+import { InstructorNoteTagColor } from '../../shared/components/InstructorNote/InstructorNoteTag'
 
 export const noteTagTableColumns: ColumnDef<NoteTag>[] = [
   {
@@ -10,6 +10,6 @@ export const noteTagTableColumns: ColumnDef<NoteTag>[] = [
   {
     accessorKey: 'color',
     header: 'Color',
-    cell: ({ row }) => <InstructorNoteTag tag={row.original} />,
+    cell: ({ row }) => <InstructorNoteTagColor color={row.original.color} />,
   },
 ]
