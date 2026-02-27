@@ -28,7 +28,7 @@
       85748 Garching b. München
     </p>
     <p class="mt-2">
-      E-Mail: aet@cit.tum.de<br>
+      E-Mail: prompt.aet@xcit.tum.de<br>
       Website: <a href="https://aet.cit.tum.de" target="_blank" rel="noopener noreferrer">https://aet.cit.tum.de</a>
     </p>
     <p class="mt-2">
@@ -81,7 +81,7 @@
       </li>
       <li>
         <strong>Art. 6 Abs. 1 lit. f DSGVO:</strong>
-        Berechtigtes Interesse an der Sicherstellung des ordnungsgemäßen Betriebs und der IT-Sicherheit der Plattform (Serverprotokolle).
+        Berechtigtes Interesse an der Sicherstellung des ordnungsgemäßen Betriebs und der IT-Sicherheit der Plattform. Dies umfasst die Verarbeitung von Serverprotokollen und Systemmetriken sowie deren automatisierte Analyse, einschließlich des Einsatzes KI-gestützter Anomalieerkennungssysteme zum Schutz der IT-Infrastruktur (vgl. Abschnitt 5.11). Das berechtigte Interesse ergibt sich aus der Notwendigkeit, die Verfügbarkeit, Integrität und Vertraulichkeit der Plattform und der darin verarbeiteten Daten zu gewährleisten.
       </li>
     </ul>
   </section>
@@ -220,20 +220,50 @@
     <p class="mt-2">Der Versand erfolgt über einen SMTP-Server der Technischen Universität München.</p>
 
     <!-- 5.11 -->
-    <h3 class="text-lg font-semibold mt-4 mb-2">5.11 Serverprotokolle</h3>
-    <p><strong>Zweck:</strong> Sicherstellung des ordnungsgemäßen Betriebs, Erkennung und Abwehr von Angriffen, Fehlerbehebung</p>
-    <p><strong>Rechtsgrundlage:</strong> Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse)</p>
-    <p class="mt-1"><strong>Daten:</strong></p>
+    <h3 class="text-lg font-semibold mt-4 mb-2">5.11 Serverprotokolle und Systemmetriken</h3>
+    <p><strong>Zweck:</strong> Sicherstellung des ordnungsgemäßen Betriebs, Erkennung und Abwehr von Angriffen, Fehlerbehebung, Verfügbarkeitsüberwachung, Kapazitätsplanung</p>
+    <p><strong>Rechtsgrundlage:</strong> Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse an der IT-Sicherheit und Betriebsfähigkeit der Plattform)</p>
+
+    <p class="mt-2"><strong>5.11.1 Serverprotokolle (Logdaten)</strong></p>
+    <p class="mt-1">Bei jedem Zugriff auf die Plattform werden folgende Daten in Protokolldateien verarbeitet:</p>
     <ul class="list-disc pl-6 space-y-1 mt-1">
       <li>IP-Adresse des anfragenden Rechners</li>
       <li>Datum und Uhrzeit des Zugriffs</li>
       <li>Name, URL und übertragene Datenmenge der abgerufenen Datei</li>
       <li>Zugriffsstatus (Datei übertragen, nicht gefunden etc.)</li>
+      <li>HTTP-Statuscode und Antwortzeit</li>
       <li>Kenndaten des verwendeten Browsers und Betriebssystems (sofern vom Browser übermittelt)</li>
       <li>Webseite, von der der Zugriff erfolgte (sofern vom Browser übermittelt)</li>
     </ul>
+
+    <p class="mt-2"><strong>5.11.2 Systemmetriken</strong></p>
+    <p class="mt-1">Zur Sicherstellung der Verfügbarkeit und Leistungsfähigkeit der Plattform werden folgende technische Systemmetriken erhoben:</p>
+    <ul class="list-disc pl-6 space-y-1 mt-1">
+      <li>CPU-, Arbeitsspeicher- und Festplattenauslastung der Server</li>
+      <li>Netzwerkverkehr und Verbindungsstatistiken</li>
+      <li>Anfragerate, Fehlerrate und Antwortzeiten der Dienste</li>
+      <li>Datenbankauslastung und Abfragezeiten</li>
+      <li>Dienstverfügbarkeit und Neustartinformationen</li>
+    </ul>
+    <p class="mt-1">
+      Diese Systemmetriken sind technische Betriebsdaten und enthalten grundsätzlich keine personenbezogenen Daten. Soweit durch die Kombination mit Protokolldaten (insbesondere IP-Adressen) ein Personenbezug hergestellt werden könnte, erfolgt die Verarbeitung auf Grundlage von Art. 6 Abs. 1 lit. f DSGVO.
+    </p>
+
+    <p class="mt-2"><strong>5.11.3 Automatisierte Analyse und KI-gestützte Erkennung</strong></p>
+    <p class="mt-1">
+      Die Serverprotokolle und Systemmetriken werden automatisiert ausgewertet, um die IT-Sicherheit und den ordnungsgemäßen Betrieb der Plattform zu gewährleisten. Dabei können auch KI-gestützte Anomalieerkennungssysteme zum Einsatz kommen, insbesondere zur:
+    </p>
+    <ul class="list-disc pl-6 space-y-1 mt-1">
+      <li>Erkennung und Abwehr von Cyberangriffen (z.&nbsp;B. DDoS-Angriffe, Brute-Force-Angriffe)</li>
+      <li>Identifizierung ungewöhnlicher Zugriffsmuster und potenzieller Sicherheitsverletzungen</li>
+      <li>Frühzeitigen Erkennung von Systemausfällen und Leistungsengpässen</li>
+      <li>Erkennung von Anomalien im Netzwerkverkehr und in den Anforderungsmustern</li>
+    </ul>
     <p class="mt-2">
-      Die Protokolldaten werden automatisiert zur Erkennung von Angriffen ausgewertet. Eine Zusammenführung mit anderen Datenbeständen erfolgt nicht. Im Einzelfall (bei gemeldeten Störungen oder Sicherheitsvorfällen) kann eine manuelle Auswertung erfolgen.
+      <strong>Wichtiger Hinweis:</strong> Die automatisierte und KI-gestützte Analyse wird <strong>ausschließlich auf technische Systemdaten</strong> (Serverprotokolle und Systemmetriken) angewendet. Es findet <strong>keine Profilbildung einzelner Nutzer</strong> und <strong>kein automatisiertes Scoring oder Ranking von Personen</strong> statt. Die Analyse dient ausschließlich dem Schutz der IT-Infrastruktur und der Sicherstellung der Verfügbarkeit der Plattform. Eine Zusammenführung der Analyseergebnisse mit personenbezogenen Nutzerdaten (z.&nbsp;B. Studierendendaten, Bewerbungsdaten) erfolgt nicht.
+    </p>
+    <p class="mt-2">
+      Im Einzelfall (bei gemeldeten Störungen oder Sicherheitsvorfällen) kann ergänzend eine manuelle Auswertung der Protokolldaten erfolgen.
     </p>
   </section>
 
@@ -303,6 +333,10 @@
         Werden nach spätestens 30 Tagen gelöscht.
       </li>
       <li>
+        <strong>Systemmetriken:</strong>
+        Aggregierte Systemmetriken (ohne Personenbezug) können zu Zwecken der Kapazitätsplanung und Trendanalyse länger aufbewahrt werden. Soweit Metriken einen Personenbezug aufweisen könnten (z.&nbsp;B. durch Verknüpfung mit IP-Adressen), werden sie nach spätestens 30 Tagen gelöscht oder anonymisiert.
+      </li>
+      <li>
         <strong>Authentifizierungsdaten:</strong>
         Sitzungsdaten verfallen automatisch nach maximal 24 Stunden. Kontodaten im Identity Provider werden gelöscht, wenn das Konto nicht mehr benötigt wird.
       </li>
@@ -327,11 +361,25 @@
     </p>
   </section>
 
-  <!-- Section 9: Keine automatisierte Entscheidungsfindung -->
+  <!-- Section 9: Automatisierte Verarbeitung und Entscheidungsfindung -->
   <section>
-    <h2 class="text-xl font-semibold mb-2">9. Automatisierte Entscheidungsfindung</h2>
+    <h2 class="text-xl font-semibold mb-2">9. Automatisierte Verarbeitung und Entscheidungsfindung</h2>
     <p>
-      Es findet keine automatisierte Entscheidungsfindung im Sinne von Art. 22 DSGVO statt. Alle Entscheidungen über die Zulassung zu Lehrveranstaltungen, Bewertungen und sonstige Maßnahmen werden von Menschen getroffen. Bewertungspunktzahlen dienen lediglich als Unterstützung.
+      <strong>Automatisierte Entscheidungsfindung gegenüber Personen (Art. 22 DSGVO):</strong>
+      Es findet keine automatisierte Entscheidungsfindung im Sinne von Art. 22 DSGVO statt, die Ihnen gegenüber rechtliche Wirkung entfaltet oder Sie in ähnlicher Weise erheblich beeinträchtigt. Alle Entscheidungen über die Zulassung zu Lehrveranstaltungen, Bewertungen und sonstige Maßnahmen werden von Menschen getroffen. Bewertungspunktzahlen dienen lediglich als Unterstützung für die Lehrenden.
+    </p>
+    <p class="mt-2">
+      <strong>Automatisierte Verarbeitung von Systemdaten:</strong>
+      Wie in Abschnitt 5.11.3 beschrieben, setzen wir automatisierte Analyseverfahren, einschließlich KI-gestützter Anomalieerkennung, zur Überwachung der IT-Sicherheit und des Systembetriebs ein. Diese Verarbeitung bezieht sich ausschließlich auf technische Systemdaten (Serverprotokolle, Systemmetriken) und stellt keine automatisierte Entscheidungsfindung im Sinne von Art. 22 DSGVO dar, da:
+    </p>
+    <ul class="list-disc pl-6 space-y-1 mt-1">
+      <li>sie keine rechtliche Wirkung gegenüber einzelnen Personen entfaltet,</li>
+      <li>sie Personen nicht in ähnlicher Weise erheblich beeinträchtigt,</li>
+      <li>sie ausschließlich dem Schutz der IT-Infrastruktur dient,</li>
+      <li>keine Profilbildung einzelner Nutzer stattfindet.</li>
+    </ul>
+    <p class="mt-2">
+      Sollte die automatisierte Analyse einen Sicherheitsvorfall erkennen (z.&nbsp;B. einen laufenden Angriff), können automatisierte Schutzmaßnahmen auf Netzwerkebene ausgelöst werden (z.&nbsp;B. temporäre IP-Sperrung). Solche Maßnahmen richten sich gegen technische Zugriffsmuster, nicht gegen einzelne Personen.
     </p>
   </section>
 
@@ -382,7 +430,7 @@
     </ul>
     <p class="mt-2">
       Zur Ausübung Ihrer Rechte können Sie sich jederzeit an uns wenden:
-      <a href="mailto:aet@cit.tum.de">aet@cit.tum.de</a>
+      <a href="mailto:prompt.aet@xcit.tum.de">prompt.aet@xcit.tum.de</a>
     </p>
   </section>
 
@@ -440,7 +488,7 @@
       85748 Garching b. Munich, Germany
     </p>
     <p class="mt-2">
-      Email: aet@cit.tum.de<br>
+      Email: prompt.aet@xcit.tum.de<br>
       Website: <a href="https://aet.cit.tum.de" target="_blank" rel="noopener noreferrer">https://aet.cit.tum.de</a>
     </p>
     <p class="mt-2">
@@ -493,7 +541,7 @@
       </li>
       <li>
         <strong>Art. 6(1)(f) GDPR:</strong>
-        Legitimate interest in ensuring the proper operation and IT security of the platform (server logs).
+        Legitimate interest in ensuring the proper operation and IT security of the platform. This includes the processing of server logs and system metrics as well as their automated analysis, including the use of AI-based anomaly detection systems to protect the IT infrastructure (see Section 5.11). The legitimate interest arises from the necessity to ensure the availability, integrity, and confidentiality of the platform and the data processed therein.
       </li>
     </ul>
   </section>
@@ -632,20 +680,50 @@
     <p class="mt-2">Emails are sent via an SMTP server operated by the Technical University of Munich.</p>
 
     <!-- 5.11 -->
-    <h3 class="text-lg font-semibold mt-4 mb-2">5.11 Server Logs</h3>
-    <p><strong>Purpose:</strong> Ensuring proper operation, detection and prevention of attacks, error resolution</p>
-    <p><strong>Legal basis:</strong> Art. 6(1)(f) GDPR (legitimate interest)</p>
-    <p class="mt-1"><strong>Data:</strong></p>
+    <h3 class="text-lg font-semibold mt-4 mb-2">5.11 Server Logs and System Metrics</h3>
+    <p><strong>Purpose:</strong> Ensuring proper operation, detection and prevention of attacks, error resolution, availability monitoring, capacity planning</p>
+    <p><strong>Legal basis:</strong> Art. 6(1)(f) GDPR (legitimate interest in IT security and operational stability of the platform)</p>
+
+    <p class="mt-2"><strong>5.11.1 Server Logs</strong></p>
+    <p class="mt-1">Each time the platform is accessed, the following data is processed in log files:</p>
     <ul class="list-disc pl-6 space-y-1 mt-1">
       <li>IP address of the requesting computer</li>
       <li>Date and time of access</li>
       <li>Name, URL, and transferred data volume of the accessed file</li>
       <li>Access status (file transferred, not found, etc.)</li>
+      <li>HTTP status code and response time</li>
       <li>Identification data of the browser and operating system used (if transmitted by the browser)</li>
       <li>Website from which access was made (if transmitted by the browser)</li>
     </ul>
+
+    <p class="mt-2"><strong>5.11.2 System Metrics</strong></p>
+    <p class="mt-1">To ensure the availability and performance of the platform, the following technical system metrics are collected:</p>
+    <ul class="list-disc pl-6 space-y-1 mt-1">
+      <li>CPU, memory, and disk utilisation of servers</li>
+      <li>Network traffic and connection statistics</li>
+      <li>Request rates, error rates, and response times of services</li>
+      <li>Database load and query times</li>
+      <li>Service availability and restart information</li>
+    </ul>
+    <p class="mt-1">
+      These system metrics are technical operational data and generally do not contain personal data. Where a personal reference could be established through combination with log data (in particular IP addresses), processing is based on Art. 6(1)(f) GDPR.
+    </p>
+
+    <p class="mt-2"><strong>5.11.3 Automated Analysis and AI-Based Detection</strong></p>
+    <p class="mt-1">
+      Server logs and system metrics are analysed automatically to ensure the IT security and proper operation of the platform. AI-based anomaly detection systems may be employed for this purpose, in particular for:
+    </p>
+    <ul class="list-disc pl-6 space-y-1 mt-1">
+      <li>Detection and prevention of cyberattacks (e.g. DDoS attacks, brute-force attacks)</li>
+      <li>Identification of unusual access patterns and potential security breaches</li>
+      <li>Early detection of system outages and performance bottlenecks</li>
+      <li>Detection of anomalies in network traffic and request patterns</li>
+    </ul>
     <p class="mt-2">
-      Log data is automatically analysed to detect attacks. No merging with other data sources takes place. In individual cases (reported disruptions or security incidents), a manual analysis may be carried out.
+      <strong>Important note:</strong> The automated and AI-based analysis is applied <strong>exclusively to technical system data</strong> (server logs and system metrics). <strong>No profiling of individual users</strong> and <strong>no automated scoring or ranking of persons</strong> takes place. The analysis serves solely to protect the IT infrastructure and ensure the availability of the platform. Analysis results are not combined with personal user data (e.g. student data, application data).
+    </p>
+    <p class="mt-2">
+      In individual cases (reported disruptions or security incidents), a manual analysis of log data may additionally be carried out.
     </p>
   </section>
 
@@ -715,6 +793,10 @@
         Deleted after a maximum of 30 days.
       </li>
       <li>
+        <strong>System metrics:</strong>
+        Aggregated system metrics (without personal reference) may be retained for longer periods for capacity planning and trend analysis purposes. Where metrics could have a personal reference (e.g. through association with IP addresses), they are deleted or anonymised after a maximum of 30 days.
+      </li>
+      <li>
         <strong>Authentication data:</strong>
         Session data expires automatically after a maximum of 24 hours. Account data in the identity provider is deleted when the account is no longer needed.
       </li>
@@ -739,11 +821,25 @@
     </p>
   </section>
 
-  <!-- Section 9: Automated decision-making -->
+  <!-- Section 9: Automated processing and decision-making -->
   <section>
-    <h2 class="text-xl font-semibold mb-2">9. Automated Decision-Making</h2>
+    <h2 class="text-xl font-semibold mb-2">9. Automated Processing and Decision-Making</h2>
     <p>
-      No automated decision-making within the meaning of Art. 22 GDPR takes place. All decisions regarding course admission, assessments, and other measures are made by humans. Assessment scores serve solely as a support tool.
+      <strong>Automated individual decision-making (Art. 22 GDPR):</strong>
+      No automated decision-making within the meaning of Art. 22 GDPR takes place that produces legal effects concerning you or similarly significantly affects you. All decisions regarding course admission, assessments, and other measures are made by humans. Assessment scores serve solely as a support tool for instructors.
+    </p>
+    <p class="mt-2">
+      <strong>Automated processing of system data:</strong>
+      As described in Section 5.11.3, we employ automated analysis methods, including AI-based anomaly detection, for IT security monitoring and system operations. This processing relates exclusively to technical system data (server logs, system metrics) and does not constitute automated individual decision-making within the meaning of Art. 22 GDPR, because:
+    </p>
+    <ul class="list-disc pl-6 space-y-1 mt-1">
+      <li>it does not produce legal effects concerning individual persons,</li>
+      <li>it does not similarly significantly affect individuals,</li>
+      <li>it serves exclusively to protect the IT infrastructure,</li>
+      <li>no profiling of individual users takes place.</li>
+    </ul>
+    <p class="mt-2">
+      Should the automated analysis detect a security incident (e.g. an ongoing attack), automated protective measures at the network level may be triggered (e.g. temporary IP blocking). Such measures are directed against technical access patterns, not against individual persons.
     </p>
   </section>
 
@@ -794,7 +890,7 @@
     </ul>
     <p class="mt-2">
       To exercise your rights, you may contact us at any time:
-      <a href="mailto:aet@cit.tum.de">aet@cit.tum.de</a>
+      <a href="mailto:prompt.aet@xcit.tum.de">prompt.aet@xcit.tum.de</a>
     </p>
   </section>
 
