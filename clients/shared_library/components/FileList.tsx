@@ -1,7 +1,8 @@
 import * as React from 'react'
+import { useState } from 'react'
 import { Download, Trash2, File } from 'lucide-react'
 import { FileResponse } from '@/network/mutations/uploadFile'
-import { Button, Card, CardContent } from '@tumaet/prompt-ui-components'
+import { Button, Card, CardContent, DeleteConfirmation } from '@tumaet/prompt-ui-components'
 import { cn } from '../utils/cn'
 import { formatFileSize } from '@/lib/formatFileSize'
 import { openFileDownload } from '@/lib/openFileDownload'
@@ -19,6 +20,9 @@ export const FileList: React.FC<FileListProps> = ({
   allowDelete = false,
   className,
 }) => {
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+  const [fileToDelete, setFileToDelete] = useState<string | null>(null)
+
   const handleDownload = async (file: FileResponse) => {
     try {
       await openFileDownload({ downloadUrl: file.downloadUrl, fileName: file.originalFilename })
@@ -27,19 +31,20 @@ export const FileList: React.FC<FileListProps> = ({
     }
   }
 
-  const handleDelete = async (fileId: string) => {
-    if (!onDelete) {
-      return
-    }
-    if (!confirm('Are you sure you want to delete this file?')) {
-      return
-    }
+  const promptDelete = (fileId: string) => {
+    setFileToDelete(fileId)
+    setDeleteDialogOpen(true)
+  }
 
-    try {
-      await onDelete(fileId)
-    } catch (error) {
-      console.error('Delete failed:', error)
+  const handleDeleteConfirmation = async (confirmed: boolean) => {
+    if (confirmed && fileToDelete && onDelete) {
+      try {
+        await onDelete(fileToDelete)
+      } catch (error) {
+        console.error('Delete failed:', error)
+      }
     }
+    setFileToDelete(null)
   }
 
   const formatDate = (dateString: string): string => {
@@ -95,7 +100,7 @@ export const FileList: React.FC<FileListProps> = ({
                     type='button'
                     size='sm'
                     variant='outline'
-                    onClick={() => handleDelete(file.id)}
+                    onClick={() => promptDelete(file.id)}
                   >
                     <Trash2 className='h-4 w-4' />
                   </Button>
@@ -105,6 +110,12 @@ export const FileList: React.FC<FileListProps> = ({
           </CardContent>
         </Card>
       ))}
+      <DeleteConfirmation
+        isOpen={deleteDialogOpen}
+        setOpen={setDeleteDialogOpen}
+        onClick={handleDeleteConfirmation}
+        deleteMessage='Are you sure you want to delete this file?'
+      />{' '}
     </div>
   )
 }
