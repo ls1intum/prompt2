@@ -85,13 +85,8 @@ export const FileUpload: React.FC<FileUploadProps> = ({
     }
 
     setSelectedFile(file)
-  }
-
-  const handleUpload = () => {
-    if (!selectedFile) return
-
     upload.mutate({
-      file: selectedFile,
+      file,
       coursePhaseId,
       description,
       tags,
@@ -166,20 +161,15 @@ export const FileUpload: React.FC<FileUploadProps> = ({
 
               <div className='flex items-center gap-2'>
                 {!isUploading && (
-                  <>
-                    <Button type='button' size='sm' onClick={handleUpload} disabled={isUploading}>
-                      Upload
-                    </Button>
-                    <Button
-                      type='button'
-                      size='sm'
-                      variant='ghost'
-                      onClick={handleRemove}
-                      disabled={isUploading}
-                    >
-                      <X className='h-4 w-4' />
-                    </Button>
-                  </>
+                  <Button
+                    type='button'
+                    size='sm'
+                    variant='ghost'
+                    onClick={handleRemove}
+                    disabled={isUploading}
+                  >
+                    <X className='h-4 w-4' />
+                  </Button>
                 )}
                 {isUploading && <Loader2 className='h-5 w-5 animate-spin text-primary' />}
               </div>

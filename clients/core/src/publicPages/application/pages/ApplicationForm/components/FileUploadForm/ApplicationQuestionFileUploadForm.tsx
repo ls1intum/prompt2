@@ -36,6 +36,10 @@ export const ApplicationQuestionFileUploadForm = forwardRef<
     setExistingAnswer(answer ?? null)
   }, [answer])
 
+  const canDeleteFiles = !isInstructorView && !!coursePhaseId && !!applicationId
+  const shouldShowUploader =
+    !isInstructorView && !existingAnswer && (!uploadedFile || !canDeleteFiles)
+
   useImperativeHandle(ref, () => ({
     validate: async () => {
       if (question.isRequired && !uploadedFile && !existingAnswer) {
@@ -90,7 +94,13 @@ export const ApplicationQuestionFileUploadForm = forwardRef<
         {question.isRequired && <span className='text-red-500 ml-1'>*</span>}
       </div>
 
-      {!isInstructorView && !existingAnswer && (
+      {canDeleteFiles && (uploadedFile || existingAnswer) && (
+        <p className='text-sm text-muted-foreground'>
+          Only one file can be uploaded. Delete the current file before uploading a new one.
+        </p>
+      )}
+
+      {shouldShowUploader && (
         <FileUpload
           coursePhaseId={coursePhaseId}
           accept={question.allowedFileTypes}
@@ -103,11 +113,7 @@ export const ApplicationQuestionFileUploadForm = forwardRef<
       {uploadedFile && (
         <div className='mt-4'>
           <p className='text-sm font-medium mb-2'>Uploaded file:</p>
-          <FileList
-            files={[uploadedFile]}
-            allowDelete={!isInstructorView && !!applicationId}
-            onDelete={handleDelete}
-          />
+          <FileList files={[uploadedFile]} allowDelete={canDeleteFiles} onDelete={handleDelete} />
         </div>
       )}
 
@@ -129,7 +135,7 @@ export const ApplicationQuestionFileUploadForm = forwardRef<
                 updatedAt: existingAnswer.uploadedAt,
               },
             ]}
-            allowDelete={!isInstructorView && !!applicationId}
+            allowDelete={canDeleteFiles}
             onDelete={handleDelete}
           />
         </div>
