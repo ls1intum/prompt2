@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -69,6 +70,11 @@ func downloadOwnCertificate(c *gin.Context) {
 	pdfData, err := GeneratorServiceSingleton.GenerateCertificate(c, authHeader, coursePhaseID, student)
 	if err != nil {
 		log.WithError(err).Error("Failed to generate certificate")
+		var typstErr *TypstCompilationError
+		if errors.As(err, &typstErr) {
+			c.JSON(http.StatusUnprocessableEntity, gin.H{"error": "Certificate template configuration error"})
+			return
+		}
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate certificate"})
 		return
 	}
@@ -82,7 +88,7 @@ func downloadOwnCertificate(c *gin.Context) {
 		log.WithError(recordErr).Warn("Failed to record certificate download")
 	}
 
-	filename := fmt.Sprintf("certificate_%s.pdf", student.LastName)
+	filename := fmt.Sprintf("certificate_%s.pdf", sanitizeFilename(student.LastName))
 	c.Header("Content-Disposition", fmt.Sprintf(`attachment; filename="%s"`, filename))
 	c.Header("Content-Type", "application/pdf")
 	c.Data(http.StatusOK, "application/pdf", pdfData)
@@ -116,6 +122,14 @@ func downloadStudentCertificate(c *gin.Context) {
 	pdfData, err := GeneratorServiceSingleton.GenerateCertificate(c, authHeader, coursePhaseID, student)
 	if err != nil {
 		log.WithError(err).Error("Failed to generate certificate")
+		var typstErr *TypstCompilationError
+		if errors.As(err, &typstErr) {
+			c.JSON(http.StatusUnprocessableEntity, gin.H{
+				"error":          "Template compilation failed",
+				"compilerOutput": typstErr.Output,
+			})
+			return
+		}
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate certificate"})
 		return
 	}
@@ -236,6 +250,11 @@ func previewCertificate(c *gin.Context) {
 	c.Header("Content-Disposition", "inline; filename=certificate_preview.pdf")
 	c.Header("Content-Type", "application/pdf")
 	c.Data(http.StatusOK, "application/pdf", pdfData)
+}
+
+// sanitizeFilename escapes backslashes and double quotes for use in Content-Disposition headers.
+func sanitizeFilename(name string) string {
+	return strings.NewReplacer(`\`, `\\`, `"`, `\"`).Replace(name)
 }
 
 func getTemplateStatus(c *gin.Context, coursePhaseID uuid.UUID) (bool, error) {
