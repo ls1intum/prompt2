@@ -7,8 +7,21 @@ import { StudentCoursePreview } from './components/StudentCoursePreview'
 import { InstructorNoteTag } from '../InstructorNote/InstructorNoteTag'
 import { NoteTagColor } from '../../interfaces/InstructorNote'
 import { ColumnDef, Row } from '@tanstack/react-table'
+import { ProfilePicture } from '@/components/StudentProfilePicture'
 
 export const studentTableColumns: ColumnDef<StudentWithCourses>[] = [
+  {
+    id: 'profilepicture',
+    header: '',
+    cell: ({ row }) => (
+      <ProfilePicture
+        email={row.original.email}
+        firstName={row.original.firstName}
+        lastName={row.original.lastName}
+        size='sm'
+      />
+    ),
+  },
   {
     accessorKey: 'firstName',
     header: 'First Name',
