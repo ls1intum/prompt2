@@ -181,12 +181,39 @@ Load certificate data in your template:
 ]
 ```
 
+### Embedding Images
+
+Since templates are stored as a single file, images (logos, signatures, etc.) must be embedded inline. Typst supports this via the `image()` function with `bytes()`.
+
+**SVG graphics** (recommended for logos, icons, decorative elements):
+
+```typst
+#let logo = bytes("<svg xmlns='http://www.w3.org/2000/svg' width='200' height='100'>...</svg>")
+#image(logo, width: 4cm)
+```
+
+**Raster images (PNG/JPG)** — wrap the base64-encoded image in an SVG data URI:
+
+```typst
+#let signature = bytes("<svg xmlns='http://www.w3.org/2000/svg' width='400' height='100'><image href='data:image/png;base64,iVBORw0KGgo...' width='400' height='100'/></svg>")
+#image(signature, width: 5cm)
+```
+
+To get the base64 string from a PNG file:
+
+```bash
+base64 -i image.png | tr -d '\n'
+```
+
+Set the SVG `width` and `height` attributes to match the original image dimensions for correct aspect ratio.
+
 ### Template Requirements
 
 - Must be a valid Typst (`.typ`) file
 - Use `json("data.json")` to access certificate data (a `vars.json` symlink is also created for compatibility)
 - Should target A4 page format
 - Fonts must be system fonts or bundled with the template
+- Images must be embedded inline (see above) — external file references will not work
 - Use the **Test Certificate** button in the settings page to verify your template compiles correctly
 
 ## Database Schema

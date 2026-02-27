@@ -85,12 +85,41 @@ Certificate templates use the [Typst](https://typst.app/) markup language. Your 
 ]
 ```
 
+#### Embedding Images
+
+Since templates are stored as a single file, images (logos, signatures, etc.) must be embedded directly in the template. No external files can be referenced.
+
+**SVG graphics** (best for logos, icons, and decorative elements — they scale without losing quality):
+
+```typst
+#let logo = bytes("<svg xmlns='http://www.w3.org/2000/svg' width='200' height='100'>...</svg>")
+#image(logo, width: 4cm)
+```
+
+**Raster images (PNG/JPG)** — encode the image as base64 and wrap it in an SVG:
+
+```typst
+#let signature = bytes("<svg xmlns='http://www.w3.org/2000/svg' width='400' height='100'><image href='data:image/png;base64,iVBORw0KGgo...' width='400' height='100'/></svg>")
+#image(signature, width: 5cm)
+```
+
+To convert a PNG file to a base64 string, run in your terminal:
+
+```bash
+base64 -i image.png | tr -d '\n'
+```
+
+:::tip
+Set the SVG `width` and `height` attributes to the original pixel dimensions of your image for a correct aspect ratio. Use the `width` parameter on `#image()` to control the display size in the certificate.
+:::
+
 #### Template Tips
 
 - Target **A4 page format** for consistency
 - Use `json("data.json")` to access certificate data
 - Test with the **Test Certificate** button before releasing — it shows compilation errors if the template is invalid
 - Fonts must be system fonts available in the deployment environment
+- Images must be embedded inline (see above) — external file references will not work
 - See the [Typst documentation](https://typst.app/docs) for the full language reference
 
 ### Managing Participants
