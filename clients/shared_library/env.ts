@@ -22,5 +22,6 @@ type EnvType = {
   SELF_TEAM_ALLOCATION_HOST: string
   TEMPLATE_HOST: string
   SENTRY_DSN_CLIENT: string
+  SENTRY_ENABLED: string
 }
 export const env: EnvType = { ...window.env }
