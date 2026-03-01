@@ -21,6 +21,5 @@ jobs:
             
             **PR:** [${{ github.event.pull_request.title }}](${{ github.event.pull_request.html_url }})
             **Author:** ${{ github.event.pull_request.user.login }}
-            **Description:** ${{ github.event.pull_request.body }}
             
             @Maintainers, please have a look! (schau mi o! 😉)
