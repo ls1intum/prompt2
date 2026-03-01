@@ -1,12 +1,13 @@
 import { useState } from 'react'
 import {
   Button,
+  DropdownMenuCheckboxItem,
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
   Textarea,
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
 } from '@tumaet/prompt-ui-components'
-import { Check, Send, Tag } from 'lucide-react'
+import { Send, Tag } from 'lucide-react'
 import { InstructorNoteTag } from './InstructorNoteTag'
 import { NoteTag } from '../../interfaces/InstructorNote'
 import { useNoteTags } from '@core/network/hooks/useInstructorNoteTags'
@@ -59,33 +60,32 @@ export function NoteComposer({
   }
 
   const tagPicker = (
-    <Popover>
-      <PopoverTrigger asChild>
-        <button className='flex items-center gap-1 text-xs text-muted-foreground rounded px-1.5 py-0.5 hover:bg-gray-100 hover:text-foreground'>
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <button className='flex items-center gap-1 text-xs text-muted-foreground rounded px-1.5 py-0.5 hover:bg-muted hover:text-foreground'>
           <Tag className='w-3 h-3' />
           <span>tag</span>
         </button>
-      </PopoverTrigger>
-      <PopoverContent className='w-auto p-1' align='start'>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent className='w-auto p-1' align='start'>
         {availableTags.length === 0 ? (
           <p className='text-xs text-muted-foreground px-2 py-1'>No tags available</p>
         ) : (
           availableTags.map((tag) => {
             const isSelected = selectedTags.some((t) => t.id === tag.id)
             return (
-              <button
+              <DropdownMenuCheckboxItem
                 key={tag.id}
                 onClick={() => toggleTag(tag)}
-                className='flex items-center gap-2 w-full text-left px-2 py-1 text-sm rounded hover:bg-gray-100 transition-colors'
+                checked={isSelected}
               >
-                <Check className={`w-3 h-3 shrink-0 ${isSelected ? 'opacity-100' : 'opacity-0'}`} />
                 <InstructorNoteTag tag={tag} />
-              </button>
+              </DropdownMenuCheckboxItem>
             )
           })
         )}
-      </PopoverContent>
-    </Popover>
+      </DropdownMenuContent>
+    </DropdownMenu>
   )
 
   return (
@@ -100,9 +100,14 @@ export function NoteComposer({
 
       <Textarea
         placeholder={isEditMode ? undefined : 'Leave an instructor note'}
-        className='w-full focus-visible:ring-0 focus-visible:ring-offset-0'
+        className='w-full focus-visible:ring-0 focus-visible:ring-offset-0 overflow-hidden'
         value={content}
-        onChange={(e) => setContent(e.target.value)}
+        rows={1}
+        onChange={(e) => {
+          setContent(e.target.value)
+          e.target.style.height = 'auto'
+          e.target.style.height = `${e.target.scrollHeight}px`
+        }}
         autoFocus={autoFocus}
         onKeyDown={(e) => {
           if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) handleSubmit()

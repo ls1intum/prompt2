@@ -1,12 +1,12 @@
 import { NoteTag, NoteTagColor } from '../../interfaces/InstructorNote'
 
 const transitionFromTagColor: Record<NoteTagColor, string> = {
-  green: 'from-green-200 border-green-600',
-  blue: 'from-blue-200 border-blue-600',
-  red: 'from-red-200 border-red-600',
-  yellow: 'from-yellow-200 border-yellow-600',
-  orange: 'from-orange-200 border-orange-600',
-  pink: 'from-pink-200 border-pink-600',
+  green: 'from-green-200 border-green-600 dark:from-green-800',
+  blue: 'from-blue-200 border-blue-600 dark:from-blue-800',
+  red: 'from-red-200 border-red-600 dark:from-red-800',
+  yellow: 'from-yellow-200 border-yellow-600 dark:from-yellow-800',
+  orange: 'from-orange-200 border-orange-600 dark:from-orange-800',
+  pink: 'from-pink-200 border-pink-600 dark:from-pink-800',
 }
 
 const bgFromTagColor: Record<NoteTagColor, string> = {
@@ -22,7 +22,7 @@ export function InstructorNoteTag({ tag }: { tag: NoteTag }) {
   return (
     <div
       className={
-        'text-xs border-l-2 text-gray-600 pl-1 text-nowrap whitespace-nowrap inline-block bg-gradient-to-r to-transparent ' +
+        'text-xs border-l-2 text-gray-600 dark:text-gray-200 pl-1 text-nowrap whitespace-nowrap inline-block bg-gradient-to-r to-transparent ' +
         transitionFromTagColor[tag.color]
       }
     >
