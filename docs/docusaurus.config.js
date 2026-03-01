@@ -127,6 +127,11 @@ const config = {
             position: 'left',
           },
           {
+            href: 'https://discord.gg/eybNUqD8gf',
+            label: 'Discord',
+            position: 'right',
+          },
+          {
             href: 'https://github.com/ls1intum/prompt2/tree/main',
             label: 'GitHub',
             position: 'right',
@@ -156,6 +161,10 @@ const config = {
           {
             title: 'Community',
             items: [
+              {
+                label: 'Discord Community',
+                href: 'https://discord.gg/eybNUqD8gf',
+              },
               {
                 label: 'GitHub Issues',
                 href: 'https://github.com/ls1intum/prompt2/issues',
