@@ -13,13 +13,15 @@ import (
 func setupInstructorNoteRouter(router *gin.RouterGroup, authMiddleware func() gin.HandlerFunc, permissionRoleMiddleware func(allowedRoles ...string) gin.HandlerFunc) {
 	instructorNoteRouter := router.Group("/instructor-notes", authMiddleware())
 	instructorNoteRouter.GET("/", permissionRoleMiddleware(permissionValidation.PromptAdmin, permissionValidation.PromptLecturer), getAllInstructorNotes)
+	instructorNoteRouter.DELETE("/:note-uuid", permissionRoleMiddleware(permissionValidation.PromptAdmin, permissionValidation.PromptLecturer), deleteInstructorNote)
+
+	instructorNoteRouter.GET("/s/:student-uuid", permissionRoleMiddleware(permissionValidation.PromptAdmin, permissionValidation.PromptLecturer), getInstructorNoteForStudentByID)
+	instructorNoteRouter.POST("/s/:student-uuid", permissionRoleMiddleware(permissionValidation.PromptAdmin, permissionValidation.PromptLecturer), createInstructorNoteForStudentByID)
+
 	instructorNoteRouter.GET("/tags", permissionRoleMiddleware(permissionValidation.PromptAdmin, permissionValidation.PromptLecturer), getAllNoteTags)
 	instructorNoteRouter.POST("/tags", permissionRoleMiddleware(permissionValidation.PromptAdmin), createNoteTag)
 	instructorNoteRouter.PUT("/tags/:tag-uuid", permissionRoleMiddleware(permissionValidation.PromptAdmin), updateNoteTag)
 	instructorNoteRouter.DELETE("/tags/:tag-uuid", permissionRoleMiddleware(permissionValidation.PromptAdmin), deleteNoteTag)
-	instructorNoteRouter.GET("/s/:student-uuid", permissionRoleMiddleware(permissionValidation.PromptAdmin, permissionValidation.PromptLecturer), getInstructorNoteForStudentByID)
-	instructorNoteRouter.POST("/s/:student-uuid", permissionRoleMiddleware(permissionValidation.PromptAdmin, permissionValidation.PromptLecturer), createInstructorNoteForStudentByID)
-	instructorNoteRouter.DELETE("/:note-uuid", permissionRoleMiddleware(permissionValidation.PromptAdmin, permissionValidation.PromptLecturer), deleteInstructorNote)
 }
 
 // getAllInstructorNotes godoc
@@ -136,25 +138,30 @@ func createInstructorNoteForStudentByID(c *gin.Context) {
 // @Failure 500 {object} utils.ErrorResponse
 // @Router /instructor-notes/{note-uuid} [delete]
 func deleteInstructorNote(c *gin.Context) {
-  note_id, err := uuid.Parse(c.Param("note-uuid"))
-  if err != nil {
-    handleError(c, http.StatusBadRequest, err)
-    return
-  }
+	note_id, err := uuid.Parse(c.Param("note-uuid"))
+	if err != nil {
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
 
-  userID, err := utils.GetUserUUIDFromContext(c)
+	userID, err := utils.GetUserUUIDFromContext(c)
 	if err != nil {
 		handleError(c, http.StatusInternalServerError, err)
 		return
 	}
 
-  note, err := DeleteInstructorNote(c, note_id, userID)
-  if err != nil {
-    handleError(c, http.StatusInternalServerError, err)
-    return
-  }
+	if _, err := VerifyNoteOwnership(c, note_id, userID); err != nil {
+		handleError(c, http.StatusForbidden, err)
+		return
+	}
 
-  c.IndentedJSON(http.StatusOK, note)
+	note, err := DeleteInstructorNote(c, note_id, userID)
+	if err != nil {
+		handleError(c, http.StatusInternalServerError, err)
+		return
+	}
+
+	c.IndentedJSON(http.StatusOK, note)
 }
 
 
