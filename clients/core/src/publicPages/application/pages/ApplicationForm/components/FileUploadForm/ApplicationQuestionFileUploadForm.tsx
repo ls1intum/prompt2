@@ -6,7 +6,8 @@ import { ApplicationAnswerFileUpload } from '@core/interfaces/application/applic
 import { CreateApplicationAnswerFileUpload } from '@core/interfaces/application/applicationAnswer/fileUpload/createApplicationAnswerFileUpload'
 import { FileResponse } from '@/network/mutations/uploadFile'
 import { deleteApplicationFile } from '@/network/mutations/deleteApplicationFile'
-import { Alert, AlertDescription, CardDescription, CardTitle } from '@tumaet/prompt-ui-components'
+import { Alert, AlertDescription, CardTitle } from '@tumaet/prompt-ui-components'
+import { FormDescriptionHTML } from '../FormDescriptionHTML'
 
 export interface QuestionFileUploadFormRef {
   validate: () => Promise<boolean>
@@ -88,8 +89,8 @@ export const ApplicationQuestionFileUploadForm = forwardRef<
     <div className='space-y-4'>
       <div>
         <CardTitle className='text-lg'>{question.title}</CardTitle>
-        {question.description && (
-          <CardDescription className='mt-1'>{question.description}</CardDescription>
+        {!isInstructorView && question.description && (
+          <FormDescriptionHTML htmlCode={question.description} />
         )}
         {question.isRequired && <span className='text-red-500 ml-1'>*</span>}
       </div>
