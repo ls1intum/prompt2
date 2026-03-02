@@ -38,6 +38,9 @@ on:
       self_team_allocation_image_tag:
         description: "The tag of the self team allocation image that was built"
         value: ${{ jobs.self-team-allocation.outputs.image_tag }}
+      certificate_image_tag:
+        description: "The tag of the certificate component image that was built"
+        value: ${{ jobs.certificate.outputs.image_tag }}
 
 permissions:
   contents: read
@@ -47,7 +50,7 @@ jobs:
   clients-base:
     uses: ls1intum/.github/.github/workflows/build-and-push-docker-image.yml@v1.1.1
     with:
-      image-name: ghcr.io/ls1intum/prompt2/prompt-clients-base
+      image-name: ls1intum/prompt2/prompt-clients-base
       docker-file: clients/Dockerfile # Defaults to Dockerfile
       docker-context: ./clients
       tags: ${{ inputs.release_tag }}
@@ -64,7 +67,7 @@ jobs:
     needs: clients-base
     uses: ls1intum/.github/.github/workflows/build-and-push-docker-image.yml@v1.1.1
     with:
-      image-name: ghcr.io/ls1intum/prompt2/prompt-clients-core
+      image-name: ls1intum/prompt2/prompt-clients-core
       docker-file: clients/core/Dockerfile # Defaults to Dockerfile
       docker-context: ./clients/core
       tags: ${{ inputs.release_tag }}
@@ -79,7 +82,7 @@ jobs:
     needs: clients-base
     uses: ls1intum/.github/.github/workflows/build-and-push-docker-image.yml@v1.1.1
     with:
-      image-name: ghcr.io/ls1intum/prompt2/prompt-clients-template-component
+      image-name: ls1intum/prompt2/prompt-clients-template-component
       docker-file: clients/template_component/Dockerfile # Defaults to Dockerfile
       docker-context: ./clients/template_component
       tags: ${{ inputs.release_tag }}
@@ -92,7 +95,7 @@ jobs:
     needs: clients-base
     uses: ls1intum/.github/.github/workflows/build-and-push-docker-image.yml@v1.1.1
     with:
-      image-name: ghcr.io/ls1intum/prompt2/prompt-clients-interview-component
+      image-name: ls1intum/prompt2/prompt-clients-interview-component
       docker-file: clients/interview_component/Dockerfile # Defaults to Dockerfile
       docker-context: ./clients/interview_component
       tags: ${{ inputs.release_tag }}
@@ -105,7 +108,7 @@ jobs:
     needs: clients-base
     uses: ls1intum/.github/.github/workflows/build-and-push-docker-image.yml@v1.1.1
     with:
-      image-name: ghcr.io/ls1intum/prompt2/prompt-clients-matching-component
+      image-name: ls1intum/prompt2/prompt-clients-matching-component
       docker-file: clients/matching_component/Dockerfile # Defaults to Dockerfile
       docker-context: ./clients/matching_component
       tags: ${{ inputs.release_tag }}
@@ -118,7 +121,7 @@ jobs:
     needs: clients-base
     uses: ls1intum/.github/.github/workflows/build-and-push-docker-image.yml@v1.1.1
     with:
-      image-name: ghcr.io/ls1intum/prompt2/prompt-clients-intro-course-developer-component
+      image-name: ls1intum/prompt2/prompt-clients-intro-course-developer-component
       docker-file: clients/intro_course_developer_component/Dockerfile # Defaults to Dockerfile
       docker-context: ./clients/intro_course_developer_component
       tags: ${{ inputs.release_tag }}
@@ -131,7 +134,7 @@ jobs:
     needs: clients-base
     uses: ls1intum/.github/.github/workflows/build-and-push-docker-image.yml@v1.1.1
     with:
-      image-name: ghcr.io/ls1intum/prompt2/prompt-clients-assessment-component
+      image-name: ls1intum/prompt2/prompt-clients-assessment-component
       docker-file: clients/assessment_component/Dockerfile # Defaults to Dockerfile
       docker-context: ./clients/assessment_component
       tags: ${{ inputs.release_tag }}
@@ -144,7 +147,7 @@ jobs:
     needs: clients-base
     uses: ls1intum/.github/.github/workflows/build-and-push-docker-image.yml@v1.1.1
     with:
-      image-name: ghcr.io/ls1intum/prompt2/prompt-clients-devops-challenge-component
+      image-name: ls1intum/prompt2/prompt-clients-devops-challenge-component
       docker-file: clients/devops_challenge_component/Dockerfile # Defaults to Dockerfile
       docker-context: ./clients/devops_challenge_component
       tags: ${{ inputs.release_tag }}
@@ -157,7 +160,7 @@ jobs:
     needs: clients-base
     uses: ls1intum/.github/.github/workflows/build-and-push-docker-image.yml@v1.1.1
     with:
-      image-name: ghcr.io/ls1intum/prompt2/prompt-clients-team-allocation-component
+      image-name: ls1intum/prompt2/prompt-clients-team-allocation-component
       docker-file: clients/team_allocation_component/Dockerfile # Defaults to Dockerfile
       docker-context: ./clients/team_allocation_component
       tags: ${{ inputs.release_tag }}
@@ -167,14 +170,27 @@ jobs:
     secrets: inherit
 
   self-team-allocation:
-      needs: clients-base
-      uses: ls1intum/.github/.github/workflows/build-and-push-docker-image.yml@v1.1.1
-      with:
-        image-name: ghcr.io/ls1intum/prompt2/prompt-clients-self-team-allocation-component
-        docker-file: clients/self_team_allocation_component/Dockerfile # Defaults to Dockerfile
-        docker-context: ./clients/self_team_allocation_component
-        tags: ${{ inputs.release_tag }}
-        build-args: |
-          "IMAGE_TAG=${{ needs.clients-base.outputs.image_tag }}"
-          "CORE_HOST=${{ vars.CORE_HOST }}"
-      secrets: inherit
+    needs: clients-base
+    uses: ls1intum/.github/.github/workflows/build-and-push-docker-image.yml@v1.1.1
+    with:
+      image-name: ls1intum/prompt2/prompt-clients-self-team-allocation-component
+      docker-file: clients/self_team_allocation_component/Dockerfile # Defaults to Dockerfile
+      docker-context: ./clients/self_team_allocation_component
+      tags: ${{ inputs.release_tag }}
+      build-args: |
+        "IMAGE_TAG=${{ needs.clients-base.outputs.image_tag }}"
+        "CORE_HOST=${{ vars.CORE_HOST }}"
+    secrets: inherit
+
+  certificate:
+    needs: clients-base
+    uses: ls1intum/.github/.github/workflows/build-and-push-docker-image.yml@v1.1.1
+    with:
+      image-name: ls1intum/prompt2/prompt-clients-certificate-component
+      docker-file: clients/certificate_component/Dockerfile
+      docker-context: ./clients/certificate_component
+      tags: ${{ inputs.release_tag }}
+      build-args: |
+        "IMAGE_TAG=${{ needs.clients-base.outputs.image_tag }}"
+        "CORE_HOST=${{ vars.CORE_HOST }}"
+    secrets: inherit

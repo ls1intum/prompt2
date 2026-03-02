@@ -14,6 +14,7 @@ postgres_assessment_data/
 postgres_self_team_allocation_data/
 postgres_template_server_data/
 postgres_interview_data/
+postgres_certificate_data/
 seaweedfs_master_data/
 seaweedfs_volume_data/
 seaweedfs_filer_data/
@@ -24,3 +25,4 @@ seaweedfs_filer_data/
 
 **/*/.DS_Store
 **/.gocache/
+.DS_Store

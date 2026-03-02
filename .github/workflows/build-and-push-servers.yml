@@ -26,6 +26,9 @@ on:
       server_interview_image_tag:
         description: "The tag of the interview server image that was built"
         value: ${{ jobs.interview.outputs.image_tag }}
+      server_certificate_image_tag:
+        description: "The tag of the certificate server image that was built"
+        value: ${{ jobs.certificate.outputs.image_tag }}
 
 permissions:
   contents: read
@@ -35,7 +38,7 @@ jobs:
   core:
     uses: ls1intum/.github/.github/workflows/build-and-push-docker-image.yml@v1.1.1
     with:
-      image-name: ghcr.io/ls1intum/prompt2/prompt-server-core # Defaults to the repository name
+      image-name: ls1intum/prompt2/prompt-server-core # Defaults to the repository name
       docker-file: servers/Dockerfile # Defaults to Dockerfile
       docker-context: ./servers/core
       tags: ${{ inputs.release_tag }}
@@ -43,7 +46,7 @@ jobs:
   intro-course:
     uses: ls1intum/.github/.github/workflows/build-and-push-docker-image.yml@v1.1.1
     with:
-      image-name: ghcr.io/ls1intum/prompt2/prompt-server-intro-course
+      image-name: ls1intum/prompt2/prompt-server-intro-course
       docker-file: servers/Dockerfile
       docker-context: ./servers/intro_course
       tags: ${{ inputs.release_tag }}
@@ -51,7 +54,7 @@ jobs:
   team-allocation:
     uses: ls1intum/.github/.github/workflows/build-and-push-docker-image.yml@v1.1.1
     with:
-      image-name: ghcr.io/ls1intum/prompt2/prompt-server-team-allocation
+      image-name: ls1intum/prompt2/prompt-server-team-allocation
       docker-file: servers/Dockerfile
       docker-context: ./servers/team_allocation
       tags: ${{ inputs.release_tag }}
@@ -59,24 +62,32 @@ jobs:
   assessment:
     uses: ls1intum/.github/.github/workflows/build-and-push-docker-image.yml@v1.1.1
     with:
-      image-name: ghcr.io/ls1intum/prompt2/prompt-server-assessment
+      image-name: ls1intum/prompt2/prompt-server-assessment
       docker-file: servers/Dockerfile
       docker-context: ./servers/assessment
       tags: ${{ inputs.release_tag }}
     secrets: inherit
   self-team-allocation:
-      uses: ls1intum/.github/.github/workflows/build-and-push-docker-image.yml@v1.1.1
-      with:
-        image-name: ghcr.io/ls1intum/prompt2/prompt-server-self-team-allocation
-        docker-file: servers/Dockerfile
-        docker-context: ./servers/self_team_allocation
-        tags: ${{ inputs.release_tag }}
-      secrets: inherit
+    uses: ls1intum/.github/.github/workflows/build-and-push-docker-image.yml@v1.1.1
+    with:
+      image-name: ls1intum/prompt2/prompt-server-self-team-allocation
+      docker-file: servers/Dockerfile
+      docker-context: ./servers/self_team_allocation
+      tags: ${{ inputs.release_tag }}
+    secrets: inherit
   interview:
     uses: ls1intum/.github/.github/workflows/build-and-push-docker-image.yml@v1.1.1
     with:
-      image-name: ghcr.io/ls1intum/prompt2/prompt-server-interview
+      image-name: ls1intum/prompt2/prompt-server-interview
       docker-file: servers/Dockerfile
       docker-context: ./servers/interview
+      tags: ${{ inputs.release_tag }}
+    secrets: inherit
+  certificate:
+    uses: ls1intum/.github/.github/workflows/build-and-push-docker-image.yml@v1.1.1
+    with:
+      image-name: ls1intum/prompt2/prompt-server-certificate
+      docker-file: servers/certificate/Dockerfile
+      docker-context: ./servers/certificate
       tags: ${{ inputs.release_tag }}
     secrets: inherit
