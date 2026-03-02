@@ -51,9 +51,9 @@ definitions:
     type: object
   interviewSlotDTO.AssignmentInfo:
     properties:
-      assigned_at:
+      assignedAt:
         type: string
-      course_participation_id:
+      courseParticipationId:
         type: string
       id:
         type: string
@@ -65,20 +65,20 @@ definitions:
       capacity:
         minimum: 1
         type: integer
-      end_time:
+      endTime:
         type: string
       location:
         type: string
-      start_time:
+      startTime:
         type: string
     required:
     - capacity
-    - end_time
-    - start_time
+    - endTime
+    - startTime
     type: object
   interviewSlotDTO.InterviewSlotResponse:
     properties:
-      assigned_count:
+      assignedCount:
         type: integer
       assignments:
         items:
@@ -86,19 +86,19 @@ definitions:
         type: array
       capacity:
         type: integer
-      course_phase_id:
+      coursePhaseId:
         type: string
-      created_at:
+      createdAt:
         type: string
-      end_time:
+      endTime:
         type: string
       id:
         type: string
       location:
         type: string
-      start_time:
+      startTime:
         type: string
-      updated_at:
+      updatedAt:
         type: string
     type: object
   interviewSlotDTO.StudentInfo:
@@ -117,16 +117,16 @@ definitions:
       capacity:
         minimum: 1
         type: integer
-      end_time:
+      endTime:
         type: string
       location:
         type: string
-      start_time:
+      startTime:
         type: string
     required:
     - capacity
-    - end_time
-    - start_time
+    - endTime
+    - startTime
     type: object
   pgtype.InfinityModifier:
     enum:
