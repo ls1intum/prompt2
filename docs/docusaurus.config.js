@@ -8,6 +8,8 @@ import {themes as prismThemes} from 'prism-react-renderer';
 
 // This runs in Node.js - Don't use client-side code here (browser APIs, JSX...)
 
+const DISCORD_INVITE_URL = 'https://discord.gg/eybNUqD8gf';
+
 /** @type {import('@docusaurus/types').Config} */
 const config = {
   title: 'PROMPT Documentation',
@@ -127,7 +129,7 @@ const config = {
             position: 'left',
           },
           {
-            href: 'https://discord.gg/eybNUqD8gf',
+            href: DISCORD_INVITE_URL,
             label: 'Discord',
             position: 'right',
           },
@@ -163,7 +165,7 @@ const config = {
             items: [
               {
                 label: 'Discord Community',
-                href: 'https://discord.gg/eybNUqD8gf',
+                href: DISCORD_INVITE_URL,
               },
               {
                 label: 'GitHub Issues',
