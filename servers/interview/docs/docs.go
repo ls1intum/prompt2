@@ -697,10 +697,10 @@ const docTemplate = `{
         "interviewSlotDTO.AssignmentInfo": {
             "type": "object",
             "properties": {
-                "assigned_at": {
+                "assignedAt": {
                     "type": "string"
                 },
-                "course_participation_id": {
+                "courseParticipationId": {
                     "type": "string"
                 },
                 "id": {
@@ -715,21 +715,21 @@ const docTemplate = `{
             "type": "object",
             "required": [
                 "capacity",
-                "end_time",
-                "start_time"
+                "endTime",
+                "startTime"
             ],
             "properties": {
                 "capacity": {
                     "type": "integer",
                     "minimum": 1
                 },
-                "end_time": {
+                "endTime": {
                     "type": "string"
                 },
                 "location": {
                     "type": "string"
                 },
-                "start_time": {
+                "startTime": {
                     "type": "string"
                 }
             }
@@ -737,7 +737,7 @@ const docTemplate = `{
         "interviewSlotDTO.InterviewSlotResponse": {
             "type": "object",
             "properties": {
-                "assigned_count": {
+                "assignedCount": {
                     "type": "integer"
                 },
                 "assignments": {
@@ -749,13 +749,13 @@ const docTemplate = `{
                 "capacity": {
                     "type": "integer"
                 },
-                "course_phase_id": {
+                "coursePhaseId": {
                     "type": "string"
                 },
-                "created_at": {
+                "createdAt": {
                     "type": "string"
                 },
-                "end_time": {
+                "endTime": {
                     "type": "string"
                 },
                 "id": {
@@ -764,10 +764,10 @@ const docTemplate = `{
                 "location": {
                     "type": "string"
                 },
-                "start_time": {
+                "startTime": {
                     "type": "string"
                 },
-                "updated_at": {
+                "updatedAt": {
                     "type": "string"
                 }
             }
@@ -793,21 +793,21 @@ const docTemplate = `{
             "type": "object",
             "required": [
                 "capacity",
-                "end_time",
-                "start_time"
+                "endTime",
+                "startTime"
             ],
             "properties": {
                 "capacity": {
                     "type": "integer",
                     "minimum": 1
                 },
-                "end_time": {
+                "endTime": {
                     "type": "string"
                 },
                 "location": {
                     "type": "string"
                 },
-                "start_time": {
+                "startTime": {
                     "type": "string"
                 }
             }

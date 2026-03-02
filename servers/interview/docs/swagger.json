@@ -691,10 +691,10 @@
         "interviewSlotDTO.AssignmentInfo": {
             "type": "object",
             "properties": {
-                "assigned_at": {
+                "assignedAt": {
                     "type": "string"
                 },
-                "course_participation_id": {
+                "courseParticipationId": {
                     "type": "string"
                 },
                 "id": {
@@ -709,21 +709,21 @@
             "type": "object",
             "required": [
                 "capacity",
-                "end_time",
-                "start_time"
+                "endTime",
+                "startTime"
             ],
             "properties": {
                 "capacity": {
                     "type": "integer",
                     "minimum": 1
                 },
-                "end_time": {
+                "endTime": {
                     "type": "string"
                 },
                 "location": {
                     "type": "string"
                 },
-                "start_time": {
+                "startTime": {
                     "type": "string"
                 }
             }
@@ -731,7 +731,7 @@
         "interviewSlotDTO.InterviewSlotResponse": {
             "type": "object",
             "properties": {
-                "assigned_count": {
+                "assignedCount": {
                     "type": "integer"
                 },
                 "assignments": {
@@ -743,13 +743,13 @@
                 "capacity": {
                     "type": "integer"
                 },
-                "course_phase_id": {
+                "coursePhaseId": {
                     "type": "string"
                 },
-                "created_at": {
+                "createdAt": {
                     "type": "string"
                 },
-                "end_time": {
+                "endTime": {
                     "type": "string"
                 },
                 "id": {
@@ -758,10 +758,10 @@
                 "location": {
                     "type": "string"
                 },
-                "start_time": {
+                "startTime": {
                     "type": "string"
                 },
-                "updated_at": {
+                "updatedAt": {
                     "type": "string"
                 }
             }
@@ -787,21 +787,21 @@
             "type": "object",
             "required": [
                 "capacity",
-                "end_time",
-                "start_time"
+                "endTime",
+                "startTime"
             ],
             "properties": {
                 "capacity": {
                     "type": "integer",
                     "minimum": 1
                 },
-                "end_time": {
+                "endTime": {
                     "type": "string"
                 },
                 "location": {
                     "type": "string"
                 },
-                "start_time": {
+                "startTime": {
                     "type": "string"
                 }
             }
