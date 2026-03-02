@@ -4,7 +4,8 @@ on:
   pull_request:
     types: [labeled]
 
-permissions: {}
+permissions:
+  contents: read
 
 jobs:
   notify:
