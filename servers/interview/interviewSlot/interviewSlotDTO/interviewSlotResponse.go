@@ -8,13 +8,13 @@ import (
 
 type InterviewSlotResponse struct {
 	ID            uuid.UUID        `json:"id"`
-	CoursePhaseID uuid.UUID        `json:"course_phase_id"`
-	StartTime     time.Time        `json:"start_time"`
-	EndTime       time.Time        `json:"end_time"`
+	CoursePhaseID uuid.UUID        `json:"coursePhaseId"`
+	StartTime     time.Time        `json:"startTime"`
+	EndTime       time.Time        `json:"endTime"`
 	Location      *string          `json:"location"`
 	Capacity      int32            `json:"capacity"`
-	AssignedCount int64            `json:"assigned_count"`
+	AssignedCount int64            `json:"assignedCount"`
 	Assignments   []AssignmentInfo `json:"assignments"`
-	CreatedAt     time.Time        `json:"created_at"`
-	UpdatedAt     time.Time        `json:"updated_at"`
+	CreatedAt     time.Time        `json:"createdAt"`
+	UpdatedAt     time.Time        `json:"updatedAt"`
 }

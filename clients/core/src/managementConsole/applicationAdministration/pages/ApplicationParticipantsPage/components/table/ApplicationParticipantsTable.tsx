@@ -1,4 +1,4 @@
-import { ReactNode, useCallback, useMemo } from 'react'
+import { ReactNode, useCallback, useMemo, useRef } from 'react'
 import { PromptTable, TableFilter } from '@tumaet/prompt-ui-components'
 
 import { useDeleteApplications } from '../../hooks/useDeleteApplications'
@@ -17,6 +17,7 @@ export const ApplicationParticipantsTable = ({ phaseId }: { phaseId: string }): 
   const { participations, additionalScores } = useApplicationStore()
   const { mutate: deleteApplications } = useDeleteApplications()
   const navigate = useNavigate()
+  const tableContainerRef = useRef<HTMLDivElement | null>(null)
 
   const data = useMemo(
     () => buildApplicationRows(participations, additionalScores),
@@ -33,13 +34,32 @@ export const ApplicationParticipantsTable = ({ phaseId }: { phaseId: string }): 
     [additionalScores],
   )
 
+  const getVisibleApplicationIds = useCallback(() => {
+    const idsFromVisibleRows = Array.from(
+      tableContainerRef.current?.querySelectorAll('[data-application-participation-id]') ?? [],
+    )
+      .map((element) => element.getAttribute('data-application-participation-id') ?? '')
+      .filter((id, index, ids) => Boolean(id) && ids.indexOf(id) === index)
+
+    if (idsFromVisibleRows.length > 0) {
+      return idsFromVisibleRows
+    }
+
+    return data.map((row) => row.courseParticipationID)
+  }, [data])
+
   const viewApplication = useCallback(
     (row: ApplicationRow) => {
       navigate(
         `/management/course/${courseId}/${phaseId}/participants/${row.courseParticipationID}`,
+        {
+          state: {
+            filteredApplicationIds: getVisibleApplicationIds(),
+          },
+        },
       )
     },
-    [navigate, courseId, phaseId],
+    [navigate, courseId, phaseId, getVisibleApplicationIds],
   )
 
   const { mutate: updateBatch } = useUpdateCoursePhaseParticipationBatch()
@@ -63,12 +83,14 @@ export const ApplicationParticipantsTable = ({ phaseId }: { phaseId: string }): 
   }, [deleteApplications, viewApplication, phaseId, updateBatch])
 
   return (
-    <PromptTable<ApplicationRow>
-      data={data}
-      columns={columns}
-      filters={filters}
-      actions={actions}
-      onRowClick={viewApplication}
-    />
+    <div ref={tableContainerRef}>
+      <PromptTable<ApplicationRow>
+        data={data}
+        columns={columns}
+        filters={filters}
+        actions={actions}
+        onRowClick={viewApplication}
+      />
+    </div>
   )
 }

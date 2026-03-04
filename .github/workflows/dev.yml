@@ -15,6 +15,24 @@ permissions:
   packages: write
 
 jobs:
+  assign-author:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    steps:
+      - name: Assign PR author
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const author = context.payload.pull_request.user.login;
+            await github.rest.issues.addAssignees({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.pull_request.number,
+              assignees: [author]
+            });
+
   detect-migrations:
     if: github.event_name == 'pull_request'
     uses: ./.github/workflows/detect-migrations.yml
