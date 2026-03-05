@@ -14,7 +14,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5/pgxpool"
 	promptSDK "github.com/ls1intum/prompt-sdk"
-	"github.com/ls1intum/prompt-sdk/utils"
 	sdkUtils "github.com/ls1intum/prompt-sdk/utils"
 	"github.com/ls1intum/prompt2/servers/intro_course/config"
 	"github.com/ls1intum/prompt2/servers/intro_course/copy"
@@ -48,7 +47,7 @@ func runMigrations(databaseURL string) {
 }
 
 func initSentry() {
-	sentryDsn := utils.GetEnv("SENTRY_DSN_INTRO_COURSE", "")
+	sentryDsn := sdkUtils.GetEnv("SENTRY_DSN_INTRO_COURSE", "")
 	if sentryDsn == "" {
 		log.Info("Sentry DSN not configured, skipping initialization")
 		return
@@ -59,7 +58,7 @@ func initSentry() {
 
 	if err := sentry.Init(sentry.ClientOptions{
 		Dsn:              sentryDsn,
-		Environment:      utils.GetEnv("ENVIRONMENT", "development"),
+		Environment:      sdkUtils.GetEnv("ENVIRONMENT", "development"),
 		Debug:            false,
 		Transport:        transport,
 		EnableLogs:       true,
