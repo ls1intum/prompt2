@@ -13,7 +13,6 @@ import (
 	sentrylogrus "github.com/getsentry/sentry-go/logrus"
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/ls1intum/prompt-sdk/utils"
 	sdkUtils "github.com/ls1intum/prompt-sdk/utils"
 	"github.com/ls1intum/prompt2/servers/core/applicationAdministration"
 	"github.com/ls1intum/prompt2/servers/core/course"
@@ -114,7 +113,7 @@ func initSentry() {
 
 	if err := sentry.Init(sentry.ClientOptions{
 		Dsn:              sentryDsn,
-		Environment:      utils.GetEnv("ENVIRONMENT", "development"),
+		Environment:      sdkUtils.GetEnv("ENVIRONMENT", "development"),
 		Debug:            false,
 		Transport:        transport,
 		EnableLogs:       true,
