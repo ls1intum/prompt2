@@ -1,19 +1,8 @@
-import { useState } from 'react'
-import {
-  Button,
-  DropdownMenuCheckboxItem,
-  DropdownMenu,
-  DropdownMenuTrigger,
-  DropdownMenuContent,
-  Textarea,
-} from '@tumaet/prompt-ui-components'
-import { Send, Tag } from 'lucide-react'
+import { useState, useRef, useEffect } from 'react'
 import { InstructorNoteTag } from './InstructorNoteTag'
 import { NoteTag } from '../../interfaces/InstructorNote'
-import { useNoteTags } from '@core/network/hooks/useInstructorNoteTags'
-
-const isMac = /Mac/i.test(navigator.platform)
-const submitShortcut = isMac ? '⌘↵' : 'Ctrl+↵'
+import { InstructorNoteComposerTagPicker } from './InstructorNoteFormElements/InstructorNoteComposerTagPicker'
+import { InstructorNoteComposerSubmitButton } from './InstructorNoteFormElements/InstructorNoteComposerSubmitButton'
 
 interface NoteComposerProps {
   onSubmit: (content: string, tagIds: string[]) => Promise<void>
@@ -34,7 +23,26 @@ export function NoteComposer({
 }: NoteComposerProps) {
   const [content, setContent] = useState(initialContent)
   const [selectedTags, setSelectedTags] = useState<NoteTag[]>(initialTags)
-  const { data: availableTags = [] } = useNoteTags()
+  const [isMultiLine, setIsMultiLine] = useState(false)
+  const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const singleLineHeightRef = useRef(0)
+
+  useEffect(() => {
+    const el = textareaRef.current
+    if (!el) return
+    // Measure natural single-line height
+    const saved = el.value
+    el.value = 'x'
+    el.style.height = 'auto'
+    singleLineHeightRef.current = el.scrollHeight
+    el.value = saved
+    // Resize for initial content (edit mode)
+    if (initialContent) {
+      el.style.height = 'auto'
+      el.style.height = `${el.scrollHeight}px`
+      setIsMultiLine(el.scrollHeight > singleLineHeightRef.current)
+    }
+  }, [])
 
   const sendUnavailable = !content.trim() || isPending
   const isEditMode = onCancel !== undefined
@@ -54,39 +62,12 @@ export function NoteComposer({
       )
       setContent('')
       setSelectedTags([])
+      setIsMultiLine(false)
+      if (textareaRef.current) textareaRef.current.style.height = 'auto'
     } catch {
       // error handled upstream; keep form open
     }
   }
-
-  const tagPicker = (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <button className='flex items-center gap-1 text-xs text-muted-foreground rounded px-1.5 py-0.5 hover:bg-muted hover:text-foreground'>
-          <Tag className='w-3 h-3' />
-          <span>tag</span>
-        </button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent className='w-auto p-1' align='start'>
-        {availableTags.length === 0 ? (
-          <p className='text-xs text-muted-foreground px-2 py-1'>No tags available</p>
-        ) : (
-          availableTags.map((tag) => {
-            const isSelected = selectedTags.some((t) => t.id === tag.id)
-            return (
-              <DropdownMenuCheckboxItem
-                key={tag.id}
-                onClick={() => toggleTag(tag)}
-                checked={isSelected}
-              >
-                <InstructorNoteTag tag={tag} />
-              </DropdownMenuCheckboxItem>
-            )
-          })
-        )}
-      </DropdownMenuContent>
-    </DropdownMenu>
-  )
 
   return (
     <div className='space-y-1.5'>
@@ -98,42 +79,40 @@ export function NoteComposer({
         </div>
       )}
 
-      <Textarea
-        placeholder={isEditMode ? undefined : 'Leave an instructor note'}
-        className='w-full focus-visible:ring-0 focus-visible:ring-offset-0 overflow-hidden'
-        value={content}
-        rows={1}
-        onChange={(e) => {
-          setContent(e.target.value)
-          e.target.style.height = 'auto'
-          e.target.style.height = `${e.target.scrollHeight}px`
-        }}
-        autoFocus={autoFocus}
-        onKeyDown={(e) => {
-          if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) handleSubmit()
-        }}
-      />
-
-      <div className='flex items-start justify-between'>
-        {tagPicker}
-        {isEditMode ? (
-          <div className='flex gap-2'>
-            <Button variant='ghost' size='sm' onClick={onCancel}>
-              Cancel
-            </Button>
-            <Button size='sm' onClick={handleSubmit} disabled={sendUnavailable}>
-              {isPending ? 'Saving...' : 'Save'}
-            </Button>
-          </div>
-        ) : (
-          <div className='flex items-center gap-2 text-xs text-muted-foreground'>
-            <p className={`font-bold ${sendUnavailable ? '' : 'text-black'}`}>{submitShortcut}</p>
-            <p>or</p>
-            <Button size='sm' onClick={handleSubmit} disabled={sendUnavailable}>
-              <Send />
-            </Button>
-          </div>
-        )}
+      <div
+        className={
+          `flex ${isMultiLine ? 'items-end' : 'items-start'} ` +
+          'gap-1 rounded-md border border-input bg-background focus-within:ring-1 focus-within:ring-ring px-2 py-1.5'
+        }
+      >
+        <textarea
+          ref={textareaRef}
+          placeholder={isEditMode ? undefined : 'Leave an instructor note'}
+          className={
+            `ml-1 flex-1 min-w-0 bg-transparent pt-0.5 ${isMultiLine ? 'pb-0.5' : ''} ` +
+            'text-sm placeholder:text-muted-foreground focus:outline-none resize-none overflow-hidden'
+          }
+          value={content}
+          rows={1}
+          onChange={(e) => {
+            setContent(e.target.value)
+            e.target.style.height = 'auto'
+            const newHeight = e.target.scrollHeight
+            e.target.style.height = `${newHeight}px`
+            setIsMultiLine(newHeight > singleLineHeightRef.current)
+          }}
+          autoFocus={autoFocus}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) handleSubmit()
+            if (e.key === 'Escape' && isEditMode) onCancel?.()
+          }}
+        />
+        <InstructorNoteComposerTagPicker selectedTags={selectedTags} onToggle={toggleTag} />
+        <InstructorNoteComposerSubmitButton
+          onClick={handleSubmit}
+          disabled={sendUnavailable}
+          isEditMode={isEditMode}
+        />
       </div>
     </div>
   )
