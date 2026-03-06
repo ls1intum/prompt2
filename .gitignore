@@ -26,3 +26,4 @@ seaweedfs_filer_data/
 **/*/.DS_Store
 **/.gocache/
 .DS_Store
+.gemini/
