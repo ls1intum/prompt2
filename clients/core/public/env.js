@@ -16,4 +16,5 @@ window.env = {
   GITHUB_REF: '$GITHUB_REF - Will be here in Production',
   SERVER_IMAGE_TAG: '$SERVER_IMAGE_TAG - Image Tag',
   SENTRY_DSN_CLIENT: '', // Sentry DSN for core client - leave empty for local development
+  ENABLE_PASSKEYS: 'true', // Enable passkey authentication
 }
