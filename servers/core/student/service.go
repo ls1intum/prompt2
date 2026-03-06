@@ -137,6 +137,10 @@ func CreateOrUpdateStudent(ctx context.Context, transactionQueries *db.Queries, 
 	} else if studentObj.MatriculationNumber != "" {
 		// Regular university student with matriculation number
 		studentByEmail, err = GetStudentByMatriculationNumberAndUniversityLogin(ctx, studentObj.MatriculationNumber, studentObj.UniversityLogin)
+		if errors.Is(err, sql.ErrNoRows) {
+			// Fallback: student may have been stored before matriculation number was available
+			studentByEmail, err = GetStudentByUniversityLogin(ctx, studentObj.UniversityLogin)
+		}
 	} else {
 		// University account holder without matriculation number (e.g. external TUM member)
 		studentByEmail, err = GetStudentByUniversityLogin(ctx, studentObj.UniversityLogin)

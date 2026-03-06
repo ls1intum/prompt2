@@ -311,6 +311,10 @@ func GetApplicationAuthenticatedByMatriculationNumberAndUniversityLogin(ctx cont
 	var err error
 	if matriculationNumber != "" {
 		studentObj, err = student.GetStudentByMatriculationNumberAndUniversityLogin(ctxWithTimeout, matriculationNumber, universityLogin)
+		if errors.Is(err, sql.ErrNoRows) {
+			// Fallback: student may have been stored before matriculation number was available
+			studentObj, err = student.GetStudentByUniversityLogin(ctxWithTimeout, universityLogin)
+		}
 	} else {
 		studentObj, err = student.GetStudentByUniversityLogin(ctxWithTimeout, universityLogin)
 	}
