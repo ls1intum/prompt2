@@ -3,19 +3,19 @@ package applicationDTO
 import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
-	db "github.com/ls1intum/prompt2/servers/core/db/sqlc"
+	db "github.com/prompt-edu/prompt/servers/core/db/sqlc"
 )
 
 type CreateQuestionFileUpload struct {
-	CoursePhaseID        uuid.UUID   `json:"coursePhaseID"`
-	Title                string      `json:"title"`
-	Description          string      `json:"description"`
-	IsRequired           bool        `json:"isRequired"`
-	AllowedFileTypes     string      `json:"allowedFileTypes"`
-	MaxFileSizeMB        int         `json:"maxFileSizeMB"`
-	OrderNum             int         `json:"orderNum"`
+	CoursePhaseID            uuid.UUID   `json:"coursePhaseID"`
+	Title                    string      `json:"title"`
+	Description              string      `json:"description"`
+	IsRequired               bool        `json:"isRequired"`
+	AllowedFileTypes         string      `json:"allowedFileTypes"`
+	MaxFileSizeMB            int         `json:"maxFileSizeMB"`
+	OrderNum                 int         `json:"orderNum"`
 	AccessibleForOtherPhases pgtype.Bool `json:"accessibleForOtherPhases" swaggertype:"boolean"`
-	AccessKey            pgtype.Text `json:"accessKey" swaggertype:"string"`
+	AccessKey                pgtype.Text `json:"accessKey" swaggertype:"string"`
 }
 
 func (a CreateQuestionFileUpload) GetDBModel() db.CreateApplicationQuestionFileUploadParams {
