@@ -148,9 +148,7 @@ export const StudentForm = forwardRef<StudentComponentRef, StudentFormProps>(fun
               name='matriculationNumber'
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>
-                    Matriculation Number
-                  </FormLabel>
+                  <FormLabel>Matriculation Number</FormLabel>
                   <FormControl>
                     <Input
                       {...field}
