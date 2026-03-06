@@ -1,4 +1,4 @@
-ARG IMAGE_TAG
+ARG IMAGE_TAG=latest
 FROM ghcr.io/prompt-edu/prompt/prompt-clients-base:${IMAGE_TAG} AS core-base
 
 WORKDIR /app/matching_component
