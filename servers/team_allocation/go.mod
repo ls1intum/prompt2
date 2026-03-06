@@ -1,4 +1,4 @@
-module github.com/ls1intum/prompt2/servers/team_allocation
+module github.com/prompt-edu/prompt/servers/team_allocation
 
 go 1.26
 
