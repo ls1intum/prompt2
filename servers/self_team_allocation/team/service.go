@@ -10,9 +10,9 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	promptSDK "github.com/ls1intum/prompt-sdk"
 	"github.com/ls1intum/prompt-sdk/promptTypes"
-	db "github.com/ls1intum/prompt2/servers/self_team_allocation/db/sqlc"
-	"github.com/ls1intum/prompt2/servers/self_team_allocation/team/teamDTO"
-	"github.com/ls1intum/prompt2/servers/self_team_allocation/timeframe"
+	db "github.com/prompt-edu/prompt/servers/self_team_allocation/db/sqlc"
+	"github.com/prompt-edu/prompt/servers/self_team_allocation/team/teamDTO"
+	"github.com/prompt-edu/prompt/servers/self_team_allocation/timeframe"
 	log "github.com/sirupsen/logrus"
 )
 

@@ -2,7 +2,7 @@ package applicationDTO
 
 import (
 	"github.com/google/uuid"
-	"github.com/ls1intum/prompt2/servers/core/student/studentDTO"
+	"github.com/prompt-edu/prompt/servers/core/student/studentDTO"
 )
 
 type StatusEnum string

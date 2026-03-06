@@ -6,7 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	promptSDK "github.com/ls1intum/prompt-sdk"
-	"github.com/ls1intum/prompt2/servers/self_team_allocation/team/teamDTO"
+	"github.com/prompt-edu/prompt/servers/self_team_allocation/team/teamDTO"
 	log "github.com/sirupsen/logrus"
 )
 
