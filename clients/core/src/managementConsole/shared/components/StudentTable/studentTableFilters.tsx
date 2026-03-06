@@ -71,6 +71,9 @@ export function getStudentTableFilters(studentsWithCourses: StudentWithCourses[]
           <DropdownMenuSub>
             <DropdownMenuSubTrigger>Tag</DropdownMenuSubTrigger>
             <DropdownMenuSubContent>
+              {tagOptions.length == 0 && (
+                <p className='text-muted-foreground text-sm px-1'>No tags available</p>
+              )}
               {tagOptions.map((tag) => (
                 <DropdownMenuCheckboxItem
                   key={tag.id}
