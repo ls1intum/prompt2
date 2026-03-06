@@ -1,4 +1,4 @@
-module github.com/ls1intum/prompt2/servers/interview
+module github.com/prompt-edu/prompt/servers/interview
 
 go 1.26
 
