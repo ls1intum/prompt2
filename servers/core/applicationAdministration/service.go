@@ -18,6 +18,7 @@ import (
 	promptSDK "github.com/ls1intum/prompt-sdk"
 	db "github.com/ls1intum/prompt2/servers/core/db/sqlc"
 	"github.com/ls1intum/prompt2/servers/core/student"
+	"github.com/ls1intum/prompt2/servers/core/student/studentDTO"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -306,7 +307,13 @@ func GetApplicationAuthenticatedByMatriculationNumberAndUniversityLogin(ctx cont
 	ctxWithTimeout, cancel := db.GetTimeoutContext(ctx)
 	defer cancel()
 
-	studentObj, err := student.GetStudentByMatriculationNumberAndUniversityLogin(ctxWithTimeout, matriculationNumber, universityLogin)
+	var studentObj studentDTO.Student
+	var err error
+	if matriculationNumber != "" {
+		studentObj, err = student.GetStudentByMatriculationNumberAndUniversityLogin(ctxWithTimeout, matriculationNumber, universityLogin)
+	} else {
+		studentObj, err = student.GetStudentByUniversityLogin(ctxWithTimeout, universityLogin)
+	}
 	if err != nil && errors.Is(err, sql.ErrNoRows) {
 		return applicationDTO.Application{
 			Status:             applicationDTO.StatusNewUser,

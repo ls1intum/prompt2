@@ -150,7 +150,6 @@ export const StudentForm = forwardRef<StudentComponentRef, StudentFormProps>(fun
                 <FormItem>
                   <FormLabel>
                     Matriculation Number
-                    {requiredStar}
                   </FormLabel>
                   <FormControl>
                     <Input
