@@ -66,6 +66,7 @@ export const AddCourseProperties: React.FC<AddCoursePropertiesProps> = ({
     const filteredValue = e.target.value.toLowerCase().replace(/[^a-z0-9]/g, '')
     form.setValue('semesterTag', filteredValue, { shouldValidate: true })
     form.clearErrors('name')
+    form.clearErrors('semesterTag')
   }
 
   const checkNameAvailability = async () => {
@@ -79,6 +80,10 @@ export const AddCourseProperties: React.FC<AddCoursePropertiesProps> = ({
           type: 'manual',
           message: `A course with name "${name}" and semester tag "${semesterTag}" already exists. Please
                 choose a different name or semester tag.`,
+        })
+        form.setError('semesterTag', {
+          type: 'manual',
+          message: 'Part of a conflicting name + semester tag combination.',
         })
       }
     } catch {
@@ -103,6 +108,7 @@ export const AddCourseProperties: React.FC<AddCoursePropertiesProps> = ({
                   onChange={(e) => {
                     field.onChange(e)
                     form.clearErrors('name')
+                    form.clearErrors('semesterTag')
                   }}
                   onBlur={async () => {
                     field.onBlur()
