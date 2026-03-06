@@ -138,7 +138,9 @@ export const AddTemplateDialog = ({
         ) : isError && (error as any)?.response?.status === 409 ? (
           <>
             <DialogHeader>
-              <DialogTitle className='text-2xl font-bold text-center'>Add a New Template</DialogTitle>
+              <DialogTitle className='text-2xl font-bold text-center'>
+                Add a New Template
+              </DialogTitle>
             </DialogHeader>
             <Alert variant='destructive'>
               <AlertTitle>Name already taken</AlertTitle>
