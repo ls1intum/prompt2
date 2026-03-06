@@ -10,10 +10,10 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
 	promptSDK "github.com/ls1intum/prompt-sdk"
-	"github.com/ls1intum/prompt2/servers/assessment/assessmentType"
-	"github.com/ls1intum/prompt2/servers/assessment/coursePhaseConfig"
-	db "github.com/ls1intum/prompt2/servers/assessment/db/sqlc"
-	"github.com/ls1intum/prompt2/servers/assessment/evaluations/evaluationCompletion/evaluationCompletionDTO"
+	"github.com/prompt-edu/prompt/servers/assessment/assessmentType"
+	"github.com/prompt-edu/prompt/servers/assessment/coursePhaseConfig"
+	db "github.com/prompt-edu/prompt/servers/assessment/db/sqlc"
+	"github.com/prompt-edu/prompt/servers/assessment/evaluations/evaluationCompletion/evaluationCompletionDTO"
 	log "github.com/sirupsen/logrus"
 )
 
