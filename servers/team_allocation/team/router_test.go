@@ -9,7 +9,7 @@ import (
 	"testing"
 
 	"github.com/gin-gonic/gin"
-	"github.com/ls1intum/prompt-sdk/promptTypes"
+	"github.com/prompt-edu/prompt-sdk/promptTypes"
 	"github.com/prompt-edu/prompt/servers/team_allocation/team/teamDTO"
 	"github.com/prompt-edu/prompt/servers/team_allocation/testutils"
 	"github.com/stretchr/testify/assert"
