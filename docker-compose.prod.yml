@@ -649,9 +649,10 @@ services:
   seaweedfs-s3:
     image: chrislusf/seaweedfs:4.12
     container_name: prompt-seaweedfs-s3
-    command:
+    entrypoint:
       - /bin/sh
       - -ec
+    command:
       - |
         cat >/tmp/s3.json <<EOF
         {
@@ -688,7 +689,11 @@ services:
     networks:
       - prompt-network
     healthcheck:
-      test: ["CMD-SHELL", "wget --spider -q http://localhost:8333/ || exit 1"]
+      test:
+        [
+          "CMD-SHELL",
+          "code=$(wget --server-response --spider -q http://localhost:8333/ 2>&1 | grep -Eo \"HTTP/[0-9.]+ [0-9]+\" | tail -1 | cut -d\" \" -f2); [ \"$$code\" = \"200\" ] || [ \"$$code\" = \"403\" ]",
+        ]
       interval: 10s
       timeout: 5s
       retries: 3
