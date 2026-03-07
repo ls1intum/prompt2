@@ -520,7 +520,27 @@ services:
     container_name: prompt-seaweedfs-s3
     ports:
       - "8334:8333"   # S3 API
-    command: "s3 -filer=seaweedfs-filer:8888 -ip.bind=0.0.0.0"
+    command:
+      - /bin/sh
+      - -ec
+      - |
+        cat >/tmp/s3.json <<EOF
+        {
+          "identities": [
+            {
+              "name": "prompt-s3",
+              "credentials": [
+                {
+                  "accessKey": "$$WEED_S3_DEFAULT_USER",
+                  "secretKey": "$$WEED_S3_DEFAULT_PWD"
+                }
+              ],
+              "actions": ["Admin", "Read", "Write"]
+            }
+          ]
+        }
+        EOF
+        exec weed s3 -filer=seaweedfs-filer:8888 -ip.bind=0.0.0.0 -config=/tmp/s3.json
     depends_on:
       seaweedfs-master:
         condition: service_healthy
@@ -530,8 +550,6 @@ services:
     environment:
       - WEED_S3_DEFAULT_USER=admin
       - WEED_S3_DEFAULT_PWD=admin123
-    volumes:
-      - ./seaweedfs-config:/etc/seaweedfs
     healthcheck:
       test: ["CMD-SHELL", "wget --spider -q http://localhost:8333/ || exit 1"]
       interval: 10s

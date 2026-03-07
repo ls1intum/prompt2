@@ -50,7 +50,7 @@ Port 8334 on the host is mapped to the S3 gateway's port 8333.
 
 ## Access Control
 
-SeaweedFS itself performs **credential-based access control** via its `s3.json` configuration file (mounted at `/etc/seaweedfs/s3.json`). Only identities listed in this file can interact with the S3 API. In production, the credentials are injected via the `SEAWEEDFS_S3_USER` / `SEAWEEDFS_S3_PASSWORD` environment variables.
+SeaweedFS itself performs **credential-based access control** via an S3 config file generated when the `seaweedfs-s3` container starts. The file is rendered from the configured S3 credentials and passed to `weed s3` via `-config`, so only that generated identity can interact with the S3 API.
 
 ### Presigned URL Flow
 
@@ -125,7 +125,7 @@ The `docker-compose.prod.yml` is **correctly configured** for SeaweedFS deployme
 - The S3 gateway has Traefik labels for `Host(s3.${CORE_HOST})` with TLS.
 - The core server receives all required S3 environment variables.
 - SeaweedFS data directories are bind-mounted for persistence across container restarts.
-- The `seaweedfs-config` directory (containing `s3.json`) is mounted into the S3 gateway.
+- The S3 gateway generates its `s3.json` config on startup from `S3_ACCESS_KEY` / `S3_SECRET_KEY` and passes it to `weed s3` via `-config`.
 
 :::note
 The SeaweedFS containers are **not restarted** during application deployments — the deployment workflow's stop step only targets application containers, so file storage persists across deploys.
