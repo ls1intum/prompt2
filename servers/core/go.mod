@@ -10,7 +10,7 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/jackc/pgx/v5 v5.8.0
 	github.com/pkg/errors v0.9.1
-	github.com/prompt-edu/prompt-sdk v1.1.0
+	github.com/prompt-edu/prompt-sdk v1.1.1
 	github.com/sirupsen/logrus v1.9.4
 	github.com/stretchr/testify v1.11.1
 	github.com/swaggo/swag v1.16.6
