@@ -22,7 +22,7 @@ export function InstructorNoteComposerSubmitButton({
 }: InstructorNoteComposerSubmitButtonProps) {
   const buttonClass = `shrink-0 p-1 rounded transition-colors disabled:cursor-not-allowed ${
     disabled ? 'text-muted-foreground' : 'text-black'
-  }`
+  } hover:bg-muted`
 
   return (
     <TooltipProvider>
