@@ -16,7 +16,7 @@ export const PromptLogo = () => {
   const { data } = useQuery<GitHubPR>({
     queryKey: ['github-pr', pr],
     queryFn: () =>
-      fetch(`https://api.github.com/repos/ls1intum/prompt2/pulls/${pr}`).then((r) => r.json()),
+      fetch(`https://api.github.com/repos/prompt-edu/prompt/pulls/${pr}`).then((r) => r.json()),
     staleTime: Infinity,
     enabled: !!pr,
   })
@@ -42,7 +42,7 @@ export const PromptLogo = () => {
   if (pr) {
     return (
       <a
-        href={`https://github.com/ls1intum/prompt2/pull/${pr}`}
+        href={`https://github.com/prompt-edu/prompt/pull/${pr}`}
         target='_blank'
         rel='noopener noreferrer'
         className='flex items-center hover:opacity-80 transition-opacity duration-150'
