@@ -9,11 +9,11 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
-	sdkUtils "github.com/ls1intum/prompt-sdk/utils"
-	"github.com/ls1intum/prompt2/servers/core/course/courseDTO"
-	"github.com/ls1intum/prompt2/servers/core/coursePhase/coursePhaseDTO"
-	db "github.com/ls1intum/prompt2/servers/core/db/sqlc"
-	"github.com/ls1intum/prompt2/servers/core/permissionValidation"
+	sdkUtils "github.com/prompt-edu/prompt-sdk/utils"
+	"github.com/prompt-edu/prompt/servers/core/course/courseDTO"
+	"github.com/prompt-edu/prompt/servers/core/coursePhase/coursePhaseDTO"
+	db "github.com/prompt-edu/prompt/servers/core/db/sqlc"
+	"github.com/prompt-edu/prompt/servers/core/permissionValidation"
 	log "github.com/sirupsen/logrus"
 )
 

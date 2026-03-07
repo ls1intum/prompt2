@@ -7,8 +7,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
-	promptSDK "github.com/ls1intum/prompt-sdk"
-	sdkUtils "github.com/ls1intum/prompt-sdk/utils"
+	promptSDK "github.com/prompt-edu/prompt-sdk"
+	sdkUtils "github.com/prompt-edu/prompt-sdk/utils"
 	log "github.com/sirupsen/logrus"
 )
 

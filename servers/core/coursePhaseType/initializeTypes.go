@@ -6,9 +6,9 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
-	sdkUtils "github.com/ls1intum/prompt-sdk/utils"
-	db "github.com/ls1intum/prompt2/servers/core/db/sqlc"
-	"github.com/ls1intum/prompt2/servers/core/meta"
+	sdkUtils "github.com/prompt-edu/prompt-sdk/utils"
+	db "github.com/prompt-edu/prompt/servers/core/db/sqlc"
+	"github.com/prompt-edu/prompt/servers/core/meta"
 	log "github.com/sirupsen/logrus"
 )
 

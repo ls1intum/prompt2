@@ -8,11 +8,11 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
-	promptSDK "github.com/ls1intum/prompt-sdk"
-	sdkUtils "github.com/ls1intum/prompt-sdk/utils"
-	"github.com/ls1intum/prompt2/servers/team_allocation/coreRequests"
-	db "github.com/ls1intum/prompt2/servers/team_allocation/db/sqlc"
-	"github.com/ls1intum/prompt2/servers/team_allocation/tease/teaseDTO"
+	promptSDK "github.com/prompt-edu/prompt-sdk"
+	sdkUtils "github.com/prompt-edu/prompt-sdk/utils"
+	"github.com/prompt-edu/prompt/servers/team_allocation/coreRequests"
+	db "github.com/prompt-edu/prompt/servers/team_allocation/db/sqlc"
+	"github.com/prompt-edu/prompt/servers/team_allocation/tease/teaseDTO"
 	log "github.com/sirupsen/logrus"
 )
 

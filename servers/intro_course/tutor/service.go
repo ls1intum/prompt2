@@ -8,9 +8,9 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
-	sdkUtils "github.com/ls1intum/prompt-sdk/utils"
-	db "github.com/ls1intum/prompt2/servers/intro_course/db/sqlc"
-	"github.com/ls1intum/prompt2/servers/intro_course/tutor/tutorDTO"
+	sdkUtils "github.com/prompt-edu/prompt-sdk/utils"
+	db "github.com/prompt-edu/prompt/servers/intro_course/db/sqlc"
+	"github.com/prompt-edu/prompt/servers/intro_course/tutor/tutorDTO"
 	log "github.com/sirupsen/logrus"
 )
 

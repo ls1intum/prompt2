@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"time"
 
-	sdkUtils "github.com/ls1intum/prompt-sdk/utils"
+	sdkUtils "github.com/prompt-edu/prompt-sdk/utils"
 	log "github.com/sirupsen/logrus"
 )
 
