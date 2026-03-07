@@ -33,6 +33,11 @@ type ApplicationAdminRouterTestSuite struct {
 	applicationAdminService ApplicationService
 }
 
+var (
+	requiredFileUploadQuestionID = uuid.MustParse("b1b04042-95d1-4765-8592-caf9560c8c3d")
+	seededUploadFileID           = uuid.MustParse("d3d04042-95d1-4765-8592-caf9560c8c3f")
+)
+
 func (suite *ApplicationAdminRouterTestSuite) SetupSuite() {
 	suite.ctx = context.Background()
 
@@ -217,6 +222,12 @@ func (suite *ApplicationAdminRouterTestSuite) TestPostApplicationExternEndpoint_
 				Answer:                []string{"MacBook"},
 			},
 		},
+		AnswersFileUpload: []applicationDTO.CreateAnswerFileUpload{
+			{
+				ApplicationQuestionID: requiredFileUploadQuestionID,
+				FileID:                seededUploadFileID,
+			},
+		},
 	}
 
 	jsonBody, err := json.Marshal(application)
@@ -279,6 +290,12 @@ func (suite *ApplicationAdminRouterTestSuite) TestPostApplicationAuthenticatedEn
 				Answer:                []string{"MacBook"},
 			},
 		},
+		AnswersFileUpload: []applicationDTO.CreateAnswerFileUpload{
+			{
+				ApplicationQuestionID: requiredFileUploadQuestionID,
+				FileID:                seededUploadFileID,
+			},
+		},
 	}
 
 	jsonBody, err := json.Marshal(application)
@@ -320,6 +337,12 @@ func (suite *ApplicationAdminRouterTestSuite) TestPostApplicationExternEndpoint_
 			{
 				ApplicationQuestionID: uuid.MustParse("383a9590-fba2-4e6b-a32b-88895d55fb9b"),
 				Answer:                []string{"MacBook"},
+			},
+		},
+		AnswersFileUpload: []applicationDTO.CreateAnswerFileUpload{
+			{
+				ApplicationQuestionID: requiredFileUploadQuestionID,
+				FileID:                seededUploadFileID,
 			},
 		},
 	}
