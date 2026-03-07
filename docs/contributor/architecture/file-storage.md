@@ -90,7 +90,7 @@ To deploy SeaweedFS via the CI/CD pipeline, the following variables and secrets 
 | `S3_ENDPOINT`             | `http://seaweedfs-s3:8333`             | Internal Docker endpoint for the S3 gateway                                 |
 | `S3_PUBLIC_ENDPOINT`      | `https://s3.prompt.ase.cit.tum.de`     | Public endpoint for presigned URLs (must resolve to S3 gateway via Traefik) |
 | `S3_FORCE_PATH_STYLE`     | `true`                                 | Must be `true` for SeaweedFS/MinIO                                          |
-| `S3_PRESIGN_UPLOAD_TTL_SECONDS`   | `900`                                  | Presigned upload URL TTL in seconds                                          |
+| `S3_PRESIGN_UPLOAD_TTL_SECONDS`   | `60`                                   | Presigned upload URL TTL in seconds                                          |
 | `S3_PRESIGN_DOWNLOAD_TTL_SECONDS` | `30`                                   | Presigned download URL TTL in seconds                                        |
 | `S3_PRESIGN_TTL_SECONDS`          | (optional legacy)                      | Legacy fallback TTL used if the specific upload/download TTLs are not set    |
 | `MAX_FILE_UPLOAD_SIZE_MB` | `50`                                   | Maximum upload size in MB                                                   |

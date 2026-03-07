@@ -525,7 +525,7 @@ func (s *StorageService) convertToFileResponse(ctx context.Context, file db.File
 }
 
 func presignUploadTTLSeconds() int {
-	return resolvePresignTTLSeconds("S3_PRESIGN_UPLOAD_TTL_SECONDS", 900)
+	return resolvePresignTTLSeconds("S3_PRESIGN_UPLOAD_TTL_SECONDS", 60)
 }
 
 func presignDownloadTTLSeconds() int {

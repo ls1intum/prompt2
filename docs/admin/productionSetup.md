@@ -252,7 +252,7 @@ PROMPT now stores uploaded files in an S3-compatible bucket (SeaweedFS S3 gatewa
   Set to `true` for SeaweedFS/MinIO. Set to `false` for AWS S3.
 
 - **`S3_PRESIGN_UPLOAD_TTL_SECONDS`**  
-  Presigned upload URL TTL in seconds (default: `900`).
+  Presigned upload URL TTL in seconds (default: `60`).
 
 - **`S3_PRESIGN_DOWNLOAD_TTL_SECONDS`**  
   Presigned download URL TTL in seconds (default: `30`).

@@ -96,7 +96,7 @@ func NewS3Adapter(bucket, region, endpoint, publicEndpoint, accessKey, secretKey
 		presignClient:   presignClient,
 		bucket:          bucket,
 		forcePathStyle:  forcePathStyle,
-		presignDuration: 15 * time.Minute, // Default presign duration
+		presignDuration: time.Minute, // Default presign duration
 		publicEndpoint:  publicEndpoint,
 	}, nil
 }
