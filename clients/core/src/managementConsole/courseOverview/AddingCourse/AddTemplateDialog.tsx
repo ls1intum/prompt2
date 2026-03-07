@@ -96,7 +96,6 @@ export const AddTemplateDialog = ({
       longDescription: templatePropertiesFormValues?.longDescription || '',
       template: true,
     }
-    // todo API call
     mutate(course)
   }
 

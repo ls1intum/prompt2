@@ -83,7 +83,6 @@ export const AddCourseDialog = ({
       longDescription: coursePropertiesFormValues?.longDescription || '',
       template: false,
     }
-    // todo API call
     mutate(course)
   }
 
