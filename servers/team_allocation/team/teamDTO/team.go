@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 
 	"github.com/ls1intum/prompt-sdk/promptTypes"
-	db "github.com/ls1intum/prompt2/servers/team_allocation/db/sqlc"
+	db "github.com/prompt-edu/prompt/servers/team_allocation/db/sqlc"
 )
 
 func GetTeamDTOFromDBModel(dbTeam db.Team) promptTypes.Team {

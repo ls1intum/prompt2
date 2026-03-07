@@ -12,7 +12,7 @@ import (
 	"github.com/google/uuid"
 	promptSDK "github.com/ls1intum/prompt-sdk"
 	"github.com/ls1intum/prompt-sdk/promptTypes"
-	"github.com/ls1intum/prompt2/servers/core/coursePhase/resolution"
+	"github.com/prompt-edu/prompt/servers/core/coursePhase/resolution"
 	log "github.com/sirupsen/logrus"
 )
 
