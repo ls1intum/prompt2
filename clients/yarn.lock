@@ -4518,12 +4518,12 @@ __metadata:
   linkType: hard
 
 "@tumaet/prompt-shared-state@npm:^1.0.6":
-  version: 1.0.6
-  resolution: "@tumaet/prompt-shared-state@npm:1.0.6"
+  version: 1.0.8
+  resolution: "@tumaet/prompt-shared-state@npm:1.0.8"
   dependencies:
-    typescript: "npm:^5.7.3"
-    zustand: "npm:^5.0.10"
-  checksum: 10c0/04944e2c8a7d34c28a5458b549e96a28660068831b39ea9d48a8ce844f376016835bd0c60a9bd96bc7b1576a8d57f8adee4aed742ee232e46cb7f4a0cef5ce5c
+    typescript: "npm:^5.9.3"
+    zustand: "npm:^5.0.11"
+  checksum: 10c0/3e8f942c0e57b46d85b089b97fa312ce182f8449f62bc3360f2b18cac81cc1ec6548f9b06dd277c69969f614bad0819f47822c470c27c8cec438d77a0e8c4efc
   languageName: node
   linkType: hard
 
@@ -18092,27 +18092,6 @@ __metadata:
     react:
       optional: true
   checksum: 10c0/55559e37a82f0c06cadc61cb08f08314c0fe05d6a93815e41e3376130c13db22a5017cbb0cd1f018c82f2dad0051afe3592561d40f980bd4082e32005e8a950c
-  languageName: node
-  linkType: hard
-
-"zustand@npm:^5.0.10":
-  version: 5.0.10
-  resolution: "zustand@npm:5.0.10"
-  peerDependencies:
-    "@types/react": ">=18.0.0"
-    immer: ">=9.0.6"
-    react: ">=18.0.0"
-    use-sync-external-store: ">=1.2.0"
-  peerDependenciesMeta:
-    "@types/react":
-      optional: true
-    immer:
-      optional: true
-    react:
-      optional: true
-    use-sync-external-store:
-      optional: true
-  checksum: 10c0/e6ddabf2b44f2c0b7362b0f549cb457d25516caa4c0465132037b62b6173552a43d48bb494c1707286f8d60b389fa249eb4242aa810f1c1d4b4d0b96df789cb8
   languageName: node
   linkType: hard
 
