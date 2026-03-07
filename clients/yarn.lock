@@ -1062,7 +1062,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@hookform/resolvers@npm:^3.9.1":
+"@hookform/resolvers@npm:^3.10.0":
   version: 3.10.0
   resolution: "@hookform/resolvers@npm:3.10.0"
   peerDependencies:
@@ -4528,10 +4528,10 @@ __metadata:
   linkType: hard
 
 "@tumaet/prompt-ui-components@npm:^1.0.6":
-  version: 1.0.6
-  resolution: "@tumaet/prompt-ui-components@npm:1.0.6"
+  version: 1.0.8
+  resolution: "@tumaet/prompt-ui-components@npm:1.0.8"
   dependencies:
-    "@hookform/resolvers": "npm:^3.9.1"
+    "@hookform/resolvers": "npm:^3.10.0"
     "@radix-ui/react-accordion": "npm:^1.2.12"
     "@radix-ui/react-alert-dialog": "npm:^1.1.15"
     "@radix-ui/react-avatar": "npm:^1.1.11"
@@ -4569,27 +4569,27 @@ __metadata:
     "@tiptap/pm": "npm:^2.27.2"
     "@tiptap/react": "npm:^2.27.2"
     "@tiptap/starter-kit": "npm:^2.27.2"
-    class-variance-authority: "npm:^0.7.0"
+    class-variance-authority: "npm:^0.7.1"
     clsx: "npm:^2.1.1"
     cmdk: "npm:1.1.1"
     date-fns: "npm:^4.1.0"
     highlight.js: "npm:^11.11.1"
     lowlight: "npm:^3.3.0"
-    lucide-react: "npm:^0.563.0"
+    lucide-react: "npm:^0.576.0"
     postcss: "npm:^8.5.6"
     postcss-preset-env: "npm:^10.6.1"
-    react: "npm:^19.2.3"
+    react: "npm:^19.2.4"
     react-day-picker: "npm:8.10.1"
-    react-dom: "npm:^19.2.3"
-    react-hook-form: "npm:^7.71.1"
-    react-medium-image-zoom: "npm:^5.4.0"
-    react-router-dom: "npm:^7.13.0"
+    react-dom: "npm:^19.2.4"
+    react-hook-form: "npm:^7.71.2"
+    react-medium-image-zoom: "npm:^5.4.1"
+    react-router-dom: "npm:^7.13.1"
     recharts: "npm:^3.7.0"
     sonner: "npm:^2.0.7"
-    tailwind-merge: "npm:^2.5.4"
+    tailwind-merge: "npm:^2.6.1"
     tsc-alias: "npm:^1.8.16"
-    typescript: "npm:^5.7.3"
-  checksum: 10c0/480061ee84cfb68f5fc95f916f3c9445646d4373fad003daf34c980fc818af4581ee313453263bc907b33a4e53011216c68897db5fb244541523b2798f8b93b4
+    typescript: "npm:^5.9.3"
+  checksum: 10c0/55482a38ca43da04d3ae054c93afbf66483abb0a3a38ab37e6ab85407687940ddd0ba809d2231f6176a6d75571bc24ea94a4cc54af39751f1f4a15587b1c4218
   languageName: node
   linkType: hard
 
@@ -6573,7 +6573,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"class-variance-authority@npm:^0.7.0, class-variance-authority@npm:^0.7.1":
+"class-variance-authority@npm:^0.7.1":
   version: 0.7.1
   resolution: "class-variance-authority@npm:0.7.1"
   dependencies:
@@ -11466,21 +11466,21 @@ __metadata:
   languageName: node
   linkType: hard
 
-"lucide-react@npm:^0.563.0":
-  version: 0.563.0
-  resolution: "lucide-react@npm:0.563.0"
-  peerDependencies:
-    react: ^16.5.1 || ^17.0.0 || ^18.0.0 || ^19.0.0
-  checksum: 10c0/4a2027be255755d64ce18040062426dec07a5da920c000d9cd330e383fa10716a584c927dc03e91daccc6e05f6f486d4f49d1bd009e5f7763aa6fcf704806554
-  languageName: node
-  linkType: hard
-
 "lucide-react@npm:^0.575.0":
   version: 0.575.0
   resolution: "lucide-react@npm:0.575.0"
   peerDependencies:
     react: ^16.5.1 || ^17.0.0 || ^18.0.0 || ^19.0.0
   checksum: 10c0/4f42e81c88f60c8f904b178c0b28e8ac9a99da8ef24eba5f26ed97b63124304a847baea2f71125629a272df58dbb61cd799ff6a7e4878e5a4c28d8a699b84730
+  languageName: node
+  linkType: hard
+
+"lucide-react@npm:^0.576.0":
+  version: 0.576.0
+  resolution: "lucide-react@npm:0.576.0"
+  peerDependencies:
+    react: ^16.5.1 || ^17.0.0 || ^18.0.0 || ^19.0.0
+  checksum: 10c0/316301dd4331d99ec6923d5e7e7ec48d57309738fa29b2e993fd4f4f9db73a22e820b9bf586831b2bb48ddbd0a7c56f6a6f130b2a5b718df5301395290b99e90
   languageName: node
   linkType: hard
 
@@ -14704,7 +14704,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-dom@npm:^19.2.3, react-dom@npm:^19.2.4":
+"react-dom@npm:^19.2.4":
   version: 19.2.4
   resolution: "react-dom@npm:19.2.4"
   dependencies:
@@ -14715,7 +14715,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-hook-form@npm:^7.71.1, react-hook-form@npm:^7.71.2":
+"react-hook-form@npm:^7.71.2":
   version: 7.71.2
   resolution: "react-hook-form@npm:7.71.2"
   peerDependencies:
@@ -14742,16 +14742,6 @@ __metadata:
   version: 18.3.1
   resolution: "react-is@npm:18.3.1"
   checksum: 10c0/f2f1e60010c683479e74c63f96b09fb41603527cd131a9959e2aee1e5a8b0caf270b365e5ca77d4a6b18aae659b60a86150bb3979073528877029b35aecd2072
-  languageName: node
-  linkType: hard
-
-"react-medium-image-zoom@npm:^5.4.0":
-  version: 5.4.0
-  resolution: "react-medium-image-zoom@npm:5.4.0"
-  peerDependencies:
-    react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
-    react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
-  checksum: 10c0/41c20f02fd50d11703ee3bc57dd8ea3c7f132c5b68bfc79b6a6c5bbe6aa1fe265b771a83451b5f4f6e5f0f58842926649849709bead0966efd7a679eeee957cd
   languageName: node
   linkType: hard
 
@@ -14840,18 +14830,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-router-dom@npm:^7.13.0":
-  version: 7.13.0
-  resolution: "react-router-dom@npm:7.13.0"
-  dependencies:
-    react-router: "npm:7.13.0"
-  peerDependencies:
-    react: ">=18"
-    react-dom: ">=18"
-  checksum: 10c0/759bd5e7fe7b5baba50a0264724188707682d217cad8eac702a55e0b1abebf295be014dd3bfaff8e3c2def9dfaa23e6ded3f908feab84df766e9b82cc3774e98
-  languageName: node
-  linkType: hard
-
 "react-router-dom@npm:^7.13.1":
   version: 7.13.1
   resolution: "react-router-dom@npm:7.13.1"
@@ -14861,22 +14839,6 @@ __metadata:
     react: ">=18"
     react-dom: ">=18"
   checksum: 10c0/2b8ed9dc753f1f7be599a53a00900df04e2b4d1186b0a4d63004eebb2250cd78cd6837ff15fcada5f88d53ad127fff0d1de31468715dcd6dd79dad8cfa8414e9
-  languageName: node
-  linkType: hard
-
-"react-router@npm:7.13.0":
-  version: 7.13.0
-  resolution: "react-router@npm:7.13.0"
-  dependencies:
-    cookie: "npm:^1.0.1"
-    set-cookie-parser: "npm:^2.6.0"
-  peerDependencies:
-    react: ">=18"
-    react-dom: ">=18"
-  peerDependenciesMeta:
-    react-dom:
-      optional: true
-  checksum: 10c0/397cb009bc83d071269c8f9323bbfe1f856721fde75e39b29fe0ddfe7564ebdc3b8bbb85768321cae92ec28b406e8fac7eab7e232d0738b3b1c092e2764e4307
   languageName: node
   linkType: hard
 
@@ -14912,7 +14874,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react@npm:^19.2.3, react@npm:^19.2.4":
+"react@npm:^19.2.4":
   version: 19.2.4
   resolution: "react@npm:19.2.4"
   checksum: 10c0/cd2c9ff67a720799cc3b38a516009986f7fc4cb8d3e15716c6211cf098d1357ee3e348ab05ad0600042bbb0fd888530ba92e329198c92eafa0994f5213396596
@@ -16398,7 +16360,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tailwind-merge@npm:^2.5.4":
+"tailwind-merge@npm:^2.6.1":
   version: 2.6.1
   resolution: "tailwind-merge@npm:2.6.1"
   checksum: 10c0/f9b5d7ba37f6c6dc7bb7a090f08252e8d827b5abfc1031bf468c5274ce104409e7952a0075a3e009aab53adda8c6d133bc1dd9d3427e2ae5bc00306f9ce1fbff
