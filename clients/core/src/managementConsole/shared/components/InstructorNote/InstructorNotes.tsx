@@ -35,7 +35,10 @@ function PlaceholderNote({
 export function InstructorNotes() {
   return (
     <div className='flex flex-col relative p-2'>
-      <div className='flex flex-col items-center justify-center w-80 px-4 py-12 border rounded-2xl absolute top-[190px] left-1/2 -translate-x-1/2 z-20 backdrop-blur-lg'>
+      <div
+        className='flex flex-col items-center justify-center w-80 px-4 py-12 border rounded-2xl
+          absolute top-[190px] left-1/2 -translate-x-1/2 z-20 backdrop-blur-lg'
+      >
         <NotepadText className='w-10 h-10' />
         <h3 className='font-bold text-xl'>Instructor Notes</h3>
         <p className='text-center'>

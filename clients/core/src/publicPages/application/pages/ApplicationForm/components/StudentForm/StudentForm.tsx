@@ -278,7 +278,7 @@ export const StudentForm = forwardRef<StudentComponentRef, StudentFormProps>(fun
             name='nationality'
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Nationality</FormLabel>
+                <FormLabel>Nationality{requiredStar}</FormLabel>
                 <Popover>
                   <PopoverTrigger asChild>
                     <FormControl>
