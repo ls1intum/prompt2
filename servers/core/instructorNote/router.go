@@ -5,9 +5,9 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
-	"github.com/ls1intum/prompt2/servers/core/instructorNote/instructorNoteDTO"
-	"github.com/ls1intum/prompt2/servers/core/permissionValidation"
-	"github.com/ls1intum/prompt2/servers/core/utils"
+	"github.com/prompt-edu/prompt/servers/core/instructorNote/instructorNoteDTO"
+	"github.com/prompt-edu/prompt/servers/core/permissionValidation"
+	"github.com/prompt-edu/prompt/servers/core/utils"
 )
 
 func setupInstructorNoteRouter(router *gin.RouterGroup, authMiddleware func() gin.HandlerFunc, permissionRoleMiddleware func(allowedRoles ...string) gin.HandlerFunc) {
@@ -67,7 +67,6 @@ func getInstructorNoteForStudentByID(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, studentNotes)
 }
 
-
 // createInstructorNoteForStudentByID godoc
 // @Summary Create an instructor Note for a student
 // @Description Create a new instructor note or a new edit for a specific student given its ID
@@ -93,14 +92,14 @@ func createInstructorNoteForStudentByID(c *gin.Context) {
 		return
 	}
 
-  userID, err := utils.GetUserUUIDFromContext(c)
+	userID, err := utils.GetUserUUIDFromContext(c)
 	if err != nil {
 		handleError(c, http.StatusInternalServerError, err)
 		return
 	}
 
-  authorName := utils.GetUserNameFromContext(c)
-  authorEmail := utils.GetUserEmailFromContext(c)
+	authorName := utils.GetUserNameFromContext(c)
+	authorEmail := utils.GetUserEmailFromContext(c)
 
 	// validate Request
 	if err := ValidateCreateNote(newNote); err != nil {
@@ -112,7 +111,7 @@ func createInstructorNoteForStudentByID(c *gin.Context) {
 		return
 	}
 
-  _, err = NewStudentNote(c, id, newNote, userID, authorName, authorEmail)
+	_, err = NewStudentNote(c, id, newNote, userID, authorName, authorEmail)
 	if err != nil {
 		handleError(c, http.StatusInternalServerError, err)
 		return
@@ -125,7 +124,6 @@ func createInstructorNoteForStudentByID(c *gin.Context) {
 	}
 	c.IndentedJSON(http.StatusOK, studentNotes)
 }
-
 
 // deleteInstructorNote godoc
 // @Summary Delete an instructor Note
@@ -163,8 +161,6 @@ func deleteInstructorNote(c *gin.Context) {
 
 	c.IndentedJSON(http.StatusOK, note)
 }
-
-
 
 // createNoteTag godoc
 // @Summary Create a note tag
@@ -271,4 +267,3 @@ func handleError(c *gin.Context, statusCode int, err error) {
 		Error: err.Error(),
 	})
 }
-
