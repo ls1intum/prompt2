@@ -56,6 +56,7 @@ jobs:
     permissions:
       contents: read
       pull-requests: write
+
   detect-changes:
     uses: ./.github/workflows/detect-changes.yml
     with:
@@ -63,58 +64,107 @@ jobs:
     permissions:
       contents: read
       pull-requests: read
+
   generate-api-spec:
     needs: detect-changes
     uses: ./.github/workflows/generate-api-spec.yml
     secrets: inherit
     with:
       directories: ${{ needs.detect-changes.outputs.api_spec_directories }}
+
   lint-servers:
     needs: detect-changes
     uses: ./.github/workflows/lint-servers.yml
     secrets: inherit
     with:
       modules: ${{ needs.detect-changes.outputs.server_modules }}
+
   test-servers:
     needs: [detect-changes, lint-servers]
     uses: ./.github/workflows/test-servers.yml
     secrets: inherit
     with:
       directories: ${{ needs.detect-changes.outputs.server_modules }}
-  build-servers:
-    if: ${{ always() && !cancelled() && !contains(needs.*.result, 'failure') }}
-    needs: [detect-changes, test-servers]
-    uses: ./.github/workflows/build-and-push-servers.yml
-    secrets: inherit
+
   lint-clients:
     needs: detect-changes
     uses: ./.github/workflows/lint-clients.yml
     secrets: inherit
     with:
       modules: ${{ needs.detect-changes.outputs.client_modules }}
-  build-clients:
-    if: ${{ always() && !cancelled() && !contains(needs.*.result, 'failure') }}
+
+  # ----------------------------------------------------------------
+  # PR BUILDS: smart build-or-retag — only changed images are rebuilt
+  # ----------------------------------------------------------------
+  build-clients-pr:
+    # always() prevents this job from being skipped when lint-clients is skipped
+    # (lint is skipped when no client files changed, but we still need to retag all images)
+    if: always() && github.event_name == 'pull_request' && !cancelled() && !contains(needs.*.result, 'failure')
     needs: [detect-changes, lint-clients]
-    uses: ./.github/workflows/build-and-push-clients.yml
+    uses: ./.github/workflows/build-clients-pr.yml
     secrets: inherit
-  deploy-dev:
-    needs: [build-clients, build-servers]
+    with:
+      pr_number: ${{ github.event.pull_request.number }}
+      client_base_changed: ${{ needs.detect-changes.outputs.client_base_changed }}
+      clients_to_build: ${{ needs.detect-changes.outputs.clients_to_build }}
+
+  build-servers-pr:
+    # always() prevents this job from being skipped when test-servers is skipped
+    if: always() && github.event_name == 'pull_request' && !cancelled() && !contains(needs.*.result, 'failure')
+    needs: [detect-changes, test-servers]
+    uses: ./.github/workflows/build-servers-pr.yml
+    secrets: inherit
+    with:
+      pr_number: ${{ github.event.pull_request.number }}
+      servers_to_build: ${{ needs.detect-changes.outputs.servers_to_build }}
+
+  deploy-dev-pr:
+    if: always() && github.event_name == 'pull_request' && !cancelled() && !contains(needs.*.result, 'failure')
+    needs: [build-clients-pr, build-servers-pr]
     uses: ./.github/workflows/deploy-docker.yml
     secrets: inherit
     with:
       environment: prompt-dev-vm
-      core_image_tag: ${{ needs.build-clients.outputs.core_image_tag }}
-      template_image_tag: ${{ needs.build-clients.outputs.template_image_tag }}
-      interview_image_tag: ${{ needs.build-clients.outputs.interview_image_tag }}
-      matching_image_tag: ${{ needs.build-clients.outputs.matching_image_tag }}
-      intro_course_developer_image_tag: ${{ needs.build-clients.outputs.intro_course_developer_image_tag }}
-      assessment_image_tag: ${{ needs.build-clients.outputs.assessment_image_tag }}
-      team_allocation_image_tag: ${{ needs.build-clients.outputs.team_allocation_image_tag }}
-      self_team_allocation_image_tag: ${{ needs.build-clients.outputs.self_team_allocation_image_tag }}
-      server_core_image_tag: ${{ needs.build-servers.outputs.server_core_image_tag }}
-      server_intro_course_image_tag: ${{ needs.build-servers.outputs.server_intro_course_image_tag }}
-      server_team_allocation_image_tag: ${{ needs.build-servers.outputs.server_team_allocation_image_tag }}
-      server_assessment_image_tag: ${{ needs.build-servers.outputs.server_assessment_image_tag }}
-      server_interview_image_tag: ${{ needs.build-servers.outputs.server_interview_image_tag }}
-      devops_challenge_image_tag: ${{ needs.build-clients.outputs.devops_challenge_image_tag }}
-      server_self_team_allocation_image_tag: ${{ needs.build-servers.outputs.server_self_team_allocation_image_tag }}
+      pr_number: ${{ github.event.pull_request.number }}
+
+  # ----------------------------------------------------------------
+  # MAIN BRANCH BUILDS: always build everything, tag main-latest
+  # ----------------------------------------------------------------
+  build-servers-main:
+    if: always() && github.event_name == 'push' && !cancelled() && !contains(needs.*.result, 'failure')
+    needs: [detect-changes, test-servers]
+    uses: ./.github/workflows/build-and-push-servers.yml
+    secrets: inherit
+    with:
+      update_main_latest: true
+
+  build-clients-main:
+    if: always() && github.event_name == 'push' && !cancelled() && !contains(needs.*.result, 'failure')
+    needs: [detect-changes, lint-clients]
+    uses: ./.github/workflows/build-and-push-clients.yml
+    secrets: inherit
+    with:
+      update_main_latest: true
+
+  deploy-dev-main:
+    if: always() && github.event_name == 'push' && !cancelled() && !contains(needs.*.result, 'failure')
+    needs: [build-clients-main, build-servers-main]
+    uses: ./.github/workflows/deploy-docker.yml
+    secrets: inherit
+    with:
+      environment: prompt-dev-vm
+      core_image_tag: ${{ needs.build-clients-main.outputs.core_image_tag }}
+      template_image_tag: ${{ needs.build-clients-main.outputs.template_image_tag }}
+      interview_image_tag: ${{ needs.build-clients-main.outputs.interview_image_tag }}
+      matching_image_tag: ${{ needs.build-clients-main.outputs.matching_image_tag }}
+      intro_course_developer_image_tag: ${{ needs.build-clients-main.outputs.intro_course_developer_image_tag }}
+      assessment_image_tag: ${{ needs.build-clients-main.outputs.assessment_image_tag }}
+      team_allocation_image_tag: ${{ needs.build-clients-main.outputs.team_allocation_image_tag }}
+      self_team_allocation_image_tag: ${{ needs.build-clients-main.outputs.self_team_allocation_image_tag }}
+      devops_challenge_image_tag: ${{ needs.build-clients-main.outputs.devops_challenge_image_tag }}
+      server_core_image_tag: ${{ needs.build-servers-main.outputs.server_core_image_tag }}
+      server_intro_course_image_tag: ${{ needs.build-servers-main.outputs.server_intro_course_image_tag }}
+      server_team_allocation_image_tag: ${{ needs.build-servers-main.outputs.server_team_allocation_image_tag }}
+      server_assessment_image_tag: ${{ needs.build-servers-main.outputs.server_assessment_image_tag }}
+      server_interview_image_tag: ${{ needs.build-servers-main.outputs.server_interview_image_tag }}
+      server_self_team_allocation_image_tag: ${{ needs.build-servers-main.outputs.server_self_team_allocation_image_tag }}

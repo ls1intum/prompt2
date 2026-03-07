@@ -1,0 +1,260 @@
+name: Build or Retag Client Images for PR
+
+# For each client image: full build (ls1intum, multi-arch) if relevant files changed,
+# or instant manifest retag (crane) from main-latest if nothing changed.
+# All images end up tagged as pr-<number>.
+
+on:
+  workflow_call:
+    inputs:
+      pr_number:
+        description: "PR number used as image tag (pr-<number>)"
+        required: true
+        type: string
+      client_base_changed:
+        description: "Whether the shared client base image inputs changed"
+        required: true
+        type: string
+      clients_to_build:
+        description: "JSON array of client component directories that need a full Docker build"
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  # ------------------------------------------------------------------
+  # BUILD BASE — only when base image inputs changed
+  # ------------------------------------------------------------------
+  build-base:
+    if: inputs.client_base_changed == 'true'
+    uses: ls1intum/.github/.github/workflows/build-and-push-docker-image.yml@v1.2.0
+    with:
+      image-name: ghcr.io/prompt-edu/prompt/prompt-clients-base
+      docker-file: clients/Dockerfile
+      docker-context: ./clients
+      tags: "pr-${{ inputs.pr_number }}"
+    secrets: inherit
+
+  # ------------------------------------------------------------------
+  # RETAG UNCHANGED CLIENT IMAGES (base + unchanged components)
+  # Runs in parallel with build-base; only touches images NOT being built.
+  # Skipped entirely when base changed (all clients will be rebuilt).
+  # ------------------------------------------------------------------
+  retag-clients:
+    if: inputs.client_base_changed != 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: imjasonh/setup-crane@v0.4
+
+      - name: Authenticate crane to GHCR
+        run: crane auth login ghcr.io -u ${{ github.actor }} -p ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Retag unchanged client images
+        env:
+          PR: ${{ inputs.pr_number }}
+          CLIENTS_TO_BUILD: ${{ inputs.clients_to_build }}
+        run: |
+          set -euo pipefail
+
+          BASE="ghcr.io/prompt-edu/prompt"
+          SRC_TAG="main-latest"
+          DST_TAG="pr-$PR"
+
+          retag_if_unchanged() {
+            local image="$1"
+            local module="$2"
+            if ! echo "$CLIENTS_TO_BUILD" | jq -e --arg m "$module" 'contains([$m])' > /dev/null 2>&1; then
+              echo "Retagging $image:$SRC_TAG -> $DST_TAG"
+              crane cp "$BASE/$image:$SRC_TAG" "$BASE/$image:$DST_TAG"
+            else
+              echo "Skipping retag of $image (will be built)"
+            fi
+          }
+
+          # Retag base (since client_base_changed is false)
+          crane cp "$BASE/prompt-clients-base:$SRC_TAG" "$BASE/prompt-clients-base:$DST_TAG"
+
+          # Retag each component that isn't being built
+          retag_if_unchanged "prompt-clients-core"                               "core"
+          retag_if_unchanged "prompt-clients-template-component"                 "template_component"
+          retag_if_unchanged "prompt-clients-interview-component"                "interview_component"
+          retag_if_unchanged "prompt-clients-matching-component"                 "matching_component"
+          retag_if_unchanged "prompt-clients-intro-course-developer-component"   "intro_course_developer_component"
+          retag_if_unchanged "prompt-clients-assessment-component"               "assessment_component"
+          retag_if_unchanged "prompt-clients-devops-challenge-component"         "devops_challenge_component"
+          retag_if_unchanged "prompt-clients-team-allocation-component"          "team_allocation_component"
+          retag_if_unchanged "prompt-clients-self-team-allocation-component"     "self_team_allocation_component"
+
+  # ------------------------------------------------------------------
+  # BUILD COMPONENTS — one job per component, using ls1intum (multi-arch)
+  # Each job runs only if that component needs a rebuild.
+  # Both build-base AND retag-clients are listed as needs so the job
+  # starts only after pr-<N> tag for the base image exists (either
+  # freshly built or retagged from main-latest).
+  # ------------------------------------------------------------------
+  build-core:
+    needs: [build-base, retag-clients]
+    if: |
+      always() && !cancelled() &&
+      !contains(needs.*.result, 'failure') &&
+      (inputs.client_base_changed == 'true' ||
+       contains(fromJson(inputs.clients_to_build), 'core'))
+    uses: ls1intum/.github/.github/workflows/build-and-push-docker-image.yml@v1.2.0
+    with:
+      image-name: ghcr.io/prompt-edu/prompt/prompt-clients-core
+      docker-file: clients/core/Dockerfile
+      docker-context: ./clients/core
+      tags: "pr-${{ inputs.pr_number }}"
+      build-args: |
+        "IMAGE_TAG=pr-${{ inputs.pr_number }}"
+        "CORE_HOST=${{ vars.CORE_HOST }}"
+        "KEYCLOAK_HOST=${{ vars.KEYCLOAK_HOST }}"
+        "KEYCLOAK_REALM_NAME=${{ vars.KEYCLOAK_REALM_NAME }}"
+    secrets: inherit
+
+  build-template:
+    needs: [build-base, retag-clients]
+    if: |
+      always() && !cancelled() &&
+      !contains(needs.*.result, 'failure') &&
+      (inputs.client_base_changed == 'true' ||
+       contains(fromJson(inputs.clients_to_build), 'template_component'))
+    uses: ls1intum/.github/.github/workflows/build-and-push-docker-image.yml@v1.2.0
+    with:
+      image-name: ghcr.io/prompt-edu/prompt/prompt-clients-template-component
+      docker-file: clients/template_component/Dockerfile
+      docker-context: ./clients/template_component
+      tags: "pr-${{ inputs.pr_number }}"
+      build-args: |
+        "IMAGE_TAG=pr-${{ inputs.pr_number }}"
+        "CORE_HOST=${{ vars.CORE_HOST }}"
+    secrets: inherit
+
+  build-interview:
+    needs: [build-base, retag-clients]
+    if: |
+      always() && !cancelled() &&
+      !contains(needs.*.result, 'failure') &&
+      (inputs.client_base_changed == 'true' ||
+       contains(fromJson(inputs.clients_to_build), 'interview_component'))
+    uses: ls1intum/.github/.github/workflows/build-and-push-docker-image.yml@v1.2.0
+    with:
+      image-name: ghcr.io/prompt-edu/prompt/prompt-clients-interview-component
+      docker-file: clients/interview_component/Dockerfile
+      docker-context: ./clients/interview_component
+      tags: "pr-${{ inputs.pr_number }}"
+      build-args: |
+        "IMAGE_TAG=pr-${{ inputs.pr_number }}"
+        "CORE_HOST=${{ vars.CORE_HOST }}"
+    secrets: inherit
+
+  build-matching:
+    needs: [build-base, retag-clients]
+    if: |
+      always() && !cancelled() &&
+      !contains(needs.*.result, 'failure') &&
+      (inputs.client_base_changed == 'true' ||
+       contains(fromJson(inputs.clients_to_build), 'matching_component'))
+    uses: ls1intum/.github/.github/workflows/build-and-push-docker-image.yml@v1.2.0
+    with:
+      image-name: ghcr.io/prompt-edu/prompt/prompt-clients-matching-component
+      docker-file: clients/matching_component/Dockerfile
+      docker-context: ./clients/matching_component
+      tags: "pr-${{ inputs.pr_number }}"
+      build-args: |
+        "IMAGE_TAG=pr-${{ inputs.pr_number }}"
+        "CORE_HOST=${{ vars.CORE_HOST }}"
+    secrets: inherit
+
+  build-intro-course-developer:
+    needs: [build-base, retag-clients]
+    if: |
+      always() && !cancelled() &&
+      !contains(needs.*.result, 'failure') &&
+      (inputs.client_base_changed == 'true' ||
+       contains(fromJson(inputs.clients_to_build), 'intro_course_developer_component'))
+    uses: ls1intum/.github/.github/workflows/build-and-push-docker-image.yml@v1.2.0
+    with:
+      image-name: ghcr.io/prompt-edu/prompt/prompt-clients-intro-course-developer-component
+      docker-file: clients/intro_course_developer_component/Dockerfile
+      docker-context: ./clients/intro_course_developer_component
+      tags: "pr-${{ inputs.pr_number }}"
+      build-args: |
+        "IMAGE_TAG=pr-${{ inputs.pr_number }}"
+        "CORE_HOST=${{ vars.CORE_HOST }}"
+    secrets: inherit
+
+  build-assessment:
+    needs: [build-base, retag-clients]
+    if: |
+      always() && !cancelled() &&
+      !contains(needs.*.result, 'failure') &&
+      (inputs.client_base_changed == 'true' ||
+       contains(fromJson(inputs.clients_to_build), 'assessment_component'))
+    uses: ls1intum/.github/.github/workflows/build-and-push-docker-image.yml@v1.2.0
+    with:
+      image-name: ghcr.io/prompt-edu/prompt/prompt-clients-assessment-component
+      docker-file: clients/assessment_component/Dockerfile
+      docker-context: ./clients/assessment_component
+      tags: "pr-${{ inputs.pr_number }}"
+      build-args: |
+        "IMAGE_TAG=pr-${{ inputs.pr_number }}"
+        "CORE_HOST=${{ vars.CORE_HOST }}"
+    secrets: inherit
+
+  build-devops-challenge:
+    needs: [build-base, retag-clients]
+    if: |
+      always() && !cancelled() &&
+      !contains(needs.*.result, 'failure') &&
+      (inputs.client_base_changed == 'true' ||
+       contains(fromJson(inputs.clients_to_build), 'devops_challenge_component'))
+    uses: ls1intum/.github/.github/workflows/build-and-push-docker-image.yml@v1.2.0
+    with:
+      image-name: ghcr.io/prompt-edu/prompt/prompt-clients-devops-challenge-component
+      docker-file: clients/devops_challenge_component/Dockerfile
+      docker-context: ./clients/devops_challenge_component
+      tags: "pr-${{ inputs.pr_number }}"
+      build-args: |
+        "IMAGE_TAG=pr-${{ inputs.pr_number }}"
+        "CORE_HOST=${{ vars.CORE_HOST }}"
+    secrets: inherit
+
+  build-team-allocation:
+    needs: [build-base, retag-clients]
+    if: |
+      always() && !cancelled() &&
+      !contains(needs.*.result, 'failure') &&
+      (inputs.client_base_changed == 'true' ||
+       contains(fromJson(inputs.clients_to_build), 'team_allocation_component'))
+    uses: ls1intum/.github/.github/workflows/build-and-push-docker-image.yml@v1.2.0
+    with:
+      image-name: ghcr.io/prompt-edu/prompt/prompt-clients-team-allocation-component
+      docker-file: clients/team_allocation_component/Dockerfile
+      docker-context: ./clients/team_allocation_component
+      tags: "pr-${{ inputs.pr_number }}"
+      build-args: |
+        "IMAGE_TAG=pr-${{ inputs.pr_number }}"
+        "CORE_HOST=${{ vars.CORE_HOST }}"
+    secrets: inherit
+
+  build-self-team-allocation:
+    needs: [build-base, retag-clients]
+    if: |
+      always() && !cancelled() &&
+      !contains(needs.*.result, 'failure') &&
+      (inputs.client_base_changed == 'true' ||
+       contains(fromJson(inputs.clients_to_build), 'self_team_allocation_component'))
+    uses: ls1intum/.github/.github/workflows/build-and-push-docker-image.yml@v1.2.0
+    with:
+      image-name: ghcr.io/prompt-edu/prompt/prompt-clients-self-team-allocation-component
+      docker-file: clients/self_team_allocation_component/Dockerfile
+      docker-context: ./clients/self_team_allocation_component
+      tags: "pr-${{ inputs.pr_number }}"
+      build-args: |
+        "IMAGE_TAG=pr-${{ inputs.pr_number }}"
+        "CORE_HOST=${{ vars.CORE_HOST }}"
+    secrets: inherit

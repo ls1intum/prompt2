@@ -17,6 +17,15 @@ on:
       client_modules:
         description: "JSON array of client modules that should run"
         value: ${{ jobs.detect.outputs.client_modules }}
+      client_base_changed:
+        description: "Whether the shared client base image (Dockerfile, shared_library, deps) changed"
+        value: ${{ jobs.detect.outputs.client_base_changed }}
+      clients_to_build:
+        description: "JSON array of client component directories that need a Docker rebuild"
+        value: ${{ jobs.detect.outputs.clients_to_build }}
+      servers_to_build:
+        description: "JSON array of server modules that need a Docker rebuild"
+        value: ${{ jobs.detect.outputs.servers_to_build }}
 
 permissions:
   contents: read
@@ -29,6 +38,9 @@ jobs:
       server_modules: ${{ steps.set-outputs.outputs.server_modules }}
       api_spec_directories: ${{ steps.set-outputs.outputs.api_spec_directories }}
       client_modules: ${{ steps.set-outputs.outputs.client_modules }}
+      client_base_changed: ${{ steps.set-outputs.outputs.client_base_changed }}
+      clients_to_build: ${{ steps.set-outputs.outputs.clients_to_build }}
+      servers_to_build: ${{ steps.set-outputs.outputs.servers_to_build }}
     steps:
       - uses: actions/checkout@v6
         with:
@@ -82,6 +94,17 @@ jobs:
             servers/**/go.sum
           json: true
           escape_json: false
+          base_sha: ${{ inputs.base_sha }}
+      - uses: tj-actions/changed-files@v45
+        id: changed-client-base
+        with:
+          files: |
+            clients/Dockerfile
+            clients/package.json
+            clients/yarn.lock
+            clients/lerna.json
+            clients/shared_library/**
+            clients/nginx/**
           base_sha: ${{ inputs.base_sha }}
       - id: set-outputs
         run: |
@@ -176,6 +199,37 @@ jobs:
             fi
           fi
 
+          # --- Docker build change detection ---
+
+          # client_base_changed: true if the shared base image inputs changed
+          client_base_image_changed="${{ steps.changed-client-base.outputs.any_changed }}"
+          client_base_changed=false
+          if [ "$client_base_image_changed" = "true" ] || [ "$workflows_changed" = "true" ] || [ "$docker_compose_changed" = "true" ] || [ "$force_all" = "true" ]; then
+            client_base_changed=true
+          fi
+
+          # clients_to_build: component dirs that need a Docker rebuild
+          # (all components if base changed; otherwise only dirs with own-file changes)
+          clients_to_build="[]"
+          if [ "$client_base_changed" = "true" ]; then
+            # Rebuild every component that has a Dockerfile
+            if compgen -G "clients/*/" > /dev/null; then
+              for dir in clients/*/; do
+                module=$(basename "$dir")
+                [ -f "$dir/Dockerfile" ] && clients_to_build=$(add_unique "$clients_to_build" "$module")
+              done
+            fi
+          else
+            # Rebuild only components whose own files changed (reuses changed-clients step)
+            while IFS= read -r dir; do
+              module=$(echo "$dir" | cut -d'/' -f2)
+              [ -n "$module" ] && [ -f "clients/$module/Dockerfile" ] && clients_to_build=$(add_unique "$clients_to_build" "$module")
+            done < <(echo '${{ steps.changed-clients.outputs.all_changed_files }}' | jq -r '.[]')
+          fi
+
+          # servers_to_build: same set as server_modules (used for Docker builds)
+          servers_to_build="$server_modules"
+
           {
             echo "server_modules<<EOF"
             echo "$server_modules"
@@ -185,5 +239,14 @@ jobs:
             echo "EOF"
             echo "client_modules<<EOF"
             echo "$client_modules"
+            echo "EOF"
+            echo "client_base_changed<<EOF"
+            echo "$client_base_changed"
+            echo "EOF"
+            echo "clients_to_build<<EOF"
+            echo "$clients_to_build"
+            echo "EOF"
+            echo "servers_to_build<<EOF"
+            echo "$servers_to_build"
             echo "EOF"
           } >> "$GITHUB_OUTPUT"

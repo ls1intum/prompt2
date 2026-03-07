@@ -6,51 +6,73 @@ on:
       environment:
         required: true
         type: string
+      # For PR builds: provide pr_number and all images will use tag pr-<number>.
+      # For main/prod builds: leave pr_number empty and provide individual image tags.
+      pr_number:
+        description: "PR number — when set, all image tags resolve to pr-<pr_number>"
+        required: false
+        type: string
+        default: ""
       core_image_tag:
-        required: true
+        required: false
         type: string
+        default: ""
       template_image_tag:
-        required: true
+        required: false
         type: string
+        default: ""
       interview_image_tag:
-        required: true
+        required: false
         type: string
+        default: ""
       matching_image_tag:
-        required: true
+        required: false
         type: string
+        default: ""
       intro_course_developer_image_tag:
-        required: true
+        required: false
         type: string
+        default: ""
       server_core_image_tag:
-        required: true
+        required: false
         type: string
+        default: ""
       server_intro_course_image_tag:
-        required: true
+        required: false
         type: string
+        default: ""
       server_team_allocation_image_tag:
-        required: true
+        required: false
         type: string
+        default: ""
       server_self_team_allocation_image_tag:
-        required: true
+        required: false
         type: string
+        default: ""
       server_assessment_image_tag:
-        required: true
+        required: false
         type: string
+        default: ""
       server_interview_image_tag:
-        required: true
+        required: false
         type: string
+        default: ""
       assessment_image_tag:
-        required: true
+        required: false
         type: string
+        default: ""
       devops_challenge_image_tag:
-        required: true
+        required: false
         type: string
+        default: ""
       team_allocation_image_tag:
-        required: true
+        required: false
         type: string
+        default: ""
       self_team_allocation_image_tag:
-        required: true
+        required: false
         type: string
+        default: ""
 
     secrets:
       VM_SSH_PRIVATE_KEY:
@@ -231,22 +253,44 @@ jobs:
 
             echo "GITHUB_SHA=${{ github.sha }}" >> .env.prod
             echo "GITHUB_REF=${{ github.ref != '' && github.ref || github.head_ref }}" >> .env.prod
-            echo "SERVER_CORE_IMAGE_TAG=${{ inputs.server_core_image_tag }}" >> .env.prod
-            echo "SERVER_INTRO_COURSE_IMAGE_TAG=${{ inputs.server_intro_course_image_tag }}" >> .env.prod
-            echo "SERVER_TEAM_ALLOCATION_IMAGE_TAG=${{ inputs.server_team_allocation_image_tag }}" >> .env.prod
-            echo "SERVER_ASSESSMENT_IMAGE_TAG=${{ inputs.server_assessment_image_tag }}" >> .env.prod
-            echo "SERVER_SELF_TEAM_ALLOCATION_IMAGE_TAG=${{ inputs.server_self_team_allocation_image_tag }}" >> .env.prod
-            echo "SERVER_INTERVIEW_IMAGE_TAG=${{ inputs.server_interview_image_tag }}" >> .env.prod
 
-            echo "CORE_IMAGE_TAG=${{ inputs.core_image_tag }}" >> .env.prod
-            echo "TEMPLATE_IMAGE_TAG=${{ inputs.template_image_tag }}" >> .env.prod
-            echo "INTERVIEW_IMAGE_TAG=${{ inputs.interview_image_tag }}" >> .env.prod
-            echo "MATCHING_IMAGE_TAG=${{ inputs.matching_image_tag }}" >> .env.prod
-            echo "INTRO_COURSE_DEVELOPER_IMAGE_TAG=${{ inputs.intro_course_developer_image_tag }}" >> .env.prod
-            echo "ASSESSMENT_IMAGE_TAG=${{ inputs.assessment_image_tag }}" >> .env.prod
-            echo "DEVOPS_CHALLENGE_IMAGE_TAG=${{ inputs.devops_challenge_image_tag }}" >> .env.prod
-            echo "TEAM_ALLOCATION_IMAGE_TAG=${{ inputs.team_allocation_image_tag }}" >> .env.prod
-            echo "SELF_TEAM_ALLOCATION_IMAGE_TAG=${{ inputs.self_team_allocation_image_tag }}" >> .env.prod
+            # Resolve image tags: use pr-<number> for all when pr_number is set,
+            # otherwise fall back to the individually supplied tags.
+            PR_NUMBER="${{ inputs.pr_number }}"
+            if [ -n "$PR_NUMBER" ]; then
+              TAG="pr-${PR_NUMBER}"
+              echo "SERVER_CORE_IMAGE_TAG=$TAG" >> .env.prod
+              echo "SERVER_INTRO_COURSE_IMAGE_TAG=$TAG" >> .env.prod
+              echo "SERVER_TEAM_ALLOCATION_IMAGE_TAG=$TAG" >> .env.prod
+              echo "SERVER_ASSESSMENT_IMAGE_TAG=$TAG" >> .env.prod
+              echo "SERVER_SELF_TEAM_ALLOCATION_IMAGE_TAG=$TAG" >> .env.prod
+              echo "SERVER_INTERVIEW_IMAGE_TAG=$TAG" >> .env.prod
+              echo "CORE_IMAGE_TAG=$TAG" >> .env.prod
+              echo "TEMPLATE_IMAGE_TAG=$TAG" >> .env.prod
+              echo "INTERVIEW_IMAGE_TAG=$TAG" >> .env.prod
+              echo "MATCHING_IMAGE_TAG=$TAG" >> .env.prod
+              echo "INTRO_COURSE_DEVELOPER_IMAGE_TAG=$TAG" >> .env.prod
+              echo "ASSESSMENT_IMAGE_TAG=$TAG" >> .env.prod
+              echo "DEVOPS_CHALLENGE_IMAGE_TAG=$TAG" >> .env.prod
+              echo "TEAM_ALLOCATION_IMAGE_TAG=$TAG" >> .env.prod
+              echo "SELF_TEAM_ALLOCATION_IMAGE_TAG=$TAG" >> .env.prod
+            else
+              echo "SERVER_CORE_IMAGE_TAG=${{ inputs.server_core_image_tag }}" >> .env.prod
+              echo "SERVER_INTRO_COURSE_IMAGE_TAG=${{ inputs.server_intro_course_image_tag }}" >> .env.prod
+              echo "SERVER_TEAM_ALLOCATION_IMAGE_TAG=${{ inputs.server_team_allocation_image_tag }}" >> .env.prod
+              echo "SERVER_ASSESSMENT_IMAGE_TAG=${{ inputs.server_assessment_image_tag }}" >> .env.prod
+              echo "SERVER_SELF_TEAM_ALLOCATION_IMAGE_TAG=${{ inputs.server_self_team_allocation_image_tag }}" >> .env.prod
+              echo "SERVER_INTERVIEW_IMAGE_TAG=${{ inputs.server_interview_image_tag }}" >> .env.prod
+              echo "CORE_IMAGE_TAG=${{ inputs.core_image_tag }}" >> .env.prod
+              echo "TEMPLATE_IMAGE_TAG=${{ inputs.template_image_tag }}" >> .env.prod
+              echo "INTERVIEW_IMAGE_TAG=${{ inputs.interview_image_tag }}" >> .env.prod
+              echo "MATCHING_IMAGE_TAG=${{ inputs.matching_image_tag }}" >> .env.prod
+              echo "INTRO_COURSE_DEVELOPER_IMAGE_TAG=${{ inputs.intro_course_developer_image_tag }}" >> .env.prod
+              echo "ASSESSMENT_IMAGE_TAG=${{ inputs.assessment_image_tag }}" >> .env.prod
+              echo "DEVOPS_CHALLENGE_IMAGE_TAG=${{ inputs.devops_challenge_image_tag }}" >> .env.prod
+              echo "TEAM_ALLOCATION_IMAGE_TAG=${{ inputs.team_allocation_image_tag }}" >> .env.prod
+              echo "SELF_TEAM_ALLOCATION_IMAGE_TAG=${{ inputs.self_team_allocation_image_tag }}" >> .env.prod
+            fi
 
 
             echo "SENDER_EMAIL=${{ vars.SENDER_EMAIL_ADDRESS }}" >> .env.prod
