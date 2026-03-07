@@ -1,4 +1,4 @@
-module github.com/ls1intum/prompt2/servers/template_server
+module github.com/prompt-edu/prompt/servers/template_server
 
 go 1.26
 
@@ -9,7 +9,7 @@ require (
 	github.com/gin-gonic/gin v1.11.0
 	github.com/google/uuid v1.6.0
 	github.com/jackc/pgx/v5 v5.8.0
-	github.com/ls1intum/prompt-sdk v1.0.11
+	github.com/ls1intum/prompt-sdk v1.0.12
 	github.com/sirupsen/logrus v1.9.4
 	github.com/swaggo/swag v1.16.6
 )
