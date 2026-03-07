@@ -269,7 +269,7 @@ services:
       - prompt-network
 
   server-certificate:
-    image: "ghcr.io/ls1intum/prompt2/prompt-server-certificate:${SERVER_CERTIFICATE_IMAGE_TAG}"
+    image: "ghcr.io/prompt-edu/prompt/prompt-server-certificate:${SERVER_CERTIFICATE_IMAGE_TAG}"
     container_name: prompt-server-certificate
     labels:
       - "traefik.enable=true"
@@ -605,7 +605,7 @@ services:
       - prompt-network
 
   client-certificate-component:
-    image: "ghcr.io/ls1intum/prompt2/prompt-clients-certificate-component:${CERTIFICATE_IMAGE_TAG}"
+    image: "ghcr.io/prompt-edu/prompt/prompt-clients-certificate-component:${CERTIFICATE_IMAGE_TAG}"
     container_name: prompt-client-certificate-component
     environment:
       - TZ=Europe/Berlin
