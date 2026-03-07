@@ -1,4 +1,4 @@
-module github.com/ls1intum/prompt2/servers/core
+module github.com/prompt-edu/prompt/servers/core
 
 go 1.26
 
