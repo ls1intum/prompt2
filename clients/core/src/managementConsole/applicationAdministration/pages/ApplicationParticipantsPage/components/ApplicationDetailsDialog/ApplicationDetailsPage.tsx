@@ -162,6 +162,7 @@ export const ApplicationDetailsPage = () => {
           <div className='flex flex-col gap-2'>
             {fetchedApplication && fetchedApplicationForm && (
               <ApplicationAnswersTable
+                coursePhaseId={phaseId ?? ''}
                 questions={[
                   ...fetchedApplicationForm.questionsMultiSelect,
                   ...fetchedApplicationForm.questionsText,

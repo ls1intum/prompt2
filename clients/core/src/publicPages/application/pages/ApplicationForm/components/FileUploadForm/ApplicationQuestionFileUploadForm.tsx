@@ -35,6 +35,11 @@ export const ApplicationQuestionFileUploadForm = forwardRef<
 
   useEffect(() => {
     setExistingAnswer(answer ?? null)
+    // After a successful submit, the backend answer arrives via props.
+    // Clear local upload state to avoid rendering the same file twice.
+    if (answer) {
+      setUploadedFile(null)
+    }
   }, [answer])
 
   const canDeleteFiles = !isInstructorView && !!coursePhaseId && !!applicationId

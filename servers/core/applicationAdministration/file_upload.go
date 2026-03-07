@@ -283,6 +283,46 @@ func deleteApplicationFileAuthenticated(c *gin.Context) {
 	c.Status(http.StatusNoContent)
 }
 
+// getApplicationFileDownloadURL godoc
+// @Summary Get application file download URL
+// @Description Creates a presigned download URL for an application file in the given course phase
+// @Tags applications
+// @Security BearerAuth
+// @Produce json
+// @Param coursePhaseID path string true "Course Phase UUID"
+// @Param fileId path string true "File UUID"
+// @Success 200 {object} map[string]string
+// @Failure 400 {object} utils.ErrorResponse
+// @Failure 403 {object} utils.ErrorResponse
+// @Failure 404 {object} utils.ErrorResponse
+// @Failure 500 {object} utils.ErrorResponse
+// @Router /applications/{coursePhaseID}/files/{fileId}/download-url [get]
+func getApplicationFileDownloadURL(c *gin.Context) {
+	coursePhaseID, ok := parseCoursePhaseID(c)
+	if !ok {
+		return
+	}
+
+	fileID, err := uuid.Parse(c.Param("fileId"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid file ID"})
+		return
+	}
+
+	fileResponse, err := storage.StorageServiceSingleton.GetFileByID(c.Request.Context(), fileID)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "file not found"})
+		return
+	}
+
+	if fileResponse.CoursePhaseID == nil || *fileResponse.CoursePhaseID != coursePhaseID {
+		c.JSON(http.StatusForbidden, gin.H{"error": "no permission to access file"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"downloadUrl": fileResponse.DownloadURL})
+}
+
 func parseCoursePhaseID(c *gin.Context) (uuid.UUID, bool) {
 	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
 	if err != nil {

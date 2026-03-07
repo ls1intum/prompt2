@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import {
   Badge,
   Card,
@@ -21,10 +22,12 @@ import { ApplicationAnswerMultiSelect } from '@core/interfaces/application/appli
 import { ApplicationAnswerFileUpload } from '@core/interfaces/application/applicationAnswer/fileUpload/applicationAnswerFileUpload'
 import { formatFileSize } from '@/lib/formatFileSize'
 import { openFileDownload } from '@/lib/openFileDownload'
+import { getApplicationFileDownloadUrl } from '@core/network/queries/applicationFileDownloadUrl'
 
 import { AlignLeft, CheckSquare, Paperclip, Download } from 'lucide-react'
 
 interface ApplicationAnswersTableProps {
+  coursePhaseId: string
   questions: (
     | ApplicationQuestionText
     | ApplicationQuestionMultiSelect
@@ -36,12 +39,33 @@ interface ApplicationAnswersTableProps {
 }
 
 export const ApplicationAnswersTable = ({
+  coursePhaseId,
   questions,
   answersMultiSelect,
   answersText,
   answersFileUpload,
 }: ApplicationAnswersTableProps) => {
+  const [downloadingFileId, setDownloadingFileId] = useState<string | null>(null)
   const sortedQuestions = [...questions].sort((a, b) => a.orderNum - b.orderNum)
+
+  const handleDownload = async (fileAnswer: ApplicationAnswerFileUpload) => {
+    if (!coursePhaseId || !fileAnswer.fileID) {
+      return
+    }
+
+    try {
+      setDownloadingFileId(fileAnswer.fileID)
+      const downloadUrl = await getApplicationFileDownloadUrl(coursePhaseId, fileAnswer.fileID)
+      await openFileDownload({
+        downloadUrl,
+        fileName: fileAnswer.fileName,
+      })
+    } catch (error) {
+      console.error('Failed to download file:', error)
+    } finally {
+      setDownloadingFileId(null)
+    }
+  }
 
   return (
     <Card className='w-full'>
@@ -106,13 +130,12 @@ export const ApplicationAnswersTable = ({
                             <Button
                               variant='outline'
                               size='sm'
-                              onClick={() =>
-                                openFileDownload({
-                                  downloadUrl: fileAnswer.downloadUrl,
-                                  fileName: fileAnswer.fileName,
-                                })
+                              onClick={() => handleDownload(fileAnswer)}
+                              disabled={
+                                !coursePhaseId ||
+                                !fileAnswer.fileID ||
+                                downloadingFileId === fileAnswer.fileID
                               }
-                              disabled={!fileAnswer.downloadUrl}
                             >
                               <Download className='mr-2 h-4 w-4' />
                               Download

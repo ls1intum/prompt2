@@ -32,7 +32,7 @@ var ErrNotFound = errors.New("application was not found")
 var ErrAlreadyApplied = errors.New("application already exists")
 var ErrStudentDetailsDoNotMatch = errors.New("student details do not match")
 
-func buildFileUploadAnswerDTOs(ctx context.Context, answers []db.ApplicationAnswerFileUpload) []applicationDTO.AnswerFileUpload {
+func buildFileUploadAnswerDTOs(ctx context.Context, answers []db.ApplicationAnswerFileUpload, includeDownloadURL bool) []applicationDTO.AnswerFileUpload {
 	answerDTOs := make([]applicationDTO.AnswerFileUpload, 0, len(answers))
 	for _, answer := range answers {
 		dto := applicationDTO.AnswerFileUpload{
@@ -42,14 +42,25 @@ func buildFileUploadAnswerDTOs(ctx context.Context, answers []db.ApplicationAnsw
 			FileID:                answer.FileID,
 		}
 
-		file, err := storage.StorageServiceSingleton.GetFileByID(ctx, answer.FileID)
-		if err != nil {
-			log.WithError(err).WithField("fileId", answer.FileID).Warn("Failed to load file metadata for answer")
+		if includeDownloadURL {
+			file, err := storage.StorageServiceSingleton.GetFileByID(ctx, answer.FileID)
+			if err != nil {
+				log.WithError(err).WithField("fileId", answer.FileID).Warn("Failed to load file metadata for answer")
+			} else {
+				dto.FileName = file.OriginalFilename
+				dto.FileSize = file.SizeBytes
+				dto.UploadedAt = file.CreatedAt
+				dto.DownloadURL = file.DownloadURL
+			}
 		} else {
-			dto.FileName = file.OriginalFilename
-			dto.FileSize = file.SizeBytes
-			dto.UploadedAt = file.CreatedAt
-			dto.DownloadURL = file.DownloadURL
+			file, err := ApplicationServiceSingleton.queries.GetFileByID(ctx, answer.FileID)
+			if err != nil {
+				log.WithError(err).WithField("fileId", answer.FileID).Warn("Failed to load file metadata for answer")
+			} else {
+				dto.FileName = file.OriginalFilename
+				dto.FileSize = file.SizeBytes
+				dto.UploadedAt = file.CreatedAt.Time
+			}
 		}
 
 		answerDTOs = append(answerDTOs, dto)
@@ -519,7 +530,7 @@ func GetApplicationAuthenticatedByMatriculationNumberAndUniversityLogin(ctx cont
 			Student:            &studentObj,
 			AnswersText:        applicationDTO.GetAnswersTextDTOFromDBModels(answersText),
 			AnswersMultiSelect: applicationDTO.GetAnswersMultiSelectDTOFromDBModels(answersMultiSelect),
-			AnswersFileUpload:  buildFileUploadAnswerDTOs(ctxWithTimeout, answersFileUpload),
+			AnswersFileUpload:  buildFileUploadAnswerDTOs(ctxWithTimeout, answersFileUpload, true),
 		}, nil
 
 	} else {
@@ -689,7 +700,7 @@ func GetApplicationByCPID(ctx context.Context, coursePhaseID uuid.UUID, coursePa
 		Student:            &studentObj,
 		AnswersText:        applicationDTO.GetAnswersTextDTOFromDBModels(answersText),
 		AnswersMultiSelect: applicationDTO.GetAnswersMultiSelectDTOFromDBModels(answersMultiSelect),
-		AnswersFileUpload:  buildFileUploadAnswerDTOs(ctxWithTimeout, answersFileUpload),
+		AnswersFileUpload:  buildFileUploadAnswerDTOs(ctxWithTimeout, answersFileUpload, false),
 	}, nil
 }
 
