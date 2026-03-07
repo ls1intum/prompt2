@@ -2,7 +2,7 @@
 
 ## Executive Summary
 
-Extract `servers/intro_course/` and `clients/intro_course_developer_component/` from the `prompt2` monorepo into a new standalone GitHub repository (e.g., `ls1intum/prompt2-intro-course`). The extracted services will continue to run on the same VM, joining the existing `prompt-network` Docker network and being routed by the existing Traefik reverse proxy.
+Extract `servers/intro_course/` and `clients/intro_course_developer_component/` from the `prompt` monorepo into a new standalone GitHub repository (e.g., `prompt-edu/prompt-intro-course`). The extracted services will continue to run on the same VM, joining the existing `prompt-network` Docker network and being routed by the existing Traefik reverse proxy.
 
 ---
 
@@ -12,8 +12,8 @@ Extract `servers/intro_course/` and `clients/intro_course_developer_component/` 
 
 | Component              | Location                                    | Port            | Docker Image                                                               |
 | ---------------------- | ------------------------------------------- | --------------- | -------------------------------------------------------------------------- |
-| **Server**             | `servers/intro_course/`                     | 8080 (internal) | `ghcr.io/ls1intum/prompt2/prompt-server-intro-course`                      |
-| **Client (Developer)** | `clients/intro_course_developer_component/` | 80 (nginx)      | `ghcr.io/ls1intum/prompt2/prompt-clients-intro-course-developer-component` |
+| **Server**             | `servers/intro_course/`                     | 8080 (internal) | `ghcr.io/prompt-edu/prompt/prompt-server-intro-course`                      |
+| **Client (Developer)** | `clients/intro_course_developer_component/` | 80 (nginx)      | `ghcr.io/prompt-edu/prompt/prompt-clients-intro-course-developer-component` |
 | **Database**           | `db-intro-course` (postgres:15.2-alpine)    | 5433            | Stock postgres image                                                       |
 
 ### Integration Points with Monorepo
@@ -26,7 +26,7 @@ Extract `servers/intro_course/` and `clients/intro_course_developer_component/` 
 | Shared library (`@/`)          | Intro client → `shared_library/` | Webpack alias, Yarn workspaces, base Docker image                                                   |
 | `@tumaet/prompt-shared-state`  | Intro client → npm               | Published npm package (no issue)                                                                    |
 | `@tumaet/prompt-ui-components` | Intro client → npm               | Published npm package (no issue)                                                                    |
-| `prompt-sdk` (Go)              | Intro server → Go module         | Published at `github.com/ls1intum/prompt-sdk` (no issue)                                            |
+| `prompt-sdk` (Go)              | Intro server → Go module         | Published at `github.com/prompt-edu/prompt-sdk` (no issue)                                            |
 | Core server calls              | Intro server → Core server       | `PUT /api/keycloak/:courseID/group/:name/students` (via `SERVER_CORE_HOST`)                         |
 | Docker network                 | All containers                   | `prompt-network` (external Docker network)                                                          |
 | Traefik routing                | Reverse proxy → containers       | Labels: `PathPrefix(/intro-course/api)` and `PathPrefix(/intro-course-developer)`                   |
@@ -49,7 +49,7 @@ Extract `servers/intro_course/` and `clients/intro_course_developer_component/` 
 
 ### Option B: Continue using the monorepo base Docker image
 
-1. The extracted client Dockerfile continues to `FROM ghcr.io/ls1intum/prompt2/prompt-clients-base:${IMAGE_TAG}`
+1. The extracted client Dockerfile continues to `FROM ghcr.io/prompt-edu/prompt/prompt-clients-base:${IMAGE_TAG}`
 2. It pulls the base image from the monorepo's GHCR, which already contains `shared_library`
 3. No changes to the shared library itself
 
@@ -74,7 +74,7 @@ Extract `servers/intro_course/` and `clients/intro_course_developer_component/` 
 ### 2.1 Repository Structure
 
 ```
-prompt2-intro-course/
+prompt-intro-course/
 ├── .github/
 │   └── workflows/
 │       ├── dev.yml                    # PR/push pipeline
@@ -134,8 +134,8 @@ cp -r clients/nginx/ <new-repo>/clients/nginx/
 Use `git filter-repo` to extract history for the relevant directories:
 
 ```bash
-git clone prompt2 prompt2-intro-course
-cd prompt2-intro-course
+git clone prompt prompt-intro-course
+cd prompt-intro-course
 git filter-repo \
   --path servers/intro_course/ \
   --path clients/intro_course_developer_component/ \
@@ -151,7 +151,7 @@ git filter-repo \
 The Go server is already self-contained:
 
 - Own `go.mod` with independent dependencies
-- `prompt-sdk` is an external Go module (`github.com/ls1intum/prompt-sdk`)
+- `prompt-sdk` is an external Go module (`github.com/prompt-edu/prompt-sdk`)
 - Own database schema and migrations
 - Only external call: `SERVER_CORE_HOST` for Keycloak group management
 
@@ -163,7 +163,7 @@ If you want the module path to reflect the new repo:
 
 ```go
 // go.mod
-module github.com/ls1intum/prompt2-intro-course/servers/intro_course
+module github.com/prompt-edu/prompt-intro-course/servers/intro_course
 ```
 
 This requires updating all internal imports in the server code. Alternatively, keep the original module path — it's just a module identifier, not a hard requirement to match the repo URL.
@@ -180,7 +180,7 @@ The Dockerfile stays almost identical:
 
 ```dockerfile
 ARG IMAGE_TAG
-FROM ghcr.io/ls1intum/prompt2/prompt-clients-base:${IMAGE_TAG} AS core-base
+FROM ghcr.io/prompt-edu/prompt/prompt-clients-base:${IMAGE_TAG} AS core-base
 
 WORKDIR /app/intro_course_developer_component
 COPY . ./
@@ -235,7 +235,7 @@ The Axios base URL (`env.INTRO_COURSE_HOST`) is already runtime-configurable via
 ```yaml
 services:
   server-intro-course:
-    image: ghcr.io/ls1intum/prompt2-intro-course/prompt-server-intro-course:${SERVER_IMAGE_TAG}
+    image: ghcr.io/prompt-edu/prompt-intro-course/prompt-server-intro-course:${SERVER_IMAGE_TAG}
     container_name: server-intro-course
     restart: unless-stopped
     networks:
@@ -268,7 +268,7 @@ services:
       - "traefik.docker.network=prompt-network"
 
   client-intro-course-developer-component:
-    image: ghcr.io/ls1intum/prompt2-intro-course/prompt-clients-intro-course-developer:${CLIENT_IMAGE_TAG}
+    image: ghcr.io/prompt-edu/prompt-intro-course/prompt-clients-intro-course-developer:${CLIENT_IMAGE_TAG}
     container_name: client-intro-course-developer-component
     restart: unless-stopped
     networks:
@@ -342,17 +342,17 @@ on:
 
 jobs:
   server:
-    uses: ls1intum/.github/.github/workflows/build-and-push-docker-image.yml@v1.1.1
+    uses: prompt-edu/.github/.github/workflows/build-and-push-docker-image.yml@v1.1.1
     with:
-      image-name: ghcr.io/ls1intum/prompt2-intro-course/prompt-server-intro-course
+      image-name: ghcr.io/prompt-edu/prompt-intro-course/prompt-server-intro-course
       docker-file: servers/intro_course/Dockerfile
       docker-context: ./servers/intro_course
       tag: ${{ inputs.release_tag }}
 
   client:
-    uses: ls1intum/.github/.github/workflows/build-and-push-docker-image.yml@v1.1.1
+    uses: prompt-edu/.github/.github/workflows/build-and-push-docker-image.yml@v1.1.1
     with:
-      image-name: ghcr.io/ls1intum/prompt2-intro-course/prompt-clients-intro-course-developer
+      image-name: ghcr.io/prompt-edu/prompt-intro-course/prompt-clients-intro-course-developer
       docker-file: clients/intro_course_developer_component/Dockerfile
       docker-context: ./clients/intro_course_developer_component
       tag: ${{ inputs.release_tag }}
@@ -364,7 +364,7 @@ jobs:
 Create `.github/workflows/deploy.yml` mirroring the monorepo's `deploy-docker.yml`:
 
 1. SSH to VM via gateway (reuse same secrets)
-2. SCP `docker-compose.prod.yml` to VM (different path, e.g., `/opt/prompt2-intro-course/`)
+2. SCP `docker-compose.prod.yml` to VM (different path, e.g., `/opt/prompt-intro-course/`)
 3. Write `.env.prod` with image tags and secrets
 4. `docker compose -f docker-compose.prod.yml --env-file=.env.prod up --pull=always -d`
 
@@ -577,7 +577,7 @@ The Module Federation dev setup works because the core's webpack config already 
 
 - [ ] **P1.** Decide on `shared_library` strategy (Option A, B, or C)
 - [ ] **P2.** If Option A: Publish `shared_library` as npm package, update all consumers
-- [ ] **P3.** Create new GitHub repository `ls1intum/prompt2-intro-course`
+- [ ] **P3.** Create new GitHub repository `prompt-edu/prompt-intro-course`
 - [ ] **P4.** Set up GHCR access for the new repo (package permissions)
 - [ ] **P5.** Configure GitHub Actions secrets (SSH keys, DB passwords, Keycloak, GitLab token, Sentry DSN)
 
