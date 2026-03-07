@@ -6,7 +6,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
-	promptSDK "github.com/ls1intum/prompt-sdk"
+	promptSDK "github.com/prompt-edu/prompt-sdk"
 	"github.com/prompt-edu/prompt/servers/intro_course/coreRequests"
 	"github.com/prompt-edu/prompt/servers/intro_course/tutor/tutorDTO"
 	log "github.com/sirupsen/logrus"

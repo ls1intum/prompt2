@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/google/uuid"
-	"github.com/ls1intum/prompt-sdk/promptTypes"
+	"github.com/prompt-edu/prompt-sdk/promptTypes"
 	db "github.com/prompt-edu/prompt/servers/self_team_allocation/db/sqlc"
 	"github.com/stretchr/testify/require"
 )

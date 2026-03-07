@@ -10,7 +10,7 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	db "github.com/prompt-edu/prompt/servers/intro_course/db/sqlc"
 	"github.com/prompt-edu/prompt/servers/intro_course/tutor/tutorDTO"
-	promptSDK "github.com/ls1intum/prompt-sdk"
+	promptSDK "github.com/prompt-edu/prompt-sdk"
 	log "github.com/sirupsen/logrus"
 )
 
