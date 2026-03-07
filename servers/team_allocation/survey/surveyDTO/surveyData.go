@@ -3,7 +3,7 @@ package surveyDTO
 import (
 	"time"
 
-	"github.com/ls1intum/prompt-sdk/promptTypes"
+	"github.com/prompt-edu/prompt-sdk/promptTypes"
 	db "github.com/prompt-edu/prompt/servers/team_allocation/db/sqlc"
 	"github.com/prompt-edu/prompt/servers/team_allocation/skills/skillDTO"
 	"github.com/prompt-edu/prompt/servers/team_allocation/team/teamDTO"

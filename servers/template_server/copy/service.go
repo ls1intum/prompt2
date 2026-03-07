@@ -5,7 +5,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5/pgxpool"
-	promptTypes "github.com/ls1intum/prompt-sdk/promptTypes"
+	promptTypes "github.com/prompt-edu/prompt-sdk/promptTypes"
 	db "github.com/prompt-edu/prompt/servers/template_server/db/sqlc"
 )
 
