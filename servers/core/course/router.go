@@ -187,7 +187,8 @@ func checkCourseNameAvailability(c *gin.Context) {
 
 	exists, err := CheckCourseNameExists(c, name, semesterTag)
 	if err != nil {
-		handleError(c, http.StatusInternalServerError, err)
+		log.Error(err)
+		handleError(c, http.StatusInternalServerError, errors.New("failed to check course name availability"))
 		return
 	}
 

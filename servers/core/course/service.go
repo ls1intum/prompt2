@@ -195,9 +195,13 @@ func CreateCourse(ctx context.Context, course courseDTO.CreateCourse, requesterI
 func CheckCourseNameExists(ctx context.Context, name, semesterTag string) (bool, error) {
 	ctxWithTimeout, cancel := db.GetTimeoutContext(ctx)
 	defer cancel()
+	semesterTagParam := pgtype.Text{Valid: false}
+	if semesterTag != "" {
+		semesterTagParam = pgtype.Text{String: semesterTag, Valid: true}
+	}
 	return CourseServiceSingleton.queries.CheckCourseNameExists(ctxWithTimeout, db.CheckCourseNameExistsParams{
 		Name:        name,
-		SemesterTag: pgtype.Text{String: semesterTag, Valid: true},
+		SemesterTag: semesterTagParam,
 	})
 }
 
