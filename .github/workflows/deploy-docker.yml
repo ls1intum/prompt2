@@ -18,13 +18,7 @@ on:
       matching_image_tag:
         required: true
         type: string
-      intro_course_developer_image_tag:
-        required: true
-        type: string
       server_core_image_tag:
-        required: true
-        type: string
-      server_intro_course_image_tag:
         required: true
         type: string
       server_team_allocation_image_tag:
@@ -84,7 +78,7 @@ jobs:
           proxy_port: ${{ vars.DEPLOYMENT_GATEWAY_PORT }}
           script: |
             # Define services to stop/remove (all except reverse-proxy and maintenance)
-            SERVICES="server-core server-intro-course server-team-allocation server-self-team-allocation server-assessment server-interview client-core client-assessment-component client-devops-challenge-component client-intro-course-developer-component client-interview-component client-matching-component client-team-allocation-component client-self-team-allocation-component client-template-component"
+            SERVICES="server-core server-team-allocation server-self-team-allocation server-assessment server-interview client-core client-assessment-component client-devops-challenge-component client-interview-component client-matching-component client-team-allocation-component client-self-team-allocation-component client-template-component"
             # Stop all services except reverse-proxy and maintenance (keep fallback active)
             docker compose -f docker-compose.prod.yml --env-file=.env.prod stop $SERVICES
             # Remove stopped containers
@@ -211,8 +205,6 @@ jobs:
             echo "DB_NAME=${{ vars.DB_NAME }}" >> .env.prod
             echo "DB_USER=${{ vars.DB_USER }}" >> .env.prod
             echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env.prod
-            echo "DB_HOST_INTRO_COURSE=${{ vars.DB_HOST_INTRO_COURSE }}" >> .env.prod
-            echo "DB_PORT_INTRO_COURSE=${{ vars.DB_PORT_INTRO_COURSE }}" >> .env.prod
             echo "DB_HOST_TEAM_ALLOCATION=${{ vars.DB_HOST_TEAM_ALLOCATION }}" >> .env.prod
             echo "DB_PORT_TEAM_ALLOCATION=${{ vars.DB_PORT_TEAM_ALLOCATION }}" >> .env.prod
             echo "DB_HOST_SELF_TEAM_ALLOCATION=${{ vars.DB_HOST_SELF_TEAM_ALLOCATION }}" >> .env.prod
@@ -232,7 +224,6 @@ jobs:
             echo "GITHUB_SHA=${{ github.sha }}" >> .env.prod
             echo "GITHUB_REF=${{ github.ref != '' && github.ref || github.head_ref }}" >> .env.prod
             echo "SERVER_CORE_IMAGE_TAG=${{ inputs.server_core_image_tag }}" >> .env.prod
-            echo "SERVER_INTRO_COURSE_IMAGE_TAG=${{ inputs.server_intro_course_image_tag }}" >> .env.prod
             echo "SERVER_TEAM_ALLOCATION_IMAGE_TAG=${{ inputs.server_team_allocation_image_tag }}" >> .env.prod
             echo "SERVER_ASSESSMENT_IMAGE_TAG=${{ inputs.server_assessment_image_tag }}" >> .env.prod
             echo "SERVER_SELF_TEAM_ALLOCATION_IMAGE_TAG=${{ inputs.server_self_team_allocation_image_tag }}" >> .env.prod
@@ -242,7 +233,6 @@ jobs:
             echo "TEMPLATE_IMAGE_TAG=${{ inputs.template_image_tag }}" >> .env.prod
             echo "INTERVIEW_IMAGE_TAG=${{ inputs.interview_image_tag }}" >> .env.prod
             echo "MATCHING_IMAGE_TAG=${{ inputs.matching_image_tag }}" >> .env.prod
-            echo "INTRO_COURSE_DEVELOPER_IMAGE_TAG=${{ inputs.intro_course_developer_image_tag }}" >> .env.prod
             echo "ASSESSMENT_IMAGE_TAG=${{ inputs.assessment_image_tag }}" >> .env.prod
             echo "DEVOPS_CHALLENGE_IMAGE_TAG=${{ inputs.devops_challenge_image_tag }}" >> .env.prod
             echo "TEAM_ALLOCATION_IMAGE_TAG=${{ inputs.team_allocation_image_tag }}" >> .env.prod
@@ -267,7 +257,6 @@ jobs:
             # echo "SENTRY_DSN_INTERVIEW=${{ vars.SENTRY_DSN_INTERVIEW }}" >> .env.prod
 
             echo "ACME_EMAIL=${{ vars.ACME_EMAIL }}" >> .env.prod
-            echo "GITLAB_ACCESS_TOKEN=${{ vars.GITLAB_ACCESS_TOKEN }}" >> .env.prod
 
       - name: SSH to VM and Execute Docker-Compose Up
         uses: appleboy/ssh-action@v1.2.5
