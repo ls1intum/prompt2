@@ -1,0 +1,126 @@
+name: Build or Retag Server Images for PR
+
+# For each server image: full build (ls1intum, multi-arch) if relevant files changed,
+# or instant manifest retag (crane) from main-latest if nothing changed.
+# All images end up tagged as pr-<number>.
+
+on:
+  workflow_call:
+    inputs:
+      pr_number:
+        description: "PR number used as image tag (pr-<number>)"
+        required: true
+        type: string
+      servers_to_build:
+        description: "JSON array of server modules that need a full Docker build"
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  # ------------------------------------------------------------------
+  # BUILD SERVER IMAGES — one job per server, using ls1intum (multi-arch)
+  # ------------------------------------------------------------------
+  build-core:
+    if: contains(fromJson(inputs.servers_to_build), 'core')
+    uses: ls1intum/.github/.github/workflows/build-and-push-docker-image.yml@v1.2.0
+    with:
+      image-name: ghcr.io/prompt-edu/prompt/prompt-server-core
+      docker-file: servers/Dockerfile
+      docker-context: ./servers/core
+      tags: "pr-${{ inputs.pr_number }}"
+    secrets: inherit
+
+  build-intro-course:
+    if: contains(fromJson(inputs.servers_to_build), 'intro_course')
+    uses: ls1intum/.github/.github/workflows/build-and-push-docker-image.yml@v1.2.0
+    with:
+      image-name: ghcr.io/prompt-edu/prompt/prompt-server-intro-course
+      docker-file: servers/Dockerfile
+      docker-context: ./servers/intro_course
+      tags: "pr-${{ inputs.pr_number }}"
+    secrets: inherit
+
+  build-team-allocation:
+    if: contains(fromJson(inputs.servers_to_build), 'team_allocation')
+    uses: ls1intum/.github/.github/workflows/build-and-push-docker-image.yml@v1.2.0
+    with:
+      image-name: ghcr.io/prompt-edu/prompt/prompt-server-team-allocation
+      docker-file: servers/Dockerfile
+      docker-context: ./servers/team_allocation
+      tags: "pr-${{ inputs.pr_number }}"
+    secrets: inherit
+
+  build-assessment:
+    if: contains(fromJson(inputs.servers_to_build), 'assessment')
+    uses: ls1intum/.github/.github/workflows/build-and-push-docker-image.yml@v1.2.0
+    with:
+      image-name: ghcr.io/prompt-edu/prompt/prompt-server-assessment
+      docker-file: servers/Dockerfile
+      docker-context: ./servers/assessment
+      tags: "pr-${{ inputs.pr_number }}"
+    secrets: inherit
+
+  build-self-team-allocation:
+    if: contains(fromJson(inputs.servers_to_build), 'self_team_allocation')
+    uses: ls1intum/.github/.github/workflows/build-and-push-docker-image.yml@v1.2.0
+    with:
+      image-name: ghcr.io/prompt-edu/prompt/prompt-server-self-team-allocation
+      docker-file: servers/Dockerfile
+      docker-context: ./servers/self_team_allocation
+      tags: "pr-${{ inputs.pr_number }}"
+    secrets: inherit
+
+  build-interview:
+    if: contains(fromJson(inputs.servers_to_build), 'interview')
+    uses: ls1intum/.github/.github/workflows/build-and-push-docker-image.yml@v1.2.0
+    with:
+      image-name: ghcr.io/prompt-edu/prompt/prompt-server-interview
+      docker-file: servers/Dockerfile
+      docker-context: ./servers/interview
+      tags: "pr-${{ inputs.pr_number }}"
+    secrets: inherit
+
+  # ------------------------------------------------------------------
+  # RETAG UNCHANGED SERVER IMAGES
+  # Runs in parallel with the build jobs (touches different images).
+  # ------------------------------------------------------------------
+  retag-servers:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: imjasonh/setup-crane@v0.4
+
+      - name: Authenticate crane to GHCR
+        run: crane auth login ghcr.io -u ${{ github.actor }} -p ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Retag unchanged server images
+        env:
+          PR: ${{ inputs.pr_number }}
+          SERVERS_TO_BUILD: ${{ inputs.servers_to_build }}
+        run: |
+          set -euo pipefail
+
+          BASE="ghcr.io/prompt-edu/prompt"
+          SRC_TAG="main-latest"
+          DST_TAG="pr-$PR"
+
+          retag_if_unchanged() {
+            local image="$1"
+            local module="$2"
+            if ! echo "$SERVERS_TO_BUILD" | jq -e --arg m "$module" 'contains([$m])' > /dev/null 2>&1; then
+              echo "Retagging $image:$SRC_TAG -> $DST_TAG"
+              crane cp "$BASE/$image:$SRC_TAG" "$BASE/$image:$DST_TAG"
+            else
+              echo "Skipping retag of $image (will be built)"
+            fi
+          }
+
+          retag_if_unchanged "prompt-server-core"                 "core"
+          retag_if_unchanged "prompt-server-intro-course"         "intro_course"
+          retag_if_unchanged "prompt-server-team-allocation"      "team_allocation"
+          retag_if_unchanged "prompt-server-assessment"           "assessment"
+          retag_if_unchanged "prompt-server-self-team-allocation" "self_team_allocation"
+          retag_if_unchanged "prompt-server-interview"            "interview"
