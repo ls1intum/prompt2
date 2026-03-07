@@ -47,11 +47,6 @@ SELECT EXISTS (SELECT 1
                FROM course_phase_type
                WHERE name = 'Intro Course Developer') AS does_exist;
 
--- name: TestIntroCourseTutorPhaseTypeExists :one
-SELECT EXISTS (SELECT 1
-               FROM course_phase_type
-               WHERE name = 'IntroCourseTutor') AS does_exist;
-
 -- name: TestDevOpsChallengeTypeExists :one
 SELECT EXISTS (SELECT 1
                FROM course_phase_type
