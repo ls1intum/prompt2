@@ -42,7 +42,11 @@ func (suite *SurveyRouterTestSuite) SetupSuite() {
 	suite.router = gin.Default()
 	api := suite.router.Group("/api/course_phase/:coursePhaseID")
 	testMiddleware := func(allowedRoles ...string) gin.HandlerFunc {
-		return sdkTestUtils.MockAuthMiddlewareWithEmail(allowedRoles, "student@example.com", "03711111", "ab12cde")
+		inner := sdkTestUtils.MockAuthMiddlewareWithEmail(allowedRoles, "student@example.com", "03711111", "ab12cde")
+		return func(c *gin.Context) {
+			c.Set("courseParticipationID", uuid.MustParse("99999999-9999-9999-9999-999999999991"))
+			inner(c)
+		}
 	}
 	setupSurveyRouter(api, testMiddleware)
 }
@@ -144,9 +148,9 @@ func (suite *SurveyRouterTestSuite) TestSetSurveyTimeframe() {
 		return sdkTestUtils.MockAuthMiddlewareWithEmail(allowedRoles, "lecturer@example.com", "03711111", "ab12cde")
 	}
 
-	// Re-setup router with lecturer middleware
-	suite.router = gin.Default()
-	api := suite.router.Group("/api/course_phase/:coursePhaseID")
+	// Use a local router to avoid overwriting the shared suite router
+	localRouter := gin.Default()
+	api := localRouter.Group("/api/course_phase/:coursePhaseID")
 	setupSurveyRouter(api, testMiddleware)
 
 	timeframeReq := surveyDTO.SurveyTimeframe{
@@ -159,7 +163,7 @@ func (suite *SurveyRouterTestSuite) TestSetSurveyTimeframe() {
 	req.Header.Set("Content-Type", "application/json")
 	resp := httptest.NewRecorder()
 
-	suite.router.ServeHTTP(resp, req)
+	localRouter.ServeHTTP(resp, req)
 
 	assert.Equal(suite.T(), http.StatusOK, resp.Code)
 }

@@ -13,6 +13,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
+	keycloakTokenVerifier "github.com/prompt-edu/prompt-sdk/keycloakTokenVerifier"
 	sdkTestUtils "github.com/prompt-edu/prompt-sdk/testutils"
 	db "github.com/prompt-edu/prompt/servers/interview/db/sqlc"
 	interviewAssignmentDTO "github.com/prompt-edu/prompt/servers/interview/interviewAssignment/interviewAssignmentDTO"
@@ -54,6 +55,12 @@ func (suite *InterviewAssignmentRouterTestSuite) newRouter(courseParticipationID
 	setupInterviewAssignmentRouter(api, func(allowedRoles ...string) gin.HandlerFunc {
 		return func(c *gin.Context) {
 			c.Set("courseParticipationID", courseParticipationID)
+			keycloakTokenVerifier.SetTokenUser(c, keycloakTokenVerifier.TokenUser{
+				Roles:                 map[string]bool{},
+				Email:                 "test@example.com",
+				IsStudentOfCourse:     true,
+				CourseParticipationID: courseParticipationID,
+			})
 			c.Next()
 		}
 	})
