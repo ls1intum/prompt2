@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	promptSDK "github.com/ls1intum/prompt-sdk"
-	"github.com/ls1intum/prompt2/servers/team_allocation/coreRequests/coreRequestDTO"
+	"github.com/prompt-edu/prompt/servers/team_allocation/coreRequests/coreRequestDTO"
 )
 
 // GetCourses fetches courses from the core service.

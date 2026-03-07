@@ -1,4 +1,4 @@
-module github.com/ls1intum/prompt2/servers/assessment
+module github.com/prompt-edu/prompt/servers/assessment
 
 go 1.26
 

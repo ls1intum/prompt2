@@ -7,8 +7,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	promptSDK "github.com/ls1intum/prompt-sdk"
-	"github.com/ls1intum/prompt2/servers/assessment/categories/categoryDTO"
-	"github.com/ls1intum/prompt2/servers/assessment/coursePhaseConfig"
+	"github.com/prompt-edu/prompt/servers/assessment/categories/categoryDTO"
+	"github.com/prompt-edu/prompt/servers/assessment/coursePhaseConfig"
 	log "github.com/sirupsen/logrus"
 )
 
