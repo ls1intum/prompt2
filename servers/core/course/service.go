@@ -13,7 +13,7 @@ import (
 	"github.com/prompt-edu/prompt/servers/core/coursePhase/coursePhaseDTO"
 	db "github.com/prompt-edu/prompt/servers/core/db/sqlc"
 	"github.com/prompt-edu/prompt/servers/core/permissionValidation"
-	promptSDK "github.com/ls1intum/prompt-sdk"
+	promptSDK "github.com/prompt-edu/prompt-sdk"
 	log "github.com/sirupsen/logrus"
 )
 

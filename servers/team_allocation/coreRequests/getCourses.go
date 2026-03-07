@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strings"
 
-	promptSDK "github.com/ls1intum/prompt-sdk"
+	promptSDK "github.com/prompt-edu/prompt-sdk"
 	"github.com/prompt-edu/prompt/servers/team_allocation/coreRequests/coreRequestDTO"
 )
 
