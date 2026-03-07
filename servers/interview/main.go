@@ -56,11 +56,16 @@ func runMigrations(databaseURL string) {
 	}
 }
 
-func initSentry() {
+func initSentry() bool {
+	if promptSDK.GetEnv("SENTRY_ENABLED", "false") != "true" {
+		log.Info("Sentry is disabled (SENTRY_ENABLED != true)")
+		return false
+	}
+
 	sentryDsn := promptSDK.GetEnv("SENTRY_DSN_INTERVIEW", "")
 	if sentryDsn == "" {
-		log.Info("Sentry DSN not configured, skipping initialization")
-		return
+		log.Warn("Sentry is enabled but SENTRY_DSN_INTERVIEW is not configured, skipping initialization")
+		return false
 	}
 
 	transport := sentry.NewHTTPTransport()
@@ -83,13 +88,13 @@ func initSentry() {
 		TracesSampleRate: 1.0,
 	}); err != nil {
 		log.Errorf("Sentry initialization failed: %v", err)
-		return
+		return false
 	}
 
 	client := sentry.CurrentHub().Client()
 	if client == nil {
 		log.Error("Sentry client is nil")
-		return
+		return false
 	}
 
 	logHook := sentrylogrus.NewLogHookFromClient(
@@ -111,6 +116,7 @@ func initSentry() {
 	})
 
 	log.Info("Sentry initialized successfully")
+	return true
 }
 
 // @title           PROMPT Interview API
@@ -141,8 +147,10 @@ func initKeycloak(queries db.Queries) {
 }
 
 func main() {
-	initSentry()
-	defer sentry.Flush(2 * time.Second)
+	sentryEnabled := initSentry()
+	if sentryEnabled {
+		defer sentry.Flush(2 * time.Second)
+	}
 
 	databaseURL := getDatabaseURL()
 	log.Debugf("Connecting to database at host=%s port=%s db=%s user=%s sslmode=%s", dbHost, dbPort, dbName, dbUser, sslMode)
@@ -160,7 +168,9 @@ func main() {
 	clientHost := promptSDK.GetEnv("CORE_HOST", "http://localhost:3000")
 
 	router := gin.Default()
-	router.Use(sentrygin.New(sentrygin.Options{}))
+	if sentryEnabled {
+		router.Use(sentrygin.New(sentrygin.Options{}))
+	}
 	router.Use(promptSDK.CORSMiddleware(clientHost))
 
 	api := router.Group("interview/api/course_phase/:coursePhaseID")
