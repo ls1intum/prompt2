@@ -20,6 +20,7 @@ import { templateFormSchema, type TemplateFormValues } from '@core/validations/t
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 import { CourseType, CourseTypeDetails } from '@tumaet/prompt-shared-state'
+import { checkCourseNameExists } from '@core/network/queries/checkCourseNameExists'
 
 interface AddTemplatePropertiesProps {
   onNext: (data: TemplateFormValues) => void
@@ -68,7 +69,31 @@ export const AddTemplateProperties: React.FC<AddTemplatePropertiesProps> = ({
             <FormItem>
               <FormLabel>Template Name</FormLabel>
               <FormControl>
-                <Input placeholder='Enter a template name' {...field} className='w-full' />
+                <Input
+                  placeholder='Enter a template name'
+                  {...field}
+                  className='w-full'
+                  onChange={(e) => {
+                    field.onChange(e)
+                    form.clearErrors('name')
+                  }}
+                  onBlur={async () => {
+                    field.onBlur()
+                    const value = form.getValues('name')
+                    if (!value) return
+                    try {
+                      const exists = await checkCourseNameExists(value, 'template')
+                      if (exists) {
+                        form.setError('name', {
+                          type: 'manual',
+                          message: 'A template with this name already exists.',
+                        })
+                      }
+                    } catch {
+                      // silently ignore network errors — server-side 409 handles it
+                    }
+                  }}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
