@@ -13,7 +13,7 @@ import (
 	sentrylogrus "github.com/getsentry/sentry-go/logrus"
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5/pgxpool"
-	promptSDK "github.com/ls1intum/prompt-sdk"
+	promptSDK "github.com/prompt-edu/prompt-sdk"
 	"github.com/prompt-edu/prompt/servers/intro_course/config"
 	"github.com/prompt-edu/prompt/servers/intro_course/copy"
 	db "github.com/prompt-edu/prompt/servers/intro_course/db/sqlc"
