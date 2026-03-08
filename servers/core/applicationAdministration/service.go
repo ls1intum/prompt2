@@ -9,16 +9,17 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
+	promptSDK "github.com/prompt-edu/prompt-sdk"
 	"github.com/prompt-edu/prompt/servers/core/applicationAdministration/applicationDTO"
 	"github.com/prompt-edu/prompt/servers/core/course/courseParticipation"
 	"github.com/prompt-edu/prompt/servers/core/course/courseParticipation/courseParticipationDTO"
 	"github.com/prompt-edu/prompt/servers/core/coursePhase"
 	"github.com/prompt-edu/prompt/servers/core/coursePhase/coursePhaseParticipation"
 	"github.com/prompt-edu/prompt/servers/core/coursePhase/coursePhaseParticipation/coursePhaseParticipationDTO"
-	promptSDK "github.com/prompt-edu/prompt-sdk"
 	db "github.com/prompt-edu/prompt/servers/core/db/sqlc"
 	"github.com/prompt-edu/prompt/servers/core/student"
-  "github.com/prompt-edu/prompt/servers/core/student/studentDTO"
+	"github.com/prompt-edu/prompt/servers/core/student/studentDTO"
+	"github.com/prompt-edu/prompt/servers/core/utils"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -201,9 +202,10 @@ func PostApplicationExtern(ctx context.Context, coursePhaseID uuid.UUID, applica
 	}
 	defer promptSDK.DeferDBRollback(tx, ctx)
 	qtx := ApplicationServiceSingleton.queries.WithTx(tx)
+  queries := utils.GetQueries(qtx, &ApplicationServiceSingleton.queries)
 
 	// 1. Check if studentObj with this email already exists
-	studentObj, err := student.GetStudentByEmail(ctx, application.Student.Email)
+	studentObj, err := student.GetStudentByEmail(ctx, &queries, application.Student.Email)
 	if err != nil && !errors.Is(err, sql.ErrNoRows) {
 		log.Error(err)
 		return uuid.Nil, errors.New("could save the application")
@@ -310,13 +312,13 @@ func GetApplicationAuthenticatedByMatriculationNumberAndUniversityLogin(ctx cont
 	var studentObj studentDTO.Student
 	var err error
 	if matriculationNumber != "" {
-		studentObj, err = student.GetStudentByMatriculationNumberAndUniversityLogin(ctxWithTimeout, matriculationNumber, universityLogin)
+		studentObj, err = student.GetStudentByMatriculationNumberAndUniversityLogin(ctxWithTimeout, &ApplicationServiceSingleton.queries, matriculationNumber, universityLogin)
 		if errors.Is(err, sql.ErrNoRows) {
 			// Fallback: student may have been stored before matriculation number was available
-			studentObj, err = student.GetStudentByUniversityLogin(ctxWithTimeout, universityLogin)
+			studentObj, err = student.GetStudentByUniversityLogin(ctxWithTimeout, &ApplicationServiceSingleton.queries, universityLogin)
 		}
 	} else {
-		studentObj, err = student.GetStudentByUniversityLogin(ctxWithTimeout, universityLogin)
+		studentObj, err = student.GetStudentByUniversityLogin(ctxWithTimeout, &ApplicationServiceSingleton.queries, universityLogin)
 	}
 	if err != nil && errors.Is(err, sql.ErrNoRows) {
 		return applicationDTO.Application{

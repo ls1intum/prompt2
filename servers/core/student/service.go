@@ -85,8 +85,8 @@ func CreateStudent(ctx context.Context, transactionQueries *db.Queries, student 
 	return studentDTO.GetStudentDTOFromDBModel(createdStudent), nil
 }
 
-func GetStudentByEmail(ctx context.Context, email string) (studentDTO.Student, error) {
-	student, err := StudentServiceSingleton.queries.GetStudentByEmail(ctx, pgtype.Text{String: email, Valid: true})
+func GetStudentByEmail(ctx context.Context, queries *db.Queries, email string) (studentDTO.Student, error) {
+	student, err := queries.GetStudentByEmail(ctx, pgtype.Text{String: email, Valid: true})
 	if err != nil {
 		return studentDTO.Student{}, err
 	}
@@ -94,8 +94,8 @@ func GetStudentByEmail(ctx context.Context, email string) (studentDTO.Student, e
 	return studentDTO.GetStudentDTOFromDBModel(student), nil
 }
 
-func GetStudentByMatriculationNumberAndUniversityLogin(ctx context.Context, matriculation_number string, universityLogin string) (studentDTO.Student, error) {
-	student, err := StudentServiceSingleton.queries.GetStudentByMatriculationNumberAndUniversityLogin(ctx, db.GetStudentByMatriculationNumberAndUniversityLoginParams{
+func GetStudentByMatriculationNumberAndUniversityLogin(ctx context.Context, queries *db.Queries, matriculation_number string, universityLogin string) (studentDTO.Student, error) {
+	student, err := queries.GetStudentByMatriculationNumberAndUniversityLogin(ctx, db.GetStudentByMatriculationNumberAndUniversityLoginParams{
 		UniversityLogin:     pgtype.Text{String: universityLogin, Valid: true},
 		MatriculationNumber: pgtype.Text{String: matriculation_number, Valid: true},
 	})
@@ -105,8 +105,8 @@ func GetStudentByMatriculationNumberAndUniversityLogin(ctx context.Context, matr
 	return studentDTO.GetStudentDTOFromDBModel(student), nil
 }
 
-func GetStudentByUniversityLogin(ctx context.Context, universityLogin string) (studentDTO.Student, error) {
-	student, err := StudentServiceSingleton.queries.GetStudentByUniversityLogin(ctx, pgtype.Text{String: universityLogin, Valid: true})
+func GetStudentByUniversityLogin(ctx context.Context, queries *db.Queries, universityLogin string) (studentDTO.Student, error) {
+	student, err := queries.GetStudentByUniversityLogin(ctx, pgtype.Text{String: universityLogin, Valid: true})
 	if err != nil {
 		return studentDTO.Student{}, err
 	}
@@ -133,17 +133,17 @@ func CreateOrUpdateStudent(ctx context.Context, transactionQueries *db.Queries, 
 	var err error
 	if !studentObj.HasUniversityAccount {
 		// Student added by lecturer but without university account
-		studentByEmail, err = GetStudentByEmail(ctx, studentObj.Email)
+		studentByEmail, err = GetStudentByEmail(ctx, &queries, studentObj.Email)
 	} else if studentObj.MatriculationNumber != "" {
 		// Regular university student with matriculation number
-		studentByEmail, err = GetStudentByMatriculationNumberAndUniversityLogin(ctx, studentObj.MatriculationNumber, studentObj.UniversityLogin)
+		studentByEmail, err = GetStudentByMatriculationNumberAndUniversityLogin(ctx, &queries, studentObj.MatriculationNumber, studentObj.UniversityLogin)
 		if errors.Is(err, sql.ErrNoRows) {
 			// Fallback: student may have been stored before matriculation number was available
-			studentByEmail, err = GetStudentByUniversityLogin(ctx, studentObj.UniversityLogin)
+			studentByEmail, err = GetStudentByUniversityLogin(ctx, &queries, studentObj.UniversityLogin)
 		}
 	} else {
 		// University account holder without matriculation number (e.g. external TUM member)
-		studentByEmail, err = GetStudentByUniversityLogin(ctx, studentObj.UniversityLogin)
+		studentByEmail, err = GetStudentByUniversityLogin(ctx, &queries, studentObj.UniversityLogin)
 	}
 
 	if err != nil && errors.Is(err, sql.ErrNoRows) {
