@@ -140,6 +140,11 @@ func CreateOrUpdateStudent(ctx context.Context, transactionQueries *db.Queries, 
 		if errors.Is(err, sql.ErrNoRows) {
 			// Fallback: student may have been stored before matriculation number was available
 			existingStudent, err = GetStudentByUniversityLogin(ctx, &queries, studentInput.UniversityLogin)
+			if err == nil && existingStudent.MatriculationNumber != "" {
+				// Found a student with a different matriculation number — treat as new user
+				err = sql.ErrNoRows
+				existingStudent = studentDTO.Student{}
+			}
 		}
 	} else {
 		// University account holder without matriculation number (e.g. external TUM member)

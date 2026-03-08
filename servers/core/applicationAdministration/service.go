@@ -475,6 +475,11 @@ func GetApplicationAuthenticatedByMatriculationNumberAndUniversityLogin(ctx cont
 		if errors.Is(err, sql.ErrNoRows) {
 			// Fallback: student may have been stored before matriculation number was available
 			studentObj, err = student.GetStudentByUniversityLogin(ctxWithTimeout, &ApplicationServiceSingleton.queries, universityLogin)
+			if err == nil && studentObj.MatriculationNumber != "" {
+				// Found a student with a different matriculation number — treat as new user
+				err = sql.ErrNoRows
+				studentObj = studentDTO.Student{}
+			}
 		}
 	} else {
 		studentObj, err = student.GetStudentByUniversityLogin(ctxWithTimeout, &ApplicationServiceSingleton.queries, universityLogin)
