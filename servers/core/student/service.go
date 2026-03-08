@@ -126,50 +126,54 @@ func UpdateStudent(ctx context.Context, transactionQueries *db.Queries, id uuid.
 	return studentDTO.GetStudentDTOFromDBModel(updatedStudent), nil
 }
 
-func CreateOrUpdateStudent(ctx context.Context, transactionQueries *db.Queries, studentObj studentDTO.CreateStudent) (studentDTO.Student, error) {
+func CreateOrUpdateStudent(ctx context.Context, transactionQueries *db.Queries, studentInput studentDTO.CreateStudent) (studentDTO.Student, error) {
 	queries := utils.GetQueries(transactionQueries, &StudentServiceSingleton.queries)
 
-	var studentByEmail studentDTO.Student
+	var existingStudent studentDTO.Student
 	var err error
-	if !studentObj.HasUniversityAccount {
+	if !studentInput.HasUniversityAccount {
 		// Student added by lecturer but without university account
-		studentByEmail, err = GetStudentByEmail(ctx, &queries, studentObj.Email)
-	} else if studentObj.MatriculationNumber != "" {
+		existingStudent, err = GetStudentByEmail(ctx, &queries, studentInput.Email)
+	} else if studentInput.MatriculationNumber != "" {
 		// Regular university student with matriculation number
-		studentByEmail, err = GetStudentByMatriculationNumberAndUniversityLogin(ctx, &queries, studentObj.MatriculationNumber, studentObj.UniversityLogin)
+		existingStudent, err = GetStudentByMatriculationNumberAndUniversityLogin(ctx, &queries, studentInput.MatriculationNumber, studentInput.UniversityLogin)
 		if errors.Is(err, sql.ErrNoRows) {
 			// Fallback: student may have been stored before matriculation number was available
-			studentByEmail, err = GetStudentByUniversityLogin(ctx, &queries, studentObj.UniversityLogin)
+			existingStudent, err = GetStudentByUniversityLogin(ctx, &queries, studentInput.UniversityLogin)
 		}
 	} else {
 		// University account holder without matriculation number (e.g. external TUM member)
-		studentByEmail, err = GetStudentByUniversityLogin(ctx, &queries, studentObj.UniversityLogin)
+		existingStudent, err = GetStudentByUniversityLogin(ctx, &queries, studentInput.UniversityLogin)
 	}
 
 	if err != nil && errors.Is(err, sql.ErrNoRows) {
-		return CreateStudent(ctx, &queries, studentObj)
+		return CreateStudent(ctx, &queries, studentInput)
 	}
 	if err != nil {
 		return studentDTO.Student{}, err
 	}
 
 	// student exists
-	if studentObj.ID != uuid.Nil && studentByEmail.ID != studentObj.ID {
+	if studentInput.ID != uuid.Nil && existingStudent.ID != studentInput.ID {
 		return studentDTO.Student{}, errors.New("student has wrong ID")
 	} else {
-		return UpdateStudent(ctx, &queries, studentByEmail.ID, studentDTO.CreateStudent{
-			ID:                   studentByEmail.ID, // make sure the id is not overwritten
-			FirstName:            studentObj.FirstName,
-			LastName:             studentObj.LastName,
-			Email:                studentByEmail.Email,
-			MatriculationNumber:  studentObj.MatriculationNumber,
-			UniversityLogin:      studentObj.UniversityLogin,
-			HasUniversityAccount: studentObj.HasUniversityAccount,
-			Gender:               studentObj.Gender,
-			Nationality:          studentObj.Nationality,
-			StudyDegree:          studentObj.StudyDegree,
-			StudyProgram:         studentObj.StudyProgram,
-			CurrentSemester:      studentObj.CurrentSemester,
+		matriculationNumber := studentInput.MatriculationNumber
+		if matriculationNumber == "" {
+			matriculationNumber = existingStudent.MatriculationNumber
+		}
+		return UpdateStudent(ctx, &queries, existingStudent.ID, studentDTO.CreateStudent{
+			ID:                   existingStudent.ID, // make sure the id is not overwritten
+			FirstName:            studentInput.FirstName,
+			LastName:             studentInput.LastName,
+			Email:                existingStudent.Email,
+			MatriculationNumber:  matriculationNumber,
+			UniversityLogin:      studentInput.UniversityLogin,
+			HasUniversityAccount: studentInput.HasUniversityAccount,
+			Gender:               studentInput.Gender,
+			Nationality:          studentInput.Nationality,
+			StudyDegree:          studentInput.StudyDegree,
+			StudyProgram:         studentInput.StudyProgram,
+			CurrentSemester:      studentInput.CurrentSemester,
 		})
 	}
 }
