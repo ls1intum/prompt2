@@ -113,6 +113,27 @@ func GetStudentByUniversityLogin(ctx context.Context, queries *db.Queries, unive
 	return studentDTO.GetStudentDTOFromDBModel(student), nil
 }
 
+// ResolveStudentByUniversityCredentials looks up a student by matriculation number and university login.
+// If no matriculation number is provided, it falls back to university login alone.
+// If the matriculation number is provided but not found, it falls back to university login —
+// but only if the found student has no matriculation number yet (migration case).
+// If the found student already has a different matriculation number, sql.ErrNoRows is returned.
+func ResolveStudentByUniversityCredentials(ctx context.Context, queries *db.Queries, matriculationNumber string, universityLogin string) (studentDTO.Student, error) {
+	if matriculationNumber != "" {
+		studentObj, err := GetStudentByMatriculationNumberAndUniversityLogin(ctx, queries, matriculationNumber, universityLogin)
+		if errors.Is(err, sql.ErrNoRows) {
+			// Fallback: student may have been stored before matriculation number was available
+			studentObj, err = GetStudentByUniversityLogin(ctx, queries, universityLogin)
+			if err == nil && studentObj.MatriculationNumber != "" {
+				// Found a student with a different matriculation number — treat as new user
+				return studentDTO.Student{}, sql.ErrNoRows
+			}
+		}
+		return studentObj, err
+	}
+	return GetStudentByUniversityLogin(ctx, queries, universityLogin)
+}
+
 func UpdateStudent(ctx context.Context, transactionQueries *db.Queries, id uuid.UUID, student studentDTO.CreateStudent) (studentDTO.Student, error) {
 	queries := utils.GetQueries(transactionQueries, &StudentServiceSingleton.queries)
 	updateStudentParams := student.GetDBModel()
@@ -134,21 +155,8 @@ func CreateOrUpdateStudent(ctx context.Context, transactionQueries *db.Queries, 
 	if !studentInput.HasUniversityAccount {
 		// Student added by lecturer but without university account
 		existingStudent, err = GetStudentByEmail(ctx, &queries, studentInput.Email)
-	} else if studentInput.MatriculationNumber != "" {
-		// Regular university student with matriculation number
-		existingStudent, err = GetStudentByMatriculationNumberAndUniversityLogin(ctx, &queries, studentInput.MatriculationNumber, studentInput.UniversityLogin)
-		if errors.Is(err, sql.ErrNoRows) {
-			// Fallback: student may have been stored before matriculation number was available
-			existingStudent, err = GetStudentByUniversityLogin(ctx, &queries, studentInput.UniversityLogin)
-			if err == nil && existingStudent.MatriculationNumber != "" {
-				// Found a student with a different matriculation number — treat as new user
-				err = sql.ErrNoRows
-				existingStudent = studentDTO.Student{}
-			}
-		}
 	} else {
-		// University account holder without matriculation number (e.g. external TUM member)
-		existingStudent, err = GetStudentByUniversityLogin(ctx, &queries, studentInput.UniversityLogin)
+		existingStudent, err = ResolveStudentByUniversityCredentials(ctx, &queries, studentInput.MatriculationNumber, studentInput.UniversityLogin)
 	}
 
 	if err != nil && errors.Is(err, sql.ErrNoRows) {

@@ -18,7 +18,6 @@ import (
 	db "github.com/prompt-edu/prompt/servers/core/db/sqlc"
 	"github.com/prompt-edu/prompt/servers/core/storage"
 	"github.com/prompt-edu/prompt/servers/core/student"
-	"github.com/prompt-edu/prompt/servers/core/student/studentDTO"
 	"github.com/prompt-edu/prompt/servers/core/utils"
 	log "github.com/sirupsen/logrus"
 )
@@ -468,22 +467,7 @@ func GetApplicationAuthenticatedByMatriculationNumberAndUniversityLogin(ctx cont
 	ctxWithTimeout, cancel := db.GetTimeoutContext(ctx)
 	defer cancel()
 
-	var studentObj studentDTO.Student
-	var err error
-	if matriculationNumber != "" {
-		studentObj, err = student.GetStudentByMatriculationNumberAndUniversityLogin(ctxWithTimeout, &ApplicationServiceSingleton.queries, matriculationNumber, universityLogin)
-		if errors.Is(err, sql.ErrNoRows) {
-			// Fallback: student may have been stored before matriculation number was available
-			studentObj, err = student.GetStudentByUniversityLogin(ctxWithTimeout, &ApplicationServiceSingleton.queries, universityLogin)
-			if err == nil && studentObj.MatriculationNumber != "" {
-				// Found a student with a different matriculation number — treat as new user
-				err = sql.ErrNoRows
-				studentObj = studentDTO.Student{}
-			}
-		}
-	} else {
-		studentObj, err = student.GetStudentByUniversityLogin(ctxWithTimeout, &ApplicationServiceSingleton.queries, universityLogin)
-	}
+	studentObj, err := student.ResolveStudentByUniversityCredentials(ctxWithTimeout, &ApplicationServiceSingleton.queries, matriculationNumber, universityLogin)
 	if err != nil && errors.Is(err, sql.ErrNoRows) {
 		return applicationDTO.Application{
 			Status:             applicationDTO.StatusNewUser,
