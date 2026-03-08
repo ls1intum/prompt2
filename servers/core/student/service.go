@@ -94,10 +94,10 @@ func GetStudentByEmail(ctx context.Context, queries *db.Queries, email string) (
 	return studentDTO.GetStudentDTOFromDBModel(student), nil
 }
 
-func GetStudentByMatriculationNumberAndUniversityLogin(ctx context.Context, queries *db.Queries, matriculation_number string, universityLogin string) (studentDTO.Student, error) {
+func GetStudentByMatriculationNumberAndUniversityLogin(ctx context.Context, queries *db.Queries, matriculationNumber string, universityLogin string) (studentDTO.Student, error) {
 	student, err := queries.GetStudentByMatriculationNumberAndUniversityLogin(ctx, db.GetStudentByMatriculationNumberAndUniversityLoginParams{
 		UniversityLogin:     pgtype.Text{String: universityLogin, Valid: true},
-		MatriculationNumber: pgtype.Text{String: matriculation_number, Valid: true},
+		MatriculationNumber: pgtype.Text{String: matriculationNumber, Valid: true},
 	})
 	if err != nil {
 		return studentDTO.Student{}, err
