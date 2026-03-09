@@ -485,7 +485,7 @@ func initCertificate() error {
 			log.Error("failed to begin transaction: ", err)
 			return err
 		}
-		defer promptSDK.DeferDBRollback(tx, ctx)
+		defer sdkUtils.DeferRollback(tx, ctx)
 		qtx := CoursePhaseTypeServiceSingleton.queries.WithTx(tx)
 
 		// 1.) Create the phase
