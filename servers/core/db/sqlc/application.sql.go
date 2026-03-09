@@ -926,9 +926,10 @@ JOIN
 JOIN 
     course c
     ON cp.course_id = c.id
-WHERE 
+WHERE
     cp.id = $1
     AND cp.is_initial_phase = true
+    AND c.archived = false
     AND cpt.name = 'Application'
     AND (cp.restricted_data->>'applicationEndDate')::timestamp > NOW()
     AND (cp.restricted_data->>'applicationStartDate')::timestamp < NOW()
