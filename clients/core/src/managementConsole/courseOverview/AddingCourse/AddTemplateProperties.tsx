@@ -45,12 +45,30 @@ export const AddTemplateProperties: React.FC<AddTemplatePropertiesProps> = ({
     },
   })
 
-  const onSubmit = (data: TemplateFormValues) => {
+  const onSubmit = async (data: TemplateFormValues) => {
+    if (await checkTemplateExistsAndUpdateForm(data.name)) {
+      return
+    }
     onNext(data)
   }
 
   const selectedCourseType = form.watch('courseType')
   const isEctsDisabled = CourseTypeDetails[selectedCourseType]?.ects !== undefined
+
+  const checkTemplateExistsAndUpdateForm = async (val) => {
+    try {
+      const exists = await checkCourseNameExists(val, 'template')
+      if (exists) {
+        form.setError('name', {
+          type: 'manual',
+          message: 'A template with this name already exists.',
+        })
+      }
+      return exists
+    } catch {
+      return false
+    }
+  }
 
   useEffect(() => {
     const ectsValue = CourseTypeDetails[selectedCourseType]?.ects
@@ -81,17 +99,7 @@ export const AddTemplateProperties: React.FC<AddTemplatePropertiesProps> = ({
                     field.onBlur()
                     const value = form.getValues('name')
                     if (!value) return
-                    try {
-                      const exists = await checkCourseNameExists(value, 'template')
-                      if (exists) {
-                        form.setError('name', {
-                          type: 'manual',
-                          message: 'A template with this name already exists.',
-                        })
-                      }
-                    } catch {
-                      // silently ignore network errors — server-side 409 handles it
-                    }
+                    checkTemplateExistsAndUpdateForm(value)
                   }}
                 />
               </FormControl>
