@@ -14,12 +14,12 @@ import (
 	sentrylogrus "github.com/getsentry/sentry-go/logrus"
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5/pgxpool"
-	promptSDK "github.com/ls1intum/prompt-sdk"
-	"github.com/ls1intum/prompt2/servers/certificate/config"
-	db "github.com/ls1intum/prompt2/servers/certificate/db/sqlc"
-	"github.com/ls1intum/prompt2/servers/certificate/generator"
-	"github.com/ls1intum/prompt2/servers/certificate/participants"
-	"github.com/ls1intum/prompt2/servers/certificate/utils"
+	promptSDK "github.com/prompt-edu/prompt-sdk"
+	"github.com/prompt-edu/prompt/servers/certificate/config"
+	db "github.com/prompt-edu/prompt/servers/certificate/db/sqlc"
+	"github.com/prompt-edu/prompt/servers/certificate/generator"
+	"github.com/prompt-edu/prompt/servers/certificate/participants"
+	"github.com/prompt-edu/prompt/servers/certificate/utils"
 	log "github.com/sirupsen/logrus"
 )
 
