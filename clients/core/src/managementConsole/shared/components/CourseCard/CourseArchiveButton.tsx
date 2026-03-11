@@ -1,6 +1,12 @@
 import { archiveCourses, unarchiveCourses } from '@core/network/mutations/updateCourseArchiveStatus'
 import { ArchiveCourseConfirmationDialog } from '@core/managementConsole/shared/components/ArchiveCourseConfirmationDialog'
-import { Button, Tooltip, TooltipContent, TooltipTrigger } from '@tumaet/prompt-ui-components'
+import {
+  Button,
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+  useToast,
+} from '@tumaet/prompt-ui-components'
 import { Archive, ArchiveRestore } from 'lucide-react'
 import { useState } from 'react'
 
@@ -11,6 +17,22 @@ interface CourseArchiveButtonProps {
 
 export function CourseArchiveButton({ archived, courseID }: CourseArchiveButtonProps) {
   const [dialogOpen, setDialogOpen] = useState(false)
+  const { toast } = useToast()
+
+  const handleArchiveConfirm = async () => {
+    try {
+      await archiveCourses([courseID])
+      setDialogOpen(false)
+      toast({ title: 'Archived Course' })
+    } catch (error) {
+      console.error(error)
+      toast({
+        title: 'Failed to update course archive status',
+        description: 'Please try again later!',
+        variant: 'destructive',
+      })
+    }
+  }
 
   const handleClick = () => {
     if (archived) {
@@ -44,7 +66,7 @@ export function CourseArchiveButton({ archived, courseID }: CourseArchiveButtonP
         courseID={courseID}
         isOpen={dialogOpen}
         onOpenChange={setDialogOpen}
-        onConfirm={() => archiveCourses([courseID])}
+        onConfirm={handleArchiveConfirm}
       />
     </>
   )

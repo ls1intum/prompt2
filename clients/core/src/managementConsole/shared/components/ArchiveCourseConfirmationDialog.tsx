@@ -1,4 +1,5 @@
 import { useCourseStore } from '@tumaet/prompt-shared-state'
+import { useQuery } from '@tanstack/react-query'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -9,6 +10,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@tumaet/prompt-ui-components'
+import { isAfter } from 'date-fns'
+import { getCoursePhaseByID } from '@core/network/queries/coursePhase'
 
 interface ArchiveCourseConfirmationDialogProps {
   courseID: string
@@ -25,8 +28,20 @@ export function ArchiveCourseConfirmationDialog({
 }: ArchiveCourseConfirmationDialogProps) {
   const { courses } = useCourseStore()
   const course = courses.find((c) => c.id === courseID)
-  const hasApplicationPhase =
-    course?.coursePhases.some((p) => p.coursePhaseType === 'Application') ?? false
+
+  const applicationPhase = course?.coursePhases.find((p) => p.coursePhaseType === 'Application')
+
+  const { data: applicationPhaseData } = useQuery({
+    queryKey: ['coursePhase', applicationPhase?.id],
+    queryFn: () => getCoursePhaseByID(applicationPhase!.id),
+    enabled: !!applicationPhase,
+  })
+
+  const applicationEndDate = applicationPhaseData?.restrictedData?.['applicationEndDate']
+    ? new Date(applicationPhaseData.restrictedData['applicationEndDate'])
+    : undefined
+
+  const hasActiveApplicationPhase = !!applicationEndDate && isAfter(applicationEndDate, new Date())
 
   return (
     <AlertDialog open={isOpen} onOpenChange={onOpenChange}>
@@ -34,10 +49,10 @@ export function ArchiveCourseConfirmationDialog({
         <AlertDialogHeader>
           <AlertDialogTitle>Archive this course?</AlertDialogTitle>
           <AlertDialogDescription className='mt-2'>
-            {hasApplicationPhase && (
+            {hasActiveApplicationPhase && (
               <>
                 <p className='font-semibold text-black'>
-                  This course has an active application phase.
+                  This course has an active or upcoming application phase.
                 </p>
                 <p>Archiving it will prevent students from submitting applications.</p>
               </>
