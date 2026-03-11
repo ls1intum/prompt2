@@ -10,7 +10,7 @@ import (
 	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
-	promptSDK "github.com/prompt-edu/prompt-sdk"
+	sdkUtils "github.com/prompt-edu/prompt-sdk/utils"
 	"github.com/prompt-edu/prompt/servers/core/course/courseDTO"
 	"github.com/prompt-edu/prompt/servers/core/coursePhase/coursePhaseDTO"
 	db "github.com/prompt-edu/prompt/servers/core/db/sqlc"
@@ -157,7 +157,7 @@ func CreateCourse(ctx context.Context, course courseDTO.CreateCourse, requesterI
 	if err != nil {
 		return courseDTO.Course{}, err
 	}
-	defer promptSDK.DeferDBRollback(tx, ctx)
+	defer sdkUtils.DeferRollback(tx, ctx)
 	qtx := CourseServiceSingleton.queries.WithTx(tx)
 
 	createCourseParams, err := course.GetDBModel()
@@ -210,7 +210,7 @@ func UpdateCoursePhaseOrder(ctx context.Context, courseID uuid.UUID, graphUpdate
 	if err != nil {
 		return err
 	}
-	defer promptSDK.DeferDBRollback(tx, ctx)
+	defer sdkUtils.DeferRollback(tx, ctx)
 	qtx := CourseServiceSingleton.queries.WithTx(tx)
 
 	// delete all previous connections
@@ -310,7 +310,7 @@ func UpdateParticipationDataGraph(ctx context.Context, courseID uuid.UUID, graph
 	if err != nil {
 		return err
 	}
-	defer promptSDK.DeferDBRollback(tx, ctx)
+	defer sdkUtils.DeferRollback(tx, ctx)
 	qtx := CourseServiceSingleton.queries.WithTx(tx)
 
 	// delete all previous connections
@@ -345,7 +345,7 @@ func UpdatePhaseDataGraph(ctx context.Context, courseID uuid.UUID, graphUpdate [
 	if err != nil {
 		return err
 	}
-	defer promptSDK.DeferDBRollback(tx, ctx)
+	defer sdkUtils.DeferRollback(tx, ctx)
 	qtx := CourseServiceSingleton.queries.WithTx(tx)
 
 	// delete all previous connections
