@@ -34,7 +34,7 @@ export function ArchiveCourseConfirmationDialog({
   const { data: applicationPhaseData } = useQuery({
     queryKey: ['coursePhase', applicationPhase?.id],
     queryFn: () => getCoursePhaseByID(applicationPhase!.id),
-    enabled: !!applicationPhase,
+    enabled: isOpen && !!applicationPhase,
   })
 
   const applicationEndDate = applicationPhaseData?.restrictedData?.['applicationEndDate']
