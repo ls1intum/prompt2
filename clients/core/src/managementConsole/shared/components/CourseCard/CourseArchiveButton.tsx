@@ -19,24 +19,33 @@ export function CourseArchiveButton({ archived, courseID }: CourseArchiveButtonP
   const [dialogOpen, setDialogOpen] = useState(false)
   const { toast } = useToast()
 
+  const toastArchiveError = (error: unknown) => {
+    console.error(error)
+    toast({
+      title: 'Failed to update course archive status',
+      description: 'Please try again later!',
+      variant: 'destructive',
+    })
+  }
+
   const handleArchiveConfirm = async () => {
     try {
       await archiveCourses([courseID])
       setDialogOpen(false)
       toast({ title: 'Archived Course' })
     } catch (error) {
-      console.error(error)
-      toast({
-        title: 'Failed to update course archive status',
-        description: 'Please try again later!',
-        variant: 'destructive',
-      })
+      toastArchiveError(error)
     }
   }
 
-  const handleClick = () => {
+  const handleClick = async () => {
     if (archived) {
-      unarchiveCourses([courseID])
+      try {
+        await unarchiveCourses([courseID])
+        toast({ title: 'Unarchived Course' })
+      } catch (error) {
+        toastArchiveError(error)
+      }
     } else {
       setDialogOpen(true)
     }
