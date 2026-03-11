@@ -9,7 +9,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
-	promptSDK "github.com/prompt-edu/prompt-sdk"
+	sdkUtils "github.com/prompt-edu/prompt-sdk/utils"
 	"github.com/prompt-edu/prompt/servers/core/applicationAdministration/applicationDTO"
 	"github.com/prompt-edu/prompt/servers/core/course/courseParticipation"
 	"github.com/prompt-edu/prompt/servers/core/coursePhase"
@@ -175,7 +175,7 @@ func UpdateApplicationForm(ctx context.Context, coursePhaseId uuid.UUID, form ap
 	if err != nil {
 		return err
 	}
-	defer promptSDK.DeferDBRollback(tx, ctx)
+	defer sdkUtils.DeferRollback(tx, ctx)
 	qtx := ApplicationServiceSingleton.queries.WithTx(tx)
 
 	// Check if course phase is application phase
@@ -344,7 +344,7 @@ func PostApplicationExtern(ctx context.Context, coursePhaseID uuid.UUID, applica
 	if err != nil {
 		return uuid.Nil, err
 	}
-	defer promptSDK.DeferDBRollback(tx, ctx)
+	defer sdkUtils.DeferRollback(tx, ctx)
 	qtx := ApplicationServiceSingleton.queries.WithTx(tx)
   queries := utils.GetQueries(qtx, &ApplicationServiceSingleton.queries)
 
@@ -553,7 +553,7 @@ func PostApplicationAuthenticatedStudent(ctx context.Context, coursePhaseID uuid
 	if err != nil {
 		return uuid.Nil, err
 	}
-	defer promptSDK.DeferDBRollback(tx, ctx)
+	defer sdkUtils.DeferRollback(tx, ctx)
 	qtx := ApplicationServiceSingleton.queries.WithTx(tx)
 
 	// 1. Update student details
@@ -734,7 +734,7 @@ func UpdateApplicationAssessment(ctx context.Context, coursePhaseID uuid.UUID, c
 	if err != nil {
 		return err
 	}
-	defer promptSDK.DeferDBRollback(tx, ctx)
+	defer sdkUtils.DeferRollback(tx, ctx)
 	qtx := ApplicationServiceSingleton.queries.WithTx(tx)
 
 	if assessment.PassStatus != nil || assessment.RestrictedData.Length() > 0 {
@@ -785,7 +785,7 @@ func UploadAdditionalScore(ctx context.Context, coursePhaseID uuid.UUID, additio
 		return err
 	}
 
-	defer promptSDK.DeferDBRollback(tx, ctx)
+	defer sdkUtils.DeferRollback(tx, ctx)
 	qtx := ApplicationServiceSingleton.queries.WithTx(tx)
 
 	// generate batch of scores
