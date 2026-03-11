@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
 	sdkUtils "github.com/prompt-edu/prompt-sdk/utils"
@@ -16,6 +17,9 @@ import (
 	"github.com/prompt-edu/prompt/servers/core/permissionValidation"
 	log "github.com/sirupsen/logrus"
 )
+
+// ErrDuplicateCourseIdentifier is returned when a course with the same name and semester tag already exists.
+var ErrDuplicateCourseIdentifier = errors.New("a course with this name and semester already exists")
 
 type CourseService struct {
 	queries db.Queries
@@ -168,6 +172,10 @@ func CreateCourse(ctx context.Context, course courseDTO.CreateCourse, requesterI
 	}
 	createdCourse, err := qtx.CreateCourse(ctx, createCourseParams)
 	if err != nil {
+		var pgErr *pgconn.PgError
+		if errors.As(err, &pgErr) && pgErr.Code == "23505" {
+			return courseDTO.Course{}, ErrDuplicateCourseIdentifier
+		}
 		return courseDTO.Course{}, err
 	}
 
@@ -182,6 +190,19 @@ func CreateCourse(ctx context.Context, course courseDTO.CreateCourse, requesterI
 		return courseDTO.Course{}, fmt.Errorf("failed to commit transaction: %w", err)
 	}
 	return courseDTO.GetCourseDTOFromDBModel(createdCourse)
+}
+
+func CheckCourseNameExists(ctx context.Context, name, semesterTag string) (bool, error) {
+	ctxWithTimeout, cancel := db.GetTimeoutContext(ctx)
+	defer cancel()
+	semesterTagParam := pgtype.Text{Valid: false}
+	if semesterTag != "" {
+		semesterTagParam = pgtype.Text{String: semesterTag, Valid: true}
+	}
+	return CourseServiceSingleton.queries.CheckCourseNameExists(ctxWithTimeout, db.CheckCourseNameExistsParams{
+		Name:        name,
+		SemesterTag: semesterTagParam,
+	})
 }
 
 func UpdateCoursePhaseOrder(ctx context.Context, courseID uuid.UUID, graphUpdate courseDTO.UpdateCoursePhaseGraph) error {
