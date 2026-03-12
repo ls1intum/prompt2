@@ -10,7 +10,7 @@ interface GitHubPR {
 
 export const PromptLogo = () => {
   const version = packageJSON.version
-  const prMatch = env.SERVER_IMAGE_TAG.match(/^pr-(\d+)$/)
+  const prMatch = env.GITHUB_REF.match(/refs\/pull\/(\d+)\/merge/)
   const pr = prMatch?.[1]
 
   const { data } = useQuery<GitHubPR>({
