@@ -17,6 +17,10 @@ else
   if [[ -z "${go_bin}" ]]; then
     go_bin="$(go env GOPATH 2>/dev/null || true)/bin"
   fi
+  # Fallback to default Go install location when go is not on PATH
+  if [[ -z "${go_bin}" || ! -x "${go_bin}/swag" ]]; then
+    go_bin="${HOME}/go/bin"
+  fi
   if [[ -n "${go_bin}" && -x "${go_bin}/swag" ]]; then
     swag_bin="${go_bin}/swag"
   fi
