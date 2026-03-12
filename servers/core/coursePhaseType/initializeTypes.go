@@ -6,7 +6,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
-	promptSDK "github.com/prompt-edu/prompt-sdk"
+	sdkUtils "github.com/prompt-edu/prompt-sdk/utils"
 	db "github.com/prompt-edu/prompt/servers/core/db/sqlc"
 	"github.com/prompt-edu/prompt/servers/core/meta"
 	log "github.com/sirupsen/logrus"
@@ -24,7 +24,7 @@ func initInterview() error {
 		if err != nil {
 			return err
 		}
-		defer promptSDK.DeferDBRollback(tx, ctx)
+		defer sdkUtils.DeferRollback(tx, ctx)
 		qtx := CoursePhaseTypeServiceSingleton.queries.WithTx(tx)
 
 		// 1.) Create the phase
@@ -111,7 +111,7 @@ func initMatching() error {
 		if err != nil {
 			return err
 		}
-		defer promptSDK.DeferDBRollback(tx, ctx)
+		defer sdkUtils.DeferRollback(tx, ctx)
 		qtx := CoursePhaseTypeServiceSingleton.queries.WithTx(tx)
 
 		// 1.) Create the phase
@@ -174,7 +174,7 @@ func initIntroCourseDeveloper() error {
 		if err != nil {
 			return err
 		}
-		defer promptSDK.DeferDBRollback(tx, ctx)
+		defer sdkUtils.DeferRollback(tx, ctx)
 		qtx := CoursePhaseTypeServiceSingleton.queries.WithTx(tx)
 
 		// 1.) Create the phase
@@ -258,7 +258,7 @@ func initAssessment() error {
 		if err != nil {
 			return err
 		}
-		defer promptSDK.DeferDBRollback(tx, ctx)
+		defer sdkUtils.DeferRollback(tx, ctx)
 		qtx := CoursePhaseTypeServiceSingleton.queries.WithTx(tx)
 
 		// 1.) Create the phase
@@ -340,7 +340,7 @@ func initTeamAllocation() error {
 		if err != nil {
 			return err
 		}
-		defer promptSDK.DeferDBRollback(tx, ctx)
+		defer sdkUtils.DeferRollback(tx, ctx)
 		qtx := CoursePhaseTypeServiceSingleton.queries.WithTx(tx)
 
 		// 1.) Create the phase
@@ -423,7 +423,7 @@ func initSelfTeamAllocation() error {
 		if err != nil {
 			return err
 		}
-		defer promptSDK.DeferDBRollback(tx, ctx)
+		defer sdkUtils.DeferRollback(tx, ctx)
 		qtx := CoursePhaseTypeServiceSingleton.queries.WithTx(tx)
 
 		// 1.) Create the phase
@@ -465,6 +465,72 @@ func initSelfTeamAllocation() error {
 
 	} else {
 		log.Debug("team allocation module already exists")
+	}
+
+	return nil
+}
+
+func initCertificate() error {
+	ctx := context.Background()
+	exists, err := CoursePhaseTypeServiceSingleton.queries.TestCertificateTypeExists(ctx)
+
+	if err != nil {
+		log.Error("failed to check if certificate phase type exists: ", err)
+		return err
+	}
+	if !exists {
+		// Begin transaction
+		tx, err := CoursePhaseTypeServiceSingleton.conn.Begin(ctx)
+		if err != nil {
+			log.Error("failed to begin transaction: ", err)
+			return err
+		}
+		defer sdkUtils.DeferRollback(tx, ctx)
+		qtx := CoursePhaseTypeServiceSingleton.queries.WithTx(tx)
+
+		// 1.) Create the phase
+		baseURL := "{CORE_HOST}/certificate/api"
+		if CoursePhaseTypeServiceSingleton.isDevEnvironment {
+			baseURL = "http://localhost:8088/certificate/api"
+		}
+
+		newCertificate := db.CreateCoursePhaseTypeParams{
+			ID:           uuid.New(),
+			Name:         "Certificate",
+			Description:  pgtype.Text{String: "Certificate of completion generation and distribution.", Valid: true},
+			InitialPhase: false,
+			BaseUrl:      baseURL,
+		}
+		err = qtx.CreateCoursePhaseType(ctx, newCertificate)
+		if err != nil {
+			log.Error("failed to create certificate phase type: ", err)
+			return err
+		}
+
+		// 2.) Create required inputs - Certificate phase typically needs team and student data
+		// Team allocation input (to know which teams exist)
+		err = qtx.InsertTeamAllocationRequiredInput(ctx, newCertificate.ID)
+		if err != nil {
+			log.Error("failed to create required team allocation input: ", err)
+			return err
+		}
+
+		// Team input (to get team information)
+		err = qtx.InsertTeamRequiredInput(ctx, newCertificate.ID)
+		if err != nil {
+			log.Error("failed to create required team input: ", err)
+			return err
+		}
+
+		// No provided outputs for certificate phase (it's typically an end phase)
+
+		// 3.) Commit the transaction
+		if err := tx.Commit(ctx); err != nil {
+			return fmt.Errorf("failed to commit transaction: %w", err)
+		}
+
+	} else {
+		log.Debug("certificate phase type already exists")
 	}
 
 	return nil
