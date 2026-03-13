@@ -243,7 +243,7 @@ We are building a community around PROMPT! Whether you are an instructor using t
 
 - **Discord**: Join our [Discord Server](https://discord.gg/eybNUqD8gf) for real-time discussion and support.
 - **GitHub Issues**: Report bugs or request features on our [Issue Tracker](https://github.com/prompt-edu/prompt/issues).
-- **Documentation**: Visit our [Documentation Portal](https://ls1intum.github.io/prompt2/) for detailed guides.
+- **Documentation**: Visit our [Documentation Portal](https://prompt-edu.github.io/prompt/) for detailed guides.
 
 ## 🤝 Contributing
 
