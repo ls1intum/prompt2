@@ -1,6 +1,6 @@
 # PROMPT 2.0: A Modular and Scalable Management Platform for Project-Based Teaching
 
-[![Discord](https://img.shields.io/discord/1345423854160445580?style=for-the-badge&logo=discord&logoColor=white&label=Join%20our%20Community)](https://discord.gg/eybNUqD8gf)
+[![Discord](https://img.shields.io/badge/Join%20our%20Community-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/eybNUqD8gf)
 
 ## What is PROMPT?
 
