@@ -1,12 +1,9 @@
 import type { CoursePhaseParticipationWithStudent } from '@tumaet/prompt-shared-state'
 import { useMemo } from 'react'
 import { useLocation, useNavigate, useParams } from 'react-router-dom'
+import type { ProfileDetailLocationState } from '../pages/ProfileDetail/ProfileDetailPage'
 import { resolveNavigationOrder } from '../utils/resolveNavigationOrder'
-import { useSorting, useSortSearchParam } from './useSorting'
-
-export interface InterviewNavigationState {
-  orderedParticipationIds?: string[]
-}
+import { useParticipationStore } from '../zustand/useParticipationStore'
 
 interface InterviewNavigation {
   orderedParticipations: CoursePhaseParticipationWithStudent[]
@@ -15,41 +12,38 @@ interface InterviewNavigation {
 }
 
 /**
- * Resolves the order to step through interviewees from a profile. Follows the order the overview
- * showed when the profile was opened, so changing a score or status here does not reshuffle the
- * list being worked through. Without that snapshot (e.g. after a reload) the order is sorted by
- * the `sorting` query param instead.
+ * Resolves the order to step through interviewees from a profile. Follows the order the
+ * participants table showed when the profile was opened, including its search and filters, so
+ * changing a score or status here does not reshuffle the list being worked through. A profile
+ * opened without that order, e.g. in a new tab, steps through all participants instead.
  */
 export const useInterviewNavigation = (): InterviewNavigation => {
   const { studentId } = useParams<{ studentId: string }>()
   const navigate = useNavigate()
   const location = useLocation()
-  const snapshotIds = (location.state as InterviewNavigationState | null)?.orderedParticipationIds
-  const [sortBy] = useSortSearchParam()
-  const liveOrder = useSorting(sortBy)
+  const navigationState = (location.state as ProfileDetailLocationState | null) ?? null
+  const { participations } = useParticipationStore()
 
-  const currentParticipationId = liveOrder.find(
+  const currentParticipationId = participations.find(
     (p) => p.student.id === studentId,
   )?.courseParticipationID
   const orderedParticipations = useMemo(() => {
-    const participationById = new Map(liveOrder.map((p) => [p.courseParticipationID, p]))
+    const participationById = new Map(participations.map((p) => [p.courseParticipationID, p]))
     return resolveNavigationOrder(
-      snapshotIds,
-      liveOrder.map((p) => p.courseParticipationID),
+      navigationState?.orderedParticipationIds,
+      participations.map((p) => p.courseParticipationID),
       currentParticipationId,
     ).flatMap((id) => participationById.get(id) ?? [])
-  }, [snapshotIds, liveOrder, currentParticipationId])
+  }, [navigationState?.orderedParticipationIds, participations, currentParticipationId])
 
   const navigateToParticipation = (participation: CoursePhaseParticipationWithStudent) => {
-    navigate(
-      { pathname: `../${participation.student.id}`, search: location.search },
-      {
-        relative: 'path',
-        state: {
-          orderedParticipationIds: orderedParticipations.map((p) => p.courseParticipationID),
-        } satisfies InterviewNavigationState,
-      },
-    )
+    navigate(`../${participation.student.id}`, {
+      relative: 'path',
+      state: {
+        tableSearch: navigationState?.tableSearch,
+        orderedParticipationIds: orderedParticipations.map((p) => p.courseParticipationID),
+      } satisfies ProfileDetailLocationState,
+    })
   }
 
   return { orderedParticipations, currentParticipationId, navigateToParticipation }

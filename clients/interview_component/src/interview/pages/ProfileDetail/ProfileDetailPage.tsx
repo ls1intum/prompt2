@@ -19,6 +19,8 @@ import { useParticipationStore } from '../../zustand/useParticipationStore'
 
 export interface ProfileDetailLocationState {
   tableSearch?: string
+  /** The participants table's order when the profile was opened, for previous / next. */
+  orderedParticipationIds?: string[]
 }
 
 export const ProfileDetailPage = () => {
@@ -42,7 +44,10 @@ export const ProfileDetailPage = () => {
         <div className='flex items-center gap-4'>
           <Button
             onClick={() =>
-              navigate({ pathname: '..', search: navigationState?.tableSearch }, { relative: 'path' })
+              navigate(
+                { pathname: '..', search: navigationState?.tableSearch },
+                { relative: 'path' },
+              )
             }
             variant='ghost'
             size='sm'

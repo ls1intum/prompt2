@@ -1,6 +1,6 @@
 /**
- * Picks the order to navigate in: the snapshot taken on the overview, reduced to ids that still
- * exist, as long as it contains the current id. Otherwise the live order.
+ * Picks the order to navigate in: the snapshot taken on the participants table, reduced to ids
+ * that still exist, as long as it contains the current id. Otherwise the live order.
  */
 export const resolveNavigationOrder = (
   snapshotIds: string[] | undefined,
