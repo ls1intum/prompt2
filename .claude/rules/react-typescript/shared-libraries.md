@@ -35,7 +35,7 @@ import { Button, Card, ManagementPageHeader } from '@tumaet/prompt-ui-components
 - **Rich text:** `MinimalTiptapEditor`, `MailingTiptapEditor`, `DescriptionMinimalTiptapEditor`.
 - **Hooks:** `useToast`, `useIsMobile`, `useCustomElementWidth`, `useScreenSize`.
 - **Utilities:** `cn` (clsx + tailwind-merge), `getStatusBadge`, `getStatusColor`, `getGravatarUrl`,
-  `getCountries`, `formatFileSize`, `openFileDownload`, `getNavigationNeighbors`.
+  `getCountries`, `formatFileSize`, `openFileDownload`.
   **Table types:** `WithId`, `RowAction<T>`, `TableFilter`, `SortableHeader`.
 
 ## `@tumaet/prompt-shared-state` (source: `prompt-shared-state` repo)
