@@ -104,6 +104,39 @@ export class InterviewPage {
     await expect(dialog).toBeHidden()
   }
 
+  // ── Interview participants and profiles (lecturer) ───────────────────────
+
+  async gotoParticipants(courseId: string, phaseId: string) {
+    await this.goto(courseId, phaseId, '/participants')
+  }
+
+  async expectParticipantsLoaded() {
+    await expect(
+      this.page.getByRole('heading', { level: 1, name: 'Interview Participants' }),
+    ).toBeVisible({ timeout: 15_000 })
+  }
+
+  async openProfile(firstName: string, lastName: string) {
+    await this.page
+      .getByRole('row', { name: new RegExp(`${firstName} ${lastName}`) })
+      .getByRole('cell', { name: lastName, exact: true })
+      .click()
+  }
+
+  async searchParticipants(term: string) {
+    const search = this.page.getByPlaceholder('Search ... (press Enter)')
+    await search.fill(term)
+    await search.press('Enter')
+  }
+
+  async backToParticipants() {
+    await this.page.getByRole('button', { name: 'Back', exact: true }).click()
+  }
+
+  breadcrumb(): Locator {
+    return this.page.getByRole('navigation', { name: 'breadcrumb' })
+  }
+
   // ── Student booking view (phase root) ────────────────────────────────────
 
   slotCard(slotId: string): Locator {

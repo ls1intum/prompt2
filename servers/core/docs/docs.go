@@ -1684,6 +1684,12 @@ const docTemplate = `{
                             "$ref": "#/definitions/utils.ErrorResponse"
                         }
                     },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
@@ -1725,6 +1731,12 @@ const docTemplate = `{
                     },
                     "500": {
                         "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    },
+                    "502": {
+                        "description": "Bad Gateway",
                         "schema": {
                             "$ref": "#/definitions/utils.ErrorResponse"
                         }
@@ -2428,8 +2440,26 @@ const docTemplate = `{
                             "$ref": "#/definitions/utils.ErrorResponse"
                         }
                     },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    },
                     "500": {
                         "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    },
+                    "502": {
+                        "description": "Bad Gateway",
                         "schema": {
                             "$ref": "#/definitions/utils.ErrorResponse"
                         }
@@ -5510,6 +5540,218 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/study-programs": {
+            "get": {
+                "description": "Get the study programs applicants can pick, ordered by name. No authentication required.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "studyPrograms"
+                ],
+                "summary": "Get all study programs",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/studyProgramDTO.StudyProgram"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Add a study program to the list applicants can pick",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "studyPrograms"
+                ],
+                "summary": "Create a study program",
+                "parameters": [
+                    {
+                        "description": "Study program to create",
+                        "name": "studyProgram",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/studyProgramDTO.CreateStudyProgram"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/studyProgramDTO.StudyProgram"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/study-programs/student-counts": {
+            "get": {
+                "description": "Count the students whose stored study program matches each listed program",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "studyPrograms"
+                ],
+                "summary": "Get the number of students per study program",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/studyProgramDTO.StudyProgramStudentCount"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/study-programs/{study-program-uuid}": {
+            "put": {
+                "description": "Rename a study program or change its short name. A rename also updates every student with the previous name.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "studyPrograms"
+                ],
+                "summary": "Update a study program",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Study program UUID",
+                        "name": "study-program-uuid",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Updated study program",
+                        "name": "studyProgram",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/studyProgramDTO.UpdateStudyProgram"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/studyProgramDTO.StudyProgram"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Remove a study program from the list. Students keep their stored study program.",
+                "tags": [
+                    "studyPrograms"
+                ],
+                "summary": "Delete a study program",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Study program UUID",
+                        "name": "study-program-uuid",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -7119,9 +7361,6 @@ const docTemplate = `{
         "coursePhaseDTO.CreateCoursePhase": {
             "type": "object",
             "properties": {
-                "courseID": {
-                    "type": "string"
-                },
                 "coursePhaseTypeID": {
                     "type": "string"
                 },
@@ -7156,9 +7395,6 @@ const docTemplate = `{
         "coursePhaseDTO.UpdateCoursePhase": {
             "type": "object",
             "properties": {
-                "id": {
-                    "type": "string"
-                },
                 "name": {
                     "description": "use pgtype to handle null values",
                     "type": "string"
@@ -8562,6 +8798,53 @@ const docTemplate = `{
                     "$ref": "#/definitions/db.StudyDegree"
                 },
                 "studyProgram": {
+                    "type": "string"
+                }
+            }
+        },
+        "studyProgramDTO.CreateStudyProgram": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "shortName": {
+                    "type": "string"
+                }
+            }
+        },
+        "studyProgramDTO.StudyProgram": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "shortName": {
+                    "type": "string"
+                }
+            }
+        },
+        "studyProgramDTO.StudyProgramStudentCount": {
+            "type": "object",
+            "properties": {
+                "studentCount": {
+                    "type": "integer"
+                },
+                "studyProgramID": {
+                    "type": "string"
+                }
+            }
+        },
+        "studyProgramDTO.UpdateStudyProgram": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "shortName": {
                     "type": "string"
                 }
             }

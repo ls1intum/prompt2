@@ -178,10 +178,24 @@ const ROUTES: Route[] = [
     timeout: 10_000,
   },
   {
+    name: 'assessments.saveIndependent',
+    run: () => assessmentApi.assessments.saveIndependent(PHASE, assessment),
+    method: 'post',
+    url: `${ASSESSMENT_BASE}/student-assessment/independent`,
+    data: BODY,
+    timeout: 10_000,
+  },
+  {
     name: 'assessments.remove',
     run: () => assessmentApi.assessments.remove(PHASE, 'assessment-1'),
     method: 'delete',
     url: `${ASSESSMENT_BASE}/student-assessment/assessment-1`,
+  },
+  {
+    name: 'assessments.removeIndependent',
+    run: () => assessmentApi.assessments.removeIndependent(PHASE, 'independent-1'),
+    method: 'delete',
+    url: `${ASSESSMENT_BASE}/student-assessment/independent/independent-1`,
   },
   {
     name: 'completions.listInPhase',
@@ -208,6 +222,20 @@ const ROUTES: Route[] = [
     method: 'post',
     url: `${ASSESSMENT_BASE}/student-assessment/completed/mark-complete`,
     data: BODY,
+  },
+  {
+    name: 'completions.markCompleteBatch',
+    run: () => assessmentApi.completions.markCompleteBatch(PHASE, [PARTICIPATION]),
+    method: 'post',
+    url: `${ASSESSMENT_BASE}/student-assessment/completed/mark-complete/batch`,
+    data: { courseParticipationIDs: [PARTICIPATION] },
+  },
+  {
+    name: 'completions.unmarkBatch',
+    run: () => assessmentApi.completions.unmarkBatch(PHASE, [PARTICIPATION]),
+    method: 'put',
+    url: `${ASSESSMENT_BASE}/student-assessment/completed/unmark/batch`,
+    data: { courseParticipationIDs: [PARTICIPATION] },
   },
   {
     name: 'completions.unmark',
@@ -411,6 +439,12 @@ const ROUTES: Route[] = [
     method: 'post',
     url: `${ASSESSMENT_BASE}/config/unrelease`,
     data: {},
+  },
+  {
+    name: 'config.reminderStatus',
+    run: () => assessmentApi.config.reminderStatus(PHASE),
+    method: 'get',
+    url: `${ASSESSMENT_BASE}/config/reminders`,
   },
   {
     name: 'config.sendReminder',

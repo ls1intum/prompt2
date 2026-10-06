@@ -98,7 +98,7 @@ func (s *ActionItemService) getStudentActionItemsForCoursePhaseCommunication(c *
 
 // createActionItem godoc
 // @Summary Create action item
-// @Description Create a new action item.
+// @Description Create a new action item. The author is taken from the authenticated JWT.
 // @Tags action_items
 // @Accept json
 // @Produce json
@@ -106,22 +106,32 @@ func (s *ActionItemService) getStudentActionItemsForCoursePhaseCommunication(c *
 // @Param actionItem body actionItemDTO.CreateActionItemRequest true "Action item payload"
 // @Success 201 {object} map[string]string
 // @Failure 400 {object} map[string]string
+// @Failure 401 {object} map[string]string
 // @Failure 403 {object} map[string]string
 // @Failure 500 {object} map[string]string
 // @Router /course_phase/{coursePhaseID}/student-assessment/action-item [post]
 func (s *ActionItemService) createActionItem(c *gin.Context) {
+	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
+	if err != nil {
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
+
 	var req actionItemDTO.CreateActionItemRequest
 	if err := c.BindJSON(&req); err != nil {
 		handleError(c, http.StatusBadRequest, err)
 		return
 	}
-	err := s.CreateActionItem(c, req)
+
+	author, ok := tokenAuthor(c)
+	if !ok {
+		return
+	}
+	req.Author = author
+
+	err = s.CreateActionItem(c, coursePhaseID, req)
 	if err != nil {
-		if errors.Is(err, assessmentCompletion.ErrAssessmentCompleted) || errors.Is(err, coursePhaseConfig.ErrNotStarted) {
-			handleError(c, http.StatusForbidden, err)
-			return
-		}
-		handleError(c, http.StatusInternalServerError, err)
+		handleError(c, actionItemErrorStatus(err), err)
 		return
 	}
 	c.JSON(http.StatusCreated, gin.H{"message": "Action item created successfully"})
@@ -129,7 +139,7 @@ func (s *ActionItemService) createActionItem(c *gin.Context) {
 
 // updateActionItem godoc
 // @Summary Update action item
-// @Description Update an action item.
+// @Description Update an action item. The author is taken from the authenticated JWT.
 // @Tags action_items
 // @Accept json
 // @Produce json
@@ -138,10 +148,17 @@ func (s *ActionItemService) createActionItem(c *gin.Context) {
 // @Param actionItem body actionItemDTO.UpdateActionItemRequest true "Action item payload"
 // @Success 200 {object} map[string]string
 // @Failure 400 {object} map[string]string
+// @Failure 401 {object} map[string]string
 // @Failure 403 {object} map[string]string
+// @Failure 404 {object} map[string]string
 // @Failure 500 {object} map[string]string
 // @Router /course_phase/{coursePhaseID}/student-assessment/action-item/{id} [put]
 func (s *ActionItemService) updateActionItem(c *gin.Context) {
+	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
+	if err != nil {
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
 	actionItemID, err := uuid.Parse(c.Param("id"))
 	if err != nil {
 		handleError(c, http.StatusBadRequest, err)
@@ -157,13 +174,15 @@ func (s *ActionItemService) updateActionItem(c *gin.Context) {
 	// Ensure the ID from URL matches the one in the request
 	req.ID = actionItemID
 
-	err = s.UpdateActionItem(c, req)
+	author, ok := tokenAuthor(c)
+	if !ok {
+		return
+	}
+	req.Author = author
+
+	err = s.UpdateActionItem(c, coursePhaseID, req)
 	if err != nil {
-		if errors.Is(err, assessmentCompletion.ErrAssessmentCompleted) || errors.Is(err, coursePhaseConfig.ErrNotStarted) {
-			handleError(c, http.StatusForbidden, err)
-			return
-		}
-		handleError(c, http.StatusInternalServerError, err)
+		handleError(c, actionItemErrorStatus(err), err)
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"message": "Action item updated successfully"})
@@ -178,22 +197,24 @@ func (s *ActionItemService) updateActionItem(c *gin.Context) {
 // @Success 200 {string} string "OK"
 // @Failure 400 {object} map[string]string
 // @Failure 403 {object} map[string]string
+// @Failure 404 {object} map[string]string
 // @Failure 500 {object} map[string]string
 // @Router /course_phase/{coursePhaseID}/student-assessment/action-item/{id} [delete]
 func (s *ActionItemService) deleteActionItem(c *gin.Context) {
+	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
+	if err != nil {
+		handleError(c, http.StatusBadRequest, err)
+		return
+	}
 	actionItemID, err := uuid.Parse(c.Param("id"))
 	if err != nil {
 		handleError(c, http.StatusBadRequest, err)
 		return
 	}
 
-	err = s.DeleteActionItem(c, actionItemID)
+	err = s.DeleteActionItem(c, coursePhaseID, actionItemID)
 	if err != nil {
-		if errors.Is(err, assessmentCompletion.ErrAssessmentCompleted) || errors.Is(err, coursePhaseConfig.ErrNotStarted) {
-			handleError(c, http.StatusForbidden, err)
-			return
-		}
-		handleError(c, http.StatusInternalServerError, err)
+		handleError(c, actionItemErrorStatus(err), err)
 		return
 	}
 	c.Status(http.StatusOK)
@@ -293,6 +314,28 @@ func (s *ActionItemService) getMyActionItems(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, actionItems)
+}
+
+// tokenAuthor returns the display name of the authenticated user. The server is
+// the source of truth for author identity; anything the client supplied is ignored.
+func tokenAuthor(c *gin.Context) (string, bool) {
+	tokenUser, ok := keycloakTokenVerifier.GetTokenUser(c)
+	if !ok {
+		handleError(c, http.StatusUnauthorized, errors.New("authenticated user not found in context"))
+		return "", false
+	}
+	return assessmentCompletion.AuthorName(tokenUser), true
+}
+
+func actionItemErrorStatus(err error) int {
+	switch {
+	case errors.Is(err, ErrActionItemNotFound):
+		return http.StatusNotFound
+	case errors.Is(err, assessmentCompletion.ErrAssessmentCompleted), errors.Is(err, coursePhaseConfig.ErrNotStarted):
+		return http.StatusForbidden
+	default:
+		return http.StatusInternalServerError
+	}
 }
 
 func handleError(c *gin.Context, statusCode int, err error) {

@@ -6,10 +6,10 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	sdkUtils "github.com/prompt-edu/prompt-sdk/utils"
 	"github.com/prompt-edu/prompt/servers/core/applicationAdministration/applicationDTO"
 	"github.com/prompt-edu/prompt/servers/core/coursePhase/coursePhaseParticipation/coursePhaseParticipationDTO"
 	"github.com/prompt-edu/prompt/servers/core/permissionValidation"
-	"github.com/prompt-edu/prompt/servers/core/utils"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -285,11 +285,14 @@ func (s *ApplicationService) postApplicationManual(c *gin.Context) {
 		return
 	}
 
-	courseParticipationID, err := s.PostApplicationAuthenticatedStudent(c, coursePhaseId, application)
+	courseParticipationID, err := s.PostApplicationAuthenticatedStudent(c, coursePhaseId, anyUploaderInPhase(), application)
 	if err != nil {
 		log.Error(err)
 		if errors.Is(err, ErrAlreadyApplied) {
 			handleError(c, http.StatusMethodNotAllowed, errors.New("already applied"))
+			return
+		} else if errors.Is(err, ErrFileNotInApplication) {
+			handleError(c, http.StatusBadRequest, err)
 			return
 		} else if errors.Is(err, ErrEmailAlreadyInUse) {
 			handleError(c, http.StatusConflict, errors.New("email already in use"))
@@ -353,6 +356,9 @@ func (s *ApplicationService) postApplicationExtern(c *gin.Context) {
 		} else if errors.Is(err, ErrStudentDetailsDoNotMatch) {
 			handleError(c, http.StatusConflict, errors.New("student exists but details do not match"))
 			return
+		} else if errors.Is(err, ErrFileNotInApplication) {
+			handleError(c, http.StatusBadRequest, err)
+			return
 		}
 
 		handleError(c, http.StatusInternalServerError, errors.New("could not post application"))
@@ -396,6 +402,11 @@ func (s *ApplicationService) postApplicationAuthenticated(c *gin.Context) {
 	universityLogin := c.GetString("universityLogin")
 	firstName := c.GetString("firstName")
 	lastName := c.GetString("lastName")
+	userID, ok := getUserID(c)
+	if !ok {
+		handleError(c, http.StatusUnauthorized, errors.New("no user id found"))
+		return
+	}
 	if userEmail == "" {
 		handleError(c, http.StatusUnauthorized, errors.New("no user email found"))
 		return
@@ -426,11 +437,14 @@ func (s *ApplicationService) postApplicationAuthenticated(c *gin.Context) {
 		application.Student.LastName = lastName
 	}
 
-	courseParticipationID, err := s.PostApplicationAuthenticatedStudent(c, coursePhaseId, application)
+	courseParticipationID, err := s.PostApplicationAuthenticatedStudent(c, coursePhaseId, uploadedBy(userID), application)
 	if err != nil {
 		log.Error(err)
 		if errors.Is(err, ErrEmailAlreadyInUse) {
 			handleError(c, http.StatusConflict, errors.New("email already in use"))
+			return
+		} else if errors.Is(err, ErrFileNotInApplication) {
+			handleError(c, http.StatusBadRequest, err)
 			return
 		}
 		handleError(c, http.StatusInternalServerError, errors.New("could not post application"))
@@ -786,7 +800,7 @@ func (s *ApplicationService) postApplicationImport(c *gin.Context) {
 }
 
 func handleError(c *gin.Context, statusCode int, err error) {
-	c.JSON(statusCode, utils.ErrorResponse{
+	c.JSON(statusCode, sdkUtils.ErrorResponse{
 		Error: err.Error(),
 	})
 }

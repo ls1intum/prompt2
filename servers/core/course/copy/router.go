@@ -6,9 +6,9 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	sdkUtils "github.com/prompt-edu/prompt-sdk/utils"
 	"github.com/prompt-edu/prompt/servers/core/course/copy/courseCopyDTO"
 	"github.com/prompt-edu/prompt/servers/core/permissionValidation"
-	"github.com/prompt-edu/prompt/servers/core/utils"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -53,6 +53,11 @@ func (s *CourseCopyService) copyCourse(c *gin.Context) {
 	courseVariables := courseCopyDTO.CopyCourseRequest{}
 	if err := c.BindJSON(&courseVariables); err != nil {
 		handleError(c, http.StatusBadRequest, fmt.Errorf("invalid request body: %w", err))
+		return
+	}
+
+	if err := validateCopyCourseRequest(courseVariables); err != nil {
+		handleError(c, http.StatusBadRequest, err)
 		return
 	}
 
@@ -109,7 +114,7 @@ func (s *CourseCopyService) checkCourseCopyable(c *gin.Context) {
 }
 
 func handleError(c *gin.Context, statusCode int, err error) {
-	c.JSON(statusCode, utils.ErrorResponse{
+	c.JSON(statusCode, sdkUtils.ErrorResponse{
 		Error: err.Error(),
 	})
 }

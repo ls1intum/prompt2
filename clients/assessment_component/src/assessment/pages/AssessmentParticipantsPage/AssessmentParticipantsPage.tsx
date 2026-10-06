@@ -2,10 +2,15 @@ import {
   CoursePhaseParticipationsTable,
   ErrorPage,
   type ExtraParticipantColumn,
-  LoadingPage,
   ManagementPageHeader,
+  type ParticipantRow,
+  QueryGate,
+  type RowAction,
   type TableFilter,
+  useToast,
 } from '@tumaet/prompt-ui-components'
+import { isAxiosError } from 'axios'
+import { Lock, Unlock } from 'lucide-react'
 import { useMemo, useRef } from 'react'
 import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import { AssessmentType } from '../../interfaces/assessmentType'
@@ -18,6 +23,7 @@ import { useGetAllScoreLevels } from '../hooks/useGetAllScoreLevels'
 import { useGetAllTeams } from '../hooks/useGetAllTeams'
 import { useGetCoursePhaseConfig } from '../hooks/useGetCoursePhaseConfig'
 import { useGetCoursePhaseParticipations } from '../hooks/useGetCoursePhaseParticipations'
+import { getTutorLabel } from '../hooks/useTutorLabel'
 import {
   createGradeSuggestionColumn,
   createPeerEvalStatusColumn,
@@ -26,6 +32,21 @@ import {
   createTeamColumn,
   createTutorEvalStatusColumn,
 } from './columns'
+import { useMarkAssessmentsAsCompleted } from './hooks/useMarkAssessmentsAsCompleted'
+import { useUnmarkAssessmentsAsCompleted } from './hooks/useUnmarkAssessmentsAsCompleted'
+import {
+  canMarkAnyAsCompleted,
+  canUnmarkAny,
+  pluralizeAssessments,
+  summarizeMarkResult,
+  summarizeUnmarkResult,
+} from './utils/completionActions'
+
+const toParticipationIDs = (rows: ParticipantRow[]) => rows.map((row) => row.courseParticipationID)
+
+const serverErrorMessage = (error: unknown): string =>
+  (isAxiosError<{ error?: string }>(error) ? error.response?.data?.error : undefined) ??
+  'Please try again.'
 
 export const AssessmentParticipantsPage = () => {
   const { phaseId } = useParams<{ phaseId: string }>()
@@ -43,46 +64,18 @@ export const AssessmentParticipantsPage = () => {
     navigate(target)
   }
 
-  const {
-    data: coursePhaseConfig,
-    isPending: isCoursePhaseConfigPending,
-    isError: isCoursePhaseConfigError,
-    refetch: refetchCoursePhaseConfig,
-  } = useGetCoursePhaseConfig()
+  const coursePhaseConfigQuery = useGetCoursePhaseConfig()
+  const coursePhaseConfig = coursePhaseConfigQuery.data
   const assessmentEnabled = coursePhaseConfig?.assessmentEnabled ?? false
   const { data: participations } = useGetCoursePhaseParticipations()
   const { data: scoreLevels } = useGetAllScoreLevels({ enabled: assessmentEnabled })
   const { data: teams } = useGetAllTeams()
 
-  const {
-    data: assessmentCompletions,
-    isPending: isAssessmentCompletionsPending,
-    isError: isAssessmentCompletionsError,
-    refetch: refetchAssessmentCompletions,
-  } = useGetAllAssessmentCompletions({ enabled: assessmentEnabled })
+  const assessmentCompletionsQuery = useGetAllAssessmentCompletions({ enabled: assessmentEnabled })
+  const evaluationCompletionsQuery = useGetAllEvaluationCompletions()
 
-  const {
-    data: evaluationCompletions,
-    isPending: isEvaluationCompletionsPending,
-    isError: isEvaluationCompletionsError,
-    refetch: refetchEvaluationCompletions,
-  } = useGetAllEvaluationCompletions()
-
-  const isError =
-    isCoursePhaseConfigError ||
-    (assessmentEnabled && isAssessmentCompletionsError) ||
-    isEvaluationCompletionsError
-  const isPending =
-    isCoursePhaseConfigPending ||
-    (assessmentEnabled && isAssessmentCompletionsPending) ||
-    isEvaluationCompletionsPending
-  const refetch = () => {
-    refetchCoursePhaseConfig()
-    refetchEvaluationCompletions()
-    if (assessmentEnabled) {
-      refetchAssessmentCompletions()
-    }
-  }
+  const assessmentCompletions = assessmentCompletionsQuery.data
+  const evaluationCompletions = evaluationCompletionsQuery.data
 
   const selfEvaluationCompletions = useMemo(() => {
     return (
@@ -128,6 +121,7 @@ export const AssessmentParticipantsPage = () => {
         teams,
         participations,
         coursePhaseConfig?.tutorEvaluationEnabled ?? false,
+        getTutorLabel(coursePhaseConfig).title,
       ),
     ]
 
@@ -144,6 +138,72 @@ export const AssessmentParticipantsPage = () => {
     tutorEvaluationCompletions,
   ])
 
+  const { toast } = useToast()
+  const { mutateAsync: markAsCompleted } = useMarkAssessmentsAsCompleted()
+  const { mutateAsync: unmarkAsCompleted } = useUnmarkAssessmentsAsCompleted()
+  const deadline = coursePhaseConfig?.deadline
+  const isDeadlinePassed = deadline ? new Date() > new Date(deadline) : false
+
+  const extraActions: RowAction<ParticipantRow>[] = useMemo(() => {
+    if (!assessmentEnabled) {
+      return []
+    }
+    return [
+      {
+        label: 'Mark as final',
+        icon: <Lock className='h-4 w-4' />,
+        disabled: (rows) => !canMarkAnyAsCompleted(toParticipationIDs(rows), assessmentCompletions),
+        confirm: {
+          title: 'Mark as final',
+          description: (count) =>
+            `Mark ${pluralizeAssessments(count)} as final? Final assessments can no longer be edited. Assessments with unassessed competencies or no grade suggestion are skipped.`,
+          confirmLabel: 'Mark as final',
+        },
+        onAction: async (rows) => {
+          try {
+            toast(summarizeMarkResult(await markAsCompleted(toParticipationIDs(rows))))
+          } catch (error) {
+            toast({
+              title: 'Marking as final failed',
+              description: serverErrorMessage(error),
+              variant: 'destructive',
+            })
+          }
+        },
+      },
+      {
+        label: 'Unmark final',
+        icon: <Unlock className='h-4 w-4' />,
+        disabled: (rows) =>
+          isDeadlinePassed || !canUnmarkAny(toParticipationIDs(rows), assessmentCompletions),
+        confirm: {
+          title: 'Unmark final',
+          description: (count) =>
+            `Reopen ${pluralizeAssessments(count)} for editing? Assessments that are not final are skipped.`,
+          confirmLabel: 'Unmark final',
+        },
+        onAction: async (rows) => {
+          try {
+            toast(summarizeUnmarkResult(await unmarkAsCompleted(toParticipationIDs(rows))))
+          } catch (error) {
+            toast({
+              title: 'Unmarking final failed',
+              description: serverErrorMessage(error),
+              variant: 'destructive',
+            })
+          }
+        },
+      },
+    ]
+  }, [
+    assessmentEnabled,
+    assessmentCompletions,
+    isDeadlinePassed,
+    markAsCompleted,
+    unmarkAsCompleted,
+    toast,
+  ])
+
   const extraFilters: TableFilter[] = [
     {
       type: 'select',
@@ -153,53 +213,56 @@ export const AssessmentParticipantsPage = () => {
     },
   ]
 
-  if (isError) {
-    return <ErrorPage message='Error loading assessments' onRetry={refetch} />
-  }
-  if (isPending) {
-    return <LoadingPage />
-  }
+  if (!phaseId) return <ErrorPage description='Invalid course phase ID' />
 
   return (
-    <div id='table-view' className='relative flex flex-col'>
-      <ManagementPageHeader>
-        {assessmentEnabled ? 'Assessment Participants' : 'Evaluation Participants'}
-      </ManagementPageHeader>
-      <p className='text-sm text-muted-foreground mb-4'>
-        {assessmentEnabled
-          ? 'Click on a participant to view/edit their assessment. Cmd/Ctrl-click to open it in a new tab.'
-          : 'Assessment is disabled for this phase. This table tracks evaluation progress only.'}
-      </p>
-      {assessmentEnabled && (
-        <div className='grid gap-6 grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 mb-6'>
-          <AssessmentDiagram
-            participations={participations}
-            scoreLevels={scoreLevels}
-            completions={assessmentCompletions}
-          />
-          <GradeDistributionDiagram participations={participations} grades={completedGrades} />
-          <ScoreLevelDistributionDiagram
-            participations={participations}
-            scoreLevels={scoreLevels}
+    <QueryGate
+      queries={[coursePhaseConfigQuery, assessmentCompletionsQuery, evaluationCompletionsQuery]}
+      errorFallback={({ refetch }) => (
+        <ErrorPage message='Error loading assessments' onRetry={refetch} />
+      )}
+    >
+      <div id='table-view' className='relative flex flex-col'>
+        <ManagementPageHeader>
+          {assessmentEnabled ? 'Assessment Participants' : 'Evaluation Participants'}
+        </ManagementPageHeader>
+        <p className='text-sm text-muted-foreground mb-4'>
+          {assessmentEnabled
+            ? 'Click on a participant to view/edit their assessment. Cmd/Ctrl-click to open it in a new tab.'
+            : 'Assessment is disabled for this phase. This table tracks evaluation progress only.'}
+        </p>
+        {assessmentEnabled && (
+          <div className='grid gap-6 grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 mb-6'>
+            <AssessmentDiagram
+              participations={participations}
+              scoreLevels={scoreLevels}
+              completions={assessmentCompletions}
+            />
+            <GradeDistributionDiagram participations={participations} grades={completedGrades} />
+            <ScoreLevelDistributionDiagram
+              participations={participations}
+              scoreLevels={scoreLevels}
+            />
+          </div>
+        )}
+        <div
+          className='w-full'
+          onClickCapture={(e) => {
+            openInNewTabRef.current = e.metaKey || e.ctrlKey
+          }}
+        >
+          <CoursePhaseParticipationsTable
+            phaseId={phaseId}
+            participants={participations ?? []}
+            extraColumns={extraColumns}
+            extraFilters={extraFilters}
+            extraActions={extraActions}
+            onClickRowAction={
+              assessmentEnabled ? (row) => openAssessment(row.courseParticipationID) : undefined
+            }
           />
         </div>
-      )}
-      <div
-        className='w-full'
-        onClickCapture={(e) => {
-          openInNewTabRef.current = e.metaKey || e.ctrlKey
-        }}
-      >
-        <CoursePhaseParticipationsTable
-          phaseId={phaseId!}
-          participants={participations ?? []}
-          extraColumns={extraColumns}
-          extraFilters={extraFilters}
-          onClickRowAction={
-            assessmentEnabled ? (row) => openAssessment(row.courseParticipationID) : undefined
-          }
-        />
       </div>
-    </div>
+    </QueryGate>
   )
 }
