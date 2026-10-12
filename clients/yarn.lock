@@ -10548,6 +10548,7 @@ __metadata:
     react-hook-form: "npm:^7.89.0"
     react-medium-image-zoom: "npm:^5.4.9"
     react-router-dom: "npm:^7.18.4"
+    recharts: "npm:^3.10.1"
     sass-loader: "npm:^17.0.1"
     sonner: "npm:^2.0.8"
     style-loader: "npm:^4.0.0"
