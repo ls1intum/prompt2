@@ -163,10 +163,14 @@ export const KeycloakProvider: React.FC<{
   }, [])
 
   // Keeps the in-memory id token, which Keycloak needs as id_token_hint for the logout URL.
+  // Only drops the persisted tokens: clearing the auth state would make RequireAuth start a
+  // login redirect that replaces this logout redirect, and the still-active Keycloak SSO
+  // session would sign the user straight back in. The page unloads on the redirect anyway.
   const logout = useCallback(async () => {
-    clearLocalSession()
+    localStorage.removeItem(TOKEN_KEY)
+    localStorage.removeItem(REFRESH_TOKEN_KEY)
     await keycloakRef.current?.logout({ redirectUri: window.location.origin })
-  }, [clearLocalSession])
+  }, [])
 
   const forceTokenRefresh = useCallback(async () => {
     const instance = keycloakRef.current
