@@ -53,6 +53,14 @@ const toInitError = (reason: unknown): Error => {
   return new Error(description || 'Keycloak could not be reached.')
 }
 
+const detachSessionCallbacks = (instance: Keycloak) => {
+  instance.onAuthSuccess = undefined
+  instance.onAuthRefreshSuccess = undefined
+  instance.onAuthRefreshError = undefined
+  instance.onAuthLogout = undefined
+  instance.onTokenExpired = undefined
+}
+
 export const KeycloakProvider: React.FC<{
   keycloakUrl: string
   keycloakRealmName: string
@@ -107,6 +115,19 @@ export const KeycloakProvider: React.FC<{
     clearLocalSession()
   }, [clearLocalSession])
 
+  const attachSessionCallbacks = useCallback(
+    (instance: Keycloak) => {
+      instance.onAuthSuccess = () => storeSession(instance)
+      instance.onAuthRefreshSuccess = () => storeSession(instance)
+      instance.onAuthRefreshError = () => clearSession()
+      instance.onAuthLogout = () => clearLocalSession()
+      instance.onTokenExpired = () => {
+        void instance.updateToken(5).catch(() => undefined)
+      }
+    },
+    [storeSession, clearSession, clearLocalSession],
+  )
+
   useEffect(() => {
     if (initStarted.current) return
     initStarted.current = true
@@ -117,14 +138,7 @@ export const KeycloakProvider: React.FC<{
       clientId: 'prompt-client',
     })
     keycloakRef.current = instance
-
-    instance.onAuthSuccess = () => storeSession(instance)
-    instance.onAuthRefreshSuccess = () => storeSession(instance)
-    instance.onAuthRefreshError = () => clearSession()
-    instance.onAuthLogout = () => clearLocalSession()
-    instance.onTokenExpired = () => {
-      void instance.updateToken(5).catch(() => undefined)
-    }
+    attachSessionCallbacks(instance)
 
     const storedToken = localStorage.getItem(TOKEN_KEY)
     const storedRefreshToken = localStorage.getItem(REFRESH_TOKEN_KEY)
@@ -144,7 +158,7 @@ export const KeycloakProvider: React.FC<{
         clearSession()
       })
       .finally(() => setIsInitialized(true))
-  }, [keycloakRealmName, keycloakUrl, storeSession, clearSession, clearLocalSession])
+  }, [keycloakRealmName, keycloakUrl, attachSessionCallbacks, clearSession])
 
   // Another tab logged out: the shared tokens are gone, so this tab must not keep
   // rendering an authenticated UI (the shared axios reads localStorage per request).
@@ -168,27 +182,25 @@ export const KeycloakProvider: React.FC<{
   // isLoggingOut stops RequireAuth from answering the cleared session with a login redirect,
   // which would replace the logout redirect and let the still-active Keycloak SSO session
   // sign the user straight back in. The refresh callbacks are detached so a refresh landing
-  // mid-redirect can neither write tokens back nor touch the auth state. Keeps the in-memory
+  // mid-redirect can neither write tokens back nor touch the auth state, and reattached if
+  // the logout fails so a later login works without a reload. Keeps the in-memory
   // id token, which Keycloak needs as id_token_hint for the logout URL.
   const logout = useCallback(async () => {
     const instance = keycloakRef.current
     if (!instance) return
 
-    instance.onAuthSuccess = undefined
-    instance.onAuthRefreshSuccess = undefined
-    instance.onAuthRefreshError = undefined
-    instance.onAuthLogout = undefined
-    instance.onTokenExpired = undefined
+    detachSessionCallbacks(instance)
     setIsLoggingOut(true)
     clearLocalSession()
 
     try {
       await instance.logout({ redirectUri: window.location.origin })
     } catch (error) {
+      attachSessionCallbacks(instance)
       setIsLoggingOut(false)
       throw error
     }
-  }, [clearLocalSession])
+  }, [attachSessionCallbacks, clearLocalSession])
 
   const forceTokenRefresh = useCallback(async () => {
     const instance = keycloakRef.current
