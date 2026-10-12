@@ -1,6 +1,7 @@
 ---
 paths:
   - "**/rspack.config.mjs"
+  - "clients/shared/rspack/**"
 ---
 
 # Module Federation
