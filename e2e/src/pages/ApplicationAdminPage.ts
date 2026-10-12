@@ -3,7 +3,7 @@ import { Page, Locator, expect } from '@playwright/test'
 export type ApplicationStatusBadge = 'Not Assessed' | 'Accepted' | 'Rejected'
 
 // The lecturer-facing admin surfaces of an Application phase under
-// /management/course/:courseId/:phaseId — the overview diagrams, the
+// /management/course/:courseId/:phaseId: the overview diagrams, the
 // participants table (+ per-application Accept/Reject details), the questions
 // page's student preview, and the mailing configuration page.
 export class ApplicationAdminPage {
