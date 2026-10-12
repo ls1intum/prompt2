@@ -10,6 +10,7 @@ const REFRESH_TOKEN_KEY = 'refreshToken'
 interface KeycloakContextType {
   isInitialized: boolean
   isAuthenticated: boolean
+  isLoggingOut: boolean
   initError: Error | null
   login: (redirectUri?: string) => void
   logout: () => Promise<void>
@@ -19,6 +20,7 @@ interface KeycloakContextType {
 export const KeycloakContext = createContext<KeycloakContextType>({
   isInitialized: false,
   isAuthenticated: false,
+  isLoggingOut: false,
   initError: null,
   login: () => {},
   logout: async () => {},
@@ -60,6 +62,7 @@ export const KeycloakProvider: React.FC<{
   const initStarted = useRef(false)
   const [isInitialized, setIsInitialized] = useState(false)
   const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const [isLoggingOut, setIsLoggingOut] = useState(false)
   const [initError, setInitError] = useState<Error | null>(null)
   const { setUser, setPermissions, clearUser, clearPermissions, setLogoutFunction } = useAuthStore()
 
@@ -162,15 +165,30 @@ export const KeycloakProvider: React.FC<{
     void keycloakRef.current?.login({ redirectUri: redirectUri ?? window.location.href })
   }, [])
 
-  // Keeps the in-memory id token, which Keycloak needs as id_token_hint for the logout URL.
-  // Only drops the persisted tokens: clearing the auth state would make RequireAuth start a
-  // login redirect that replaces this logout redirect, and the still-active Keycloak SSO
-  // session would sign the user straight back in. The page unloads on the redirect anyway.
+  // isLoggingOut stops RequireAuth from answering the cleared session with a login redirect,
+  // which would replace the logout redirect and let the still-active Keycloak SSO session
+  // sign the user straight back in. The refresh callbacks are detached so a refresh landing
+  // mid-redirect can neither write tokens back nor touch the auth state. Keeps the in-memory
+  // id token, which Keycloak needs as id_token_hint for the logout URL.
   const logout = useCallback(async () => {
-    localStorage.removeItem(TOKEN_KEY)
-    localStorage.removeItem(REFRESH_TOKEN_KEY)
-    await keycloakRef.current?.logout({ redirectUri: window.location.origin })
-  }, [])
+    const instance = keycloakRef.current
+    if (!instance) return
+
+    instance.onAuthSuccess = undefined
+    instance.onAuthRefreshSuccess = undefined
+    instance.onAuthRefreshError = undefined
+    instance.onAuthLogout = undefined
+    instance.onTokenExpired = undefined
+    setIsLoggingOut(true)
+    clearLocalSession()
+
+    try {
+      await instance.logout({ redirectUri: window.location.origin })
+    } catch (error) {
+      setIsLoggingOut(false)
+      throw error
+    }
+  }, [clearLocalSession])
 
   const forceTokenRefresh = useCallback(async () => {
     const instance = keycloakRef.current
@@ -186,7 +204,15 @@ export const KeycloakProvider: React.FC<{
 
   return (
     <KeycloakContext.Provider
-      value={{ isInitialized, isAuthenticated, initError, login, logout, forceTokenRefresh }}
+      value={{
+        isInitialized,
+        isAuthenticated,
+        isLoggingOut,
+        initError,
+        login,
+        logout,
+        forceTokenRefresh,
+      }}
     >
       {children}
     </KeycloakContext.Provider>
