@@ -321,7 +321,7 @@ func (s *ActionItemService) getMyActionItems(c *gin.Context) {
 func tokenAuthor(c *gin.Context) (string, bool) {
 	tokenUser, ok := keycloakTokenVerifier.GetTokenUser(c)
 	if !ok {
-		handleError(c, http.StatusUnauthorized, errors.New("authenticated user not found in context"))
+		sdkUtils.HandleError(c, http.StatusUnauthorized, errors.New("authenticated user not found in context"))
 		return "", false
 	}
 	return assessmentCompletion.AuthorName(tokenUser), true

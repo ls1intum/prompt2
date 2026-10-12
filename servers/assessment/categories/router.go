@@ -153,28 +153,28 @@ func (s *CategoryService) updateCategory(c *gin.Context) {
 func (s *CategoryService) updateSchemaOrder(c *gin.Context) {
 	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
 	if err != nil {
-		handleError(c, http.StatusBadRequest, err)
+		sdkUtils.HandleError(c, http.StatusBadRequest, err)
 		return
 	}
 
 	var request categoryDTO.UpdateSchemaOrderRequest
 	if err := c.BindJSON(&request); err != nil {
-		handleError(c, http.StatusBadRequest, err)
+		sdkUtils.HandleError(c, http.StatusBadRequest, err)
 		return
 	}
 
 	schemaID, err := s.UpdateSchemaOrder(c, coursePhaseID, request)
 	if err != nil {
 		if errors.Is(err, assessmentSchemas.ErrSchemaNotAccessible) {
-			handleError(c, http.StatusForbidden, err)
+			sdkUtils.HandleError(c, http.StatusForbidden, err)
 			return
 		}
 		if errors.Is(err, ErrIncompleteSchemaOrder) || errors.Is(err, ErrDuplicateCompetencyName) {
-			handleError(c, http.StatusBadRequest, err)
+			sdkUtils.HandleError(c, http.StatusBadRequest, err)
 			return
 		}
 		log.WithError(err).Error("could not update schema order")
-		handleError(c, http.StatusInternalServerError, errors.New("could not update schema order"))
+		sdkUtils.HandleError(c, http.StatusInternalServerError, errors.New("could not update schema order"))
 		return
 	}
 	c.JSON(http.StatusOK, categoryDTO.UpdateSchemaOrderResponse{AssessmentSchemaID: schemaID})
