@@ -75,6 +75,7 @@
     "react-hook-form": "^7.89.0",
     "react-medium-image-zoom": "^5.4.9",
     "react-router-dom": "^7.18.4",
+    "recharts": "^3.10.1",
     "sass-loader": "^17.0.1",
     "sonner": "^2.0.8",
     "style-loader": "^4.0.0",
