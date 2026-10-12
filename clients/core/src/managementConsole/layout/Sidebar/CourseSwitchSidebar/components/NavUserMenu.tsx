@@ -22,7 +22,11 @@ export function NavUserMenu({ onLogout, showThemeToggle = true }: NavUserProps) 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant='ghost' className='max-w-10 max-h-10 min-h-10 min-w-10 p-0'>
+        <Button
+          variant='ghost'
+          aria-label='User menu'
+          className='max-w-10 max-h-10 min-h-10 min-w-10 p-0'
+        >
           <NavAvatar avatarOnly />
         </Button>
       </DropdownMenuTrigger>
