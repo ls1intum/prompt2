@@ -42,6 +42,11 @@ export class LoginPage {
     await expect(this.page.locator('#kc-login')).toBeVisible()
   }
 
+  // The header's Login button on the public pages, shown only without a session.
+  async clickLoginButton() {
+    await this.page.getByRole('button', { name: 'Login' }).click()
+  }
+
   // The header's avatar menu. The public pages ask for confirmation in a
   // dialog first; the management console logs out straight away.
   async logoutFromUserMenu({ confirm = false } = {}) {

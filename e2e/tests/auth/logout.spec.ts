@@ -19,7 +19,7 @@ test.describe('Keycloak logout flow', () => {
     await login.expectLoggedOut()
 
     // Logging in again must ask for credentials instead of reusing the SSO session.
-    await page.getByRole('button', { name: 'Login' }).click()
+    await login.clickLoginButton()
     await login.expectLoginFormVisible()
   })
 
