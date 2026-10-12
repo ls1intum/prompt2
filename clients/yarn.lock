@@ -4248,6 +4248,19 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@tanstack/react-store@npm:^0.11.2":
+  version: 0.11.2
+  resolution: "@tanstack/react-store@npm:0.11.2"
+  dependencies:
+    "@tanstack/store": "npm:0.11.2"
+    use-sync-external-store: "npm:^1.6.0"
+  peerDependencies:
+    react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
+    react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
+  checksum: 10c0/a755aa369c13824709ca5b29355ab7a72ba913d3561786f993412c8c375f36c54b20c0366bd406cf21b363b12e516a251a774ee7140479571b628e895448a93d
+  languageName: node
+  linkType: hard
+
 "@tanstack/react-table@npm:^9.2.4":
   version: 9.2.4
   resolution: "@tanstack/react-table@npm:9.2.4"
@@ -4260,10 +4273,29 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@tanstack/react-table@npm:^9.2.6":
+  version: 9.2.8
+  resolution: "@tanstack/react-table@npm:9.2.8"
+  dependencies:
+    "@tanstack/react-store": "npm:^0.11.2"
+    "@tanstack/table-core": "npm:9.2.8"
+  peerDependencies:
+    react: ">=18"
+  checksum: 10c0/bc72fe599de3cf4edc120952ddab05225a1d1533060ffec2e4fde00b9aa394ee96052e09fd399685d52e1b56b18500488b15960c65aa5f9273f641b61c2ca29f
+  languageName: node
+  linkType: hard
+
 "@tanstack/store@npm:0.11.1, @tanstack/store@npm:^0.11.1":
   version: 0.11.1
   resolution: "@tanstack/store@npm:0.11.1"
   checksum: 10c0/36e308f3a5037a4d79e2b2ea9f6f4015a617fcd7cb8ff541fe50869b015fb8753b267a8c24709ad197c4c3b5fd85207edc4f71eccaf9b0d311f62336a9cf7764
+  languageName: node
+  linkType: hard
+
+"@tanstack/store@npm:0.11.2, @tanstack/store@npm:^0.11.2":
+  version: 0.11.2
+  resolution: "@tanstack/store@npm:0.11.2"
+  checksum: 10c0/5422149c853c16e642a0ddfb51c2b4a867a11516069d3b9647659212e9762b86d609144de6ac6ec099b0360c3b198d1243f613148d69c1028dee56382f0430cd
   languageName: node
   linkType: hard
 
@@ -4273,6 +4305,15 @@ __metadata:
   dependencies:
     "@tanstack/store": "npm:^0.11.1"
   checksum: 10c0/fae9e7f3028f45eb2cd3e831365e398a92030d685acdd0458c3c2245eb8456176abd0d5ca208ea58eb9e7a4ccc666c26986269c93bc4ce25603866805bb837b9
+  languageName: node
+  linkType: hard
+
+"@tanstack/table-core@npm:9.2.8":
+  version: 9.2.8
+  resolution: "@tanstack/table-core@npm:9.2.8"
+  dependencies:
+    "@tanstack/store": "npm:^0.11.2"
+  checksum: 10c0/a57aeaadd0779dfeea7eb05d7babeb1d740200dad1294efd6fb1476be723122fb6a0bc169d2ba0f022d2d064f4aa4af3850df9d8b6739fcd97d77695601d6db9
   languageName: node
   linkType: hard
 
@@ -8737,7 +8778,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"lucide-react@npm:^1.51.0":
+"lucide-react@npm:^1.52.0":
   version: 1.55.0
   resolution: "lucide-react@npm:1.55.0"
   peerDependencies:
@@ -10503,7 +10544,7 @@ __metadata:
     "@rspack/dev-server": "npm:^2.2.1"
     "@tailwindcss/postcss": "npm:^4.3.3"
     "@tanstack/react-query": "npm:^5.104.1"
-    "@tanstack/react-table": "npm:^9.2.4"
+    "@tanstack/react-table": "npm:^9.2.6"
     "@tiptap/core": "npm:^3.31.4"
     "@tiptap/extension-code-block": "npm:^3.31.4"
     "@tiptap/extension-code-block-lowlight": "npm:^3.31.4"
@@ -10539,7 +10580,7 @@ __metadata:
     keycloak-js: "npm:25.0.6"
     lerna: "npm:^10.0.1"
     lowlight: "npm:^3.3.0"
-    lucide-react: "npm:^1.51.0"
+    lucide-react: "npm:^1.52.0"
     motion: "npm:^14.0.0"
     postcss: "npm:^8.5.28"
     postcss-loader: "npm:8.2.1"
