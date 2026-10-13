@@ -38,8 +38,9 @@ func RequireParticipant() gin.HandlerFunc {
 	}
 }
 
-// RequireBodyParticipants rejects writes whose courseParticipationID, or any of whose
-// courseParticipationIDs, is outside the caller's scope.
+// RequireBodyParticipants rejects writes where the courseParticipationID or any of the
+// courseParticipationIDs is outside the caller's scope. Both fields are checked because a
+// handler binds whichever one its DTO declares.
 func RequireBodyParticipants() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		scope, ok := ensureScope(c)
@@ -64,8 +65,8 @@ func RequireBodyParticipants() gin.HandlerFunc {
 		}
 
 		targets := payload.CourseParticipationIDs
-		if len(targets) == 0 {
-			targets = []uuid.UUID{payload.CourseParticipationID}
+		if payload.CourseParticipationID != uuid.Nil || len(targets) == 0 {
+			targets = append(targets, payload.CourseParticipationID)
 		}
 		if !scope.AllowsAll(targets) {
 			abortOutsideScope(c)

@@ -132,6 +132,8 @@ func TestTutorSeesOnlyTheirTeam(t *testing.T) {
 	assert.Equal(t, http.StatusForbidden, post(router, gin.H{"courseParticipationID": outsider}).Code)
 	assert.Equal(t, http.StatusOK, post(router, gin.H{"courseParticipationIDs": []uuid.UUID{member}}).Code)
 	assert.Equal(t, http.StatusForbidden, post(router, gin.H{"courseParticipationIDs": []uuid.UUID{member, outsider}}).Code)
+	assert.Equal(t, http.StatusForbidden, post(router, gin.H{"courseParticipationID": outsider, "courseParticipationIDs": []uuid.UUID{member}}).Code)
+	assert.Equal(t, http.StatusOK, post(router, gin.H{"courseParticipationID": member, "courseParticipationIDs": []uuid.UUID{member}}).Code)
 }
 
 func TestEditorDeniedByTeamPhaseSeesNobody(t *testing.T) {

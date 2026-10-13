@@ -122,11 +122,15 @@ func tutorRouter() *gin.Engine {
 }
 
 func serve(router *gin.Engine, route scopedRoute) int {
+	return serveRecorded(router, route).Code
+}
+
+func serveRecorded(router *gin.Engine, route scopedRoute) *httptest.ResponseRecorder {
 	req := httptest.NewRequest(route.method, "/assessment/api/course_phase/"+uuid.NewString()+route.path, strings.NewReader(route.body))
 	req.Header.Set("Content-Type", "application/json")
 	resp := httptest.NewRecorder()
 	router.ServeHTTP(resp, req)
-	return resp.Code
+	return resp
 }
 
 func TestEveryEditorParticipantRouteResolvesTheTeamScope(t *testing.T) {
@@ -146,6 +150,20 @@ func TestTutorCannotReachParticipantsOutsideTheirTeam(t *testing.T) {
 		if route.body == "" && !strings.Contains(route.path, scopeOutsider.String()) {
 			continue
 		}
+		assert.Equal(t, http.StatusForbidden, serve(router, route), route.method+" "+route.path)
+	}
+}
+
+func TestTutorCannotSmuggleAnOutsiderNextToTheirTeam(t *testing.T) {
+	startTeamPhase(t, http.StatusOK)
+	router := tutorRouter()
+	mixed := `{"courseParticipationID":"` + scopeOutsider.String() + `","courseParticipationIDs":["` + scopeMember.String() + `"]}`
+
+	for _, route := range scopedRoutes(scopeOutsider) {
+		if route.body != participantBody(scopeOutsider) {
+			continue
+		}
+		route.body = mixed
 		assert.Equal(t, http.StatusForbidden, serve(router, route), route.method+" "+route.path)
 	}
 }
