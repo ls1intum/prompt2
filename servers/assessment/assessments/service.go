@@ -126,6 +126,7 @@ func (s *AssessmentService) saveScore(ctx context.Context, req assessmentDTO.Cre
 
 	tx, err := s.conn.Begin(ctx)
 	if err != nil {
+		log.Error("could not begin assessment creation/update transaction: ", err)
 		return err
 	}
 	defer promptSDK.DeferDBRollback(tx, ctx)
@@ -452,6 +453,7 @@ func (s *AssessmentService) GetStudentAssessmentResults(ctx context.Context, cou
 func (s *AssessmentService) DeleteAssessment(ctx context.Context, id, coursePhaseID uuid.UUID) error {
 	tx, err := s.conn.Begin(ctx)
 	if err != nil {
+		log.Error("could not begin assessment deletion transaction: ", err)
 		return err
 	}
 	defer promptSDK.DeferDBRollback(tx, ctx)
@@ -493,6 +495,7 @@ func (s *AssessmentService) DeleteAssessment(ctx context.Context, id, coursePhas
 func (s *AssessmentService) DeleteOwnIndependentAssessment(ctx context.Context, id, coursePhaseID uuid.UUID, authorID string, scope teamScope.Scope) error {
 	tx, err := s.conn.Begin(ctx)
 	if err != nil {
+		log.Error("could not begin independent assessment deletion transaction: ", err)
 		return err
 	}
 	defer promptSDK.DeferDBRollback(tx, ctx)
