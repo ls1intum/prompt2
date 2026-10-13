@@ -167,3 +167,14 @@ func TestTutorCannotSmuggleAnOutsiderNextToTheirTeam(t *testing.T) {
 		assert.Equal(t, http.StatusForbidden, serve(router, route), route.method+" "+route.path)
 	}
 }
+
+func TestEditorDeniedByTeamPhaseGetsEmptyLists(t *testing.T) {
+	startTeamPhase(t, http.StatusForbidden)
+	router := tutorRouter()
+
+	for _, path := range []string{"/config/participations", "/config/teams"} {
+		resp := serveRecorded(router, scopedRoute{http.MethodGet, path, ""})
+		assert.Equal(t, http.StatusOK, resp.Code, path)
+		assert.JSONEq(t, "[]", resp.Body.String(), path)
+	}
+}

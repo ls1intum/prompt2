@@ -35,6 +35,10 @@ func (s Scope) Allows(courseParticipationID uuid.UUID) bool {
 	return ok
 }
 
+func (s Scope) AllowsNobody() bool {
+	return s.confined && len(s.members) == 0
+}
+
 func (s Scope) AllowsAll(courseParticipationIDs []uuid.UUID) bool {
 	for _, id := range courseParticipationIDs {
 		if !s.Allows(id) {
