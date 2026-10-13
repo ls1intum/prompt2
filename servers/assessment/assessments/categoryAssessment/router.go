@@ -10,6 +10,7 @@ import (
 	"github.com/prompt-edu/prompt-sdk/audit"
 	"github.com/prompt-edu/prompt-sdk/keycloakTokenVerifier"
 	"github.com/prompt-edu/prompt/servers/assessment/assessments/categoryAssessment/categoryAssessmentDTO"
+	"github.com/prompt-edu/prompt/servers/assessment/teamScope"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -25,7 +26,7 @@ type assessmentGuard interface {
 func RegisterRoutes(routerGroup *gin.RouterGroup, service *CategoryAssessmentService, guard assessmentGuard, authMiddleware func(allowedRoles ...string) gin.HandlerFunc) {
 	r := routerGroup.Group("/category-assessment")
 
-	r.POST("", audit.Describe("Saved category assessment"), authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), guard.RequireAssessmentEnabled(), service.createOrUpdateCategoryAssessment)
+	r.POST("", audit.Describe("Saved category assessment"), authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), teamScope.RequireBodyParticipants(), guard.RequireAssessmentEnabled(), service.createOrUpdateCategoryAssessment)
 }
 
 // createOrUpdateCategoryAssessment godoc

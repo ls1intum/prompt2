@@ -11,6 +11,7 @@ import (
 	"github.com/prompt-edu/prompt/servers/assessment/coursePhaseConfig"
 	"github.com/prompt-edu/prompt/servers/assessment/evaluations/evaluationCompletion"
 	"github.com/prompt-edu/prompt/servers/assessment/evaluations/feedbackItem/feedbackItemDTO"
+	"github.com/prompt-edu/prompt/servers/assessment/teamScope"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -23,7 +24,7 @@ func RegisterRoutes(routerGroup *gin.RouterGroup, service *FeedbackItemService, 
 	feedbackItemRouter := routerGroup.Group("/evaluation/feedback-items")
 
 	feedbackItemRouter.GET("", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), service.listFeedbackItemsForCoursePhase)
-	feedbackItemRouter.GET("/course-participation/:courseParticipationID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), service.getFeedbackItemsForParticipantInPhase)
+	feedbackItemRouter.GET("/course-participation/:courseParticipationID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), teamScope.RequireParticipant(), service.getFeedbackItemsForParticipantInPhase)
 	feedbackItemRouter.GET("/tutor/:courseParticipationID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), service.getFeedbackItemsForTutorInPhase)
 
 	// Student endpoints - access to own feedback items only

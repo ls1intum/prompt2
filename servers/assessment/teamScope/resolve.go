@@ -43,7 +43,7 @@ func resolveEditorScope(authHeader string, coursePhaseID uuid.UUID) (Scope, erro
 
 	teams, err := fetchTeams(authHeader, resolution)
 	if errors.Is(err, errTeamsForbidden) {
-		return confinedTo(nil), nil
+		return ConfinedTo(nil), nil
 	}
 	if err != nil {
 		return Scope{}, err
@@ -55,7 +55,7 @@ func resolveEditorScope(authHeader string, coursePhaseID uuid.UUID) (Scope, erro
 			members = append(members, member.ID)
 		}
 	}
-	return confinedTo(members), nil
+	return ConfinedTo(members), nil
 }
 
 func findTeamsResolution(authHeader string, coursePhaseID uuid.UUID) (promptSDK.Resolution, bool, error) {

@@ -13,6 +13,7 @@ import (
 	"github.com/prompt-edu/prompt-sdk/keycloakTokenVerifier"
 	"github.com/prompt-edu/prompt/servers/assessment/assessments/assessmentCompletion/assessmentCompletionDTO"
 	"github.com/prompt-edu/prompt/servers/assessment/coursePhaseConfig"
+	"github.com/prompt-edu/prompt/servers/assessment/teamScope"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -34,18 +35,18 @@ func RegisterRoutes(routerGroup *gin.RouterGroup, service *AssessmentCompletionS
 	assessmentCompletionRouter := routerGroup.Group("/student-assessment/completed")
 
 	// course phase communication
-	assessmentCompletionRouter.GET("grade", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), service.getAllGrades)
-	assessmentCompletionRouter.GET("grade/course-participation/:courseParticipationID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), service.getStudentGrade)
+	assessmentCompletionRouter.GET("grade", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), teamScope.Resolve(), service.getAllGrades)
+	assessmentCompletionRouter.GET("grade/course-participation/:courseParticipationID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), teamScope.RequireParticipant(), service.getStudentGrade)
 
-	assessmentCompletionRouter.GET("", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), service.listAssessmentCompletionsByCoursePhase)
-	assessmentCompletionRouter.POST("", audit.Describe("Saved assessment completion"), authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), guard.RequireAssessmentEnabled(), service.createOrUpdateAssessmentCompletion)
-	assessmentCompletionRouter.PUT("", audit.Describe("Saved assessment completion"), authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), guard.RequireAssessmentEnabled(), service.createOrUpdateAssessmentCompletion)
-	assessmentCompletionRouter.POST("/mark-complete", audit.Describe("Marked assessment as completed"), authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), guard.RequireAssessmentEnabled(), service.markAssessmentAsCompleted)
-	assessmentCompletionRouter.POST("/mark-complete/batch", audit.Describe(auditMarkBatchAction), authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), guard.RequireAssessmentEnabled(), service.markAssessmentsAsCompleted)
-	assessmentCompletionRouter.PUT("/unmark/batch", audit.Describe(auditUnmarkBatchAction), authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), guard.RequireAssessmentEnabled(), service.unmarkAssessmentsAsCompleted)
-	assessmentCompletionRouter.GET("/course-participation/:courseParticipationID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), service.getAssessmentCompletion)
-	assessmentCompletionRouter.PUT("/course-participation/:courseParticipationID/unmark", audit.Describe("Unmarked assessment completion"), authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), guard.RequireAssessmentEnabled(), service.unmarkAssessmentAsCompleted)
-	assessmentCompletionRouter.DELETE("/course-participation/:courseParticipationID", audit.Describe("Deleted assessment completion"), authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), guard.RequireAssessmentEnabled(), service.deleteAssessmentCompletion)
+	assessmentCompletionRouter.GET("", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), teamScope.Resolve(), service.listAssessmentCompletionsByCoursePhase)
+	assessmentCompletionRouter.POST("", audit.Describe("Saved assessment completion"), authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), teamScope.RequireBodyParticipants(), guard.RequireAssessmentEnabled(), service.createOrUpdateAssessmentCompletion)
+	assessmentCompletionRouter.PUT("", audit.Describe("Saved assessment completion"), authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), teamScope.RequireBodyParticipants(), guard.RequireAssessmentEnabled(), service.createOrUpdateAssessmentCompletion)
+	assessmentCompletionRouter.POST("/mark-complete", audit.Describe("Marked assessment as completed"), authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), teamScope.RequireBodyParticipants(), guard.RequireAssessmentEnabled(), service.markAssessmentAsCompleted)
+	assessmentCompletionRouter.POST("/mark-complete/batch", audit.Describe(auditMarkBatchAction), authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), teamScope.RequireBodyParticipants(), guard.RequireAssessmentEnabled(), service.markAssessmentsAsCompleted)
+	assessmentCompletionRouter.PUT("/unmark/batch", audit.Describe(auditUnmarkBatchAction), authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), teamScope.RequireBodyParticipants(), guard.RequireAssessmentEnabled(), service.unmarkAssessmentsAsCompleted)
+	assessmentCompletionRouter.GET("/course-participation/:courseParticipationID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), teamScope.RequireParticipant(), service.getAssessmentCompletion)
+	assessmentCompletionRouter.PUT("/course-participation/:courseParticipationID/unmark", audit.Describe("Unmarked assessment completion"), authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), teamScope.RequireParticipant(), guard.RequireAssessmentEnabled(), service.unmarkAssessmentAsCompleted)
+	assessmentCompletionRouter.DELETE("/course-participation/:courseParticipationID", audit.Describe("Deleted assessment completion"), authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), teamScope.RequireParticipant(), guard.RequireAssessmentEnabled(), service.deleteAssessmentCompletion)
 
 	assessmentCompletionRouter.GET("/my-grade-suggestion", authMiddleware(promptSDK.CourseStudent), service.getMyGradeSuggestion)
 }
@@ -71,7 +72,9 @@ func (s *AssessmentCompletionService) getAllGrades(c *gin.Context) {
 		handleError(c, http.StatusInternalServerError, err)
 		return
 	}
-	c.JSON(http.StatusOK, grades)
+	c.JSON(http.StatusOK, teamScope.Filter(c, grades, func(g assessmentCompletionDTO.GradeWithParticipation) uuid.UUID {
+		return g.CourseParticipationID
+	}))
 }
 
 // getStudentGrade godoc
@@ -125,7 +128,9 @@ func (s *AssessmentCompletionService) listAssessmentCompletionsByCoursePhase(c *
 		handleError(c, http.StatusInternalServerError, err)
 		return
 	}
-	c.JSON(http.StatusOK, assessmentCompletionDTO.GetAssessmentCompletionDTOsFromDBModels(completions))
+	c.JSON(http.StatusOK, teamScope.Filter(c, assessmentCompletionDTO.GetAssessmentCompletionDTOsFromDBModels(completions), func(a assessmentCompletionDTO.AssessmentCompletion) uuid.UUID {
+		return a.CourseParticipationID
+	}))
 }
 
 // createOrUpdateAssessmentCompletion godoc

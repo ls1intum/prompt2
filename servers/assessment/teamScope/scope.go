@@ -1,12 +1,16 @@
 package teamScope
 
 import (
+	"errors"
+
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	log "github.com/sirupsen/logrus"
 )
 
 const scopeContextKey = "teamScope"
+
+var ErrOutsideScope = errors.New("access restricted to assigned team")
 
 // Scope is the set of participants the caller may see and edit. Only course editors are
 // confined; admins and lecturers get the unrestricted zero value.
@@ -15,7 +19,7 @@ type Scope struct {
 	members  map[uuid.UUID]struct{}
 }
 
-func confinedTo(members []uuid.UUID) Scope {
+func ConfinedTo(members []uuid.UUID) Scope {
 	scope := Scope{confined: true, members: make(map[uuid.UUID]struct{}, len(members))}
 	for _, member := range members {
 		scope.members[member] = struct{}{}

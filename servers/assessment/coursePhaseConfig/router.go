@@ -12,6 +12,7 @@ import (
 	"github.com/prompt-edu/prompt/servers/assessment/assessmentSchemas"
 	"github.com/prompt-edu/prompt/servers/assessment/assessmentType"
 	"github.com/prompt-edu/prompt/servers/assessment/coursePhaseConfig/coursePhaseConfigDTO"
+	"github.com/prompt-edu/prompt/servers/assessment/teamScope"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -31,7 +32,7 @@ func RegisterRoutes(routerGroup *gin.RouterGroup, service *CoursePhaseConfigServ
 	coursePhaseRouter.GET("/reminders/incomplete", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), service.getIncompleteReminderRecipients)
 	coursePhaseRouter.POST("/reminders/send", audit.Describe("Sent evaluation reminders"), authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), service.sendEvaluationReminder)
 
-	coursePhaseRouter.GET("participations", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), service.getParticipationsForCoursePhase)
+	coursePhaseRouter.GET("participations", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), teamScope.Resolve(), service.getParticipationsForCoursePhase)
 	coursePhaseRouter.GET("teams", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor, promptSDK.CourseStudent), service.getTeamsForCoursePhase)
 
 }
@@ -202,7 +203,9 @@ func (s *CoursePhaseConfigService) getParticipationsForCoursePhase(c *gin.Contex
 		return
 	}
 
-	c.JSON(http.StatusOK, participations)
+	c.JSON(http.StatusOK, teamScope.Filter(c, participations, func(p coursePhaseConfigDTO.AssessmentParticipationWithStudent) uuid.UUID {
+		return p.CourseParticipationID
+	}))
 }
 
 // getTeamsForCoursePhase godoc

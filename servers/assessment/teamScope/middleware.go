@@ -3,7 +3,6 @@ package teamScope
 import (
 	"bytes"
 	"encoding/json"
-	"errors"
 	"io"
 	"net/http"
 
@@ -13,8 +12,6 @@ import (
 	"github.com/prompt-edu/prompt-sdk/keycloakTokenVerifier"
 	log "github.com/sirupsen/logrus"
 )
-
-var errOutsideScope = errors.New("access restricted to assigned team")
 
 // Resolve stores the caller's scope for handlers that filter lists with Filter.
 func Resolve() gin.HandlerFunc {
@@ -36,7 +33,7 @@ func RequireParticipant() gin.HandlerFunc {
 			return
 		}
 		if !scope.Allows(courseParticipationID) {
-			AbortOutsideScope(c)
+			abortOutsideScope(c)
 		}
 	}
 }
@@ -71,13 +68,13 @@ func RequireBodyParticipants() gin.HandlerFunc {
 			targets = []uuid.UUID{payload.CourseParticipationID}
 		}
 		if !scope.AllowsAll(targets) {
-			AbortOutsideScope(c)
+			abortOutsideScope(c)
 		}
 	}
 }
 
-func AbortOutsideScope(c *gin.Context) {
-	c.AbortWithStatusJSON(http.StatusForbidden, gin.H{"error": errOutsideScope.Error()})
+func abortOutsideScope(c *gin.Context) {
+	c.AbortWithStatusJSON(http.StatusForbidden, gin.H{"error": ErrOutsideScope.Error()})
 }
 
 func ensureScope(c *gin.Context) (Scope, bool) {

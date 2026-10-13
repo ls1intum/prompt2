@@ -11,6 +11,7 @@ import (
 	"github.com/prompt-edu/prompt-sdk/keycloakTokenVerifier"
 	"github.com/prompt-edu/prompt/servers/assessment/coursePhaseConfig"
 	"github.com/prompt-edu/prompt/servers/assessment/evaluations/evaluationCompletion/evaluationCompletionDTO"
+	"github.com/prompt-edu/prompt/servers/assessment/teamScope"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -22,7 +23,7 @@ import (
 func RegisterRoutes(routerGroup *gin.RouterGroup, service *EvaluationCompletionService, authMiddleware func(allowedRoles ...string) gin.HandlerFunc) {
 	evaluationRouter := routerGroup.Group("/evaluation/completed")
 
-	evaluationRouter.GET("", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), service.listEvaluationCompletionsByCoursePhase)
+	evaluationRouter.GET("", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), teamScope.Resolve(), service.listEvaluationCompletionsByCoursePhase)
 
 	evaluationRouter.POST("/my-completion", audit.Describe("Saved own evaluation completion"), authMiddleware(promptSDK.CourseStudent), service.createOrUpdateMyEvaluationCompletion)
 	evaluationRouter.PUT("/my-completion", audit.Describe("Saved own evaluation completion"), authMiddleware(promptSDK.CourseStudent), service.createOrUpdateMyEvaluationCompletion)
@@ -53,7 +54,9 @@ func (s *EvaluationCompletionService) listEvaluationCompletionsByCoursePhase(c *
 		handleError(c, http.StatusInternalServerError, err)
 		return
 	}
-	c.JSON(http.StatusOK, evaluationCompletionDTO.GetEvaluationCompletionDTOsFromDBModels(completions))
+	c.JSON(http.StatusOK, teamScope.Filter(c, evaluationCompletionDTO.GetEvaluationCompletionDTOsFromDBModels(completions), func(e evaluationCompletionDTO.EvaluationCompletion) uuid.UUID {
+		return e.AuthorCourseParticipationID
+	}))
 }
 
 // createOrUpdateMyEvaluationCompletion godoc

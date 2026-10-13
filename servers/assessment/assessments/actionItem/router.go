@@ -12,6 +12,7 @@ import (
 	"github.com/prompt-edu/prompt/servers/assessment/assessments/actionItem/actionItemDTO"
 	"github.com/prompt-edu/prompt/servers/assessment/assessments/assessmentCompletion"
 	"github.com/prompt-edu/prompt/servers/assessment/coursePhaseConfig"
+	"github.com/prompt-edu/prompt/servers/assessment/teamScope"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -28,14 +29,14 @@ func RegisterRoutes(routerGroup *gin.RouterGroup, service *ActionItemService, gu
 	actionItemRouter := routerGroup.Group("student-assessment/action-item")
 
 	// course phase communication
-	actionItemRouter.GET("/action", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), service.getAllActionItemsForCoursePhaseCommunication)
-	actionItemRouter.GET("/action/course-participation/:courseParticipationID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), service.getStudentActionItemsForCoursePhaseCommunication)
+	actionItemRouter.GET("/action", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), teamScope.Resolve(), service.getAllActionItemsForCoursePhaseCommunication)
+	actionItemRouter.GET("/action/course-participation/:courseParticipationID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), teamScope.RequireParticipant(), service.getStudentActionItemsForCoursePhaseCommunication)
 
 	// action item management
-	actionItemRouter.GET("/course-participation/:courseParticipationID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), service.getActionItemsForStudent)
-	actionItemRouter.POST("", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), guard.RequireAssessmentEnabled(), service.createActionItem)
-	actionItemRouter.PUT("/:id", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), guard.RequireAssessmentEnabled(), service.updateActionItem)
-	actionItemRouter.DELETE("/:id", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), guard.RequireAssessmentEnabled(), service.deleteActionItem)
+	actionItemRouter.GET("/course-participation/:courseParticipationID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), teamScope.RequireParticipant(), service.getActionItemsForStudent)
+	actionItemRouter.POST("", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), teamScope.RequireBodyParticipants(), guard.RequireAssessmentEnabled(), service.createActionItem)
+	actionItemRouter.PUT("/:id", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), teamScope.RequireBodyParticipants(), guard.RequireAssessmentEnabled(), service.updateActionItem)
+	actionItemRouter.DELETE("/:id", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), teamScope.Resolve(), guard.RequireAssessmentEnabled(), service.deleteActionItem)
 
 	// student access to own action items
 	actionItemRouter.GET("/my-action-items", authMiddleware(promptSDK.CourseStudent), service.getMyActionItems)
@@ -62,7 +63,9 @@ func (s *ActionItemService) getAllActionItemsForCoursePhaseCommunication(c *gin.
 		handleError(c, http.StatusInternalServerError, err)
 		return
 	}
-	c.JSON(http.StatusOK, actionItems)
+	c.JSON(http.StatusOK, teamScope.Filter(c, actionItems, func(a actionItemDTO.ActionItemWithParticipation) uuid.UUID {
+		return a.CourseParticipationID
+	}))
 }
 
 // getStudentActionItemsForCoursePhaseCommunication godoc
@@ -212,7 +215,7 @@ func (s *ActionItemService) deleteActionItem(c *gin.Context) {
 		return
 	}
 
-	err = s.DeleteActionItem(c, coursePhaseID, actionItemID)
+	err = s.DeleteActionItem(c, coursePhaseID, actionItemID, teamScope.Get(c))
 	if err != nil {
 		handleError(c, actionItemErrorStatus(err), err)
 		return
@@ -331,6 +334,8 @@ func actionItemErrorStatus(err error) int {
 	switch {
 	case errors.Is(err, ErrActionItemNotFound):
 		return http.StatusNotFound
+	case errors.Is(err, teamScope.ErrOutsideScope):
+		return http.StatusForbidden
 	case errors.Is(err, assessmentCompletion.ErrAssessmentCompleted), errors.Is(err, coursePhaseConfig.ErrNotStarted):
 		return http.StatusForbidden
 	default:

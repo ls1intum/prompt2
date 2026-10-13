@@ -15,6 +15,7 @@ import (
 	"github.com/prompt-edu/prompt/servers/assessment/assessments/assessmentCompletion"
 	"github.com/prompt-edu/prompt/servers/assessment/coursePhaseConfig"
 	db "github.com/prompt-edu/prompt/servers/assessment/db/sqlc"
+	"github.com/prompt-edu/prompt/servers/assessment/teamScope"
 )
 
 type ActionItemServiceTestSuite struct {
@@ -118,13 +119,39 @@ func (suite *ActionItemServiceTestSuite) TestDeleteActionItem() {
 	// This might fail if the ID doesn't exist, which is expected
 	// The test verifies the function doesn't panic
 	assert.NotPanics(suite.T(), func() {
-		_ = suite.actionItemService.DeleteActionItem(suite.suiteCtx, suite.testCoursePhaseID, testID)
+		_ = suite.actionItemService.DeleteActionItem(suite.suiteCtx, suite.testCoursePhaseID, testID, teamScope.Scope{})
 	}, "Should not panic when deleting action item")
 }
 
 func (suite *ActionItemServiceTestSuite) TestDeleteActionItemNonExistent() {
-	err := suite.actionItemService.DeleteActionItem(suite.suiteCtx, suite.testCoursePhaseID, uuid.New())
+	err := suite.actionItemService.DeleteActionItem(suite.suiteCtx, suite.testCoursePhaseID, uuid.New(), teamScope.Scope{})
 	assert.ErrorIs(suite.T(), err, ErrActionItemNotFound)
+}
+
+func (suite *ActionItemServiceTestSuite) TestDeleteActionItemOutsideScope() {
+	participant := suite.testCourseParticipationID
+	err := suite.actionItemService.CreateActionItem(suite.suiteCtx, suite.testCoursePhaseID, actionItemDTO.CreateActionItemRequest{
+		CourseParticipationID: participant,
+		Action:                "Scoped action",
+		Author:                "tutor@example.com",
+	})
+	assert.NoError(suite.T(), err)
+
+	items, err := suite.actionItemService.ListActionItemsForStudentInPhase(suite.suiteCtx, participant, suite.testCoursePhaseID)
+	assert.NoError(suite.T(), err)
+	var itemID uuid.UUID
+	for _, item := range items {
+		if item.Action == "Scoped action" {
+			itemID = item.ID
+		}
+	}
+	assert.NotEqual(suite.T(), uuid.Nil, itemID)
+
+	err = suite.actionItemService.DeleteActionItem(suite.suiteCtx, suite.testCoursePhaseID, itemID, teamScope.ConfinedTo([]uuid.UUID{uuid.New()}))
+	assert.ErrorIs(suite.T(), err, teamScope.ErrOutsideScope)
+
+	err = suite.actionItemService.DeleteActionItem(suite.suiteCtx, suite.testCoursePhaseID, itemID, teamScope.ConfinedTo([]uuid.UUID{participant}))
+	assert.NoError(suite.T(), err)
 }
 
 func (suite *ActionItemServiceTestSuite) TestListActionItemsForCoursePhase() {
