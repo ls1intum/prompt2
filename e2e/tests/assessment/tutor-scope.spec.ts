@@ -8,13 +8,17 @@ import {
 import { apiAsRole, assessmentUrl } from './helpers'
 
 const PHASE_ID = ASSESSMENT_FIXTURE_PHASES.tutorScope
+const OTHER_TUTOR_PHASE_ID = ASSESSMENT_FIXTURE_PHASES.otherTutor
 const { ownTeam, hidden } = TUTOR_SCOPE_PARTICIPANTS
 const everyone = [...ownTeam, ...hidden]
 
-async function participationIds(role: 'course-editor' | 'lecturer'): Promise<string[]> {
+async function participationIds(
+  role: 'course-editor' | 'lecturer',
+  phaseId = PHASE_ID,
+): Promise<string[]> {
   const api = await apiAsRole(role)
   try {
-    const res = await api.get(assessmentUrl(PHASE_ID, 'config/participations'))
+    const res = await api.get(assessmentUrl(phaseId, 'config/participations'))
     expect(res.status()).toBe(200)
     const participations = (await res.json()) as { courseParticipationID: string }[]
     return participations.map((p) => p.courseParticipationID).sort()
@@ -76,5 +80,27 @@ test.describe('assessment: tutors only reach their own team', () => {
     for (const participant of hidden) {
       await expect(page.getByRole('row', { name: new RegExp(participant.name) })).toHaveCount(0)
     }
+  })
+
+  test('shows an editor who tutors no team an empty participant list', async ({ page }) => {
+    const stan = ownTeam[0]
+    expect(await participationIds('lecturer', OTHER_TUTOR_PHASE_ID)).toEqual([
+      stan.courseParticipationId,
+    ])
+    expect(await participationIds('course-editor', OTHER_TUTOR_PHASE_ID)).toEqual([])
+
+    const editor = await apiAsRole('course-editor')
+    try {
+      const teams = await editor.get(assessmentUrl(OTHER_TUTOR_PHASE_ID, 'config/teams'))
+      expect(teams.status()).toBe(200)
+      expect(await teams.json()).toEqual([])
+    } finally {
+      await editor.dispose()
+    }
+
+    const phase = new AssessmentPage(page)
+    await phase.goto(SEEDED_COURSES.fullCourse.id, OTHER_TUTOR_PHASE_ID, '/participants')
+    await phase.expectParticipantsLoaded()
+    await expect(page.getByRole('row', { name: new RegExp(stan.name) })).toHaveCount(0)
   })
 })

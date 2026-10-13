@@ -274,7 +274,9 @@ INSERT INTO course_phase (id, course_id, name, restricted_data, is_initial_phase
 -- d0000012 = CampusOnline grade export spec (Stan + Selma participate),
 -- d0000013 = evaluation-only spec (Stan participates),
 -- d0000018 = tutor scope spec (five participants; its teams come from the
--- standalone Team Allocation phase b3000004, where course-editor tutors one team).
+-- standalone Team Allocation phase b3000004, where course-editor tutors one team),
+-- d0000019 = tutor scope spec for an editor who tutors no team (Stan participates;
+-- its teams come from b3000005, whose only tutor is not course-editor).
 INSERT INTO course_phase (id, course_id, name, restricted_data, is_initial_phase, course_phase_type_id, student_readable_data)
     VALUES ('d0000006-0000-0000-0000-000000000006', 'c0000001-0000-0000-0000-000000000001', 'Assessment Visibility', '{}', false, (SELECT id FROM course_phase_type WHERE name = 'Assessment'), '{}');
 INSERT INTO course_phase (id, course_id, name, restricted_data, is_initial_phase, course_phase_type_id, student_readable_data)
@@ -291,6 +293,10 @@ INSERT INTO course_phase (id, course_id, name, restricted_data, is_initial_phase
     VALUES ('b3000004-0000-0000-0000-000000000004', 'c0000001-0000-0000-0000-000000000001', 'Team Allocation Tutor Scope', '{}', false, (SELECT id FROM course_phase_type WHERE name = 'Team Allocation'), '{}');
 INSERT INTO course_phase (id, course_id, name, restricted_data, is_initial_phase, course_phase_type_id, student_readable_data)
     VALUES ('d0000018-0000-0000-0000-000000000018', 'c0000001-0000-0000-0000-000000000001', 'Assessment Tutor Scope', '{}', false, (SELECT id FROM course_phase_type WHERE name = 'Assessment'), '{}');
+INSERT INTO course_phase (id, course_id, name, restricted_data, is_initial_phase, course_phase_type_id, student_readable_data)
+    VALUES ('b3000005-0000-0000-0000-000000000005', 'c0000001-0000-0000-0000-000000000001', 'Team Allocation Other Tutor', '{}', false, (SELECT id FROM course_phase_type WHERE name = 'Team Allocation'), '{}');
+INSERT INTO course_phase (id, course_id, name, restricted_data, is_initial_phase, course_phase_type_id, student_readable_data)
+    VALUES ('d0000019-0000-0000-0000-000000000019', 'c0000001-0000-0000-0000-000000000001', 'Assessment Other Tutor', '{}', false, (SELECT id FROM course_phase_type WHERE name = 'Assessment'), '{}');
 -- Standalone Example phases (no graph edges, route by URL). The example phase is
 -- a minimal placeholder module, so it needs no participants or config:
 -- d000000f = MF smoke + lecturer-info API auth on iPraktikumFull,
@@ -459,7 +465,8 @@ INSERT INTO course_phase_participation (course_participation_id, course_phase_id
 -- Standalone assessment fixture phases (see the course_phase inserts below):
 -- Stan + Selma in the visibility phase, Stan in the self-evaluation phase,
 -- Stan in the print phase, Stan + Selma in the grade export phase, Stan in the
--- evaluation-only phase, five students in the tutor scope phase.
+-- evaluation-only phase, five students in the tutor scope phase, Stan in the
+-- other tutor phase.
 INSERT INTO course_phase_participation (course_participation_id, course_phase_id, restricted_data, pass_status, student_readable_data)
     VALUES ('a0000001-0000-0000-0000-000000000001', 'd0000006-0000-0000-0000-000000000006', '{}', 'not_assessed', '{}');
 INSERT INTO course_phase_participation (course_participation_id, course_phase_id, restricted_data, pass_status, student_readable_data)
@@ -484,6 +491,8 @@ INSERT INTO course_phase_participation (course_participation_id, course_phase_id
     VALUES ('a0000004-0000-0000-0000-000000000004', 'd0000018-0000-0000-0000-000000000018', '{}', 'not_assessed', '{}');
 INSERT INTO course_phase_participation (course_participation_id, course_phase_id, restricted_data, pass_status, student_readable_data)
     VALUES ('a0000006-0000-0000-0000-000000000006', 'd0000018-0000-0000-0000-000000000018', '{}', 'not_assessed', '{}');
+INSERT INTO course_phase_participation (course_participation_id, course_phase_id, restricted_data, pass_status, student_readable_data)
+    VALUES ('a0000001-0000-0000-0000-000000000001', 'd0000019-0000-0000-0000-000000000019', '{}', 'not_assessed', '{}');
 -- Standalone matching re-import phase (see the course_phase insert below):
 -- Stan + Selma participate, each carrying a matching score in restricted_data.
 -- pass_status starts 'not_assessed' so the lecturer re-import journey can flip
@@ -712,7 +721,8 @@ BEGIN
             ('f0000004-0000-0000-0000-000000000004'::uuid, 'Team Allocation', 'teamAllocation', 'f0000005-0000-0000-0000-000000000005'::uuid, 'Assessment',   'teamAllocation'),
             ('f0000004-0000-0000-0000-000000000004'::uuid, 'Team Allocation', 'teamAllocation', 'f0000006-0000-0000-0000-000000000006'::uuid, 'Presentation', 'teamAllocation'),
             ('f0000004-0000-0000-0000-000000000004'::uuid, 'Team Allocation', 'teamAllocation', 'f0000007-0000-0000-0000-000000000007'::uuid, 'Certificate',  'teamAllocation'),
-            ('b3000004-0000-0000-0000-000000000004'::uuid, 'Team Allocation', 'teamAllocation', 'd0000018-0000-0000-0000-000000000018'::uuid, 'Assessment',   'teamAllocation')
+            ('b3000004-0000-0000-0000-000000000004'::uuid, 'Team Allocation', 'teamAllocation', 'd0000018-0000-0000-0000-000000000018'::uuid, 'Assessment',   'teamAllocation'),
+            ('b3000005-0000-0000-0000-000000000005'::uuid, 'Team Allocation', 'teamAllocation', 'd0000019-0000-0000-0000-000000000019'::uuid, 'Assessment',   'teamAllocation')
          ) AS edge(from_phase, from_type, from_dto, to_phase, to_type, to_dto)
     JOIN course_phase_type from_type ON from_type.name = edge.from_type
     JOIN course_phase_type to_type   ON to_type.name = edge.to_type
@@ -721,8 +731,8 @@ BEGIN
     JOIN course_phase_type_participation_required_input_dto required
          ON required.course_phase_type_id = to_type.id AND required.dto_name = edge.to_dto;
     GET DIAGNOSTICS inserted = ROW_COUNT;
-    IF inserted <> 9 THEN
-        RAISE EXCEPTION 'seed: expected 9 participation data dependency edges, inserted % - a phase type or DTO descriptor did not resolve. See seed/README.md.', inserted;
+    IF inserted <> 10 THEN
+        RAISE EXCEPTION 'seed: expected 10 participation data dependency edges, inserted % - a phase type or DTO descriptor did not resolve. See seed/README.md.', inserted;
     END IF;
 END $$;
 
@@ -736,7 +746,8 @@ BEGIN
             ('f0000004-0000-0000-0000-000000000004'::uuid, 'Team Allocation', 'teams', 'f0000005-0000-0000-0000-000000000005'::uuid, 'Assessment',   'teams'),
             ('f0000004-0000-0000-0000-000000000004'::uuid, 'Team Allocation', 'teams', 'f0000006-0000-0000-0000-000000000006'::uuid, 'Presentation', 'teams'),
             ('f0000004-0000-0000-0000-000000000004'::uuid, 'Team Allocation', 'teams', 'f0000007-0000-0000-0000-000000000007'::uuid, 'Certificate',  'teams'),
-            ('b3000004-0000-0000-0000-000000000004'::uuid, 'Team Allocation', 'teams', 'd0000018-0000-0000-0000-000000000018'::uuid, 'Assessment',   'teams')
+            ('b3000004-0000-0000-0000-000000000004'::uuid, 'Team Allocation', 'teams', 'd0000018-0000-0000-0000-000000000018'::uuid, 'Assessment',   'teams'),
+            ('b3000005-0000-0000-0000-000000000005'::uuid, 'Team Allocation', 'teams', 'd0000019-0000-0000-0000-000000000019'::uuid, 'Assessment',   'teams')
          ) AS edge(from_phase, from_type, from_dto, to_phase, to_type, to_dto)
     JOIN course_phase_type from_type ON from_type.name = edge.from_type
     JOIN course_phase_type to_type   ON to_type.name = edge.to_type
@@ -745,8 +756,8 @@ BEGIN
     JOIN course_phase_type_phase_required_input_dto required
          ON required.course_phase_type_id = to_type.id AND required.dto_name = edge.to_dto;
     GET DIAGNOSTICS inserted = ROW_COUNT;
-    IF inserted <> 4 THEN
-        RAISE EXCEPTION 'seed: expected 4 phase data dependency edges, inserted % - a phase type or DTO descriptor did not resolve. See seed/README.md.', inserted;
+    IF inserted <> 5 THEN
+        RAISE EXCEPTION 'seed: expected 5 phase data dependency edges, inserted % - a phase type or DTO descriptor did not resolve. See seed/README.md.', inserted;
     END IF;
 END $$;
 

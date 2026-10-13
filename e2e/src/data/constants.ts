@@ -128,6 +128,7 @@ export const ASSESSMENT_FIXTURE_PHASES = {
   gradeExport: 'd0000012-0000-0000-0000-000000000012',
   evaluationOnly: 'd0000013-0000-0000-0000-000000000013',
   tutorScope: 'd0000018-0000-0000-0000-000000000018',
+  otherTutor: 'd0000019-0000-0000-0000-000000000019',
 }
 
 // Participants of ASSESSMENT_FIXTURE_PHASES.tutorScope. Its teams come from the
