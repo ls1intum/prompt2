@@ -8,6 +8,7 @@ import (
 	promptSDK "github.com/prompt-edu/prompt-sdk"
 	sdkUtils "github.com/prompt-edu/prompt-sdk/utils"
 	"github.com/prompt-edu/prompt/servers/assessment/assessments/scoreLevel/scoreLevelDTO"
+	"github.com/prompt-edu/prompt/servers/assessment/teamScope"
 )
 
 var _ = scoreLevelDTO.ScoreLevelWithParticipation{}
@@ -20,8 +21,8 @@ var _ = scoreLevelDTO.ScoreLevelWithParticipation{}
 func RegisterRoutes(routerGroup *gin.RouterGroup, service *ScoreLevelService, authMiddleware func(allowedRoles ...string) gin.HandlerFunc) {
 	scoreLevelRouter := routerGroup.Group("/student-assessment/scoreLevel")
 
-	scoreLevelRouter.GET("", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), service.getAllScoreLevels)
-	scoreLevelRouter.GET("/:courseParticipationID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), service.getScoreLevelByCourseParticipationID)
+	scoreLevelRouter.GET("", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), teamScope.Resolve(), service.getAllScoreLevels)
+	scoreLevelRouter.GET("/:courseParticipationID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), teamScope.RequireParticipant(), service.getScoreLevelByCourseParticipationID)
 }
 
 // getAllScoreLevels godoc
@@ -47,7 +48,10 @@ func (s *ScoreLevelService) getAllScoreLevels(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, scoreLevels)
+	c.JSON(http.StatusOK, teamScope.Filter(c, scoreLevels, func(s scoreLevelDTO.ScoreLevelWithParticipation) uuid.UUID {
+		courseParticipationID, _ := uuid.Parse(s.CourseParticipationID)
+		return courseParticipationID
+	}))
 }
 
 // getScoreLevelByCourseParticipationID godoc

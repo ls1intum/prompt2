@@ -14,6 +14,7 @@ import (
 	"github.com/prompt-edu/prompt/servers/assessment/assessments/assessmentCompletion"
 	"github.com/prompt-edu/prompt/servers/assessment/assessments/assessmentDTO"
 	"github.com/prompt-edu/prompt/servers/assessment/coursePhaseConfig"
+	"github.com/prompt-edu/prompt/servers/assessment/teamScope"
 )
 
 // RegisterRoutes sets up assessment endpoints.
@@ -29,16 +30,16 @@ type assessmentGuard interface {
 func RegisterRoutes(routerGroup *gin.RouterGroup, service *AssessmentService, guard assessmentGuard, authMiddleware func(allowedRoles ...string) gin.HandlerFunc) {
 	assessmentRouter := routerGroup.Group("/student-assessment")
 
-	assessmentRouter.GET("", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), service.listAssessmentsByCoursePhase)
+	assessmentRouter.GET("", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), teamScope.Resolve(), service.listAssessmentsByCoursePhase)
 	// The grading form posts on every score selection, so auditing this route would
 	// bury the log and start dropping events. Completion transitions are audited instead.
-	assessmentRouter.POST("", audit.Skip(), authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), guard.RequireAssessmentEnabled(), service.createOrUpdateAssessment)
-	assessmentRouter.POST("/independent", audit.Skip(), authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), guard.RequireAssessmentEnabled(), guard.RequireIndependentAssessmentEnabled(), service.createOrUpdateIndependentAssessment)
-	assessmentRouter.GET("/:courseParticipationID/export", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), service.exportStudentAssessment)
-	assessmentRouter.GET("/:courseParticipationID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), service.getStudentAssessment)
-	assessmentRouter.GET("/course-participation/:courseParticipationID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), service.listAssessmentsByStudentInPhase)
+	assessmentRouter.POST("", audit.Skip(), authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), teamScope.RequireBodyParticipants(), guard.RequireAssessmentEnabled(), service.createOrUpdateAssessment)
+	assessmentRouter.POST("/independent", audit.Skip(), authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), teamScope.RequireBodyParticipants(), guard.RequireAssessmentEnabled(), guard.RequireIndependentAssessmentEnabled(), service.createOrUpdateIndependentAssessment)
+	assessmentRouter.GET("/:courseParticipationID/export", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), teamScope.RequireParticipant(), service.exportStudentAssessment)
+	assessmentRouter.GET("/:courseParticipationID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), teamScope.RequireParticipant(), service.getStudentAssessment)
+	assessmentRouter.GET("/course-participation/:courseParticipationID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), teamScope.RequireParticipant(), service.listAssessmentsByStudentInPhase)
 	assessmentRouter.DELETE("/:assessmentID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), guard.RequireAssessmentEnabled(), service.deleteAssessment)
-	assessmentRouter.DELETE("/independent/:independentAssessmentID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), guard.RequireAssessmentEnabled(), service.deleteOwnIndependentAssessment)
+	assessmentRouter.DELETE("/independent/:independentAssessmentID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), teamScope.Resolve(), guard.RequireAssessmentEnabled(), service.deleteOwnIndependentAssessment)
 
 	assessmentRouter.GET("/my-results", authMiddleware(promptSDK.CourseStudent), service.getMyAssessmentResults)
 }
@@ -64,7 +65,9 @@ func (s *AssessmentService) listAssessmentsByCoursePhase(c *gin.Context) {
 		sdkUtils.HandleError(c, http.StatusInternalServerError, err)
 		return
 	}
-	c.JSON(http.StatusOK, assessmentDTO.GetAssessmentDTOsFromDBModels(assessments))
+	c.JSON(http.StatusOK, teamScope.Filter(c, assessmentDTO.GetAssessmentDTOsFromDBModels(assessments), func(a assessmentDTO.Assessment) uuid.UUID {
+		return a.CourseParticipationID
+	}))
 }
 
 // createOrUpdateAssessment godoc
@@ -345,12 +348,14 @@ func (s *AssessmentService) deleteOwnIndependentAssessment(c *gin.Context) {
 		return
 	}
 
-	err = s.DeleteOwnIndependentAssessment(c, independentAssessmentID, coursePhaseID, tokenUser.ID)
+	err = s.DeleteOwnIndependentAssessment(c, independentAssessmentID, coursePhaseID, tokenUser.ID, teamScope.Get(c))
 	switch {
 	case err == nil:
 		c.Status(http.StatusNoContent)
 	case errors.Is(err, ErrAssessmentNotFound):
 		sdkUtils.HandleError(c, http.StatusNotFound, err)
+	case errors.Is(err, teamScope.ErrOutsideScope):
+		sdkUtils.HandleError(c, http.StatusForbidden, err)
 	case errors.Is(err, assessmentCompletion.ErrAssessmentCompleted), errors.Is(err, coursePhaseConfig.ErrNotStarted):
 		sdkUtils.HandleError(c, http.StatusConflict, err)
 	default:

@@ -11,6 +11,7 @@ import (
 	"github.com/prompt-edu/prompt-sdk/keycloakTokenVerifier"
 	sdkUtils "github.com/prompt-edu/prompt-sdk/utils"
 	"github.com/prompt-edu/prompt/servers/assessment/assessments/categoryAssessment/categoryAssessmentDTO"
+	"github.com/prompt-edu/prompt/servers/assessment/teamScope"
 )
 
 // RegisterRoutes sets up category-assessment endpoints.
@@ -25,7 +26,7 @@ type assessmentGuard interface {
 func RegisterRoutes(routerGroup *gin.RouterGroup, service *CategoryAssessmentService, guard assessmentGuard, authMiddleware func(allowedRoles ...string) gin.HandlerFunc) {
 	r := routerGroup.Group("/category-assessment")
 
-	r.POST("", audit.Describe("Saved category assessment"), authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), guard.RequireAssessmentEnabled(), service.createOrUpdateCategoryAssessment)
+	r.POST("", audit.Describe("Saved category assessment"), authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), teamScope.RequireBodyParticipants(), guard.RequireAssessmentEnabled(), service.createOrUpdateCategoryAssessment)
 }
 
 // createOrUpdateCategoryAssessment godoc
