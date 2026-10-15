@@ -96,7 +96,7 @@ export const AnnouncementFormDialog = ({
               severity={severity}
               title={values.title}
               message={values.message || 'Your message will appear here.'}
-              linkUrl={errors.linkUrl ? '' : values.linkUrl}
+              linkUrl={values.linkUrl}
               linkLabel={values.linkLabel}
             />
           </div>

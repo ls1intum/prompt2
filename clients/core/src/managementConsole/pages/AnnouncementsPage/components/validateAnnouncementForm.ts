@@ -1,22 +1,14 @@
+import { toHttpUrl } from '@core/announcementBanner/utils/toHttpUrl'
 import type { UpsertAnnouncement } from '@core/interfaces/announcement'
 
 type AnnouncementFormErrors = Partial<Record<keyof UpsertAnnouncement, string>>
-
-const isHttpUrl = (value: string): boolean => {
-  try {
-    const url = new URL(value)
-    return url.protocol === 'http:' || url.protocol === 'https:'
-  } catch {
-    return false
-  }
-}
 
 export const validateAnnouncementForm = (values: UpsertAnnouncement): AnnouncementFormErrors => {
   const errors: AnnouncementFormErrors = {}
   if (!values.message) {
     errors.message = 'A message is required.'
   }
-  if (values.linkUrl && !isHttpUrl(values.linkUrl)) {
+  if (values.linkUrl && !toHttpUrl(values.linkUrl)) {
     errors.linkUrl = 'Enter a valid http or https URL.'
   }
   if (values.linkLabel && !values.linkUrl) {

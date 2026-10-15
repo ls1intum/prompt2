@@ -1,6 +1,7 @@
 import type { AnnouncementSeverity } from '@core/interfaces/announcement'
 import { Button, cn } from '@tumaet/prompt-ui-components'
 import { ChevronLeft, ChevronRight, Info, OctagonAlert, TriangleAlert, X } from 'lucide-react'
+import { toHttpUrl } from './utils/toHttpUrl'
 
 interface AnnouncementPager {
   position: number
@@ -52,6 +53,7 @@ export const AnnouncementBanner = ({
   className,
 }: AnnouncementBannerProps) => {
   const Icon = SEVERITY_ICONS[severity]
+  const href = toHttpUrl(linkUrl)
 
   return (
     <div
@@ -66,9 +68,9 @@ export const AnnouncementBanner = ({
             <span className='sr-only'>{SEVERITY_LABELS[severity]}: </span>
             {title && <span className='mr-2 font-semibold'>{title}</span>}
             <span>{message}</span>
-            {linkUrl && (
+            {href && (
               <a
-                href={linkUrl}
+                href={href}
                 target='_blank'
                 rel='noopener noreferrer'
                 className='ml-2 whitespace-nowrap font-semibold underline underline-offset-2 hover:no-underline'
