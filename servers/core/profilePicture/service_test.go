@@ -148,9 +148,9 @@ type ProfilePictureServiceTestSuite struct {
 
 func (suite *ProfilePictureServiceTestSuite) SetupSuite() {
 	suite.ctx = context.Background()
-	testDB, cleanup, err := testutils.SetupTestDB(suite.ctx, "../database_dumps/profile_picture_test.sql", func(conn *pgxpool.Pool) *db.Queries {
+	testDB, cleanup, err := testutils.SetupTestDBWithMigrations(suite.ctx, "../db/migration", func(conn *pgxpool.Pool) *db.Queries {
 		return db.New(conn)
-	})
+	}, "../database_dumps/profile_picture_test.sql")
 	if err != nil {
 		suite.T().Fatalf("Failed to set up test database: %v", err)
 	}

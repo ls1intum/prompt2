@@ -85,9 +85,9 @@ func (p *pictureStore) adapter() *storage.MockStorageAdapter {
 // newProfilePicturePrivacyService serves the seeded pictures from a fresh database and store.
 func newProfilePicturePrivacyService(t *testing.T) (*PrivacyService, *pictureStore) {
 	ctx := context.Background()
-	testDB, cleanup, err := testutils.SetupTestDB(ctx, "../../database_dumps/profile_picture_test.sql", func(conn *pgxpool.Pool) *db.Queries {
+	testDB, cleanup, err := testutils.SetupTestDBWithMigrations(ctx, "../../db/migration", func(conn *pgxpool.Pool) *db.Queries {
 		return db.New(conn)
-	})
+	}, "../../database_dumps/profile_picture_test.sql")
 	require.NoError(t, err)
 	t.Cleanup(cleanup)
 
