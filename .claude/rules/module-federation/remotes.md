@@ -2,6 +2,7 @@
 paths:
   - "**/rspack.config.mjs"
   - "clients/shared/rspack/**"
+  - "clients/core/remotes.config.mjs"
 ---
 
 # Module Federation
