@@ -94,13 +94,10 @@ func (s *ProfilePictureService) CompleteUpload(ctx context.Context, uploader Upl
 	if err := validateUploadKeyOwner(uploadKey, uploader.UserID); err != nil {
 		return profilePictureDTO.ProfilePicture{}, err
 	}
+	defer s.discardUpload(ctx, uploadKey)
 
 	content, err := s.readUploadedPicture(ctx, uploadKey)
 	if err != nil {
-		// A storage hiccup says nothing about the picture, so that upload can be completed again
-		if errors.Is(err, ErrInvalidInput) {
-			s.discardUpload(ctx, uploadKey)
-		}
 		return profilePictureDTO.ProfilePicture{}, err
 	}
 
@@ -114,44 +111,10 @@ func (s *ProfilePictureService) CompleteUpload(ctx context.Context, uploader Upl
 		return profilePictureDTO.ProfilePicture{}, fmt.Errorf("failed to store profile picture: %w", err)
 	}
 
-	ctxWithTimeout, cancel := db.GetTimeoutContext(ctx)
-	defer cancel()
-
-	// Concurrent uploads of one user are serialized, so each one sees the file it replaces and
-	// no replaced file is left behind unreferenced.
-	tx, err := s.conn.Begin(ctxWithTimeout)
+	picture, err := s.replacePictureFile(ctx, uploader, file.ID)
 	if err != nil {
-		return profilePictureDTO.ProfilePicture{}, fmt.Errorf("failed to begin transaction: %w", err)
-	}
-	defer promptSDK.DeferDBRollback(tx, ctxWithTimeout)
-	txQueries := s.queries.WithTx(tx)
-
-	if err := txQueries.LockProfilePictureOfUser(ctxWithTimeout, uploader.UserID); err != nil {
-		return profilePictureDTO.ProfilePicture{}, fmt.Errorf("failed to lock profile picture: %w", err)
-	}
-
-	previous, err := txQueries.GetProfilePictureByUserID(ctxWithTimeout, uploader.UserID)
-	hasPrevious := err == nil
-	if err != nil && !errors.Is(err, pgx.ErrNoRows) {
-		return profilePictureDTO.ProfilePicture{}, fmt.Errorf("failed to load current profile picture: %w", err)
-	}
-
-	picture, err := txQueries.UpsertProfilePicture(ctxWithTimeout, db.UpsertProfilePictureParams{
-		UserID:          uploader.UserID,
-		UniversityLogin: pgtype.Text{String: uploader.UniversityLogin, Valid: uploader.UniversityLogin != ""},
-		FileID:          file.ID,
-	})
-	if err != nil {
-		return profilePictureDTO.ProfilePicture{}, fmt.Errorf("failed to save profile picture: %w", err)
-	}
-
-	if err := tx.Commit(ctxWithTimeout); err != nil {
-		return profilePictureDTO.ProfilePicture{}, fmt.Errorf("failed to commit profile picture: %w", err)
-	}
-
-	s.discardUpload(ctx, uploadKey)
-	if hasPrevious {
-		s.discardFile(ctx, previous.FileID)
+		s.discardFile(ctx, file.ID)
+		return profilePictureDTO.ProfilePicture{}, err
 	}
 
 	url, err := s.files.GetDownloadURL(ctx, file.StorageKey, urlTTLSeconds)
@@ -159,6 +122,48 @@ func (s *ProfilePictureService) CompleteUpload(ctx context.Context, uploader Upl
 		return profilePictureDTO.ProfilePicture{}, fmt.Errorf("failed to create profile picture URL: %w", err)
 	}
 	return profilePictureDTO.ProfilePicture{URL: url, UpdatedAt: picture.UpdatedAt.Time}, nil
+}
+
+func (s *ProfilePictureService) replacePictureFile(ctx context.Context, uploader Uploader, fileID uuid.UUID) (db.ProfilePicture, error) {
+	ctxWithTimeout, cancel := db.GetTimeoutContext(ctx)
+	defer cancel()
+
+	// Concurrent uploads of one user are serialized, so each one sees the file it replaces and
+	// no replaced file is left behind unreferenced.
+	tx, err := s.conn.Begin(ctxWithTimeout)
+	if err != nil {
+		return db.ProfilePicture{}, fmt.Errorf("failed to begin transaction: %w", err)
+	}
+	defer promptSDK.DeferDBRollback(tx, ctxWithTimeout)
+	txQueries := s.queries.WithTx(tx)
+
+	if err := txQueries.LockProfilePictureOfUser(ctxWithTimeout, uploader.UserID); err != nil {
+		return db.ProfilePicture{}, fmt.Errorf("failed to lock profile picture: %w", err)
+	}
+
+	previous, err := txQueries.GetProfilePictureByUserID(ctxWithTimeout, uploader.UserID)
+	hasPrevious := err == nil
+	if err != nil && !errors.Is(err, pgx.ErrNoRows) {
+		return db.ProfilePicture{}, fmt.Errorf("failed to load current profile picture: %w", err)
+	}
+
+	picture, err := txQueries.UpsertProfilePicture(ctxWithTimeout, db.UpsertProfilePictureParams{
+		UserID:          uploader.UserID,
+		UniversityLogin: pgtype.Text{String: uploader.UniversityLogin, Valid: uploader.UniversityLogin != ""},
+		FileID:          fileID,
+	})
+	if err != nil {
+		return db.ProfilePicture{}, fmt.Errorf("failed to save profile picture: %w", err)
+	}
+
+	if err := tx.Commit(ctxWithTimeout); err != nil {
+		return db.ProfilePicture{}, fmt.Errorf("failed to commit profile picture: %w", err)
+	}
+
+	if hasPrevious {
+		s.discardFile(ctx, previous.FileID)
+	}
+	return picture, nil
 }
 
 // GetOwnPicture returns the caller's profile picture, or ErrNotFound if they have none.
@@ -319,7 +324,7 @@ func (s *ProfilePictureService) readUploadedPicture(ctx context.Context, uploadK
 	return content, nil
 }
 
-// discardUpload removes an upload that was rejected or stored again. Failures only leave an
+// discardUpload removes an upload once it was completed or failed. Failures only leave an
 // unreferenced object behind, which is never served.
 func (s *ProfilePictureService) discardUpload(ctx context.Context, uploadKey string) {
 	if err := s.files.DeleteUpload(ctx, uploadKey); err != nil {
