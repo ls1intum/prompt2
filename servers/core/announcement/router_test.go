@@ -29,7 +29,7 @@ type AnnouncementRouterTestSuite struct {
 
 func (s *AnnouncementRouterTestSuite) SetupSuite() {
 	s.ctx = context.Background()
-	testDB, cleanup, err := sdkTestUtils.SetupTestDB(s.ctx, "../database_dumps/announcement_test.sql", func(conn *pgxpool.Pool) *db.Queries { return db.New(conn) })
+	testDB, cleanup, err := sdkTestUtils.SetupTestDBWithMigrations(s.ctx, "../db/migration", func(conn *pgxpool.Pool) *db.Queries { return db.New(conn) }, "../database_dumps/announcement_test.sql")
 	if err != nil {
 		log.Fatalf("Failed to set up test database: %v", err)
 	}
