@@ -9,9 +9,11 @@ import (
 	"github.com/google/uuid"
 	promptSDK "github.com/prompt-edu/prompt-sdk"
 	"github.com/prompt-edu/prompt-sdk/audit"
+	"github.com/prompt-edu/prompt-sdk/promptTypes"
 	"github.com/prompt-edu/prompt/servers/assessment/assessmentSchemas"
 	"github.com/prompt-edu/prompt/servers/assessment/assessmentType"
 	"github.com/prompt-edu/prompt/servers/assessment/coursePhaseConfig/coursePhaseConfigDTO"
+	"github.com/prompt-edu/prompt/servers/assessment/teamScope"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -31,8 +33,8 @@ func RegisterRoutes(routerGroup *gin.RouterGroup, service *CoursePhaseConfigServ
 	coursePhaseRouter.GET("/reminders/incomplete", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), service.getIncompleteReminderRecipients)
 	coursePhaseRouter.POST("/reminders/send", audit.Describe("Sent evaluation reminders"), authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer), service.sendEvaluationReminder)
 
-	coursePhaseRouter.GET("participations", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), service.getParticipationsForCoursePhase)
-	coursePhaseRouter.GET("teams", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor, promptSDK.CourseStudent), service.getTeamsForCoursePhase)
+	coursePhaseRouter.GET("participations", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), teamScope.Resolve(), service.getParticipationsForCoursePhase)
+	coursePhaseRouter.GET("teams", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor, promptSDK.CourseStudent), teamScope.Resolve(), service.getTeamsForCoursePhase)
 
 }
 
@@ -194,6 +196,11 @@ func (s *CoursePhaseConfigService) getParticipationsForCoursePhase(c *gin.Contex
 		return
 	}
 
+	if teamScope.Get(c).AllowsNobody() {
+		c.JSON(http.StatusOK, []coursePhaseConfigDTO.AssessmentParticipationWithStudent{})
+		return
+	}
+
 	authHeader := c.GetHeader("Authorization")
 	participations, err := GetParticipationsForCoursePhase(c, authHeader, coursePhaseID)
 	if err != nil {
@@ -202,7 +209,9 @@ func (s *CoursePhaseConfigService) getParticipationsForCoursePhase(c *gin.Contex
 		return
 	}
 
-	c.JSON(http.StatusOK, participations)
+	c.JSON(http.StatusOK, teamScope.Filter(c, participations, func(p coursePhaseConfigDTO.AssessmentParticipationWithStudent) uuid.UUID {
+		return p.CourseParticipationID
+	}))
 }
 
 // getTeamsForCoursePhase godoc
@@ -220,6 +229,11 @@ func (s *CoursePhaseConfigService) getTeamsForCoursePhase(c *gin.Context) {
 	if err != nil {
 		log.WithError(err).Error("Failed to parse course phase ID")
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid course phase ID"})
+		return
+	}
+
+	if teamScope.Get(c).AllowsNobody() {
+		c.JSON(http.StatusOK, []promptTypes.Team{})
 		return
 	}
 
