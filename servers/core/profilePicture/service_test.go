@@ -174,9 +174,12 @@ func (suite *ProfilePictureServiceTestSuite) SetupTest() {
 	suite.store = newObjectStore()
 	suite.store.put(adaPictureStorageKey, pictureContentType, validJPEG)
 	suite.store.put(instructorPictureKey, pictureContentType, validJPEG)
+	suite.service = suite.newService(suite.store.adapter())
+}
 
-	fileStore := files.NewStorageService(suite.queries, suite.conn, suite.store.adapter(), 50, []string{pictureContentType, "image/png"})
-	suite.service = NewProfilePictureService(suite.queries, suite.conn, fileStore)
+func (suite *ProfilePictureServiceTestSuite) newService(adapter *storage.MockStorageAdapter) *ProfilePictureService {
+	fileStore := files.NewStorageService(suite.queries, suite.conn, adapter, 50, []string{pictureContentType, "image/png"})
+	return NewProfilePictureService(suite.queries, suite.conn, fileStore)
 }
 
 func (suite *ProfilePictureServiceTestSuite) TearDownSuite() {
@@ -352,6 +355,33 @@ func (suite *ProfilePictureServiceTestSuite) TestCompleteUpload_SaveFailureDisca
 	require.NoError(suite.T(), err)
 	assert.Empty(suite.T(), remaining, "a stored file without a profile picture row is unreachable for privacy deletion")
 	assert.False(suite.T(), suite.store.hasKeyWithPrefix(fmt.Sprintf("profile-picture/%s/", userID)), "the stored picture must be removed from storage")
+}
+
+func (suite *ProfilePictureServiceTestSuite) TestCompleteUpload_URLFailureKeepsPreviousPicture() {
+	userID := uuid.New()
+	firstKey := suite.upload(userID, pictureContentType, validJPEG)
+	_, err := suite.service.CompleteUpload(suite.ctx, Uploader{UserID: userID}, firstKey)
+	require.NoError(suite.T(), err)
+	storedKey := suite.storedKey(userID)
+
+	adapter := suite.store.adapter()
+	adapter.GetURLFunc = func(context.Context, string, int) (string, error) {
+		return "", errors.New("presigner unavailable")
+	}
+	secondKey := suite.upload(userID, pictureContentType, validJPEG)
+	_, err = suite.newService(adapter).CompleteUpload(suite.ctx, Uploader{UserID: userID}, secondKey)
+
+	require.Error(suite.T(), err)
+	assert.Equal(suite.T(), storedKey, suite.storedKey(userID), "a failed save must not replace the picture")
+	assert.False(suite.T(), suite.store.wasDeleted(storedKey))
+	assert.True(suite.T(), suite.store.wasDeleted(secondKey))
+	remaining, err := suite.queries.GetFilesByUploader(suite.ctx, db.GetFilesByUploaderParams{
+		UploadedByUserID: userID.String(),
+		Limit:            10,
+	})
+	require.NoError(suite.T(), err)
+	require.Len(suite.T(), remaining, 1)
+	assert.Equal(suite.T(), storedKey, remaining[0].StorageKey)
 }
 
 func (suite *ProfilePictureServiceTestSuite) TestCompleteUpload_RejectsStoredPictureKey() {

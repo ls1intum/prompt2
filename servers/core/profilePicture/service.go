@@ -111,15 +111,16 @@ func (s *ProfilePictureService) CompleteUpload(ctx context.Context, uploader Upl
 		return profilePictureDTO.ProfilePicture{}, fmt.Errorf("failed to store profile picture: %w", err)
 	}
 
+	url, err := s.files.GetDownloadURL(ctx, file.StorageKey, urlTTLSeconds)
+	if err != nil {
+		s.discardFile(ctx, file.ID)
+		return profilePictureDTO.ProfilePicture{}, fmt.Errorf("failed to create profile picture URL: %w", err)
+	}
+
 	picture, err := s.replacePictureFile(ctx, uploader, file.ID)
 	if err != nil {
 		s.discardFile(ctx, file.ID)
 		return profilePictureDTO.ProfilePicture{}, err
-	}
-
-	url, err := s.files.GetDownloadURL(ctx, file.StorageKey, urlTTLSeconds)
-	if err != nil {
-		return profilePictureDTO.ProfilePicture{}, fmt.Errorf("failed to create profile picture URL: %w", err)
 	}
 	return profilePictureDTO.ProfilePicture{URL: url, UpdatedAt: picture.UpdatedAt.Time}, nil
 }
