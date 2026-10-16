@@ -51,13 +51,13 @@ export const Breadcrumbs: React.FC = () => {
   const currentPhaseId = segments[1] === 'course' ? segments[3] : undefined
   const hasParticipantSegment = segments.slice(4).some((segment) => segment.length >= 20)
   const { data: phaseParticipations } = useQuery({
-    queryKey: coreKeys.coursePhases.participants(currentPhaseId),
+    queryKey: coreKeys.coursePhases.participations(currentPhaseId),
     queryFn: () => coreApi.coursePhases.participations(currentPhaseId ?? ''),
     enabled: !!currentPhaseId && hasParticipantSegment,
   })
 
   const { tableSearch } = (location.state as TableReturnState | null) ?? {}
-  const parentPath = location.pathname.slice(0, location.pathname.lastIndexOf('/'))
+  const parentPath = `/${segments.slice(0, -1).join('/')}`
   const navigateToCrumb = (path: string) =>
     navigate({ pathname: path, search: path === parentPath ? tableSearch : undefined })
 
