@@ -28,6 +28,10 @@ describe('coreKeys', () => {
     expect(coreKeys.coursePhases.byIdInArchiveDialog(PHASE)).toEqual(['coursePhase', PHASE])
   })
 
+  it('shares the participants key with useGetCoursePhaseParticipants from prompt-shared-state', () => {
+    expect(coreKeys.coursePhases.participants(PHASE)).toEqual(['participants', PHASE])
+  })
+
   it('builds the course phase type keys', () => {
     expect(coreKeys.coursePhases.types()).toEqual(['course_phase_types'])
     expect(coreKeys.coursePhases.typesForScope('self')).toEqual(['coursePhaseType', 'self'])

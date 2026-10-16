@@ -120,6 +120,7 @@ export const ApplicationParticipantsTable = ({ phaseId }: { phaseId: string }): 
         `/management/course/${courseId}/${phaseId}/participants/${row.courseParticipationID}`,
         {
           state: {
+            tableSearch: window.location.search,
             filteredApplicationIds: orderedRows?.map((r) => r.courseParticipationID),
           },
         },

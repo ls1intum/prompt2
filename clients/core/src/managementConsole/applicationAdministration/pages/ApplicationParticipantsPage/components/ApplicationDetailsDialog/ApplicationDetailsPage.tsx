@@ -16,6 +16,7 @@ import { CustomScoresCard } from './components/CustomScoresCard'
 import { MissingUniversityData } from './components/MissingUniversityData'
 
 interface ApplicationDetailsLocationState {
+  tableSearch?: string
   filteredApplicationIds?: string[]
 }
 
@@ -55,7 +56,10 @@ export const ApplicationDetailsPage = () => {
   const navigateToParticipation = (nextParticipationId: string) => {
     navigate(`../${nextParticipationId}`, {
       relative: 'path',
-      state: { filteredApplicationIds: navigationOrder },
+      state: {
+        tableSearch: navigationState?.tableSearch,
+        filteredApplicationIds: navigationOrder,
+      } satisfies ApplicationDetailsLocationState,
     })
   }
 
