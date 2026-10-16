@@ -3,6 +3,8 @@ import { coreCache } from '@core/network/cache'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import type { UpdateCoursePhase } from '@tumaet/prompt-shared-state'
 import {
+  Alert,
+  AlertDescription,
   Button,
   Label,
   type ProfilePictureRequirement,
@@ -10,7 +12,7 @@ import {
   Switch,
   Textarea,
 } from '@tumaet/prompt-ui-components'
-import { Loader2 } from 'lucide-react'
+import { AlertTriangle, Loader2 } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import type { ApplicationMetaData } from '../../../../interfaces/applicationMetaData'
@@ -98,10 +100,20 @@ export function ApplicationSettingsProfilePicture({
             />
             <p className='text-sm text-muted-foreground'>
               Shown next to the picture in the application form. Explain why you ask for a picture
-              and what it is used for. Applicants without a PROMPT account (external applicants) are
-              not asked.
+              and what it is used for. Only applicants who log in with their university account are
+              asked.
             </p>
           </div>
+        )}
+
+        {settings.requirement !== 'off' && !initialData.universityLoginAvailable && (
+          <Alert>
+            <AlertTriangle className='h-4 w-4' />
+            <AlertDescription>
+              Enforce Student Login is off, so applicants do not log in and nobody is asked for a
+              picture. Turn it on in the general settings to ask applicants.
+            </AlertDescription>
+          </Alert>
         )}
 
         <div className='flex items-start justify-between gap-4'>
@@ -110,10 +122,9 @@ export function ApplicationSettingsProfilePicture({
               Hide profile pictures during the application review
             </Label>
             <p className='text-sm text-muted-foreground'>
-              Applicants' profile pictures stay hidden in this phase until they are accepted, so
-              pictures cannot influence the admission decision. Hidden pictures are marked in the
-              participant list and on the application page. After acceptance, pictures show
-              everywhere in PROMPT.
+              Applicants' profile pictures stay hidden everywhere in PROMPT until they are accepted,
+              so pictures cannot influence the admission decision. Hidden pictures are marked in the
+              participant list and on the application page.
             </p>
           </div>
           <Switch
