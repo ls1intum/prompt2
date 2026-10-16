@@ -35,7 +35,7 @@ func (suite *CourseCopyRouterTestSuite) SetupSuite() {
 	suite.ctx = context.Background()
 
 	// Set up PostgreSQL container
-	testDB, cleanup, err := sdkTestUtils.SetupTestDB(suite.ctx, "../../database_dumps/copy_course_test.sql", func(conn *pgxpool.Pool) *db.Queries { return db.New(conn) })
+	testDB, cleanup, err := sdkTestUtils.SetupTestDBWithMigrations(suite.ctx, "../../db/migration", func(conn *pgxpool.Pool) *db.Queries { return db.New(conn) }, "../../database_dumps/copy_course_test.sql")
 	if err != nil {
 		suite.T().Fatalf("Failed to set up test database: %v", err)
 	}
@@ -89,6 +89,26 @@ func (suite *CourseCopyRouterTestSuite) TestCopyCourse() {
 	assert.Equal(suite.T(), copyCourseRequest.StartDate.Time.Format("2006-01-02"), copiedCourse.StartDate.Time.Format("2006-01-02"), "Copied course start date should match")
 	assert.Equal(suite.T(), copyCourseRequest.EndDate.Time.Format("2006-01-02"), copiedCourse.EndDate.Time.Format("2006-01-02"), "Copied course end date should match")
 	assert.NotEqual(suite.T(), uuid.MustParse(courseID), copiedCourse.ID, "Copied course ID should be different from original course ID")
+}
+
+func (suite *CourseCopyRouterTestSuite) TestCopyCourseRejectsUnknownCourseType() {
+	courseID := "c1f8060d-7381-4b64-a6ea-5ba8e8ac88dd"
+
+	copyCourseRequest := courseCopyDTO.CopyCourseRequest{
+		Name:        "Invalid Type Copy",
+		SemesterTag: pgtype.Text{String: "ws2526", Valid: true},
+		StartDate:   pgtype.Date{Valid: true, Time: time.Now()},
+		EndDate:     pgtype.Date{Valid: true, Time: time.Now().Add(24 * time.Hour)},
+		CourseType:  db.CourseType("workshop"),
+	}
+
+	body, _ := json.Marshal(copyCourseRequest)
+	req, _ := http.NewRequest("POST", "/api/courses/"+courseID+"/copy", bytes.NewBuffer(body))
+	req.Header.Set("Content-Type", "application/json")
+	resp := httptest.NewRecorder()
+
+	suite.router.ServeHTTP(resp, req)
+	assert.Equal(suite.T(), http.StatusBadRequest, resp.Code)
 }
 
 func TestCourseCopyRouterTestSuite(t *testing.T) {

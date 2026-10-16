@@ -4,15 +4,22 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	promptSDK "github.com/prompt-edu/prompt-sdk"
 	"github.com/prompt-edu/prompt-sdk/audit"
 	"github.com/prompt-edu/prompt-sdk/keycloakTokenVerifier"
+	sdkUtils "github.com/prompt-edu/prompt-sdk/utils"
 	"github.com/prompt-edu/prompt/servers/assessment/assessments/assessmentCompletion/assessmentCompletionDTO"
 	"github.com/prompt-edu/prompt/servers/assessment/coursePhaseConfig"
-	log "github.com/sirupsen/logrus"
+	"github.com/prompt-edu/prompt/servers/assessment/teamScope"
+)
+
+const (
+	auditMarkBatchAction   = "Marked assessments as completed"
+	auditUnmarkBatchAction = "Unmarked assessment completions"
 )
 
 // RegisterRoutes sets up assessment completion endpoints.
@@ -28,16 +35,18 @@ func RegisterRoutes(routerGroup *gin.RouterGroup, service *AssessmentCompletionS
 	assessmentCompletionRouter := routerGroup.Group("/student-assessment/completed")
 
 	// course phase communication
-	assessmentCompletionRouter.GET("grade", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), service.getAllGrades)
-	assessmentCompletionRouter.GET("grade/course-participation/:courseParticipationID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), service.getStudentGrade)
+	assessmentCompletionRouter.GET("grade", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), teamScope.Resolve(), service.getAllGrades)
+	assessmentCompletionRouter.GET("grade/course-participation/:courseParticipationID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), teamScope.RequireParticipant(), service.getStudentGrade)
 
-	assessmentCompletionRouter.GET("", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), service.listAssessmentCompletionsByCoursePhase)
-	assessmentCompletionRouter.POST("", audit.Describe("Saved assessment completion"), authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), guard.RequireAssessmentEnabled(), service.createOrUpdateAssessmentCompletion)
-	assessmentCompletionRouter.PUT("", audit.Describe("Saved assessment completion"), authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), guard.RequireAssessmentEnabled(), service.createOrUpdateAssessmentCompletion)
-	assessmentCompletionRouter.POST("/mark-complete", audit.Describe("Marked assessment as completed"), authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), guard.RequireAssessmentEnabled(), service.markAssessmentAsCompleted)
-	assessmentCompletionRouter.GET("/course-participation/:courseParticipationID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), service.getAssessmentCompletion)
-	assessmentCompletionRouter.PUT("/course-participation/:courseParticipationID/unmark", audit.Describe("Unmarked assessment completion"), authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), guard.RequireAssessmentEnabled(), service.unmarkAssessmentAsCompleted)
-	assessmentCompletionRouter.DELETE("/course-participation/:courseParticipationID", audit.Describe("Deleted assessment completion"), authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), guard.RequireAssessmentEnabled(), service.deleteAssessmentCompletion)
+	assessmentCompletionRouter.GET("", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), teamScope.Resolve(), service.listAssessmentCompletionsByCoursePhase)
+	assessmentCompletionRouter.POST("", audit.Describe("Saved assessment completion"), authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), teamScope.RequireBodyParticipants(), guard.RequireAssessmentEnabled(), service.createOrUpdateAssessmentCompletion)
+	assessmentCompletionRouter.PUT("", audit.Describe("Saved assessment completion"), authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), teamScope.RequireBodyParticipants(), guard.RequireAssessmentEnabled(), service.createOrUpdateAssessmentCompletion)
+	assessmentCompletionRouter.POST("/mark-complete", audit.Describe("Marked assessment as completed"), authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), teamScope.RequireBodyParticipants(), guard.RequireAssessmentEnabled(), service.markAssessmentAsCompleted)
+	assessmentCompletionRouter.POST("/mark-complete/batch", audit.Describe(auditMarkBatchAction), authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), teamScope.RequireBodyParticipants(), guard.RequireAssessmentEnabled(), service.markAssessmentsAsCompleted)
+	assessmentCompletionRouter.PUT("/unmark/batch", audit.Describe(auditUnmarkBatchAction), authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), teamScope.RequireBodyParticipants(), guard.RequireAssessmentEnabled(), service.unmarkAssessmentsAsCompleted)
+	assessmentCompletionRouter.GET("/course-participation/:courseParticipationID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), teamScope.RequireParticipant(), service.getAssessmentCompletion)
+	assessmentCompletionRouter.PUT("/course-participation/:courseParticipationID/unmark", audit.Describe("Unmarked assessment completion"), authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), teamScope.RequireParticipant(), guard.RequireAssessmentEnabled(), service.unmarkAssessmentAsCompleted)
+	assessmentCompletionRouter.DELETE("/course-participation/:courseParticipationID", audit.Describe("Deleted assessment completion"), authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), teamScope.RequireParticipant(), guard.RequireAssessmentEnabled(), service.deleteAssessmentCompletion)
 
 	assessmentCompletionRouter.GET("/my-grade-suggestion", authMiddleware(promptSDK.CourseStudent), service.getMyGradeSuggestion)
 }
@@ -55,15 +64,17 @@ func RegisterRoutes(routerGroup *gin.RouterGroup, service *AssessmentCompletionS
 func (s *AssessmentCompletionService) getAllGrades(c *gin.Context) {
 	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
 	if err != nil {
-		handleError(c, http.StatusBadRequest, err)
+		sdkUtils.HandleError(c, http.StatusBadRequest, err)
 		return
 	}
 	grades, err := s.GetAllGrades(c, coursePhaseID)
 	if err != nil {
-		handleError(c, http.StatusInternalServerError, err)
+		sdkUtils.HandleError(c, http.StatusInternalServerError, err)
 		return
 	}
-	c.JSON(http.StatusOK, grades)
+	c.JSON(http.StatusOK, teamScope.Filter(c, grades, func(g assessmentCompletionDTO.GradeWithParticipation) uuid.UUID {
+		return g.CourseParticipationID
+	}))
 }
 
 // getStudentGrade godoc
@@ -80,17 +91,17 @@ func (s *AssessmentCompletionService) getAllGrades(c *gin.Context) {
 func (s *AssessmentCompletionService) getStudentGrade(c *gin.Context) {
 	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
 	if err != nil {
-		handleError(c, http.StatusBadRequest, err)
+		sdkUtils.HandleError(c, http.StatusBadRequest, err)
 		return
 	}
 	courseParticipationID, err := uuid.Parse(c.Param("courseParticipationID"))
 	if err != nil {
-		handleError(c, http.StatusBadRequest, err)
+		sdkUtils.HandleError(c, http.StatusBadRequest, err)
 		return
 	}
 	grade, err := s.GetStudentGrade(c, courseParticipationID, coursePhaseID)
 	if err != nil {
-		handleError(c, http.StatusInternalServerError, err)
+		sdkUtils.HandleError(c, http.StatusInternalServerError, err)
 		return
 	}
 	c.JSON(http.StatusOK, grade)
@@ -109,15 +120,17 @@ func (s *AssessmentCompletionService) getStudentGrade(c *gin.Context) {
 func (s *AssessmentCompletionService) listAssessmentCompletionsByCoursePhase(c *gin.Context) {
 	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
 	if err != nil {
-		handleError(c, http.StatusBadRequest, err)
+		sdkUtils.HandleError(c, http.StatusBadRequest, err)
 		return
 	}
 	completions, err := s.ListAssessmentCompletionsByCoursePhase(c, coursePhaseID)
 	if err != nil {
-		handleError(c, http.StatusInternalServerError, err)
+		sdkUtils.HandleError(c, http.StatusInternalServerError, err)
 		return
 	}
-	c.JSON(http.StatusOK, assessmentCompletionDTO.GetAssessmentCompletionDTOsFromDBModels(completions))
+	c.JSON(http.StatusOK, teamScope.Filter(c, assessmentCompletionDTO.GetAssessmentCompletionDTOsFromDBModels(completions), func(a assessmentCompletionDTO.AssessmentCompletion) uuid.UUID {
+		return a.CourseParticipationID
+	}))
 }
 
 // createOrUpdateAssessmentCompletion godoc
@@ -137,12 +150,12 @@ func (s *AssessmentCompletionService) listAssessmentCompletionsByCoursePhase(c *
 func (s *AssessmentCompletionService) createOrUpdateAssessmentCompletion(c *gin.Context) {
 	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
 	if err != nil {
-		handleError(c, http.StatusBadRequest, err)
+		sdkUtils.HandleError(c, http.StatusBadRequest, err)
 		return
 	}
 	var req assessmentCompletionDTO.AssessmentCompletion
 	if err := c.BindJSON(&req); err != nil {
-		handleError(c, http.StatusBadRequest, err)
+		sdkUtils.HandleError(c, http.StatusBadRequest, err)
 		return
 	}
 	// The authorized phase is the one in the URL; ignore any client-sent phase.
@@ -150,18 +163,18 @@ func (s *AssessmentCompletionService) createOrUpdateAssessmentCompletion(c *gin.
 	err = s.CreateOrUpdateAssessmentCompletion(c, req)
 	if err != nil {
 		if errors.Is(err, ErrInvalidGradeSuggestion) {
-			handleError(c, http.StatusBadRequest, err)
+			sdkUtils.HandleError(c, http.StatusBadRequest, err)
 			return
 		}
 		if errors.Is(err, coursePhaseConfig.ErrNotStarted) {
-			handleError(c, http.StatusForbidden, err)
+			sdkUtils.HandleError(c, http.StatusForbidden, err)
 			return
 		}
 		if errors.Is(err, ErrRemainingAssessments) {
-			handleError(c, http.StatusBadRequest, err)
+			sdkUtils.HandleError(c, http.StatusBadRequest, err)
 			return
 		}
-		handleError(c, http.StatusInternalServerError, err)
+		sdkUtils.HandleError(c, http.StatusInternalServerError, err)
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"message": "Assessment completion created/updated successfully"})
@@ -183,12 +196,12 @@ func (s *AssessmentCompletionService) createOrUpdateAssessmentCompletion(c *gin.
 func (s *AssessmentCompletionService) markAssessmentAsCompleted(c *gin.Context) {
 	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
 	if err != nil {
-		handleError(c, http.StatusBadRequest, err)
+		sdkUtils.HandleError(c, http.StatusBadRequest, err)
 		return
 	}
 	var req assessmentCompletionDTO.AssessmentCompletion
 	if err := c.BindJSON(&req); err != nil {
-		handleError(c, http.StatusBadRequest, err)
+		sdkUtils.HandleError(c, http.StatusBadRequest, err)
 		return
 	}
 	// The authorized phase is the one in the URL; ignore any client-sent phase.
@@ -196,21 +209,102 @@ func (s *AssessmentCompletionService) markAssessmentAsCompleted(c *gin.Context) 
 	err = s.MarkAssessmentAsCompleted(c, req)
 	if err != nil {
 		if errors.Is(err, coursePhaseConfig.ErrNotStarted) {
-			handleError(c, http.StatusForbidden, err)
+			sdkUtils.HandleError(c, http.StatusForbidden, err)
 			return
 		}
 		if errors.Is(err, ErrRemainingAssessments) {
-			handleError(c, http.StatusBadRequest, err)
+			sdkUtils.HandleError(c, http.StatusBadRequest, err)
 			return
 		}
 		if errors.Is(err, ErrNoAssessmentCompletion) {
-			handleError(c, http.StatusNotFound, err)
+			sdkUtils.HandleError(c, http.StatusNotFound, err)
 			return
 		}
-		handleError(c, http.StatusInternalServerError, err)
+		sdkUtils.HandleError(c, http.StatusInternalServerError, err)
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"message": "Assessment marked as completed successfully"})
+}
+
+// markAssessmentsAsCompleted godoc
+// @Summary Mark assessments as completed
+// @Description Mark several assessments as completed. Assessments that cannot be marked yet are skipped and reported with a reason.
+// @Tags assessment_completions
+// @Accept json
+// @Produce json
+// @Param coursePhaseID path string true "Course phase ID"
+// @Param request body assessmentCompletionDTO.BatchCompletionRequest true "Course participations to mark"
+// @Success 200 {object} assessmentCompletionDTO.BatchMarkResult
+// @Failure 400 {object} map[string]string
+// @Failure 401 {object} map[string]string
+// @Failure 403 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /course_phase/{coursePhaseID}/student-assessment/completed/mark-complete/batch [post]
+func (s *AssessmentCompletionService) markAssessmentsAsCompleted(c *gin.Context) {
+	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
+	if err != nil {
+		sdkUtils.HandleError(c, http.StatusBadRequest, err)
+		return
+	}
+	var req assessmentCompletionDTO.BatchCompletionRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		sdkUtils.HandleError(c, http.StatusBadRequest, err)
+		return
+	}
+	tokenUser, ok := keycloakTokenVerifier.GetTokenUser(c)
+	if !ok {
+		sdkUtils.HandleError(c, http.StatusUnauthorized, errors.New("authenticated user not found in context"))
+		return
+	}
+	result, err := s.MarkAssessmentsAsCompleted(c, coursePhaseID, req.CourseParticipationIDs, AuthorName(tokenUser))
+	if err != nil {
+		if errors.Is(err, coursePhaseConfig.ErrNotStarted) {
+			sdkUtils.HandleError(c, http.StatusForbidden, err)
+			return
+		}
+		sdkUtils.HandleError(c, http.StatusInternalServerError, err)
+		return
+	}
+	recordBatchAudit(c, auditMarkBatchAction, coursePhaseID, result.Marked)
+	c.JSON(http.StatusOK, result)
+}
+
+// unmarkAssessmentsAsCompleted godoc
+// @Summary Unmark assessments as completed
+// @Description Unmark several assessment completions. Assessments that are not completed are skipped and reported.
+// @Tags assessment_completions
+// @Accept json
+// @Produce json
+// @Param coursePhaseID path string true "Course phase ID"
+// @Param request body assessmentCompletionDTO.BatchCompletionRequest true "Course participations to unmark"
+// @Success 200 {object} assessmentCompletionDTO.BatchUnmarkResult
+// @Failure 400 {object} map[string]string
+// @Failure 403 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /course_phase/{coursePhaseID}/student-assessment/completed/unmark/batch [put]
+func (s *AssessmentCompletionService) unmarkAssessmentsAsCompleted(c *gin.Context) {
+	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
+	if err != nil {
+		sdkUtils.HandleError(c, http.StatusBadRequest, err)
+		return
+	}
+	var req assessmentCompletionDTO.BatchCompletionRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		sdkUtils.HandleError(c, http.StatusBadRequest, err)
+		return
+	}
+
+	result, err := s.UnmarkAssessmentsAsCompleted(c, coursePhaseID, req.CourseParticipationIDs)
+	if err != nil {
+		if errors.Is(err, coursePhaseConfig.ErrDeadlinePassed) {
+			sdkUtils.HandleError(c, http.StatusForbidden, err)
+			return
+		}
+		sdkUtils.HandleError(c, http.StatusInternalServerError, err)
+		return
+	}
+	recordBatchAudit(c, auditUnmarkBatchAction, coursePhaseID, result.Unmarked)
+	c.JSON(http.StatusOK, result)
 }
 
 // deleteAssessmentCompletion godoc
@@ -226,16 +320,16 @@ func (s *AssessmentCompletionService) markAssessmentAsCompleted(c *gin.Context) 
 func (s *AssessmentCompletionService) deleteAssessmentCompletion(c *gin.Context) {
 	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
 	if err != nil {
-		handleError(c, http.StatusBadRequest, err)
+		sdkUtils.HandleError(c, http.StatusBadRequest, err)
 		return
 	}
 	courseParticipationID, err := uuid.Parse(c.Param("courseParticipationID"))
 	if err != nil {
-		handleError(c, http.StatusBadRequest, err)
+		sdkUtils.HandleError(c, http.StatusBadRequest, err)
 		return
 	}
 	if err := s.DeleteAssessmentCompletion(c, courseParticipationID, coursePhaseID); err != nil {
-		handleError(c, http.StatusInternalServerError, err)
+		sdkUtils.HandleError(c, http.StatusInternalServerError, err)
 		return
 	}
 	c.Status(http.StatusOK)
@@ -255,20 +349,20 @@ func (s *AssessmentCompletionService) deleteAssessmentCompletion(c *gin.Context)
 func (s *AssessmentCompletionService) unmarkAssessmentAsCompleted(c *gin.Context) {
 	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
 	if err != nil {
-		handleError(c, http.StatusBadRequest, err)
+		sdkUtils.HandleError(c, http.StatusBadRequest, err)
 		return
 	}
 	courseParticipationID, err := uuid.Parse(c.Param("courseParticipationID"))
 	if err != nil {
-		handleError(c, http.StatusBadRequest, err)
+		sdkUtils.HandleError(c, http.StatusBadRequest, err)
 		return
 	}
 	if err := s.UnmarkAssessmentAsCompleted(c, courseParticipationID, coursePhaseID); err != nil {
 		// Check if the error is due to deadline being passed
 		if errors.Is(err, coursePhaseConfig.ErrDeadlinePassed) {
-			handleError(c, http.StatusForbidden, err)
+			sdkUtils.HandleError(c, http.StatusForbidden, err)
 		} else {
-			handleError(c, http.StatusInternalServerError, err)
+			sdkUtils.HandleError(c, http.StatusInternalServerError, err)
 		}
 		return
 	}
@@ -289,17 +383,17 @@ func (s *AssessmentCompletionService) unmarkAssessmentAsCompleted(c *gin.Context
 func (s *AssessmentCompletionService) getAssessmentCompletion(c *gin.Context) {
 	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
 	if err != nil {
-		handleError(c, http.StatusBadRequest, err)
+		sdkUtils.HandleError(c, http.StatusBadRequest, err)
 		return
 	}
 	courseParticipationID, err := uuid.Parse(c.Param("courseParticipationID"))
 	if err != nil {
-		handleError(c, http.StatusBadRequest, err)
+		sdkUtils.HandleError(c, http.StatusBadRequest, err)
 		return
 	}
 	assessmentCompletion, err := s.GetAssessmentCompletion(c, courseParticipationID, coursePhaseID)
 	if err != nil {
-		handleError(c, http.StatusInternalServerError, err)
+		sdkUtils.HandleError(c, http.StatusInternalServerError, err)
 		return
 	}
 	c.JSON(http.StatusOK, assessmentCompletion)
@@ -320,13 +414,13 @@ func (s *AssessmentCompletionService) getAssessmentCompletion(c *gin.Context) {
 func (s *AssessmentCompletionService) getMyGradeSuggestion(c *gin.Context) {
 	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
 	if err != nil {
-		handleError(c, http.StatusBadRequest, err)
+		sdkUtils.HandleError(c, http.StatusBadRequest, err)
 		return
 	}
 
 	config, err := s.coursePhaseConfig.GetCoursePhaseConfig(c, coursePhaseID)
 	if err != nil {
-		handleError(c, http.StatusInternalServerError, err)
+		sdkUtils.HandleError(c, http.StatusInternalServerError, err)
 		return
 	}
 	if !config.AssessmentEnabled {
@@ -334,13 +428,13 @@ func (s *AssessmentCompletionService) getMyGradeSuggestion(c *gin.Context) {
 		return
 	}
 	if !config.GradeSuggestionVisible {
-		handleError(c, http.StatusForbidden, fmt.Errorf("grade suggestions are not visible to students"))
+		sdkUtils.HandleError(c, http.StatusForbidden, fmt.Errorf("grade suggestions are not visible to students"))
 		return
 	}
 
 	courseParticipationID, err := keycloakTokenVerifier.GetUserCourseParticipationID(c)
 	if err != nil {
-		handleError(c, keycloakTokenVerifier.GetUserCourseParticipationIDErrorStatus(err), err)
+		sdkUtils.HandleError(c, keycloakTokenVerifier.GetUserCourseParticipationIDErrorStatus(err), err)
 		return
 	}
 
@@ -351,13 +445,13 @@ func (s *AssessmentCompletionService) getMyGradeSuggestion(c *gin.Context) {
 
 	exists, err := s.CheckAssessmentCompletionExists(c, courseParticipationID, coursePhaseID)
 	if err != nil {
-		handleError(c, http.StatusInternalServerError, err)
+		sdkUtils.HandleError(c, http.StatusInternalServerError, err)
 		return
 	}
 	if exists {
 		completion, err := s.GetAssessmentCompletion(c, courseParticipationID, coursePhaseID)
 		if err != nil {
-			handleError(c, http.StatusInternalServerError, err)
+			sdkUtils.HandleError(c, http.StatusInternalServerError, err)
 			return
 		}
 		if !completion.Completed {
@@ -370,7 +464,29 @@ func (s *AssessmentCompletionService) getMyGradeSuggestion(c *gin.Context) {
 	c.Status(http.StatusNoContent)
 }
 
-func handleError(c *gin.Context, statusCode int, err error) {
-	log.Error(err)
-	c.JSON(statusCode, gin.H{"error": err.Error()})
+// recordBatchAudit lists the changed participations on the audit entry, since the automatic
+// entry only knows the route and the IDs arrive in the request body.
+func recordBatchAudit(c *gin.Context, action string, coursePhaseID uuid.UUID, changed []uuid.UUID) {
+	courseParticipationIDs := make([]string, len(changed))
+	for i, id := range changed {
+		courseParticipationIDs[i] = id.String()
+	}
+	audit.Record(c, audit.Event{
+		Action:        action,
+		EntityType:    "assessmentCompletion",
+		CoursePhaseID: coursePhaseID.String(),
+		Metadata:      map[string]any{"courseParticipationIDs": courseParticipationIDs},
+	})
+}
+
+// AuthorName is the name stored as the author of a completion or action item, falling back to
+// the university login and then the email when the token carries no first or last name.
+func AuthorName(tokenUser keycloakTokenVerifier.TokenUser) string {
+	if name := strings.TrimSpace(tokenUser.FirstName + " " + tokenUser.LastName); name != "" {
+		return name
+	}
+	if login := strings.TrimSpace(tokenUser.UniversityLogin); login != "" {
+		return login
+	}
+	return strings.TrimSpace(tokenUser.Email)
 }

@@ -8,9 +8,15 @@ type CacheKeys = readonly (readonly unknown[])[]
 
 const EVALUATION_TYPES = [AssessmentType.SELF, AssessmentType.PEER, AssessmentType.TUTOR] as const
 
+// A key holding `undefined` matches no cached entry, so invalidate from its last defined segment
+const definedPrefixOf = (queryKey: readonly unknown[]): readonly unknown[] => {
+  const missing = queryKey.indexOf(undefined)
+  return missing === -1 ? queryKey : queryKey.slice(0, missing)
+}
+
 const invalidate = (queryClient: QueryClient, keys: CacheKeys): void => {
   for (const queryKey of keys) {
-    queryClient.invalidateQueries({ queryKey })
+    queryClient.invalidateQueries({ queryKey: definedPrefixOf(queryKey) })
   }
 }
 
@@ -25,6 +31,10 @@ export const assessmentCache = {
   schemaChanged: (queryClient: QueryClient, phaseId: Id): void =>
     invalidate(queryClient, [...categoryKeys(phaseId), assessmentKeys.assessments.all()]),
 
+  // Only the order changed, so the assessments that reference the competencies stay valid
+  schemaOrderChanged: (queryClient: QueryClient, phaseId: Id): void =>
+    invalidate(queryClient, categoryKeys(phaseId)),
+
   schemaListChanged: (queryClient: QueryClient, phaseId: Id): void =>
     invalidate(queryClient, [assessmentKeys.assessmentSchemas.inPhase(phaseId)]),
 
@@ -33,6 +43,9 @@ export const assessmentCache = {
 
   resultsReleaseChanged: (queryClient: QueryClient, phaseId: Id): void =>
     invalidate(queryClient, [assessmentKeys.coursePhaseConfig(phaseId)]),
+
+  evaluationReminderSent: (queryClient: QueryClient, phaseId: Id): void =>
+    invalidate(queryClient, [assessmentKeys.evaluationReminderStatus(phaseId)]),
 
   assessmentWritten: (queryClient: QueryClient, phaseId: Id): void =>
     invalidate(queryClient, [assessmentKeys.assessments.inPhase(phaseId)]),

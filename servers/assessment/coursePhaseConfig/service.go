@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -22,6 +23,7 @@ var ErrNotStarted = errors.New("assessment has not started yet")
 var ErrDeadlinePassed = errors.New("deadline has passed")
 var ErrCannotChangeSchemaWithData = errors.New("cannot change assessment schema when assessment or evaluation data exists")
 var ErrAssessmentDisabled = errors.New("assessment is disabled for this course phase")
+var ErrIndependentAssessmentDisabled = errors.New("independent assessment is disabled for this course phase")
 var ErrCannotDisableAssessmentWithData = errors.New("cannot disable assessment while assessment data exists")
 
 type schemaProvider interface {
@@ -97,6 +99,7 @@ func (s *CoursePhaseConfigService) GetCoursePhaseConfig(ctx context.Context, cou
 	if err != nil && errors.Is(err, sql.ErrNoRows) {
 		tx, err := s.conn.Begin(ctx)
 		if err != nil {
+			log.WithError(err).Error("Failed to begin transaction for course phase config creation")
 			return coursePhaseConfigDTO.CoursePhaseConfig{}, err
 		}
 		defer promptSDK.DeferDBRollback(tx, ctx)
@@ -228,29 +231,42 @@ func (s *CoursePhaseConfigService) CreateOrUpdateCoursePhaseConfig(ctx context.C
 		assessmentEnabled = *req.AssessmentEnabled
 	}
 
+	independentAssessmentEnabled := existingConfig.IndependentAssessmentEnabled
+	if req.IndependentAssessmentEnabled != nil {
+		independentAssessmentEnabled = *req.IndependentAssessmentEnabled
+	}
+
+	tutorDisplayName := existingConfig.TutorDisplayName
+	if req.TutorDisplayName != nil {
+		trimmed := strings.TrimSpace(*req.TutorDisplayName)
+		tutorDisplayName = pgtype.Text{String: trimmed, Valid: trimmed != ""}
+	}
+
 	params := db.CreateOrUpdateCoursePhaseConfigParams{
-		AssessmentSchemaID:       req.AssessmentSchemaID,
-		CoursePhaseID:            coursePhaseID,
-		Start:                    pgtype.Timestamptz{Time: req.Start, Valid: !req.Start.IsZero()},
-		Deadline:                 pgtype.Timestamptz{Time: req.Deadline, Valid: !req.Deadline.IsZero()},
-		SelfEvaluationEnabled:    req.SelfEvaluationEnabled,
-		SelfEvaluationSchema:     req.SelfEvaluationSchema,
-		SelfEvaluationStart:      pgtype.Timestamptz{Time: req.SelfEvaluationStart, Valid: !req.SelfEvaluationStart.IsZero()},
-		SelfEvaluationDeadline:   pgtype.Timestamptz{Time: req.SelfEvaluationDeadline, Valid: !req.SelfEvaluationDeadline.IsZero()},
-		PeerEvaluationEnabled:    req.PeerEvaluationEnabled,
-		PeerEvaluationSchema:     req.PeerEvaluationSchema,
-		PeerEvaluationStart:      pgtype.Timestamptz{Time: req.PeerEvaluationStart, Valid: !req.PeerEvaluationStart.IsZero()},
-		PeerEvaluationDeadline:   pgtype.Timestamptz{Time: req.PeerEvaluationDeadline, Valid: !req.PeerEvaluationDeadline.IsZero()},
-		TutorEvaluationEnabled:   req.TutorEvaluationEnabled,
-		TutorEvaluationSchema:    req.TutorEvaluationSchema,
-		TutorEvaluationStart:     pgtype.Timestamptz{Time: req.TutorEvaluationStart, Valid: !req.TutorEvaluationStart.IsZero()},
-		TutorEvaluationDeadline:  pgtype.Timestamptz{Time: req.TutorEvaluationDeadline, Valid: !req.TutorEvaluationDeadline.IsZero()},
-		EvaluationResultsVisible: req.EvaluationResultsVisible,
-		GradeSuggestionVisible:   gradeSuggestionVisible,
-		ActionItemsVisible:       actionItemsVisible,
-		ResultsReleased:          resultsReleased,
-		GradingSheetVisible:      gradingSheetVisible,
-		AssessmentEnabled:        assessmentEnabled,
+		AssessmentSchemaID:           req.AssessmentSchemaID,
+		CoursePhaseID:                coursePhaseID,
+		Start:                        pgtype.Timestamptz{Time: req.Start, Valid: !req.Start.IsZero()},
+		Deadline:                     pgtype.Timestamptz{Time: req.Deadline, Valid: !req.Deadline.IsZero()},
+		SelfEvaluationEnabled:        req.SelfEvaluationEnabled,
+		SelfEvaluationSchema:         req.SelfEvaluationSchema,
+		SelfEvaluationStart:          pgtype.Timestamptz{Time: req.SelfEvaluationStart, Valid: !req.SelfEvaluationStart.IsZero()},
+		SelfEvaluationDeadline:       pgtype.Timestamptz{Time: req.SelfEvaluationDeadline, Valid: !req.SelfEvaluationDeadline.IsZero()},
+		PeerEvaluationEnabled:        req.PeerEvaluationEnabled,
+		PeerEvaluationSchema:         req.PeerEvaluationSchema,
+		PeerEvaluationStart:          pgtype.Timestamptz{Time: req.PeerEvaluationStart, Valid: !req.PeerEvaluationStart.IsZero()},
+		PeerEvaluationDeadline:       pgtype.Timestamptz{Time: req.PeerEvaluationDeadline, Valid: !req.PeerEvaluationDeadline.IsZero()},
+		TutorEvaluationEnabled:       req.TutorEvaluationEnabled,
+		TutorEvaluationSchema:        req.TutorEvaluationSchema,
+		TutorEvaluationStart:         pgtype.Timestamptz{Time: req.TutorEvaluationStart, Valid: !req.TutorEvaluationStart.IsZero()},
+		TutorEvaluationDeadline:      pgtype.Timestamptz{Time: req.TutorEvaluationDeadline, Valid: !req.TutorEvaluationDeadline.IsZero()},
+		EvaluationResultsVisible:     req.EvaluationResultsVisible,
+		GradeSuggestionVisible:       gradeSuggestionVisible,
+		ActionItemsVisible:           actionItemsVisible,
+		ResultsReleased:              resultsReleased,
+		GradingSheetVisible:          gradingSheetVisible,
+		AssessmentEnabled:            assessmentEnabled,
+		TutorDisplayName:             tutorDisplayName,
+		IndependentAssessmentEnabled: independentAssessmentEnabled,
 	}
 
 	err = qtx.CreateOrUpdateCoursePhaseConfig(ctx, params)
@@ -279,6 +295,16 @@ func (s *CoursePhaseConfigService) CreateOrUpdateCoursePhaseConfig(ctx context.C
 // RequireAssessmentEnabled rejects assessment writes on evaluation-only phases. Without it, a stale
 // URL can create assessment rows that then lock the phase's schema.
 func (s *CoursePhaseConfigService) RequireAssessmentEnabled() gin.HandlerFunc {
+	return s.requireConfig(func(config coursePhaseConfigDTO.CoursePhaseConfig) bool { return config.AssessmentEnabled }, ErrAssessmentDisabled)
+}
+
+func (s *CoursePhaseConfigService) RequireIndependentAssessmentEnabled() gin.HandlerFunc {
+	return s.requireConfig(func(config coursePhaseConfigDTO.CoursePhaseConfig) bool {
+		return config.IndependentAssessmentEnabled
+	}, ErrIndependentAssessmentDisabled)
+}
+
+func (s *CoursePhaseConfigService) requireConfig(isAllowed func(coursePhaseConfigDTO.CoursePhaseConfig) bool, rejection error) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
 		if err != nil {
@@ -287,8 +313,8 @@ func (s *CoursePhaseConfigService) RequireAssessmentEnabled() gin.HandlerFunc {
 		}
 
 		// A guard must not lazily create rows, so this reads instead of calling
-		// GetCoursePhaseConfig. An unconfigured phase defaults to enabled, leaving the handler to
-		// validate the rest of the request itself.
+		// GetCoursePhaseConfig. An unconfigured phase falls back to the column defaults, leaving the
+		// handler to validate the rest of the request itself.
 		config, err := s.GetStoredCoursePhaseConfig(c, coursePhaseID)
 		if err != nil {
 			log.WithError(err).Error("Failed to get course phase config")
@@ -296,8 +322,8 @@ func (s *CoursePhaseConfigService) RequireAssessmentEnabled() gin.HandlerFunc {
 			return
 		}
 
-		if !config.AssessmentEnabled {
-			c.AbortWithStatusJSON(http.StatusConflict, gin.H{"error": ErrAssessmentDisabled.Error()})
+		if !isAllowed(config) {
+			c.AbortWithStatusJSON(http.StatusConflict, gin.H{"error": rejection.Error()})
 			return
 		}
 

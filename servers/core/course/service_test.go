@@ -34,7 +34,7 @@ func (suite *CourseServiceTestSuite) SetupSuite() {
 	suite.ctx = context.Background()
 
 	// Set up PostgreSQL container
-	testDB, cleanup, err := sdkTestUtils.SetupTestDB(suite.ctx, "../database_dumps/course_test.sql", func(conn *pgxpool.Pool) *db.Queries { return db.New(conn) })
+	testDB, cleanup, err := sdkTestUtils.SetupTestDBWithMigrations(suite.ctx, "../db/migration", func(conn *pgxpool.Pool) *db.Queries { return db.New(conn) }, "../database_dumps/course_test.sql")
 	if err != nil {
 		suite.T().Fatalf("Failed to set up test database: %v", err)
 	}
@@ -191,6 +191,44 @@ func (suite *CourseServiceTestSuite) TestUpdateCoursePhaseOrder() {
 	assert.True(suite.T(), firstCoursePhase.IsInitialPhase, "First phase should be the initial phase")
 	assert.False(suite.T(), secondCoursePhase.IsInitialPhase, "Second phase should not be the initial phase")
 	assert.False(suite.T(), thirdCoursePhase.IsInitialPhase, "Third phase should not be the initial phase")
+}
+
+func (suite *CourseServiceTestSuite) TestUpdateCoursePhaseOrderRejectsPhaseFromOtherCourse() {
+	courseID := uuid.MustParse("3f42d322-e5bf-4faa-b576-51f2cab14c2e")
+	ownPhaseID := uuid.MustParse("3d1f3b00-87f3-433b-a713-178c4050411b")
+	foreignPhase, err := suite.courseService.queries.CreateCoursePhase(suite.ctx, db.CreateCoursePhaseParams{
+		ID:                  uuid.New(),
+		CourseID:            uuid.MustParse("918977e1-2d27-4b55-9064-8504ff027a1a"),
+		Name:                pgtype.Text{String: "Foreign Phase", Valid: true},
+		RestrictedData:      []byte("{}"),
+		StudentReadableData: []byte("{}"),
+		CoursePhaseTypeID:   uuid.MustParse("7dc1c4e8-4255-4874-80a0-0c12b958744b"),
+	})
+	require.NoError(suite.T(), err)
+	defer func() {
+		require.NoError(suite.T(), suite.courseService.queries.DeleteCoursePhase(suite.ctx, foreignPhase.ID))
+	}()
+
+	graphBefore, err := suite.courseService.GetCoursePhaseGraph(suite.ctx, courseID)
+	require.NoError(suite.T(), err)
+
+	edges := map[string]courseDTO.CoursePhaseGraph{
+		"foreign source": {FromCoursePhaseID: foreignPhase.ID, ToCoursePhaseID: ownPhaseID},
+		"foreign target": {FromCoursePhaseID: ownPhaseID, ToCoursePhaseID: foreignPhase.ID},
+	}
+	for name, edge := range edges {
+		suite.Run(name, func() {
+			err := suite.courseService.UpdateCoursePhaseOrder(suite.ctx, courseID, courseDTO.UpdateCoursePhaseGraph{
+				InitialPhase: ownPhaseID,
+				PhaseGraph:   []courseDTO.CoursePhaseGraph{edge},
+			})
+			assert.ErrorIs(suite.T(), err, ErrPhaseNotInCourse)
+
+			graphAfter, err := suite.courseService.GetCoursePhaseGraph(suite.ctx, courseID)
+			require.NoError(suite.T(), err)
+			assert.Equal(suite.T(), graphBefore, graphAfter)
+		})
+	}
 }
 
 func (suite *CourseServiceTestSuite) TestCheckCourseTemplateStatusTrue() {

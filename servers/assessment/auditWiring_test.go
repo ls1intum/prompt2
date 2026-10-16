@@ -216,6 +216,20 @@ func TestAuditMiddlewareUsesDescribedLabels(t *testing.T) {
 			actionKey: "POST " + auditCoursePhaseTemplate + "/student-assessment/completed/mark-complete",
 		},
 		{
+			name:      "assessments marked complete in a batch",
+			method:    http.MethodPost,
+			path:      auditCoursePhaseRoute + "/student-assessment/completed/mark-complete/batch",
+			action:    "Marked assessments as completed",
+			actionKey: "POST " + auditCoursePhaseTemplate + "/student-assessment/completed/mark-complete/batch",
+		},
+		{
+			name:      "assessments unmarked in a batch",
+			method:    http.MethodPut,
+			path:      auditCoursePhaseRoute + "/student-assessment/completed/unmark/batch",
+			action:    "Unmarked assessment completions",
+			actionKey: "PUT " + auditCoursePhaseTemplate + "/student-assessment/completed/unmark/batch",
+		},
+		{
 			name:      "assessment unmarked",
 			method:    http.MethodPut,
 			path:      auditCoursePhaseRoute + "/student-assessment/completed" + auditParticipationSegment + "/unmark",
@@ -402,7 +416,7 @@ func TestHandlePhaseCopyProbeRecordsNothing(t *testing.T) {
 
 func TestHandlePhaseCopyRecordsScopedEvent(t *testing.T) {
 	ctx := context.Background()
-	testDB, cleanup, err := sdkTestUtils.SetupTestDB(ctx, "database_dumps/coursePhaseConfig.sql", func(conn *pgxpool.Pool) *db.Queries { return db.New(conn) })
+	testDB, cleanup, err := sdkTestUtils.SetupTestDBWithMigrations(ctx, "db/migration", func(conn *pgxpool.Pool) *db.Queries { return db.New(conn) }, "database_dumps/coursePhaseConfig.sql")
 	require.NoError(t, err)
 	defer cleanup()
 

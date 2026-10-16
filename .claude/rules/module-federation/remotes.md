@@ -1,6 +1,7 @@
 ---
 paths:
   - "**/rspack.config.mjs"
+  - "clients/shared/rspack/**"
 ---
 
 # Module Federation
@@ -35,9 +36,23 @@ inside `src/`. It does not expose `./App`.
 ## Share scope
 
 `clients/shared/rspack/federatedDependencies.mjs` is the single source of the singleton share scope
-(`react`, `react-dom`, `react-router-dom`, `@tanstack/react-query`, `@tumaet/prompt-shared-state`).
-Both the host and every remote import it, which is what keeps them from drifting apart. Changing the
-set changes it for host and remotes at once, which is the only safe way to change it.
+(`react`, `react-dom`, `react-router-dom`, `@tanstack/react-query`, `@tumaet/prompt-shared-state`,
+`@tumaet/prompt-ui-components`, `recharts`). Both the host and every remote import it, which is what keeps them
+from drifting apart. Changing the set changes it for host and remotes at once, which is the only safe
+way to change it.
+
+`@tumaet/prompt-ui-components` is shared because some of its state lives at module level. The toast
+store is the visible case: core mounts the only `<Toaster />`, so a remote holding its own copy of the
+library raises toasts into a store nothing renders, and every success and error message it shows is
+silently dropped.
+
+`recharts` is shared because the library's `ChartContainer` renders recharts' `ResponsiveContainer`,
+while each chart passes its own `BarChart`, `Bar` and axes as children. The container hands the
+measured size to the chart through a React context, so both halves must come from one recharts
+module. Whichever build ends up providing the shared UI library (core or any remote) would otherwise
+bring its own recharts copy, the chart never receives a size, and every diagram renders as an empty
+card. Recharts must therefore be listed in `clients/package.json` itself, not only as a transitive
+dependency of the UI library.
 
 ## Register (core host)
 
@@ -79,6 +94,6 @@ host overrode, and reversing the order just moves the breakage to the remote (is
 
 ## Rules
 
-- `react`, `react-dom`, `react-router-dom`, `@tanstack/react-query`, and
-  `@tumaet/prompt-shared-state` must be `singleton: true` on both host and remote.
+- `react`, `react-dom`, `react-router-dom`, `@tanstack/react-query`, `@tumaet/prompt-shared-state`,
+  `@tumaet/prompt-ui-components`, and `recharts` must be `singleton: true` on both host and remote.
 - The federation `name`, the core `remotes` key, and the import specifier must all match exactly.

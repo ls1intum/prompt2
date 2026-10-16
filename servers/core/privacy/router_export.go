@@ -7,6 +7,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	sdkUtils "github.com/prompt-edu/prompt-sdk/utils"
 	db "github.com/prompt-edu/prompt/servers/core/db/sqlc"
 	"github.com/prompt-edu/prompt/servers/core/permissionValidation"
 	"github.com/prompt-edu/prompt/servers/core/privacy/service"
@@ -38,14 +39,14 @@ func (h *privacyHandler) registerExportRoutes(privacyRouter *gin.RouterGroup, pe
 // @Tags privacy
 // @Param uuid path string true "Export UUID"
 // @Success 204
-// @Failure 400 {object} coreutils.ErrorResponse
-// @Failure 500 {object} coreutils.ErrorResponse
+// @Failure 400 {object} utils.ErrorResponse
+// @Failure 500 {object} utils.ErrorResponse
 // @Security BearerAuth
 // @Router /privacy/admin/data-exports/{uuid} [delete]
 func (h *privacyHandler) deleteExport(c *gin.Context) {
 	exportID, err := uuid.Parse(c.Param("uuid"))
 	if err != nil {
-		handleError(c, http.StatusBadRequest, err)
+		sdkUtils.HandleError(c, http.StatusBadRequest, err)
 		return
 	}
 
@@ -53,24 +54,24 @@ func (h *privacyHandler) deleteExport(c *gin.Context) {
 
 	exp, err := h.service.GetExportWithDocs(c, exportID)
 	if err != nil {
-		handleError(c, http.StatusBadRequest, err)
+		sdkUtils.HandleError(c, http.StatusBadRequest, err)
 		return
 	}
 	if exp.Status == db.ExportStatusArchived && !resetRateLimit {
-		handleError(c, http.StatusBadRequest, fmt.Errorf("export already archived"))
+		sdkUtils.HandleError(c, http.StatusBadRequest, fmt.Errorf("export already archived"))
 		return
 	}
 
 	if err := h.service.ArchiveExport(c, exportID); err != nil {
 		log.WithError(err).Error("failed to delete export")
-		handleError(c, http.StatusInternalServerError, err)
+		sdkUtils.HandleError(c, http.StatusInternalServerError, err)
 		return
 	}
 
 	if resetRateLimit {
 		if err := h.service.ResetExportRateLimit(c, exportID); err != nil {
 			log.WithError(err).Error("failed to reset rate limit")
-			handleError(c, http.StatusInternalServerError, err)
+			sdkUtils.HandleError(c, http.StatusInternalServerError, err)
 			return
 		}
 	}
@@ -85,32 +86,32 @@ func (h *privacyHandler) deleteExport(c *gin.Context) {
 // @Tags privacy
 // @Produce json
 // @Success 200 {object} privacyDTO.PrivacyExport
-// @Failure 400 {object} coreutils.ErrorResponse
-// @Failure 409 {object} coreutils.ErrorResponse "A valid export already exists for this user"
-// @Failure 429 {object} coreutils.ErrorResponse "User is rate-limited from requesting another export"
-// @Failure 500 {object} coreutils.ErrorResponse
+// @Failure 400 {object} utils.ErrorResponse
+// @Failure 409 {object} utils.ErrorResponse "A valid export already exists for this user"
+// @Failure 429 {object} utils.ErrorResponse "User is rate-limited from requesting another export"
+// @Failure 500 {object} utils.ErrorResponse
 // @Security BearerAuth
 // @Router /privacy/data-export [post]
 func (h *privacyHandler) handleNewSubjectDataExport(c *gin.Context) {
 	userID, err := coreutils.GetUserUUIDFromContext(c)
 	if err != nil {
-		handleError(c, http.StatusBadRequest, err)
+		sdkUtils.HandleError(c, http.StatusBadRequest, err)
 		return
 	}
 
 	if valErr := h.service.ValidateNoValidExportExists(c, userID); valErr != nil {
-		handleError(c, http.StatusConflict, valErr)
+		sdkUtils.HandleError(c, http.StatusConflict, valErr)
 		return
 	}
 	if valErr := h.service.ValidateNotRateLimited(c, userID); valErr != nil {
-		handleError(c, http.StatusTooManyRequests, valErr)
+		sdkUtils.HandleError(c, http.StatusTooManyRequests, valErr)
 		return
 	}
 
 	export, err := h.service.PrepareDataExport(c)
 	if err != nil {
 		log.Error("student data export failed: ", err)
-		handleError(c, http.StatusInternalServerError, err)
+		sdkUtils.HandleError(c, http.StatusInternalServerError, err)
 		return
 	}
 
@@ -133,21 +134,21 @@ func (h *privacyHandler) handleNewSubjectDataExport(c *gin.Context) {
 // @Produce json
 // @Success 200 {object} map[string]interface{}
 // @Success 204 "No recent export"
-// @Failure 400 {object} coreutils.ErrorResponse
-// @Failure 500 {object} coreutils.ErrorResponse
+// @Failure 400 {object} utils.ErrorResponse
+// @Failure 500 {object} utils.ErrorResponse
 // @Security BearerAuth
 // @Router /privacy/data-export [get]
 func (h *privacyHandler) getLatestExport(c *gin.Context) {
 	userID, err := coreutils.GetUserUUIDFromContext(c)
 	if err != nil {
-		handleError(c, http.StatusBadRequest, err)
+		sdkUtils.HandleError(c, http.StatusBadRequest, err)
 		return
 	}
 
 	availability, exp, err := h.service.GetExportAvailability(c, userID)
 	if err != nil {
 		log.Error("get latest export failed: ", err)
-		handleError(c, http.StatusInternalServerError, err)
+		sdkUtils.HandleError(c, http.StatusInternalServerError, err)
 		return
 	}
 
@@ -172,43 +173,43 @@ func (h *privacyHandler) getLatestExport(c *gin.Context) {
 // @Param uuid path string true "Export UUID"
 // @Param docID path string true "Export Document UUID"
 // @Success 200 {object} map[string]string
-// @Failure 400 {object} coreutils.ErrorResponse
-// @Failure 403 {object} coreutils.ErrorResponse
-// @Failure 500 {object} coreutils.ErrorResponse
+// @Failure 400 {object} utils.ErrorResponse
+// @Failure 403 {object} utils.ErrorResponse
+// @Failure 500 {object} utils.ErrorResponse
 // @Security BearerAuth
 // @Router /privacy/data-export/{uuid}/docs/{docID}/download-url [get]
 func (h *privacyHandler) getExportDocDownloadURL(c *gin.Context) {
 	exportID, err := uuid.Parse(c.Param("uuid"))
 	if err != nil {
-		handleError(c, http.StatusBadRequest, err)
+		sdkUtils.HandleError(c, http.StatusBadRequest, err)
 		return
 	}
 
 	docID, err := uuid.Parse(c.Param("docID"))
 	if err != nil {
-		handleError(c, http.StatusBadRequest, err)
+		sdkUtils.HandleError(c, http.StatusBadRequest, err)
 		return
 	}
 
 	if valErr := h.service.ValidateExportBelongsToRequester(c, exportID); valErr != nil {
-		handleError(c, http.StatusForbidden, valErr)
+		sdkUtils.HandleError(c, http.StatusForbidden, valErr)
 		return
 	}
 
 	if valErr := h.service.ValidateExportDocBelongsToExport(c, docID, exportID); valErr != nil {
-		handleError(c, http.StatusForbidden, valErr)
+		sdkUtils.HandleError(c, http.StatusForbidden, valErr)
 		return
 	}
 
 	if valErr := h.service.ValidateExportValid(c, exportID); valErr != nil {
-		handleError(c, http.StatusForbidden, valErr)
+		sdkUtils.HandleError(c, http.StatusForbidden, valErr)
 		return
 	}
 
 	downloadURL, err := h.service.GetDownloadURLForDoc(c, docID)
 	if err != nil {
 		log.Error("get export doc download URL failed: ", err)
-		handleError(c, http.StatusInternalServerError, err)
+		sdkUtils.HandleError(c, http.StatusInternalServerError, err)
 		return
 	}
 
@@ -221,14 +222,14 @@ func (h *privacyHandler) getExportDocDownloadURL(c *gin.Context) {
 // @Tags privacy
 // @Produce json
 // @Success 200 {array} privacyDTO.AdminPrivacyExport
-// @Failure 500 {object} coreutils.ErrorResponse
+// @Failure 500 {object} utils.ErrorResponse
 // @Security BearerAuth
 // @Router /privacy/admin/data-exports [get]
 func (h *privacyHandler) getAllExports(c *gin.Context) {
 	exports, err := h.service.GetAllExports(c)
 	if err != nil {
 		log.Error("get all exports failed: ", err)
-		handleError(c, http.StatusInternalServerError, err)
+		sdkUtils.HandleError(c, http.StatusInternalServerError, err)
 		return
 	}
 
@@ -243,32 +244,32 @@ func (h *privacyHandler) getAllExports(c *gin.Context) {
 // @Produce json
 // @Param uuid path string true "Export UUID"
 // @Success 200 {object} privacyDTO.PrivacyExport
-// @Failure 400 {object} coreutils.ErrorResponse
-// @Failure 403 {object} coreutils.ErrorResponse
-// @Failure 500 {object} coreutils.ErrorResponse
+// @Failure 400 {object} utils.ErrorResponse
+// @Failure 403 {object} utils.ErrorResponse
+// @Failure 500 {object} utils.ErrorResponse
 // @Security BearerAuth
 // @Router /privacy/data-export/{uuid} [get]
 func (h *privacyHandler) getExport(c *gin.Context) {
 	exportID, err := uuid.Parse(c.Param("uuid"))
 	if err != nil {
-		handleError(c, http.StatusBadRequest, err)
+		sdkUtils.HandleError(c, http.StatusBadRequest, err)
 		return
 	}
 
 	valErr := h.service.ValidateExportBelongsToRequester(c, exportID)
 	if valErr != nil {
-		handleError(c, http.StatusForbidden, valErr)
+		sdkUtils.HandleError(c, http.StatusForbidden, valErr)
 		return
 	}
 
 	if valErr := h.service.ValidateExportValid(c, exportID); valErr != nil {
-		handleError(c, http.StatusForbidden, valErr)
+		sdkUtils.HandleError(c, http.StatusForbidden, valErr)
 		return
 	}
 
 	expWithDocs, expErr := h.service.GetExportWithDocs(c, exportID)
 	if expErr != nil {
-		handleError(c, http.StatusInternalServerError, expErr)
+		sdkUtils.HandleError(c, http.StatusInternalServerError, expErr)
 		return
 	}
 

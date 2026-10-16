@@ -24,6 +24,7 @@ import (
 	"github.com/prompt-edu/prompt/servers/core/student"
 	"github.com/prompt-edu/prompt/servers/core/student/studentDTO"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 )
 
@@ -38,7 +39,7 @@ func (suite *ApplicationAdminServiceTestSuite) SetupSuite() {
 	suite.ctx = context.Background()
 
 	// Set up PostgreSQL container
-	testDB, cleanup, err := sdkTestUtils.SetupTestDB(suite.ctx, "../database_dumps/application_administration.sql", func(conn *pgxpool.Pool) *db.Queries { return db.New(conn) })
+	testDB, cleanup, err := sdkTestUtils.SetupTestDBWithMigrations(suite.ctx, "../db/migration", func(conn *pgxpool.Pool) *db.Queries { return db.New(conn) }, "../database_dumps/application_administration.sql")
 	if err != nil {
 		log.Fatalf("Failed to set up test database: %v", err)
 	}
@@ -381,7 +382,7 @@ func (suite *ApplicationAdminServiceTestSuite) TestPostApplicationAuthenticatedS
 		},
 	}
 
-	_, err := suite.applicationAdminService.PostApplicationAuthenticatedStudent(suite.ctx, coursePhaseID, application)
+	_, err := suite.applicationAdminService.PostApplicationAuthenticatedStudent(suite.ctx, coursePhaseID, anyUploaderInPhase(), application)
 	assert.NoError(suite.T(), err)
 }
 
@@ -404,7 +405,7 @@ func (suite *ApplicationAdminServiceTestSuite) TestPostApplicationAuthenticatedS
 	}
 
 	// Apply with existing email but updated details
-	_, err := suite.applicationAdminService.PostApplicationAuthenticatedStudent(suite.ctx, coursePhaseID, application)
+	_, err := suite.applicationAdminService.PostApplicationAuthenticatedStudent(suite.ctx, coursePhaseID, anyUploaderInPhase(), application)
 	assert.NoError(suite.T(), err)
 }
 
@@ -489,12 +490,33 @@ func (suite *ApplicationAdminServiceTestSuite) TestUploadAdditionalScore_Success
 
 func (suite *ApplicationAdminServiceTestSuite) TestDeleteApplication_Success() {
 	coursePhaseID := uuid.MustParse("4179d58a-d00d-4fa7-94a5-397bc69fab02")
-	courseParticipationID := uuid.MustParse("82d7efae-d545-4cc5-9b94-5d0ee1e50d25")
+	// Delete an application of its own: deleting a course participation cascades to its phase
+	// participations, which the other tests in this suite still rely on.
+	courseParticipationID, err := suite.applicationAdminService.PostApplicationExtern(suite.ctx, coursePhaseID, applicationDTO.PostApplication{
+		Student: studentDTO.CreateStudent{
+			FirstName:            "To Be",
+			LastName:             "Deleted",
+			Email:                "to-be-deleted@example.com",
+			HasUniversityAccount: false,
+			Gender:               db.GenderDiverse,
+			Nationality:          "DE",
+			CurrentSemester:      pgtype.Int4{Valid: true, Int32: 1},
+			StudyProgram:         "Computer Science",
+			StudyDegree:          "bachelor",
+		},
+	})
+	require.NoError(suite.T(), err)
 
 	toBeDeletedUUIDs := []uuid.UUID{courseParticipationID}
 
-	err := suite.applicationAdminService.DeleteApplications(suite.ctx, coursePhaseID, toBeDeletedUUIDs)
+	err = suite.applicationAdminService.DeleteApplications(suite.ctx, coursePhaseID, toBeDeletedUUIDs)
 	assert.NoError(suite.T(), err)
+
+	participations, err := suite.applicationAdminService.GetAllApplicationParticipations(suite.ctx, coursePhaseID)
+	assert.NoError(suite.T(), err)
+	for _, participation := range participations {
+		assert.NotEqual(suite.T(), courseParticipationID, participation.CourseParticipationID, "the deleted application should be gone")
+	}
 }
 
 func (suite *ApplicationAdminServiceTestSuite) TestGetExportedApplicationAnswers_Success() {
@@ -609,6 +631,61 @@ func (suite *ApplicationAdminServiceTestSuite) TestGetExportedApplicationAnswers
 	assert.False(suite.T(), hasDup2)
 	_, hasNonExportedAnswer := answersByQuestion[qTextNonExported]
 	assert.False(suite.T(), hasNonExportedAnswer)
+}
+
+func (suite *ApplicationAdminServiceTestSuite) TestUpsertFileUploadAnswer_ZeroUploaderMatchesNoFile() {
+	coursePhaseID := uuid.MustParse("4179d58a-d00d-4fa7-94a5-397bc69fab02")
+	courseParticipationID := uuid.MustParse("32aa070e-67c3-4a69-852a-ba3b5e849a4d")
+	answer := applicationDTO.CreateAnswerFileUpload{
+		ApplicationQuestionID: uuid.MustParse("c2c04042-95d1-4765-8592-caf9560c8c3e"),
+		FileID:                seededUploadFileID,
+	}
+	queries := &suite.applicationAdminService.queries
+
+	_, err := upsertFileUploadAnswer(suite.ctx, queries, coursePhaseID, fileUploader{}, answer, courseParticipationID)
+	assert.ErrorIs(suite.T(), err, ErrFileNotInApplication)
+
+	_, err = upsertFileUploadAnswer(suite.ctx, queries, coursePhaseID, uploadedBy("external"), answer, courseParticipationID)
+	assert.NoError(suite.T(), err)
+}
+
+func (suite *ApplicationAdminServiceTestSuite) TestUpsertFileUploadAnswer_EmptyUploaderRejectsAnonymizedFile() {
+	tx, err := suite.applicationAdminService.conn.Begin(suite.ctx)
+	assert.NoError(suite.T(), err)
+	defer func() { _ = tx.Rollback(suite.ctx) }()
+	queries := suite.applicationAdminService.queries.WithTx(tx)
+	assert.NoError(suite.T(), queries.AnonymizeFilesByUploader(suite.ctx, "external"))
+
+	coursePhaseID := uuid.MustParse("4179d58a-d00d-4fa7-94a5-397bc69fab02")
+	courseParticipationID := uuid.MustParse("32aa070e-67c3-4a69-852a-ba3b5e849a4d")
+	answer := applicationDTO.CreateAnswerFileUpload{
+		ApplicationQuestionID: uuid.MustParse("c2c04042-95d1-4765-8592-caf9560c8c3e"),
+		FileID:                seededUploadFileID,
+	}
+
+	for _, uploader := range []fileUploader{{}, uploadedBy("")} {
+		_, err = upsertFileUploadAnswer(suite.ctx, queries, coursePhaseID, uploader, answer, courseParticipationID)
+		assert.ErrorIs(suite.T(), err, ErrFileNotInApplication)
+	}
+}
+
+func (suite *ApplicationAdminServiceTestSuite) TestCleanupReplacedFiles_KeepsFileReferencedByAnotherAnswer() {
+	coursePhaseID := uuid.MustParse("4179d58a-d00d-4fa7-94a5-397bc69fab02")
+	courseParticipationID := uuid.MustParse("32aa070e-67c3-4a69-852a-ba3b5e849a4d")
+	questionID := uuid.MustParse("c2c04042-95d1-4765-8592-caf9560c8c3e")
+	queries := &suite.applicationAdminService.queries
+	answer := applicationDTO.CreateAnswerFileUpload{ApplicationQuestionID: questionID, FileID: seededUploadFileID}
+	_, err := upsertFileUploadAnswer(suite.ctx, queries, coursePhaseID, uploadedBy("external"), answer, courseParticipationID)
+	assert.NoError(suite.T(), err)
+
+	suite.applicationAdminService.cleanupReplacedFiles(suite.ctx, []uuid.UUID{seededUploadFileID})
+
+	stored, err := queries.GetApplicationAnswerFileUploadByQuestionAndParticipation(suite.ctx, db.GetApplicationAnswerFileUploadByQuestionAndParticipationParams{
+		ApplicationQuestionID: questionID,
+		CourseParticipationID: courseParticipationID,
+	})
+	assert.NoError(suite.T(), err)
+	assert.Equal(suite.T(), seededUploadFileID, stored.FileID)
 }
 
 func TestApplicationAdminServiceTestSuite(t *testing.T) {

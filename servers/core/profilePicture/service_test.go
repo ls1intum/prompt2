@@ -5,6 +5,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"image"
+	"image/jpeg"
 	"io"
 	"strings"
 	"sync"
@@ -33,10 +35,21 @@ var (
 	instructorUserID         = uuid.MustParse("bbbbbbbb-0000-0000-0000-000000000002")
 	adaPictureStorageKey     = "profile-picture/bbbbbbbb-0000-0000-0000-000000000001/ada.jpg"
 	instructorPictureKey     = "profile-picture/bbbbbbbb-0000-0000-0000-000000000002/instructor.jpg"
-	validJPEG                = append([]byte{0xFF, 0xD8, 0xFF, 0xE0}, []byte("jpeg body")...)
+	validJPEG                = encodeJPEG(pictureSizePx)
+	smallJPEG                = encodeJPEG(64)
+	truncatedJPEG            = append([]byte{0xFF, 0xD8, 0xFF, 0xE0}, []byte("jpeg body")...)
 	notAJPEG                 = []byte("\x89PNG\r\n\x1a\n")
 	oversizedPictureContents = append([]byte{0xFF, 0xD8, 0xFF}, bytes.Repeat([]byte{0}, maxPictureSizeBytes)...)
 )
+
+// encodeJPEG returns a square JPEG of the given size, like the one the client crop produces.
+func encodeJPEG(sizePx int) []byte {
+	var buffer bytes.Buffer
+	if err := jpeg.Encode(&buffer, image.NewGray(image.Rect(0, 0, sizePx, sizePx)), nil); err != nil {
+		panic(err)
+	}
+	return buffer.Bytes()
+}
 
 // objectStore is an in-memory stand-in for the S3 bucket behind the mock adapter.
 type objectStore struct {
@@ -44,10 +57,24 @@ type objectStore struct {
 	objects     map[string][]byte
 	contentType map[string]string
 	deleted     []string
+	failReads   map[string]bool
 }
 
 func newObjectStore() *objectStore {
-	return &objectStore{objects: map[string][]byte{}, contentType: map[string]string{}}
+	return &objectStore{objects: map[string][]byte{}, contentType: map[string]string{}, failReads: map[string]bool{}}
+}
+
+func (o *objectStore) get(key string) []byte {
+	o.mu.Lock()
+	defer o.mu.Unlock()
+	return o.objects[key]
+}
+
+// failReadsOf makes downloads of the key fail, like a storage hiccup.
+func (o *objectStore) failReadsOf(key string) {
+	o.mu.Lock()
+	defer o.mu.Unlock()
+	o.failReads[key] = true
 }
 
 func (o *objectStore) put(key, contentType string, content []byte) {
@@ -68,6 +95,17 @@ func (o *objectStore) wasDeleted(key string) bool {
 	return false
 }
 
+func (o *objectStore) hasKeyWithPrefix(prefix string) bool {
+	o.mu.Lock()
+	defer o.mu.Unlock()
+	for key := range o.objects {
+		if strings.HasPrefix(key, prefix) {
+			return true
+		}
+	}
+	return false
+}
+
 func (o *objectStore) adapter() *storage.MockStorageAdapter {
 	return &storage.MockStorageAdapter{
 		GetMetadataFunc: func(_ context.Context, key string) (*storage.FileMetadata, error) {
@@ -79,9 +117,20 @@ func (o *objectStore) adapter() *storage.MockStorageAdapter {
 			}
 			return &storage.FileMetadata{StorageKey: key, Size: int64(len(content)), ContentType: o.contentType[key]}, nil
 		},
+		UploadFunc: func(_ context.Context, key, contentType string, reader io.Reader) (*storage.UploadResult, error) {
+			content, err := io.ReadAll(reader)
+			if err != nil {
+				return nil, err
+			}
+			o.put(key, contentType, content)
+			return &storage.UploadResult{StorageKey: key, Size: int64(len(content))}, nil
+		},
 		DownloadFunc: func(_ context.Context, key string) (io.ReadCloser, error) {
 			o.mu.Lock()
 			defer o.mu.Unlock()
+			if o.failReads[key] {
+				return nil, errors.New("storage unavailable")
+			}
 			content, ok := o.objects[key]
 			if !ok {
 				return nil, storage.ErrObjectNotFound
@@ -110,9 +159,9 @@ type ProfilePictureServiceTestSuite struct {
 
 func (suite *ProfilePictureServiceTestSuite) SetupSuite() {
 	suite.ctx = context.Background()
-	testDB, cleanup, err := testutils.SetupTestDB(suite.ctx, "../database_dumps/profile_picture_test.sql", func(conn *pgxpool.Pool) *db.Queries {
+	testDB, cleanup, err := testutils.SetupTestDBWithMigrations(suite.ctx, "../db/migration", func(conn *pgxpool.Pool) *db.Queries {
 		return db.New(conn)
-	})
+	}, "../database_dumps/profile_picture_test.sql")
 	if err != nil {
 		suite.T().Fatalf("Failed to set up test database: %v", err)
 	}
@@ -125,9 +174,12 @@ func (suite *ProfilePictureServiceTestSuite) SetupTest() {
 	suite.store = newObjectStore()
 	suite.store.put(adaPictureStorageKey, pictureContentType, validJPEG)
 	suite.store.put(instructorPictureKey, pictureContentType, validJPEG)
+	suite.service = suite.newService(suite.store.adapter())
+}
 
-	fileStore := files.NewStorageService(suite.queries, suite.conn, suite.store.adapter(), 50, []string{pictureContentType, "image/png"})
-	suite.service = NewProfilePictureService(suite.queries, suite.conn, fileStore)
+func (suite *ProfilePictureServiceTestSuite) newService(adapter *storage.MockStorageAdapter) *ProfilePictureService {
+	fileStore := files.NewStorageService(suite.queries, suite.conn, adapter, 50, []string{pictureContentType, "image/png"})
+	return NewProfilePictureService(suite.queries, suite.conn, fileStore)
 }
 
 func (suite *ProfilePictureServiceTestSuite) TearDownSuite() {
@@ -140,6 +192,13 @@ func (suite *ProfilePictureServiceTestSuite) upload(userID uuid.UUID, contentTyp
 	require.NoError(suite.T(), err)
 	suite.store.put(presigned.StorageKey, contentType, content)
 	return presigned.StorageKey
+}
+
+// storedKey returns the key the user's current picture is served from.
+func (suite *ProfilePictureServiceTestSuite) storedKey(userID uuid.UUID) string {
+	picture, err := suite.queries.GetProfilePictureByUserID(suite.ctx, userID)
+	require.NoError(suite.T(), err)
+	return picture.StorageKey
 }
 
 // insertStudent adds a student with the given university login so tests can link uploads
@@ -160,7 +219,7 @@ func (suite *ProfilePictureServiceTestSuite) TestPresignUpload_ScopesKeyToCaller
 	presigned, err := suite.service.PresignUpload(suite.ctx, userID)
 
 	require.NoError(suite.T(), err)
-	assert.True(suite.T(), strings.HasPrefix(presigned.StorageKey, fmt.Sprintf("profile-picture/%s/", userID)))
+	assert.True(suite.T(), strings.HasPrefix(presigned.StorageKey, fmt.Sprintf("profile-picture-upload/%s/", userID)))
 	assert.NotEmpty(suite.T(), presigned.UploadURL)
 }
 
@@ -172,15 +231,32 @@ func (suite *ProfilePictureServiceTestSuite) TestCompleteUpload_SetsPictureAndLi
 	picture, err := suite.service.CompleteUpload(suite.ctx, Uploader{UserID: userID, UniversityLogin: "te01sta"}, key)
 
 	require.NoError(suite.T(), err)
-	assert.Contains(suite.T(), picture.URL, key)
+	storedKey := suite.storedKey(userID)
+	assert.True(suite.T(), strings.HasPrefix(storedKey, fmt.Sprintf("profile-picture/%s/", userID)))
+	assert.Contains(suite.T(), picture.URL, storedKey)
 
 	own, err := suite.service.GetOwnPicture(suite.ctx, userID)
 	require.NoError(suite.T(), err)
-	assert.Contains(suite.T(), own.URL, key)
+	assert.Contains(suite.T(), own.URL, storedKey)
 
 	urls, err := suite.service.LookupPictureURLs(suite.ctx, profilePictureDTO.LookupRequest{StudentIDs: []uuid.UUID{studentID}})
 	require.NoError(suite.T(), err)
-	assert.Contains(suite.T(), urls.Students[studentID], key)
+	assert.Contains(suite.T(), urls.Students[studentID], storedKey)
+}
+
+func (suite *ProfilePictureServiceTestSuite) TestCompleteUpload_ServesTheCheckedBytes() {
+	userID := uuid.New()
+	key := suite.upload(userID, pictureContentType, validJPEG)
+	_, err := suite.service.CompleteUpload(suite.ctx, Uploader{UserID: userID}, key)
+	require.NoError(suite.T(), err)
+
+	// The presigned URL is still valid, so it can be used to write to the upload key again
+	suite.store.put(key, pictureContentType, oversizedPictureContents)
+
+	assert.True(suite.T(), suite.store.wasDeleted(key), "the upload must be removed once it is stored")
+	storedKey := suite.storedKey(userID)
+	assert.NotEqual(suite.T(), key, storedKey)
+	assert.Equal(suite.T(), validJPEG, suite.store.get(storedKey))
 }
 
 func (suite *ProfilePictureServiceTestSuite) TestCompleteUpload_ReplacesAndDeletesPreviousPicture() {
@@ -188,14 +264,16 @@ func (suite *ProfilePictureServiceTestSuite) TestCompleteUpload_ReplacesAndDelet
 	firstKey := suite.upload(userID, pictureContentType, validJPEG)
 	_, err := suite.service.CompleteUpload(suite.ctx, Uploader{UserID: userID}, firstKey)
 	require.NoError(suite.T(), err)
+	firstStoredKey := suite.storedKey(userID)
 
 	secondKey := suite.upload(userID, pictureContentType, validJPEG)
 	picture, err := suite.service.CompleteUpload(suite.ctx, Uploader{UserID: userID}, secondKey)
 
 	require.NoError(suite.T(), err)
-	assert.Contains(suite.T(), picture.URL, secondKey)
-	assert.True(suite.T(), suite.store.wasDeleted(firstKey), "the replaced picture must be removed from storage")
-	assert.False(suite.T(), suite.store.wasDeleted(secondKey))
+	secondStoredKey := suite.storedKey(userID)
+	assert.Contains(suite.T(), picture.URL, secondStoredKey)
+	assert.True(suite.T(), suite.store.wasDeleted(firstStoredKey), "the replaced picture must be removed from storage")
+	assert.False(suite.T(), suite.store.wasDeleted(secondStoredKey))
 }
 
 func (suite *ProfilePictureServiceTestSuite) TestCompleteUpload_ConcurrentUploadsLeaveNoOrphan() {
@@ -229,16 +307,92 @@ func (suite *ProfilePictureServiceTestSuite) TestCompleteUpload_ConcurrentUpload
 	assert.Contains(suite.T(), own.URL, remaining[0].StorageKey)
 }
 
-func (suite *ProfilePictureServiceTestSuite) TestCompleteUpload_IsIdempotent() {
+func (suite *ProfilePictureServiceTestSuite) TestCompleteUpload_TwiceKeepsThePicture() {
+	userID := uuid.New()
+	key := suite.upload(userID, pictureContentType, validJPEG)
+	_, err := suite.service.CompleteUpload(suite.ctx, Uploader{UserID: userID}, key)
+	require.NoError(suite.T(), err)
+	storedKey := suite.storedKey(userID)
+
+	_, err = suite.service.CompleteUpload(suite.ctx, Uploader{UserID: userID}, key)
+
+	assert.ErrorIs(suite.T(), err, ErrNotFound)
+	assert.False(suite.T(), suite.store.wasDeleted(storedKey), "completing twice must not delete the current picture")
+	assert.Equal(suite.T(), storedKey, suite.storedKey(userID))
+}
+
+func (suite *ProfilePictureServiceTestSuite) TestCompleteUpload_ReadFailureDiscardsUploadAndKeepsPicture() {
+	userID := uuid.New()
+	firstKey := suite.upload(userID, pictureContentType, validJPEG)
+	_, err := suite.service.CompleteUpload(suite.ctx, Uploader{UserID: userID}, firstKey)
+	require.NoError(suite.T(), err)
+	storedKey := suite.storedKey(userID)
+
+	secondKey := suite.upload(userID, pictureContentType, validJPEG)
+	suite.store.failReadsOf(secondKey)
+	_, err = suite.service.CompleteUpload(suite.ctx, Uploader{UserID: userID}, secondKey)
+
+	require.Error(suite.T(), err)
+	assert.NotErrorIs(suite.T(), err, ErrInvalidInput)
+	assert.True(suite.T(), suite.store.wasDeleted(secondKey), "the client presigns a new key on every save, so nothing completes this upload again")
+	assert.False(suite.T(), suite.store.wasDeleted(storedKey))
+	assert.Equal(suite.T(), storedKey, suite.storedKey(userID))
+}
+
+func (suite *ProfilePictureServiceTestSuite) TestCompleteUpload_SaveFailureDiscardsStoredFile() {
+	userID := uuid.New()
+	key := suite.upload(userID, pictureContentType, validJPEG)
+	tooLongLogin := strings.Repeat("a", 21)
+
+	_, err := suite.service.CompleteUpload(suite.ctx, Uploader{UserID: userID, UniversityLogin: tooLongLogin}, key)
+
+	require.Error(suite.T(), err)
+	assert.True(suite.T(), suite.store.wasDeleted(key))
+	remaining, err := suite.queries.GetFilesByUploader(suite.ctx, db.GetFilesByUploaderParams{
+		UploadedByUserID: userID.String(),
+		Limit:            10,
+	})
+	require.NoError(suite.T(), err)
+	assert.Empty(suite.T(), remaining, "a stored file without a profile picture row is unreachable for privacy deletion")
+	assert.False(suite.T(), suite.store.hasKeyWithPrefix(fmt.Sprintf("profile-picture/%s/", userID)), "the stored picture must be removed from storage")
+}
+
+func (suite *ProfilePictureServiceTestSuite) TestCompleteUpload_URLFailureKeepsPreviousPicture() {
+	userID := uuid.New()
+	firstKey := suite.upload(userID, pictureContentType, validJPEG)
+	_, err := suite.service.CompleteUpload(suite.ctx, Uploader{UserID: userID}, firstKey)
+	require.NoError(suite.T(), err)
+	storedKey := suite.storedKey(userID)
+
+	adapter := suite.store.adapter()
+	adapter.GetURLFunc = func(context.Context, string, int) (string, error) {
+		return "", errors.New("presigner unavailable")
+	}
+	secondKey := suite.upload(userID, pictureContentType, validJPEG)
+	_, err = suite.newService(adapter).CompleteUpload(suite.ctx, Uploader{UserID: userID}, secondKey)
+
+	require.Error(suite.T(), err)
+	assert.Equal(suite.T(), storedKey, suite.storedKey(userID), "a failed save must not replace the picture")
+	assert.False(suite.T(), suite.store.wasDeleted(storedKey))
+	assert.True(suite.T(), suite.store.wasDeleted(secondKey))
+	remaining, err := suite.queries.GetFilesByUploader(suite.ctx, db.GetFilesByUploaderParams{
+		UploadedByUserID: userID.String(),
+		Limit:            10,
+	})
+	require.NoError(suite.T(), err)
+	require.Len(suite.T(), remaining, 1)
+	assert.Equal(suite.T(), storedKey, remaining[0].StorageKey)
+}
+
+func (suite *ProfilePictureServiceTestSuite) TestCompleteUpload_RejectsStoredPictureKey() {
 	userID := uuid.New()
 	key := suite.upload(userID, pictureContentType, validJPEG)
 	_, err := suite.service.CompleteUpload(suite.ctx, Uploader{UserID: userID}, key)
 	require.NoError(suite.T(), err)
 
-	_, err = suite.service.CompleteUpload(suite.ctx, Uploader{UserID: userID}, key)
+	_, err = suite.service.CompleteUpload(suite.ctx, Uploader{UserID: userID}, suite.storedKey(userID))
 
-	require.NoError(suite.T(), err)
-	assert.False(suite.T(), suite.store.wasDeleted(key), "completing twice must not delete the current picture")
+	assert.ErrorIs(suite.T(), err, ErrInvalidInput)
 }
 
 func (suite *ProfilePictureServiceTestSuite) TestCompleteUpload_RejectsForeignStorageKey() {
@@ -252,7 +406,7 @@ func (suite *ProfilePictureServiceTestSuite) TestCompleteUpload_RejectsForeignSt
 
 func (suite *ProfilePictureServiceTestSuite) TestCompleteUpload_RejectsMissingUpload() {
 	userID := uuid.New()
-	key := fmt.Sprintf("profile-picture/%s/never-uploaded.jpg", userID)
+	key := fmt.Sprintf("profile-picture-upload/%s/never-uploaded.jpg", userID)
 
 	_, err := suite.service.CompleteUpload(suite.ctx, Uploader{UserID: userID}, key)
 
@@ -265,7 +419,8 @@ func (suite *ProfilePictureServiceTestSuite) TestCompleteUpload_RejectsInvalidPi
 		content     []byte
 	}{
 		"not a JPEG":        {pictureContentType, notAJPEG},
-		"wrong type":        {"image/png", validJPEG},
+		"truncated JPEG":    {pictureContentType, truncatedJPEG},
+		"wrong dimensions":  {pictureContentType, smallJPEG},
 		"over size limit":   {pictureContentType, oversizedPictureContents},
 		"empty upload body": {pictureContentType, []byte{}},
 	}
@@ -289,10 +444,11 @@ func (suite *ProfilePictureServiceTestSuite) TestDeleteOwnPicture() {
 	key := suite.upload(userID, pictureContentType, validJPEG)
 	_, err := suite.service.CompleteUpload(suite.ctx, Uploader{UserID: userID}, key)
 	require.NoError(suite.T(), err)
+	storedKey := suite.storedKey(userID)
 
 	require.NoError(suite.T(), suite.service.DeleteOwnPicture(suite.ctx, userID))
 
-	assert.True(suite.T(), suite.store.wasDeleted(key))
+	assert.True(suite.T(), suite.store.wasDeleted(storedKey))
 	_, err = suite.service.GetOwnPicture(suite.ctx, userID)
 	assert.ErrorIs(suite.T(), err, ErrNotFound)
 	assert.ErrorIs(suite.T(), suite.service.DeleteOwnPicture(suite.ctx, userID), ErrNotFound)

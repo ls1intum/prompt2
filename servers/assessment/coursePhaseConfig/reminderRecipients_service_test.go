@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/prompt-edu/prompt-sdk/promptTypes"
 	sdkTestUtils "github.com/prompt-edu/prompt-sdk/testutils"
@@ -57,13 +58,14 @@ func (suite *ReminderRecipientsServiceTestSuite) SetupSuite() {
 	suite.ctx = context.Background()
 	suite.testPhaseID = uuid.MustParse(reminderTestPhaseID)
 
-	testDB, cleanup, err := sdkTestUtils.SetupTestDB(
+	testDB, cleanup, err := sdkTestUtils.SetupTestDBWithMigrations(
 		suite.ctx,
-		"../database_dumps/reminder_recipients_test.sql",
+		"../db/migration",
 		func(conn *pgxpool.Pool) *db.Queries { return db.New(conn) },
+		"../database_dumps/reminder_recipients_test.sql",
 	)
 	if err != nil {
-		suite.T().Skipf("skipping db-backed reminder recipient tests: %v", err)
+		suite.T().Fatalf("Failed to set up test database: %v", err)
 	}
 	suite.cleanup = cleanup
 
@@ -338,4 +340,10 @@ func (suite *ReminderRecipientsServiceTestSuite) TestGetEvaluationReminderRecipi
 
 func TestReminderRecipientsServiceTestSuite(t *testing.T) {
 	suite.Run(t, new(ReminderRecipientsServiceTestSuite))
+}
+
+func TestGetEvaluationTypeLabelUsesTutorDisplayName(t *testing.T) {
+	assert.Equal(t, "Tutor Evaluation", getEvaluationTypeLabel(assessmentType.Tutor, pgtype.Text{}))
+	assert.Equal(t, "Coach Evaluation", getEvaluationTypeLabel(assessmentType.Tutor, pgtype.Text{String: "Coach", Valid: true}))
+	assert.Equal(t, "Peer Evaluation", getEvaluationTypeLabel(assessmentType.Peer, pgtype.Text{String: "Coach", Valid: true}))
 }
