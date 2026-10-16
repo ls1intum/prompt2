@@ -42,13 +42,16 @@ type ApplicationAdminRouterTestSuite struct {
 var (
 	requiredFileUploadQuestionID = uuid.MustParse("b1b04042-95d1-4765-8592-caf9560c8c3d")
 	seededUploadFileID           = uuid.MustParse("d3d04042-95d1-4765-8592-caf9560c8c3f")
+	applicantUploadFileID        = uuid.MustParse("d3d04042-95d1-4765-8592-caf9560c8c40")
+	otherPhaseUploadFileID       = uuid.MustParse("d3d04042-95d1-4765-8592-caf9560c8c41")
+	deletedApplicantUploadFileID = uuid.MustParse("d3d04042-95d1-4765-8592-caf9560c8c42")
 )
 
 func (suite *ApplicationAdminRouterTestSuite) SetupSuite() {
 	suite.ctx = context.Background()
 
 	// Set up PostgreSQL container
-	testDB, cleanup, err := sdkTestUtils.SetupTestDB(suite.ctx, "../database_dumps/application_administration.sql", func(conn *pgxpool.Pool) *db.Queries { return db.New(conn) })
+	testDB, cleanup, err := sdkTestUtils.SetupTestDBWithMigrations(suite.ctx, "../db/migration", func(conn *pgxpool.Pool) *db.Queries { return db.New(conn) }, "../database_dumps/application_administration.sql")
 	if err != nil {
 		log.Fatalf("Failed to set up test database: %v", err)
 	}
@@ -301,7 +304,7 @@ func authApplicationWithEmail(email string) applicationDTO.PostApplication {
 		AnswersFileUpload: []applicationDTO.CreateAnswerFileUpload{
 			{
 				ApplicationQuestionID: requiredFileUploadQuestionID,
-				FileID:                seededUploadFileID,
+				FileID:                applicantUploadFileID,
 			},
 		},
 	}
@@ -416,6 +419,100 @@ func (suite *ApplicationAdminRouterTestSuite) TestPostApplicationAuthenticatedEn
 
 	assert.Equal(suite.T(), http.StatusCreated, resp.Code)
 	assert.Equal(suite.T(), "existingstudent@example.com", suite.getStudentEmail())
+}
+
+func (suite *ApplicationAdminRouterTestSuite) postApplication(path string, application applicationDTO.PostApplication) int {
+	jsonBody, err := json.Marshal(application)
+	assert.NoError(suite.T(), err)
+	req := httptest.NewRequest(http.MethodPost, path, bytes.NewReader(jsonBody))
+	req.Header.Set("Content-Type", "application/json")
+	resp := httptest.NewRecorder()
+	suite.router.ServeHTTP(resp, req)
+	return resp.Code
+}
+
+func (suite *ApplicationAdminRouterTestSuite) TestPostApplicationAuthenticatedEndpoint_RejectsFileOfOtherUploader() {
+	application := authApplicationWithEmail("existingstudent@example.com")
+	application.AnswersFileUpload[0].FileID = seededUploadFileID
+
+	code := suite.postApplication("/api/apply/authenticated/4179d58a-d00d-4fa7-94a5-397bc69fab02", application)
+	assert.Equal(suite.T(), http.StatusBadRequest, code)
+}
+
+func (suite *ApplicationAdminRouterTestSuite) TestPostApplicationAuthenticatedEndpoint_RejectsDeletedFile() {
+	application := authApplicationWithEmail("existingstudent@example.com")
+	application.AnswersFileUpload[0].FileID = deletedApplicantUploadFileID
+
+	code := suite.postApplication("/api/apply/authenticated/4179d58a-d00d-4fa7-94a5-397bc69fab02", application)
+	assert.Equal(suite.T(), http.StatusBadRequest, code)
+}
+
+func externApplicationWithFile(email string, fileID uuid.UUID) applicationDTO.PostApplication {
+	return applicationDTO.PostApplication{
+		Student: studentDTO.CreateStudent{
+			FirstName:       "External",
+			LastName:        "Applicant",
+			Email:           email,
+			Gender:          db.GenderDiverse,
+			Nationality:     "DE",
+			CurrentSemester: pgtype.Int4{Valid: true, Int32: 1},
+			StudyProgram:    "Computer Science",
+			StudyDegree:     "bachelor",
+		},
+		AnswersText: []applicationDTO.CreateAnswerText{
+			{ApplicationQuestionID: uuid.MustParse("a6a04042-95d1-4765-8592-caf9560c8c3c"), Answer: "This is a valid answer."},
+		},
+		AnswersMultiSelect: []applicationDTO.CreateAnswerMultiSelect{
+			{ApplicationQuestionID: uuid.MustParse("383a9590-fba2-4e6b-a32b-88895d55fb9b"), Answer: []string{"MacBook"}},
+		},
+		AnswersFileUpload: []applicationDTO.CreateAnswerFileUpload{
+			{ApplicationQuestionID: requiredFileUploadQuestionID, FileID: fileID},
+		},
+	}
+}
+
+func (suite *ApplicationAdminRouterTestSuite) TestPostApplicationExternEndpoint_RejectsFileOfOtherPhase() {
+	application := externApplicationWithFile("otherphasefile@example.com", otherPhaseUploadFileID)
+
+	code := suite.postApplication("/api/apply/4179d58a-d00d-4fa7-94a5-397bc69fab02", application)
+	assert.Equal(suite.T(), http.StatusBadRequest, code)
+}
+
+func (suite *ApplicationAdminRouterTestSuite) TestPostApplicationExternEndpoint_AcceptsFileOfLoggedInUploader() {
+	application := externApplicationWithFile("loggedinuploader@example.com", applicantUploadFileID)
+
+	code := suite.postApplication("/api/apply/4179d58a-d00d-4fa7-94a5-397bc69fab02", application)
+	assert.Equal(suite.T(), http.StatusCreated, code)
+}
+
+func (suite *ApplicationAdminRouterTestSuite) TestPostApplicationManualEndpoint_RejectsFileOfOtherPhase() {
+	application := applicationDTO.PostApplication{
+		Student: studentDTO.CreateStudent{
+			FirstName:            "Manual",
+			LastName:             "OtherPhase",
+			Email:                "manualotherphase@tum.de",
+			Gender:               db.GenderMale,
+			HasUniversityAccount: true,
+			MatriculationNumber:  "03799998",
+			UniversityLogin:      "zz99zzy",
+			Nationality:          "DE",
+			CurrentSemester:      pgtype.Int4{Valid: true, Int32: 3},
+			StudyProgram:         "Computer Science",
+			StudyDegree:          "bachelor",
+		},
+		AnswersText: []applicationDTO.CreateAnswerText{
+			{ApplicationQuestionID: uuid.MustParse("a6a04042-95d1-4765-8592-caf9560c8c3c"), Answer: "Valid motivation answer."},
+		},
+		AnswersMultiSelect: []applicationDTO.CreateAnswerMultiSelect{
+			{ApplicationQuestionID: uuid.MustParse("383a9590-fba2-4e6b-a32b-88895d55fb9b"), Answer: []string{"MacBook"}},
+		},
+		AnswersFileUpload: []applicationDTO.CreateAnswerFileUpload{
+			{ApplicationQuestionID: requiredFileUploadQuestionID, FileID: otherPhaseUploadFileID},
+		},
+	}
+
+	code := suite.postApplication("/api/applications/4179d58a-d00d-4fa7-94a5-397bc69fab02", application)
+	assert.Equal(suite.T(), http.StatusBadRequest, code)
 }
 
 func (suite *ApplicationAdminRouterTestSuite) TestPostApplicationManualEndpoint_UpdatesStudentEmail() {

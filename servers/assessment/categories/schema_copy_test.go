@@ -23,6 +23,7 @@ type SchemaCopyTestSuite struct {
 	suiteCtx                 context.Context
 	cleanup                  func()
 	mockCoreCleanup          func()
+	conn                     *pgxpool.Pool
 	categoryService          *CategoryService
 	schemaService            *assessmentSchemas.AssessmentSchemaService
 	coursePhaseConfigService *coursePhaseConfig.CoursePhaseConfigService
@@ -30,11 +31,12 @@ type SchemaCopyTestSuite struct {
 
 func (suite *SchemaCopyTestSuite) SetupTest() {
 	suite.suiteCtx = context.Background()
-	testDB, cleanup, err := sdkTestUtils.SetupTestDB(suite.suiteCtx, "../database_dumps/schema_copy_tests.sql", func(conn *pgxpool.Pool) *db.Queries { return db.New(conn) })
+	testDB, cleanup, err := sdkTestUtils.SetupTestDBWithMigrations(suite.suiteCtx, "../db/migration", func(conn *pgxpool.Pool) *db.Queries { return db.New(conn) }, "../database_dumps/schema_copy_tests.sql")
 	if err != nil {
 		suite.T().Fatalf("Failed to set up test database: %v", err)
 	}
 	suite.cleanup = cleanup
+	suite.conn = testDB.Conn
 
 	// Set up mock core service
 	_, mockCleanup := testutils.SetupMockCoreService()
@@ -224,6 +226,46 @@ func (suite *SchemaCopyTestSuite) TestUpdateCategory_WithAssessmentsInOtherPhase
 		"Copied category should belong to copied schema")
 }
 
+func (suite *SchemaCopyTestSuite) TestUpdateCategory_WithOnlyIndependentAssessmentsInOtherPhase() {
+	ownerPhaseID := uuid.MustParse("10000000-0000-0000-0000-000000000002")
+	otherPhaseID := uuid.MustParse("10000000-0000-0000-0000-000000000004")
+	originalSchemaID := uuid.MustParse("00000000-0000-0000-0000-000000000002")
+	originalCompetencyID := uuid.MustParse("30000000-0000-0000-0000-000000000002")
+
+	for _, table := range []string{"assessment", "evaluation"} {
+		_, err := suite.conn.Exec(suite.suiteCtx, "DELETE FROM "+table+" WHERE course_phase_id = $1", otherPhaseID)
+		assert.NoError(suite.T(), err)
+	}
+	_, err := suite.conn.Exec(suite.suiteCtx, `
+		INSERT INTO independent_assessment (course_participation_id, course_phase_id, competency_id, score_level, author, author_id)
+		VALUES ('50000000-0000-0000-0000-000000000001', $1, $2, 'good', 'Coach', 'coach-id')`, otherPhaseID, originalCompetencyID)
+	assert.NoError(suite.T(), err)
+
+	err = suite.categoryService.UpdateCategory(suite.suiteCtx, uuid.MustParse("20000000-0000-0000-0000-000000000002"), ownerPhaseID, categoryDTO.UpdateCategoryRequest{
+		Name:               "Updated Category",
+		ShortName:          "UC",
+		Weight:             10,
+		AssessmentSchemaID: originalSchemaID,
+	})
+	assert.NoError(suite.T(), err)
+
+	otherPhaseConfig, err := suite.coursePhaseConfigService.GetCoursePhaseConfig(suite.suiteCtx, otherPhaseID)
+	assert.NoError(suite.T(), err)
+	assert.NotEqual(suite.T(), originalSchemaID, otherPhaseConfig.AssessmentSchemaID,
+		"Independent scores alone must protect the consumer phase with its own schema copy")
+
+	var competencySchemaID uuid.UUID
+	err = suite.conn.QueryRow(suite.suiteCtx, `
+		SELECT cat.assessment_schema_id
+		FROM independent_assessment ia
+		JOIN competency co ON co.id = ia.competency_id
+		JOIN category cat ON cat.id = co.category_id
+		WHERE ia.course_phase_id = $1`, otherPhaseID).Scan(&competencySchemaID)
+	assert.NoError(suite.T(), err)
+	assert.Equal(suite.T(), otherPhaseConfig.AssessmentSchemaID, competencySchemaID,
+		"Independent scores must move to the copied schema's competencies")
+}
+
 // TestUpdateCategory_WithAssessmentsInSamePhase tests updating a category when there are
 // assessments in the SAME course phase. In this case, modifications should be BLOCKED
 // because the schema has assessment data.
@@ -277,6 +319,26 @@ func (suite *SchemaCopyTestSuite) TestUpdateCategory_WithAssessmentsInSamePhase(
 	assert.NoError(suite.T(), err)
 	assert.Equal(suite.T(), originalSchemaID, config.AssessmentSchemaID,
 		"Course phase config should still point to original schema")
+}
+
+// TestUpdateSchemaOrder_WithAssessmentsInSamePhase checks that reordering, like any other schema change,
+// is blocked once the phase has submitted assessment data for the schema.
+func (suite *SchemaCopyTestSuite) TestUpdateSchemaOrder_WithAssessmentsInSamePhase() {
+	coursePhaseID := uuid.MustParse("10000000-0000-0000-0000-000000000003")
+	schemaID := uuid.MustParse("00000000-0000-0000-0000-000000000003")
+
+	categories, err := suite.categoryService.GetCategoriesWithCompetencies(suite.suiteCtx, schemaID)
+	suite.Require().NoError(err)
+	order := make([]categoryDTO.CategoryOrder, 0, len(categories))
+	for _, category := range categories {
+		order = append(order, categoryDTO.CategoryOrder{ID: category.ID, CompetencyIDs: competencyIDs(category.Competencies)})
+	}
+
+	_, err = suite.categoryService.UpdateSchemaOrder(suite.suiteCtx, coursePhaseID, categoryDTO.UpdateSchemaOrderRequest{
+		Categories: order,
+	})
+	suite.Require().Error(err)
+	suite.Contains(err.Error(), "modifications are not allowed")
 }
 
 func TestSchemaCopyTestSuite(t *testing.T) {

@@ -70,6 +70,26 @@ describe('schemaChanged', () => {
   })
 })
 
+describe('schemaOrderChanged', () => {
+  it('invalidates the category caches of the phase but keeps its assessments', () => {
+    seed(
+      assessmentKeys.categories(PHASE),
+      assessmentKeys.evaluationCategories(AssessmentType.SELF, PHASE),
+      assessmentKeys.assessments.inPhase(PHASE),
+      assessmentKeys.categories(OTHER_PHASE),
+    )
+
+    assessmentCache.schemaOrderChanged(queryClient, PHASE)
+
+    expect(isInvalidated(assessmentKeys.categories(PHASE))).toBe(true)
+    expect(isInvalidated(assessmentKeys.evaluationCategories(AssessmentType.SELF, PHASE))).toBe(
+      true,
+    )
+    expect(isInvalidated(assessmentKeys.assessments.inPhase(PHASE))).toBe(false)
+    expect(isInvalidated(assessmentKeys.categories(OTHER_PHASE))).toBe(false)
+  })
+})
+
 describe('assessmentWritten', () => {
   it('invalidates the phase and its participants, not the other phases or the parent', () => {
     seed(
@@ -145,6 +165,10 @@ describe('the remaining events', () => {
         assessmentKeys.coursePhaseConfig(PHASE),
       ],
       [
+        () => assessmentCache.evaluationReminderSent(queryClient, PHASE),
+        assessmentKeys.evaluationReminderStatus(PHASE),
+      ],
+      [
         () => assessmentCache.actionItemsChanged(queryClient, PHASE),
         assessmentKeys.actionItems.inPhase(PHASE),
       ],
@@ -174,5 +198,25 @@ describe('the remaining events', () => {
 
       expect(isInvalidated(key)).toBe(true)
     }
+  })
+})
+
+// Every event routes through the same `invalidate` helper, so this covers the class
+describe('a key whose scoping id is missing', () => {
+  it('is truncated at the missing segment rather than matching nothing', () => {
+    seed(assessmentKeys.assessments.inPhase(PHASE), assessmentKeys.assessments.inPhase(OTHER_PHASE))
+
+    assessmentCache.assessmentWritten(queryClient, undefined)
+
+    expect(isInvalidated(assessmentKeys.assessments.inPhase(PHASE))).toBe(true)
+    expect(isInvalidated(assessmentKeys.assessments.inPhase(OTHER_PHASE))).toBe(true)
+  })
+
+  it('keeps the namespace, so other caches stay untouched', () => {
+    seed(assessmentKeys.actionItems.inPhase(PHASE))
+
+    assessmentCache.assessmentWritten(queryClient, undefined)
+
+    expect(isInvalidated(assessmentKeys.actionItems.inPhase(PHASE))).toBe(false)
   })
 })

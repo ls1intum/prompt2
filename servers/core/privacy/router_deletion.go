@@ -8,10 +8,10 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	sdkUtils "github.com/prompt-edu/prompt-sdk/utils"
 	"github.com/prompt-edu/prompt/servers/core/permissionValidation"
 	"github.com/prompt-edu/prompt/servers/core/privacy/privacyDTO"
 	"github.com/prompt-edu/prompt/servers/core/privacy/service"
-	coreutils "github.com/prompt-edu/prompt/servers/core/utils"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -37,21 +37,21 @@ func (h *privacyHandler) registerDeletionRoutes(privacyRouter *gin.RouterGroup, 
 // @Tags privacy
 // @Produce json
 // @Success 200 {object} privacyDTO.PrivacyDeletionRequest
-// @Failure 400 {object} coreutils.ErrorResponse
-// @Failure 409 {object} coreutils.ErrorResponse "An open request already exists for this user"
-// @Failure 500 {object} coreutils.ErrorResponse
+// @Failure 400 {object} utils.ErrorResponse
+// @Failure 409 {object} utils.ErrorResponse "An open request already exists for this user"
+// @Failure 500 {object} utils.ErrorResponse
 // @Security BearerAuth
 // @Router /privacy/data-deletion [post]
 func (h *privacyHandler) createNewSubjectDataDeletionRequest(c *gin.Context) {
 	if valErr := h.service.ValidateUserMayCreateDeletionRequest(c); valErr != nil {
-		handleError(c, http.StatusConflict, valErr)
+		sdkUtils.HandleError(c, http.StatusConflict, valErr)
 		return
 	}
 
 	record, err := h.service.CreateDeletionRequest(c)
 	if err != nil {
 		log.Error("data deletion request creation failed: ", err)
-		handleError(c, http.StatusInternalServerError, err)
+		sdkUtils.HandleError(c, http.StatusInternalServerError, err)
 		return
 	}
 
@@ -64,15 +64,15 @@ func (h *privacyHandler) createNewSubjectDataDeletionRequest(c *gin.Context) {
 // @Produce json
 // @Success 200 {object} map[string]interface{}
 // @Success 204 "No deletion request on file"
-// @Failure 400 {object} coreutils.ErrorResponse
-// @Failure 500 {object} coreutils.ErrorResponse
+// @Failure 400 {object} utils.ErrorResponse
+// @Failure 500 {object} utils.ErrorResponse
 // @Security BearerAuth
 // @Router /privacy/data-deletion [get]
 func (h *privacyHandler) getLatestDeletionRequest(c *gin.Context) {
 	request, err := h.service.GetLatestDeletionRequestForUser(c)
 	if err != nil {
 		log.Error("get latest deletion request failed: ", err)
-		handleError(c, http.StatusInternalServerError, err)
+		sdkUtils.HandleError(c, http.StatusInternalServerError, err)
 		return
 	}
 
@@ -89,27 +89,27 @@ func (h *privacyHandler) getLatestDeletionRequest(c *gin.Context) {
 // @Produce json
 // @Param uuid path string true "Deletion Request UUID"
 // @Success 200 {object} privacyDTO.PrivacyDeletionRequest
-// @Failure 400 {object} coreutils.ErrorResponse
-// @Failure 403 {object} coreutils.ErrorResponse
-// @Failure 500 {object} coreutils.ErrorResponse
+// @Failure 400 {object} utils.ErrorResponse
+// @Failure 403 {object} utils.ErrorResponse
+// @Failure 500 {object} utils.ErrorResponse
 // @Security BearerAuth
 // @Router /privacy/data-deletion/{uuid} [get]
 func (h *privacyHandler) getDeletionRequest(c *gin.Context) {
 	requestID, err := uuid.Parse(c.Param("uuid"))
 	if err != nil {
-		handleError(c, http.StatusBadRequest, err)
+		sdkUtils.HandleError(c, http.StatusBadRequest, err)
 		return
 	}
 
 	if valErr := h.service.ValidateDeletionRequestBelongsToCaller(c, requestID); valErr != nil {
-		handleError(c, http.StatusForbidden, valErr)
+		sdkUtils.HandleError(c, http.StatusForbidden, valErr)
 		return
 	}
 
 	record, err := h.service.GetDeletionRequestWithSubrequests(c, requestID)
 	if err != nil {
 		log.Error("get deletion request failed: ", err)
-		handleError(c, http.StatusInternalServerError, err)
+		sdkUtils.HandleError(c, http.StatusInternalServerError, err)
 		return
 	}
 
@@ -120,14 +120,14 @@ func (h *privacyHandler) getDeletionRequest(c *gin.Context) {
 // @Tags privacy
 // @Produce json
 // @Success 200 {array} privacyDTO.AdminPrivacyDeletionRequest
-// @Failure 500 {object} coreutils.ErrorResponse
+// @Failure 500 {object} utils.ErrorResponse
 // @Security BearerAuth
 // @Router /privacy/admin/data-deletions [get]
 func (h *privacyHandler) getAllDeletionRequests(c *gin.Context) {
 	records, err := h.service.GetAllDeletionRequests(c)
 	if err != nil {
 		log.Error("get all deletion requests failed: ", err)
-		handleError(c, http.StatusInternalServerError, err)
+		sdkUtils.HandleError(c, http.StatusInternalServerError, err)
 		return
 	}
 	c.JSON(http.StatusOK, records)
@@ -141,26 +141,26 @@ func (h *privacyHandler) getAllDeletionRequests(c *gin.Context) {
 // @Param uuid path string true "Deletion Request UUID"
 // @Param body body privacyDTO.AuditorDecisionRequest true "Auditor decision and optional note"
 // @Success 200 {object} privacyDTO.PrivacyDeletionRequest
-// @Failure 400 {object} coreutils.ErrorResponse "Invalid payload"
-// @Failure 409 {object} coreutils.ErrorResponse "Request is no longer in pending_approval state"
-// @Failure 500 {object} coreutils.ErrorResponse
+// @Failure 400 {object} utils.ErrorResponse "Invalid payload"
+// @Failure 409 {object} utils.ErrorResponse "Request is no longer in pending_approval state"
+// @Failure 500 {object} utils.ErrorResponse
 // @Security BearerAuth
 // @Router /privacy/admin/data-deletions/{uuid} [post]
 func (h *privacyHandler) decideDeletionRequest(c *gin.Context) {
 	requestID, err := uuid.Parse(c.Param("uuid"))
 	if err != nil {
-		handleError(c, http.StatusBadRequest, err)
+		sdkUtils.HandleError(c, http.StatusBadRequest, err)
 		return
 	}
 
 	var decision privacyDTO.AuditorDecisionRequest
 	if err := c.ShouldBindJSON(&decision); err != nil {
-		handleError(c, http.StatusBadRequest, err)
+		sdkUtils.HandleError(c, http.StatusBadRequest, err)
 		return
 	}
 
 	if valErr := h.service.ValidateDeletionRequestPending(c, requestID); valErr != nil {
-		handleError(c, http.StatusConflict, valErr)
+		sdkUtils.HandleError(c, http.StatusConflict, valErr)
 		return
 	}
 
@@ -169,11 +169,11 @@ func (h *privacyHandler) decideDeletionRequest(c *gin.Context) {
 		record, err := h.service.RejectDeletionRequest(c, requestID, decision.Note)
 		if err != nil {
 			if errors.Is(err, service.ErrDeletionRequestNotPending) {
-				handleError(c, http.StatusConflict, err)
+				sdkUtils.HandleError(c, http.StatusConflict, err)
 				return
 			}
 			log.Error("deletion request rejection failed: ", err)
-			handleError(c, http.StatusInternalServerError, err)
+			sdkUtils.HandleError(c, http.StatusInternalServerError, err)
 			return
 		}
 		c.JSON(http.StatusOK, record)
@@ -182,18 +182,18 @@ func (h *privacyHandler) decideDeletionRequest(c *gin.Context) {
 		record, err := h.service.AcceptDeletionRequest(c, requestID, decision.Note)
 		if err != nil {
 			if errors.Is(err, service.ErrDeletionRequestNotPending) {
-				handleError(c, http.StatusConflict, err)
+				sdkUtils.HandleError(c, http.StatusConflict, err)
 				return
 			}
 			log.Error("deletion request approval failed: ", err)
-			handleError(c, http.StatusInternalServerError, err)
+			sdkUtils.HandleError(c, http.StatusInternalServerError, err)
 			return
 		}
 		state, err := h.service.PrepareDataDeletion(c, record)
 		if err != nil {
 			log.Error("deletion preparation failed: ", err)
 			h.service.MarkDeletionRequestFailed(c, requestID)
-			handleError(c, http.StatusInternalServerError, err)
+			sdkUtils.HandleError(c, http.StatusInternalServerError, err)
 			return
 		}
 		c.JSON(http.StatusOK, record)
@@ -206,7 +206,7 @@ func (h *privacyHandler) decideDeletionRequest(c *gin.Context) {
 		}()
 
 	default:
-		handleError(c, http.StatusBadRequest, fmt.Errorf("unknown decision: %q", decision.Decision))
+		sdkUtils.HandleError(c, http.StatusBadRequest, fmt.Errorf("unknown decision: %q", decision.Decision))
 	}
 }
 
@@ -222,28 +222,28 @@ func (h *privacyHandler) decideDeletionRequest(c *gin.Context) {
 // @Produce json
 // @Param body body privacyDTO.AdminInitiateDeletionBody true "List of student IDs to delete"
 // @Success 200 {array} privacyDTO.PrivacyDeletionRequest
-// @Failure 400 {object} coreutils.ErrorResponse "Invalid payload or unknown student_id"
-// @Failure 500 {object} coreutils.ErrorResponse
+// @Failure 400 {object} utils.ErrorResponse "Invalid payload or unknown student_id"
+// @Failure 500 {object} utils.ErrorResponse
 // @Security BearerAuth
 // @Router /privacy/admin/data-deletions [post]
 func (h *privacyHandler) adminInitiateDeletionRequests(c *gin.Context) {
 	var body privacyDTO.AdminInitiateDeletionBody
 	if err := c.ShouldBindJSON(&body); err != nil {
-		handleError(c, http.StatusBadRequest, err)
+		sdkUtils.HandleError(c, http.StatusBadRequest, err)
 		return
 	}
 
 	body.StudentIDs = service.UniqueUUIDs(body.StudentIDs)
 
 	if err := h.service.ValidateStudentsExist(c, body.StudentIDs); err != nil {
-		handleError(c, http.StatusBadRequest, err)
+		sdkUtils.HandleError(c, http.StatusBadRequest, err)
 		return
 	}
 
 	records, err := h.service.CreateAdminInitiatedDeletionRequests(c, body.StudentIDs)
 	if err != nil {
 		log.Error("admin-initiated deletion creation failed: ", err)
-		handleError(c, http.StatusInternalServerError, err)
+		sdkUtils.HandleError(c, http.StatusInternalServerError, err)
 		return
 	}
 
@@ -266,29 +266,23 @@ func (h *privacyHandler) adminInitiateDeletionRequests(c *gin.Context) {
 // @Produce json
 // @Param body body privacyDTO.DeletionStatusBody true "List of deletion request IDs"
 // @Success 200 {array} privacyDTO.PrivacyDeletionRequest
-// @Failure 400 {object} coreutils.ErrorResponse
-// @Failure 500 {object} coreutils.ErrorResponse
+// @Failure 400 {object} utils.ErrorResponse
+// @Failure 500 {object} utils.ErrorResponse
 // @Security BearerAuth
 // @Router /privacy/admin/data-deletions/status [post]
 func (h *privacyHandler) adminInitiatedDeletionsStatus(c *gin.Context) {
 	var body privacyDTO.DeletionStatusBody
 	if err := c.ShouldBindJSON(&body); err != nil {
-		handleError(c, http.StatusBadRequest, err)
+		sdkUtils.HandleError(c, http.StatusBadRequest, err)
 		return
 	}
 
 	records, err := h.service.GetDeletionRequestsByIDs(c, body.IDs)
 	if err != nil {
 		log.Error("deletion status fetch failed: ", err)
-		handleError(c, http.StatusInternalServerError, err)
+		sdkUtils.HandleError(c, http.StatusInternalServerError, err)
 		return
 	}
 
 	c.JSON(http.StatusOK, records)
-}
-
-func handleError(c *gin.Context, statusCode int, err error) {
-	c.JSON(statusCode, coreutils.ErrorResponse{
-		Error: err.Error(),
-	})
 }

@@ -91,13 +91,17 @@ INSERT INTO course_phase_config (assessment_schema_id,
                                  action_items_visible,
                                  results_released,
                                  grading_sheet_visible,
-                                 assessment_enabled)
+                                 assessment_enabled,
+                                 tutor_display_name,
+                                 independent_assessment_enabled)
 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17,
         COALESCE($18::boolean, TRUE),
         COALESCE($19::boolean, TRUE),
         COALESCE($20::boolean, FALSE),
         COALESCE($21::boolean, FALSE),
-        $22::boolean)
+        $22::boolean,
+        $23::text,
+        $24::boolean)
 ON CONFLICT (course_phase_id)
     DO UPDATE SET assessment_schema_id      = EXCLUDED.assessment_schema_id,
                   start                     = EXCLUDED.start,
@@ -119,36 +123,41 @@ ON CONFLICT (course_phase_id)
                   action_items_visible      = COALESCE(EXCLUDED.action_items_visible, TRUE),
                   results_released          = COALESCE(EXCLUDED.results_released, FALSE),
                   grading_sheet_visible     = COALESCE(EXCLUDED.grading_sheet_visible, FALSE),
-                  assessment_enabled        = EXCLUDED.assessment_enabled
+                  assessment_enabled        = EXCLUDED.assessment_enabled,
+                  tutor_display_name        = EXCLUDED.tutor_display_name,
+                  independent_assessment_enabled = EXCLUDED.independent_assessment_enabled
 `
 
 type CreateOrUpdateCoursePhaseConfigParams struct {
-	AssessmentSchemaID       uuid.UUID          `json:"assessment_schema_id"`
-	CoursePhaseID            uuid.UUID          `json:"course_phase_id"`
-	Start                    pgtype.Timestamptz `json:"start"`
-	Deadline                 pgtype.Timestamptz `json:"deadline"`
-	SelfEvaluationEnabled    bool               `json:"self_evaluation_enabled"`
-	SelfEvaluationSchema     uuid.UUID          `json:"self_evaluation_schema"`
-	SelfEvaluationStart      pgtype.Timestamptz `json:"self_evaluation_start"`
-	SelfEvaluationDeadline   pgtype.Timestamptz `json:"self_evaluation_deadline"`
-	PeerEvaluationEnabled    bool               `json:"peer_evaluation_enabled"`
-	PeerEvaluationSchema     uuid.UUID          `json:"peer_evaluation_schema"`
-	PeerEvaluationStart      pgtype.Timestamptz `json:"peer_evaluation_start"`
-	PeerEvaluationDeadline   pgtype.Timestamptz `json:"peer_evaluation_deadline"`
-	TutorEvaluationEnabled   bool               `json:"tutor_evaluation_enabled"`
-	TutorEvaluationSchema    uuid.UUID          `json:"tutor_evaluation_schema"`
-	TutorEvaluationStart     pgtype.Timestamptz `json:"tutor_evaluation_start"`
-	TutorEvaluationDeadline  pgtype.Timestamptz `json:"tutor_evaluation_deadline"`
-	EvaluationResultsVisible bool               `json:"evaluation_results_visible"`
-	GradeSuggestionVisible   pgtype.Bool        `json:"grade_suggestion_visible"`
-	ActionItemsVisible       pgtype.Bool        `json:"action_items_visible"`
-	ResultsReleased          pgtype.Bool        `json:"results_released"`
-	GradingSheetVisible      pgtype.Bool        `json:"grading_sheet_visible"`
-	AssessmentEnabled        bool               `json:"assessment_enabled"`
+	AssessmentSchemaID           uuid.UUID          `json:"assessment_schema_id"`
+	CoursePhaseID                uuid.UUID          `json:"course_phase_id"`
+	Start                        pgtype.Timestamptz `json:"start"`
+	Deadline                     pgtype.Timestamptz `json:"deadline"`
+	SelfEvaluationEnabled        bool               `json:"self_evaluation_enabled"`
+	SelfEvaluationSchema         uuid.UUID          `json:"self_evaluation_schema"`
+	SelfEvaluationStart          pgtype.Timestamptz `json:"self_evaluation_start"`
+	SelfEvaluationDeadline       pgtype.Timestamptz `json:"self_evaluation_deadline"`
+	PeerEvaluationEnabled        bool               `json:"peer_evaluation_enabled"`
+	PeerEvaluationSchema         uuid.UUID          `json:"peer_evaluation_schema"`
+	PeerEvaluationStart          pgtype.Timestamptz `json:"peer_evaluation_start"`
+	PeerEvaluationDeadline       pgtype.Timestamptz `json:"peer_evaluation_deadline"`
+	TutorEvaluationEnabled       bool               `json:"tutor_evaluation_enabled"`
+	TutorEvaluationSchema        uuid.UUID          `json:"tutor_evaluation_schema"`
+	TutorEvaluationStart         pgtype.Timestamptz `json:"tutor_evaluation_start"`
+	TutorEvaluationDeadline      pgtype.Timestamptz `json:"tutor_evaluation_deadline"`
+	EvaluationResultsVisible     bool               `json:"evaluation_results_visible"`
+	GradeSuggestionVisible       pgtype.Bool        `json:"grade_suggestion_visible"`
+	ActionItemsVisible           pgtype.Bool        `json:"action_items_visible"`
+	ResultsReleased              pgtype.Bool        `json:"results_released"`
+	GradingSheetVisible          pgtype.Bool        `json:"grading_sheet_visible"`
+	AssessmentEnabled            bool               `json:"assessment_enabled"`
+	TutorDisplayName             pgtype.Text        `json:"tutor_display_name"`
+	IndependentAssessmentEnabled bool               `json:"independent_assessment_enabled"`
 }
 
-// assessment_enabled takes no COALESCE like its sibling flags: an omitted value must keep the
-// phase's current mode rather than fall back to a constant, so Go resolves it before this runs.
+// assessment_enabled, tutor_display_name and independent_assessment_enabled take no COALESCE like the sibling flags: an omitted
+// value must keep the phase's current setting rather than fall back to a constant, so Go resolves
+// them before this runs.
 func (q *Queries) CreateOrUpdateCoursePhaseConfig(ctx context.Context, arg CreateOrUpdateCoursePhaseConfigParams) error {
 	_, err := q.db.Exec(ctx, createOrUpdateCoursePhaseConfig,
 		arg.AssessmentSchemaID,
@@ -173,12 +182,14 @@ func (q *Queries) CreateOrUpdateCoursePhaseConfig(ctx context.Context, arg Creat
 		arg.ResultsReleased,
 		arg.GradingSheetVisible,
 		arg.AssessmentEnabled,
+		arg.TutorDisplayName,
+		arg.IndependentAssessmentEnabled,
 	)
 	return err
 }
 
 const getCoursePhaseConfig = `-- name: GetCoursePhaseConfig :one
-SELECT assessment_schema_id, course_phase_id, deadline, self_evaluation_enabled, self_evaluation_schema, self_evaluation_deadline, peer_evaluation_enabled, peer_evaluation_schema, peer_evaluation_deadline, start, self_evaluation_start, peer_evaluation_start, tutor_evaluation_enabled, tutor_evaluation_start, tutor_evaluation_deadline, tutor_evaluation_schema, evaluation_results_visible, grade_suggestion_visible, action_items_visible, results_released, grading_sheet_visible, assessment_enabled
+SELECT assessment_schema_id, course_phase_id, deadline, self_evaluation_enabled, self_evaluation_schema, self_evaluation_deadline, peer_evaluation_enabled, peer_evaluation_schema, peer_evaluation_deadline, start, self_evaluation_start, peer_evaluation_start, tutor_evaluation_enabled, tutor_evaluation_start, tutor_evaluation_deadline, tutor_evaluation_schema, evaluation_results_visible, grade_suggestion_visible, action_items_visible, results_released, grading_sheet_visible, assessment_enabled, tutor_display_name, independent_assessment_enabled
 FROM course_phase_config
 WHERE course_phase_id = $1
 `
@@ -209,6 +220,8 @@ func (q *Queries) GetCoursePhaseConfig(ctx context.Context, coursePhaseID uuid.U
 		&i.ResultsReleased,
 		&i.GradingSheetVisible,
 		&i.AssessmentEnabled,
+		&i.TutorDisplayName,
+		&i.IndependentAssessmentEnabled,
 	)
 	return i, err
 }
@@ -422,7 +435,7 @@ func (q *Queries) IsTutorEvaluationOpen(ctx context.Context, coursePhaseID uuid.
 }
 
 const listAssessmentSchemaCoursePhaseMappings = `-- name: ListAssessmentSchemaCoursePhaseMappings :many
-SELECT assessment_schema_id, course_phase_id, deadline, self_evaluation_enabled, self_evaluation_schema, self_evaluation_deadline, peer_evaluation_enabled, peer_evaluation_schema, peer_evaluation_deadline, start, self_evaluation_start, peer_evaluation_start, tutor_evaluation_enabled, tutor_evaluation_start, tutor_evaluation_deadline, tutor_evaluation_schema, evaluation_results_visible, grade_suggestion_visible, action_items_visible, results_released, grading_sheet_visible, assessment_enabled
+SELECT assessment_schema_id, course_phase_id, deadline, self_evaluation_enabled, self_evaluation_schema, self_evaluation_deadline, peer_evaluation_enabled, peer_evaluation_schema, peer_evaluation_deadline, start, self_evaluation_start, peer_evaluation_start, tutor_evaluation_enabled, tutor_evaluation_start, tutor_evaluation_deadline, tutor_evaluation_schema, evaluation_results_visible, grade_suggestion_visible, action_items_visible, results_released, grading_sheet_visible, assessment_enabled, tutor_display_name, independent_assessment_enabled
 FROM course_phase_config
 ORDER BY assessment_schema_id, course_phase_id
 `
@@ -459,6 +472,8 @@ func (q *Queries) ListAssessmentSchemaCoursePhaseMappings(ctx context.Context) (
 			&i.ResultsReleased,
 			&i.GradingSheetVisible,
 			&i.AssessmentEnabled,
+			&i.TutorDisplayName,
+			&i.IndependentAssessmentEnabled,
 		); err != nil {
 			return nil, err
 		}

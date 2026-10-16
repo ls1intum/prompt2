@@ -21,6 +21,7 @@ import (
 	db "github.com/prompt-edu/prompt/servers/assessment/db/sqlc"
 	"github.com/prompt-edu/prompt/servers/assessment/evaluations"
 	"github.com/prompt-edu/prompt/servers/assessment/evaluations/evaluationDTO"
+	"github.com/prompt-edu/prompt/servers/assessment/teamScope"
 	"github.com/prompt-edu/prompt/servers/assessment/utils"
 	log "github.com/sirupsen/logrus"
 )
@@ -88,16 +89,44 @@ var ErrInvalidScoreLevel = errors.New("validation failed: scoreLevel is required
 var ErrUnsupportedAssessmentExportFormat = errors.New("unsupported assessment export format")
 var ErrAssessmentNotInPhase = errors.New("assessment does not belong to this course phase")
 var ErrAssessmentNotFound = errors.New("assessment not found")
+var ErrCompetencyNotInPhase = errors.New("competency does not belong to this course phase's assessment schema")
 
 const AssessmentExportFormatJSON = "json"
 
 func (s *AssessmentService) CreateOrUpdateAssessment(ctx context.Context, req assessmentDTO.CreateOrUpdateAssessmentRequest) error {
+	return s.saveScore(ctx, req, func(qtx *db.Queries) error {
+		return qtx.CreateOrUpdateAssessment(ctx, db.CreateOrUpdateAssessmentParams{
+			CourseParticipationID: req.CourseParticipationID,
+			CoursePhaseID:         req.CoursePhaseID,
+			CompetencyID:          req.CompetencyID,
+			ScoreLevel:            scoreLevelDTO.MapDTOtoDBScoreLevel(req.ScoreLevel),
+			Author:                req.Author,
+			AuthorID:              req.AuthorID,
+		})
+	})
+}
+
+func (s *AssessmentService) CreateOrUpdateIndependentAssessment(ctx context.Context, req assessmentDTO.CreateOrUpdateAssessmentRequest) error {
+	return s.saveScore(ctx, req, func(qtx *db.Queries) error {
+		return qtx.CreateOrUpdateIndependentAssessment(ctx, db.CreateOrUpdateIndependentAssessmentParams{
+			CourseParticipationID: req.CourseParticipationID,
+			CoursePhaseID:         req.CoursePhaseID,
+			CompetencyID:          req.CompetencyID,
+			ScoreLevel:            scoreLevelDTO.MapDTOtoDBScoreLevel(req.ScoreLevel),
+			Author:                req.Author,
+			AuthorID:              req.AuthorID,
+		})
+	})
+}
+
+func (s *AssessmentService) saveScore(ctx context.Context, req assessmentDTO.CreateOrUpdateAssessmentRequest, write func(qtx *db.Queries) error) error {
 	if req.ScoreLevel == "" {
 		return ErrInvalidScoreLevel
 	}
 
 	tx, err := s.conn.Begin(ctx)
 	if err != nil {
+		log.Error("could not begin assessment creation/update transaction: ", err)
 		return err
 	}
 	defer promptSDK.DeferDBRollback(tx, ctx)
@@ -109,21 +138,38 @@ func (s *AssessmentService) CreateOrUpdateAssessment(ctx context.Context, req as
 		return err
 	}
 
-	err = qtx.CreateOrUpdateAssessment(ctx, db.CreateOrUpdateAssessmentParams{
-		CourseParticipationID: req.CourseParticipationID,
-		CoursePhaseID:         req.CoursePhaseID,
-		CompetencyID:          req.CompetencyID,
-		ScoreLevel:            scoreLevelDTO.MapDTOtoDBScoreLevel(req.ScoreLevel),
-		Author:                req.Author,
-		AuthorID:              req.AuthorID,
-	})
-	if err != nil {
+	if err := checkCompetencyInPhaseSchema(ctx, qtx, req.CompetencyID, req.CoursePhaseID); err != nil {
+		return err
+	}
+
+	if err := write(qtx); err != nil {
 		log.Error("could not create or update assessment: ", err)
 		return errors.New("could not create or update assessment")
 	}
 	if err := tx.Commit(ctx); err != nil {
 		log.Error("could not commit assessment creation/update: ", err)
 		return fmt.Errorf("failed to commit transaction: %w", err)
+	}
+	return nil
+}
+
+func checkCompetencyInPhaseSchema(ctx context.Context, qtx *db.Queries, competencyID, coursePhaseID uuid.UUID) error {
+	schemaID, err := qtx.GetAssessmentSchemaIDByCompetency(ctx, competencyID)
+	if errors.Is(err, pgx.ErrNoRows) {
+		return ErrCompetencyNotInPhase
+	}
+	if err != nil {
+		log.Error("could not get assessment schema of competency: ", err)
+		return errors.New("could not get assessment schema of competency")
+	}
+
+	config, err := qtx.GetCoursePhaseConfig(ctx, coursePhaseID)
+	if err != nil {
+		log.Error("could not get course phase config: ", err)
+		return errors.New("could not get course phase config")
+	}
+	if schemaID != config.AssessmentSchemaID {
+		return ErrCompetencyNotInPhase
 	}
 	return nil
 }
@@ -158,7 +204,7 @@ func (s *AssessmentService) ListAssessmentsByStudentInPhase(ctx context.Context,
 	return assessments, nil
 }
 
-func (s *AssessmentService) GetStudentAssessment(ctx context.Context, coursePhaseID, courseParticipationID uuid.UUID) (assessmentDTO.StudentAssessment, error) {
+func (s *AssessmentService) GetStudentAssessment(ctx context.Context, coursePhaseID, courseParticipationID uuid.UUID, viewerID string) (assessmentDTO.StudentAssessment, error) {
 	assessments, err := s.ListAssessmentsByStudentInPhase(ctx, courseParticipationID, coursePhaseID)
 	if err != nil {
 		log.Error("could not get assessments for student in phase: ", err)
@@ -210,13 +256,30 @@ func (s *AssessmentService) GetStudentAssessment(ctx context.Context, coursePhas
 		evaluations = []evaluationDTO.Evaluation{}
 	}
 
-	return assessmentDTO.StudentAssessment{
+	independentAssessments, err := s.queries.ListIndependentAssessmentsByStudentInPhase(ctx, db.ListIndependentAssessmentsByStudentInPhaseParams{
 		CourseParticipationID: courseParticipationID,
-		Assessments:           assessmentDTO.GetAssessmentDTOsFromDBModels(assessments),
-		CategoryAssessments:   categoryAssessmentDTO.GetCategoryAssessmentDTOsFromDBModels(categoryAssessments),
-		AssessmentCompletion:  completion,
-		StudentScore:          studentScore,
-		Evaluations:           evaluations,
+		CoursePhaseID:         coursePhaseID,
+	})
+	if err != nil {
+		log.Error("could not get independent assessments: ", err)
+		return assessmentDTO.StudentAssessment{}, errors.New("could not get independent assessments")
+	}
+	var myIndependentAssessments []db.IndependentAssessment
+	for _, independentAssessment := range independentAssessments {
+		if independentAssessment.AuthorID == viewerID {
+			myIndependentAssessments = append(myIndependentAssessments, independentAssessment)
+		}
+	}
+
+	return assessmentDTO.StudentAssessment{
+		CourseParticipationID:    courseParticipationID,
+		Assessments:              assessmentDTO.GetAssessmentDTOsFromDBModels(assessments),
+		CategoryAssessments:      categoryAssessmentDTO.GetCategoryAssessmentDTOsFromDBModels(categoryAssessments),
+		AssessmentCompletion:     completion,
+		StudentScore:             studentScore,
+		Evaluations:              evaluations,
+		IndependentAssessments:   assessmentDTO.GetAssessmentDTOsFromIndependentAssessments(independentAssessments),
+		MyIndependentAssessments: assessmentDTO.GetAssessmentDTOsFromIndependentAssessments(myIndependentAssessments),
 	}, nil
 }
 
@@ -390,6 +453,7 @@ func (s *AssessmentService) GetStudentAssessmentResults(ctx context.Context, cou
 func (s *AssessmentService) DeleteAssessment(ctx context.Context, id, coursePhaseID uuid.UUID) error {
 	tx, err := s.conn.Begin(ctx)
 	if err != nil {
+		log.Error("could not begin assessment deletion transaction: ", err)
 		return err
 	}
 	defer promptSDK.DeferDBRollback(tx, ctx)
@@ -422,6 +486,45 @@ func (s *AssessmentService) DeleteAssessment(ctx context.Context, id, coursePhas
 
 	if err := tx.Commit(ctx); err != nil {
 		log.Error("could not commit assessment deletion: ", err)
+		return fmt.Errorf("failed to commit transaction: %w", err)
+	}
+
+	return nil
+}
+
+func (s *AssessmentService) DeleteOwnIndependentAssessment(ctx context.Context, id, coursePhaseID uuid.UUID, authorID string, scope teamScope.Scope) error {
+	tx, err := s.conn.Begin(ctx)
+	if err != nil {
+		log.Error("could not begin independent assessment deletion transaction: ", err)
+		return err
+	}
+	defer promptSDK.DeferDBRollback(tx, ctx)
+
+	qtx := s.queries.WithTx(tx)
+
+	courseParticipationID, err := qtx.DeleteOwnIndependentAssessment(ctx, db.DeleteOwnIndependentAssessmentParams{
+		ID:            id,
+		CoursePhaseID: coursePhaseID,
+		AuthorID:      authorID,
+	})
+	if errors.Is(err, pgx.ErrNoRows) {
+		return ErrAssessmentNotFound
+	}
+	if err != nil {
+		log.Error("could not delete independent assessment: ", err)
+		return errors.New("could not delete independent assessment")
+	}
+	if !scope.Allows(courseParticipationID) {
+		return teamScope.ErrOutsideScope
+	}
+
+	err = s.assessmentCompletion.CheckAssessmentIsEditable(ctx, qtx, courseParticipationID, coursePhaseID)
+	if err != nil {
+		return err
+	}
+
+	if err := tx.Commit(ctx); err != nil {
+		log.Error("could not commit independent assessment deletion: ", err)
 		return fmt.Errorf("failed to commit transaction: %w", err)
 	}
 

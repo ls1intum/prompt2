@@ -6,9 +6,9 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	sdkUtils "github.com/prompt-edu/prompt-sdk/utils"
 	"github.com/prompt-edu/prompt/servers/core/course/copy/courseCopyDTO"
 	"github.com/prompt-edu/prompt/servers/core/permissionValidation"
-	"github.com/prompt-edu/prompt/servers/core/utils"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -52,20 +52,25 @@ func (s *CourseCopyService) copyCourse(c *gin.Context) {
 
 	courseVariables := courseCopyDTO.CopyCourseRequest{}
 	if err := c.BindJSON(&courseVariables); err != nil {
-		handleError(c, http.StatusBadRequest, fmt.Errorf("invalid request body: %w", err))
+		sdkUtils.HandleError(c, http.StatusBadRequest, fmt.Errorf("invalid request body: %w", err))
+		return
+	}
+
+	if err := validateCopyCourseRequest(courseVariables); err != nil {
+		sdkUtils.HandleError(c, http.StatusBadRequest, err)
 		return
 	}
 
 	originalCourseID, err := uuid.Parse(c.Param("uuid"))
 	if err != nil {
-		handleError(c, http.StatusBadRequest, fmt.Errorf("invalid course UUID: %w", err))
+		sdkUtils.HandleError(c, http.StatusBadRequest, fmt.Errorf("invalid course UUID: %w", err))
 		return
 	}
 
 	newCourse, err := s.CopyCourse(c, originalCourseID, courseVariables, userID)
 	if err != nil {
 		log.Error("Copy course failed: ", err)
-		handleError(c, http.StatusInternalServerError, err)
+		sdkUtils.HandleError(c, http.StatusInternalServerError, err)
 		return
 	}
 
@@ -85,13 +90,13 @@ func (s *CourseCopyService) copyCourse(c *gin.Context) {
 func (s *CourseCopyService) checkCourseCopyable(c *gin.Context) {
 	originalCourseID, err := uuid.Parse(c.Param("uuid"))
 	if err != nil {
-		handleError(c, http.StatusBadRequest, fmt.Errorf("invalid course UUID: %w", err))
+		sdkUtils.HandleError(c, http.StatusBadRequest, fmt.Errorf("invalid course UUID: %w", err))
 		return
 	}
 
 	missing, err := s.CheckAllCoursePhasesCopyable(c, originalCourseID)
 	if err != nil {
-		handleError(c, http.StatusInternalServerError, fmt.Errorf("check failed: %w", err))
+		sdkUtils.HandleError(c, http.StatusInternalServerError, fmt.Errorf("check failed: %w", err))
 		return
 	}
 
@@ -105,11 +110,5 @@ func (s *CourseCopyService) checkCourseCopyable(c *gin.Context) {
 	c.JSON(http.StatusOK, courseCopyDTO.CheckCourseCopyableResponse{
 		Copyable:          true,
 		MissingPhaseTypes: []string{},
-	})
-}
-
-func handleError(c *gin.Context, statusCode int, err error) {
-	c.JSON(statusCode, utils.ErrorResponse{
-		Error: err.Error(),
 	})
 }

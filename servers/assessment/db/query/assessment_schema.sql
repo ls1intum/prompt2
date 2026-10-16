@@ -88,17 +88,19 @@ WITH src_schema AS (
                         c.name,
                         c.description,
                         c.weight,
-                        c.short_name
+                        c.short_name,
+                        c.sort_order
                  FROM category c
                           JOIN src_schema ss ON c.assessment_schema_id = ss.id),
      inserted_categories AS (
-         INSERT INTO category (id, name, description, weight, short_name, assessment_schema_id)
+         INSERT INTO category (id, name, description, weight, short_name, assessment_schema_id, sort_order)
              SELECT cm.new_id,
                     cm.name,
                     cm.description,
                     cm.weight,
                     cm.short_name,
-                    ns.id
+                    ns.id,
+                    cm.sort_order
              FROM cat_map cm
                       CROSS JOIN new_schema ns
              RETURNING id),
@@ -114,7 +116,8 @@ WITH src_schema AS (
                                  description_bad,
                                  description_ok,
                                  description_good,
-                                 description_very_good
+                                 description_very_good,
+                                 sort_order
              )
              SELECT gen_random_uuid(),
                     cm.new_id,
@@ -126,7 +129,8 @@ WITH src_schema AS (
                     co.description_bad,
                     co.description_ok,
                     co.description_good,
-                    co.description_very_good
+                    co.description_very_good,
+                    co.sort_order
              FROM competency co
                       JOIN cat_map cm ON co.category_id = cm.old_id
              RETURNING id)
@@ -199,6 +203,14 @@ SELECT EXISTS(
         WHERE cat.assessment_schema_id = $2
     )
 ) OR EXISTS(
+    SELECT 1 FROM independent_assessment ia
+    WHERE ia.course_phase_id = $1
+    AND ia.competency_id IN (
+        SELECT co.id FROM competency co
+        JOIN category cat ON co.category_id = cat.id
+        WHERE cat.assessment_schema_id = $2
+    )
+) OR EXISTS(
     SELECT 1 FROM evaluation e
     WHERE e.course_phase_id = $1
     AND e.competency_id IN (
@@ -210,6 +222,12 @@ SELECT EXISTS(
 
 -- name: UpdateAssessmentCompetencies :exec
 UPDATE assessment
+SET competency_id = $3
+WHERE course_phase_id = $1
+AND competency_id = $2;
+
+-- name: UpdateIndependentAssessmentCompetencies :exec
+UPDATE independent_assessment
 SET competency_id = $3
 WHERE course_phase_id = $1
 AND competency_id = $2;
