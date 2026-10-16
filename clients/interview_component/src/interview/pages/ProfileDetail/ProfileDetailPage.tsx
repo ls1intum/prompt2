@@ -1,6 +1,5 @@
 import type { ExportedApplicationAnswer } from '@tumaet/prompt-shared-state'
 import {
-  Button,
   Card,
   CardContent,
   CardHeader,
@@ -8,8 +7,8 @@ import {
   ExportedApplicationAnswerTable,
   ParticipantNavigation,
 } from '@tumaet/prompt-ui-components'
-import { ChevronLeft, FileUserIcon } from 'lucide-react'
-import { useLocation, useNavigate, useParams } from 'react-router-dom'
+import { FileUserIcon } from 'lucide-react'
+import { useParams } from 'react-router-dom'
 import { InterviewCard } from '../../components/InterviewCard'
 import { StudentCard } from '../../components/StudentCard'
 import { StudentHistoryCard } from '../../components/StudentHistoryCard'
@@ -29,9 +28,6 @@ export const ProfileDetailPage = () => {
   const { coursePhase } = useCoursePhaseStore()
   const showStudentHistory = coursePhase?.restrictedData?.showStudentHistory === true
   const participation = participations.find((p) => p.student.id === studentId)
-  const navigate = useNavigate()
-  const location = useLocation()
-  const navigationState = (location.state as ProfileDetailLocationState | null) ?? null
   const { orderedParticipations, currentParticipationId, navigateToParticipation } =
     useInterviewNavigation()
 
@@ -41,28 +37,12 @@ export const ProfileDetailPage = () => {
   return (
     <div className=''>
       <div className='pb-4'>
-        <div className='flex items-center gap-4'>
-          <Button
-            onClick={() =>
-              navigate(
-                { pathname: '..', search: navigationState?.tableSearch },
-                { relative: 'path' },
-              )
-            }
-            variant='ghost'
-            size='sm'
-          >
-            <ChevronLeft className='h-4 w-4' />
-            <span>Back</span>
-          </Button>
-          <ParticipantNavigation
-            participants={orderedParticipations}
-            currentId={currentParticipationId}
-            onNavigate={navigateToParticipation}
-            colorByStatus
-            className='flex-1'
-          />
-        </div>
+        <ParticipantNavigation
+          participants={orderedParticipations}
+          currentId={currentParticipationId}
+          onNavigate={navigateToParticipation}
+          colorByStatus
+        />
         {!participation && (
           <div className='flex justify-center items-center h-64'>
             <p className='text-lg text-muted-foreground'>Participant not found</p>
