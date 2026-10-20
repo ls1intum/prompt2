@@ -92,6 +92,7 @@ jobs:
       build-args: |
         "IMAGE_TAG=${{ needs.clients-base.outputs.image_tag }}"
         "CORE_HOST=${{ vars.CORE_HOST }}"
+        "MF_BUILD_VERSION=${{ needs.clients-base.outputs.image_tag }}"
     secrets: inherit
 
   interview:
@@ -105,6 +106,7 @@ jobs:
       build-args: |
         "IMAGE_TAG=${{ needs.clients-base.outputs.image_tag }}"
         "CORE_HOST=${{ vars.CORE_HOST }}"
+        "MF_BUILD_VERSION=${{ needs.clients-base.outputs.image_tag }}"
     secrets: inherit
 
   matching:
@@ -118,6 +120,7 @@ jobs:
       build-args: |
         "IMAGE_TAG=${{ needs.clients-base.outputs.image_tag }}"
         "CORE_HOST=${{ vars.CORE_HOST }}"
+        "MF_BUILD_VERSION=${{ needs.clients-base.outputs.image_tag }}"
     secrets: inherit
 
   assessment:
@@ -131,6 +134,7 @@ jobs:
       build-args: |
         "IMAGE_TAG=${{ needs.clients-base.outputs.image_tag }}"
         "CORE_HOST=${{ vars.CORE_HOST }}"
+        "MF_BUILD_VERSION=${{ needs.clients-base.outputs.image_tag }}"
     secrets: inherit
 
   team-allocation:
@@ -144,6 +148,7 @@ jobs:
       build-args: |
         "IMAGE_TAG=${{ needs.clients-base.outputs.image_tag }}"
         "CORE_HOST=${{ vars.CORE_HOST }}"
+        "MF_BUILD_VERSION=${{ needs.clients-base.outputs.image_tag }}"
     secrets: inherit
 
   self-team-allocation:
@@ -157,6 +162,7 @@ jobs:
       build-args: |
         "IMAGE_TAG=${{ needs.clients-base.outputs.image_tag }}"
         "CORE_HOST=${{ vars.CORE_HOST }}"
+        "MF_BUILD_VERSION=${{ needs.clients-base.outputs.image_tag }}"
     secrets: inherit
 
   certificate:
@@ -170,6 +176,7 @@ jobs:
       build-args: |
         "IMAGE_TAG=${{ needs.clients-base.outputs.image_tag }}"
         "CORE_HOST=${{ vars.CORE_HOST }}"
+        "MF_BUILD_VERSION=${{ needs.clients-base.outputs.image_tag }}"
     secrets: inherit
   presentation:
     needs: clients-base
@@ -182,6 +189,7 @@ jobs:
       build-args: |
         "IMAGE_TAG=${{ needs.clients-base.outputs.image_tag }}"
         "CORE_HOST=${{ vars.CORE_HOST }}"
+        "MF_BUILD_VERSION=${{ needs.clients-base.outputs.image_tag }}"
     secrets: inherit
   infrastructure-setup:
     needs: clients-base
@@ -194,6 +202,7 @@ jobs:
       build-args: |
         "IMAGE_TAG=${{ needs.clients-base.outputs.image_tag }}"
         "CORE_HOST=${{ vars.CORE_HOST }}"
+        "MF_BUILD_VERSION=${{ needs.clients-base.outputs.image_tag }}"
     secrets: inherit
   ai:
     needs: clients-base
@@ -206,4 +215,5 @@ jobs:
       build-args: |
         "IMAGE_TAG=${{ needs.clients-base.outputs.image_tag }}"
         "CORE_HOST=${{ vars.CORE_HOST }}"
+        "MF_BUILD_VERSION=${{ needs.clients-base.outputs.image_tag }}"
     secrets: inherit
