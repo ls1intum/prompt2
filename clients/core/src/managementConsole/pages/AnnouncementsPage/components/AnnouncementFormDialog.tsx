@@ -98,6 +98,7 @@ export const AnnouncementFormDialog = ({
               message={values.message || 'Your message will appear here.'}
               linkUrl={values.linkUrl}
               linkLabel={values.linkLabel}
+              isPreview
             />
           </div>
         </section>

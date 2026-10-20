@@ -18,6 +18,7 @@ interface AnnouncementBannerProps {
   linkLabel: string
   pager?: AnnouncementPager
   onDismiss?: () => void
+  isPreview?: boolean
   className?: string
 }
 
@@ -50,14 +51,16 @@ export const AnnouncementBanner = ({
   linkLabel,
   pager,
   onDismiss,
+  isPreview = false,
   className,
 }: AnnouncementBannerProps) => {
   const Icon = SEVERITY_ICONS[severity]
   const href = toHttpUrl(linkUrl)
+  const liveRole = severity === 'critical' ? 'alert' : 'status'
 
   return (
     <div
-      role={severity === 'critical' ? 'alert' : 'status'}
+      role={isPreview ? undefined : liveRole}
       className={cn('w-full text-sm', SEVERITY_STYLES[severity], className)}
     >
       <div className='grid min-h-11 grid-cols-[1fr_minmax(0,auto)_1fr] items-center gap-3 px-4 py-1.5'>
