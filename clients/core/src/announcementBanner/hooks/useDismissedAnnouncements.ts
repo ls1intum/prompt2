@@ -26,12 +26,12 @@ export const useDismissedAnnouncements = () => {
   const [dismissedKeys, setDismissedKeys] = useState(readDismissedKeys)
 
   const dismiss = useCallback((key: string, activeKeys: string[]) => {
-    setDismissedKeys((current) => {
-      const next = new Set([...current].filter((existing) => activeKeys.includes(existing)))
-      next.add(key)
-      persistDismissedKeys(next)
-      return next
-    })
+    const next = new Set(
+      [...readDismissedKeys()].filter((existing) => activeKeys.includes(existing)),
+    )
+    next.add(key)
+    persistDismissedKeys(next)
+    setDismissedKeys(next)
   }, [])
 
   return { dismissedKeys, dismiss }
