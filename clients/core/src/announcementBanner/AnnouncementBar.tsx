@@ -30,7 +30,8 @@ export const AnnouncementBar = () => {
       return
     }
     let frame = 0
-    let appliedHeight = -1
+    let appliedHeight = bar.getBoundingClientRect().height
+    setBarHeight(appliedHeight)
     const observer = new ResizeObserver(() => {
       cancelAnimationFrame(frame)
       frame = requestAnimationFrame(() => {
@@ -41,7 +42,6 @@ export const AnnouncementBar = () => {
         }
       })
     })
-    setBarHeight(bar.getBoundingClientRect().height)
     observer.observe(bar)
     return () => {
       cancelAnimationFrame(frame)
