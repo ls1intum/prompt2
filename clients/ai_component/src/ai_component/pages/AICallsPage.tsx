@@ -80,7 +80,7 @@ const AICallsBrowser = ({ phases }: { phases: CoursePhaseWithType[] }) => {
         <LoadingPage />
       ) : (
         <>
-          <PromptTable data={page.calls} columns={columns} pageSize={PAGE_SIZE} />
+          <PromptTable data={page.calls} columns={columns} serverDriven />
           {(hasNewerPage(cursorStack) || page.nextCursor) && (
             <div className='flex items-center justify-center gap-2'>
               <Button

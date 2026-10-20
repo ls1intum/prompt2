@@ -7,14 +7,29 @@ export enum AICallContentState {
   UNAVAILABLE = 'unavailable',
 }
 
+export type AICallContentPart = { type: 'text'; text: string } | { type: string }
+
 export interface AICallMessage {
   role: string
+  content: string | AICallContentPart[] | null
+}
+
+export interface AICallToolCall {
+  id: string
+  name: string
+  arguments: string
+}
+
+export interface AICallChoice {
+  index: number
   content: string
+  refusal?: string
+  toolCalls?: AICallToolCall[]
 }
 
 export interface AICallContent {
   request: { messages?: AICallMessage[] }
-  responseText: string
+  choices: AICallChoice[]
 }
 
 export interface AICallDetail extends AICall {

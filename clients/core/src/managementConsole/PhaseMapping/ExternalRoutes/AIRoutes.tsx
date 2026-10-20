@@ -1,9 +1,10 @@
+import { useAIEnabled } from '@core/network/hooks/useAIEnabled'
 import type { ExtendedRouteObject } from '@tumaet/prompt-shared-state'
 import React from 'react'
 import { LoadingError } from '../utils/LoadingError'
 import { ExternalRoutes } from './ExternalRoutes'
 
-export const AIRoutes = React.lazy(() =>
+const AIRemoteRoutes = React.lazy(() =>
   import('ai_component/routes')
     .then((module): { default: React.FC } => ({
       default: () => {
@@ -18,3 +19,5 @@ export const AIRoutes = React.lazy(() =>
       },
     })),
 )
+
+export const AIRoutes = () => (useAIEnabled() ? <AIRemoteRoutes /> : null)

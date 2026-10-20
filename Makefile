@@ -249,7 +249,7 @@ VERIFY_COMPOSE = docker compose -f docker-compose.e2e.yml -f e2e/docker-compose.
 verify-up: ## Boot the seeded stack for host-browser verification (SKIP_BUILD=1 reuses existing images)
 	set -e; unset $(E2E_ENV_KEYS); export AI_ENABLED="$(AI_ENABLED)"; \
 		$(if $(SKIP_BUILD),true,$(VERIFY_COMPOSE) build); \
-		$(VERIFY_COMPOSE) up -d client-core server-core seed $(if $(AI_PROFILE),server-ai)
+		$(VERIFY_COMPOSE) up -d client-core server-core seed $(if $(AI_PROFILE),server-ai client-ai)
 	@echo ""
 	@echo "client    http://localhost:4000/management"
 	@echo "core API  http://localhost:18090"

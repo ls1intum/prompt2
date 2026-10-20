@@ -11,6 +11,7 @@ export interface AICall {
   id: string
   actorId: string
   actorRole: string
+  callerService: string
   issuer: string
   feature: string
   template: string | null

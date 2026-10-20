@@ -9,8 +9,9 @@ import {
   ErrorPage,
   LoadingPage,
 } from '@tumaet/prompt-ui-components'
-import { AICallContentState } from '../interfaces/aiCallDetail'
+import { type AICallChoice, AICallContentState } from '../interfaces/aiCallDetail'
 import { getAICall } from '../network/queries/getAICall'
+import { messageText } from '../utils/messageText'
 
 interface AICallDetailDialogProps {
   phaseId: string
@@ -30,6 +31,28 @@ const Field = ({ label, value }: { label: string; value: string | number | null 
   <div>
     <dt className='text-xs text-muted-foreground'>{label}</dt>
     <dd className='text-sm break-all'>{value ?? '-'}</dd>
+  </div>
+)
+
+const ChoiceView = ({ choice, label }: { choice: AICallChoice; label?: string }) => (
+  <div className='rounded-md border border-primary/40 p-3 space-y-2'>
+    <div className='flex items-center gap-2'>
+      <Badge variant='outline'>AI-generated</Badge>
+      {label && <span className='text-xs text-muted-foreground'>{label}</span>}
+    </div>
+    <p className='text-sm whitespace-pre-wrap'>{choice.content || '-'}</p>
+    {choice.refusal && (
+      <p className='text-sm whitespace-pre-wrap'>
+        <span className='font-medium'>Refusal: </span>
+        {choice.refusal}
+      </p>
+    )}
+    {choice.toolCalls?.map((toolCall) => (
+      <div key={toolCall.id}>
+        <p className='text-xs font-medium'>Tool call: {toolCall.name}</p>
+        <pre className='text-xs font-mono whitespace-pre-wrap break-all'>{toolCall.arguments}</pre>
+      </div>
+    ))}
   </div>
 )
 
@@ -79,6 +102,7 @@ export const AICallDetailDialog = ({ phaseId, callId, onClose }: AICallDetailDia
               <Field label='Model build' value={call.systemFingerprint} />
               <Field label='Finish reason' value={call.finishReason} />
               <Field label='Actor' value={`${call.actorId} (${call.actorRole})`} />
+              <Field label='Service' value={call.callerService || null} />
               <Field label='Issuer' value={call.issuer} />
               <Field
                 label='Tokens'
@@ -98,15 +122,20 @@ export const AICallDetailDialog = ({ phaseId, callId, onClose }: AICallDetailDia
                     <p className='text-xs font-medium uppercase text-muted-foreground'>
                       {message.role}
                     </p>
-                    <p className='text-sm whitespace-pre-wrap'>{message.content}</p>
+                    <p className='text-sm whitespace-pre-wrap'>{messageText(message.content)}</p>
                   </div>
                 ))}
-                <div className='rounded-md border border-primary/40 p-3'>
-                  <Badge variant='outline'>AI-generated</Badge>
-                  <p className='mt-2 text-sm whitespace-pre-wrap'>
-                    {call.content.responseText || '-'}
-                  </p>
-                </div>
+                {call.content.choices.length === 0 ? (
+                  <ChoiceView choice={{ index: 0, content: '' }} />
+                ) : (
+                  call.content.choices.map((choice, _, choices) => (
+                    <ChoiceView
+                      key={choice.index}
+                      choice={choice}
+                      label={choices.length > 1 ? `Choice ${choice.index + 1}` : undefined}
+                    />
+                  ))
+                )}
               </div>
             ) : (
               <p className='text-sm text-muted-foreground'>{CONTENT_NOTICE[call.contentState]}</p>
