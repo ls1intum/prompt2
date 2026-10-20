@@ -39,7 +39,7 @@ export const ApplicationProfilePictureSection = forwardRef<
     <ProfilePictureInput
       required={required}
       explanation={config.explanation}
-      readOnly={isInstructorView}
+      preview={isInstructorView}
       error={error}
       notice={
         config.hiddenUntilAccepted
