@@ -9,10 +9,11 @@ import (
 	"github.com/google/uuid"
 	promptSDK "github.com/prompt-edu/prompt-sdk"
 	"github.com/prompt-edu/prompt-sdk/keycloakTokenVerifier"
+	sdkUtils "github.com/prompt-edu/prompt-sdk/utils"
 	"github.com/prompt-edu/prompt/servers/assessment/assessments/actionItem/actionItemDTO"
 	"github.com/prompt-edu/prompt/servers/assessment/assessments/assessmentCompletion"
 	"github.com/prompt-edu/prompt/servers/assessment/coursePhaseConfig"
-	log "github.com/sirupsen/logrus"
+	"github.com/prompt-edu/prompt/servers/assessment/teamScope"
 )
 
 // RegisterRoutes sets up action item endpoints.
@@ -28,14 +29,14 @@ func RegisterRoutes(routerGroup *gin.RouterGroup, service *ActionItemService, gu
 	actionItemRouter := routerGroup.Group("student-assessment/action-item")
 
 	// course phase communication
-	actionItemRouter.GET("/action", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), service.getAllActionItemsForCoursePhaseCommunication)
-	actionItemRouter.GET("/action/course-participation/:courseParticipationID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), service.getStudentActionItemsForCoursePhaseCommunication)
+	actionItemRouter.GET("/action", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), teamScope.Resolve(), service.getAllActionItemsForCoursePhaseCommunication)
+	actionItemRouter.GET("/action/course-participation/:courseParticipationID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), teamScope.RequireParticipant(), service.getStudentActionItemsForCoursePhaseCommunication)
 
 	// action item management
-	actionItemRouter.GET("/course-participation/:courseParticipationID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), service.getActionItemsForStudent)
-	actionItemRouter.POST("", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), guard.RequireAssessmentEnabled(), service.createActionItem)
-	actionItemRouter.PUT("/:id", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), guard.RequireAssessmentEnabled(), service.updateActionItem)
-	actionItemRouter.DELETE("/:id", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), guard.RequireAssessmentEnabled(), service.deleteActionItem)
+	actionItemRouter.GET("/course-participation/:courseParticipationID", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), teamScope.RequireParticipant(), service.getActionItemsForStudent)
+	actionItemRouter.POST("", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), teamScope.RequireBodyParticipants(), guard.RequireAssessmentEnabled(), service.createActionItem)
+	actionItemRouter.PUT("/:id", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), teamScope.RequireBodyParticipants(), guard.RequireAssessmentEnabled(), service.updateActionItem)
+	actionItemRouter.DELETE("/:id", authMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor), teamScope.Resolve(), guard.RequireAssessmentEnabled(), service.deleteActionItem)
 
 	// student access to own action items
 	actionItemRouter.GET("/my-action-items", authMiddleware(promptSDK.CourseStudent), service.getMyActionItems)
@@ -54,15 +55,17 @@ func RegisterRoutes(routerGroup *gin.RouterGroup, service *ActionItemService, gu
 func (s *ActionItemService) getAllActionItemsForCoursePhaseCommunication(c *gin.Context) {
 	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
 	if err != nil {
-		handleError(c, http.StatusBadRequest, err)
+		sdkUtils.HandleError(c, http.StatusBadRequest, err)
 		return
 	}
 	actionItems, err := s.GetAllActionItemsForCoursePhaseCommunication(c, coursePhaseID)
 	if err != nil {
-		handleError(c, http.StatusInternalServerError, err)
+		sdkUtils.HandleError(c, http.StatusInternalServerError, err)
 		return
 	}
-	c.JSON(http.StatusOK, actionItems)
+	c.JSON(http.StatusOK, teamScope.Filter(c, actionItems, func(a actionItemDTO.ActionItemWithParticipation) uuid.UUID {
+		return a.CourseParticipationID
+	}))
 }
 
 // getStudentActionItemsForCoursePhaseCommunication godoc
@@ -79,18 +82,18 @@ func (s *ActionItemService) getAllActionItemsForCoursePhaseCommunication(c *gin.
 func (s *ActionItemService) getStudentActionItemsForCoursePhaseCommunication(c *gin.Context) {
 	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
 	if err != nil {
-		handleError(c, http.StatusBadRequest, err)
+		sdkUtils.HandleError(c, http.StatusBadRequest, err)
 		return
 	}
 	courseParticipationID, err := uuid.Parse(c.Param("courseParticipationID"))
 	if err != nil {
-		handleError(c, http.StatusBadRequest, err)
+		sdkUtils.HandleError(c, http.StatusBadRequest, err)
 		return
 	}
 
 	actionItems, err := s.GetStudentActionItemsForCoursePhaseCommunication(c, courseParticipationID, coursePhaseID)
 	if err != nil {
-		handleError(c, http.StatusInternalServerError, err)
+		sdkUtils.HandleError(c, http.StatusInternalServerError, err)
 		return
 	}
 	c.JSON(http.StatusOK, actionItems)
@@ -113,13 +116,13 @@ func (s *ActionItemService) getStudentActionItemsForCoursePhaseCommunication(c *
 func (s *ActionItemService) createActionItem(c *gin.Context) {
 	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
 	if err != nil {
-		handleError(c, http.StatusBadRequest, err)
+		sdkUtils.HandleError(c, http.StatusBadRequest, err)
 		return
 	}
 
 	var req actionItemDTO.CreateActionItemRequest
 	if err := c.BindJSON(&req); err != nil {
-		handleError(c, http.StatusBadRequest, err)
+		sdkUtils.HandleError(c, http.StatusBadRequest, err)
 		return
 	}
 
@@ -131,7 +134,7 @@ func (s *ActionItemService) createActionItem(c *gin.Context) {
 
 	err = s.CreateActionItem(c, coursePhaseID, req)
 	if err != nil {
-		handleError(c, actionItemErrorStatus(err), err)
+		sdkUtils.HandleError(c, actionItemErrorStatus(err), err)
 		return
 	}
 	c.JSON(http.StatusCreated, gin.H{"message": "Action item created successfully"})
@@ -156,18 +159,18 @@ func (s *ActionItemService) createActionItem(c *gin.Context) {
 func (s *ActionItemService) updateActionItem(c *gin.Context) {
 	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
 	if err != nil {
-		handleError(c, http.StatusBadRequest, err)
+		sdkUtils.HandleError(c, http.StatusBadRequest, err)
 		return
 	}
 	actionItemID, err := uuid.Parse(c.Param("id"))
 	if err != nil {
-		handleError(c, http.StatusBadRequest, err)
+		sdkUtils.HandleError(c, http.StatusBadRequest, err)
 		return
 	}
 
 	var req actionItemDTO.UpdateActionItemRequest
 	if err := c.BindJSON(&req); err != nil {
-		handleError(c, http.StatusBadRequest, err)
+		sdkUtils.HandleError(c, http.StatusBadRequest, err)
 		return
 	}
 
@@ -182,7 +185,7 @@ func (s *ActionItemService) updateActionItem(c *gin.Context) {
 
 	err = s.UpdateActionItem(c, coursePhaseID, req)
 	if err != nil {
-		handleError(c, actionItemErrorStatus(err), err)
+		sdkUtils.HandleError(c, actionItemErrorStatus(err), err)
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"message": "Action item updated successfully"})
@@ -203,18 +206,18 @@ func (s *ActionItemService) updateActionItem(c *gin.Context) {
 func (s *ActionItemService) deleteActionItem(c *gin.Context) {
 	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
 	if err != nil {
-		handleError(c, http.StatusBadRequest, err)
+		sdkUtils.HandleError(c, http.StatusBadRequest, err)
 		return
 	}
 	actionItemID, err := uuid.Parse(c.Param("id"))
 	if err != nil {
-		handleError(c, http.StatusBadRequest, err)
+		sdkUtils.HandleError(c, http.StatusBadRequest, err)
 		return
 	}
 
-	err = s.DeleteActionItem(c, coursePhaseID, actionItemID)
+	err = s.DeleteActionItem(c, coursePhaseID, actionItemID, teamScope.Get(c))
 	if err != nil {
-		handleError(c, actionItemErrorStatus(err), err)
+		sdkUtils.HandleError(c, actionItemErrorStatus(err), err)
 		return
 	}
 	c.Status(http.StatusOK)
@@ -234,18 +237,18 @@ func (s *ActionItemService) deleteActionItem(c *gin.Context) {
 func (s *ActionItemService) getActionItemsForStudent(c *gin.Context) {
 	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
 	if err != nil {
-		handleError(c, http.StatusBadRequest, err)
+		sdkUtils.HandleError(c, http.StatusBadRequest, err)
 		return
 	}
 	courseParticipationID, err := uuid.Parse(c.Param("courseParticipationID"))
 	if err != nil {
-		handleError(c, http.StatusBadRequest, err)
+		sdkUtils.HandleError(c, http.StatusBadRequest, err)
 		return
 	}
 
 	actionItems, err := s.ListActionItemsForStudentInPhase(c, courseParticipationID, coursePhaseID)
 	if err != nil {
-		handleError(c, http.StatusInternalServerError, err)
+		sdkUtils.HandleError(c, http.StatusInternalServerError, err)
 		return
 	}
 	c.JSON(http.StatusOK, actionItems)
@@ -266,17 +269,17 @@ func (s *ActionItemService) getActionItemsForStudent(c *gin.Context) {
 func (s *ActionItemService) getMyActionItems(c *gin.Context) {
 	coursePhaseID, err := uuid.Parse(c.Param("coursePhaseID"))
 	if err != nil {
-		handleError(c, http.StatusBadRequest, err)
+		sdkUtils.HandleError(c, http.StatusBadRequest, err)
 		return
 	}
 
 	config, err := s.coursePhaseConfig.GetCoursePhaseConfig(c, coursePhaseID)
 	if err != nil {
-		handleError(c, http.StatusInternalServerError, err)
+		sdkUtils.HandleError(c, http.StatusInternalServerError, err)
 		return
 	}
 	if !config.ActionItemsVisible {
-		handleError(c, http.StatusForbidden, fmt.Errorf("action items are not visible to students"))
+		sdkUtils.HandleError(c, http.StatusForbidden, fmt.Errorf("action items are not visible to students"))
 		return
 	}
 
@@ -287,19 +290,19 @@ func (s *ActionItemService) getMyActionItems(c *gin.Context) {
 
 	courseParticipationID, err := keycloakTokenVerifier.GetUserCourseParticipationID(c)
 	if err != nil {
-		handleError(c, keycloakTokenVerifier.GetUserCourseParticipationIDErrorStatus(err), err)
+		sdkUtils.HandleError(c, keycloakTokenVerifier.GetUserCourseParticipationIDErrorStatus(err), err)
 		return
 	}
 
 	exists, err := s.assessmentCompletion.CheckAssessmentCompletionExists(c, courseParticipationID, coursePhaseID)
 	if err != nil {
-		handleError(c, http.StatusInternalServerError, err)
+		sdkUtils.HandleError(c, http.StatusInternalServerError, err)
 		return
 	}
 	if exists {
 		completion, err := s.assessmentCompletion.GetAssessmentCompletion(c, courseParticipationID, coursePhaseID)
 		if err != nil {
-			handleError(c, http.StatusInternalServerError, err)
+			sdkUtils.HandleError(c, http.StatusInternalServerError, err)
 			return
 		}
 		if !completion.Completed {
@@ -310,7 +313,7 @@ func (s *ActionItemService) getMyActionItems(c *gin.Context) {
 
 	actionItems, err := s.ListActionItemsForStudentInPhase(c, courseParticipationID, coursePhaseID)
 	if err != nil {
-		handleError(c, http.StatusInternalServerError, err)
+		sdkUtils.HandleError(c, http.StatusInternalServerError, err)
 		return
 	}
 	c.JSON(http.StatusOK, actionItems)
@@ -321,7 +324,7 @@ func (s *ActionItemService) getMyActionItems(c *gin.Context) {
 func tokenAuthor(c *gin.Context) (string, bool) {
 	tokenUser, ok := keycloakTokenVerifier.GetTokenUser(c)
 	if !ok {
-		handleError(c, http.StatusUnauthorized, errors.New("authenticated user not found in context"))
+		sdkUtils.HandleError(c, http.StatusUnauthorized, errors.New("authenticated user not found in context"))
 		return "", false
 	}
 	return assessmentCompletion.AuthorName(tokenUser), true
@@ -331,14 +334,11 @@ func actionItemErrorStatus(err error) int {
 	switch {
 	case errors.Is(err, ErrActionItemNotFound):
 		return http.StatusNotFound
+	case errors.Is(err, teamScope.ErrOutsideScope):
+		return http.StatusForbidden
 	case errors.Is(err, assessmentCompletion.ErrAssessmentCompleted), errors.Is(err, coursePhaseConfig.ErrNotStarted):
 		return http.StatusForbidden
 	default:
 		return http.StatusInternalServerError
 	}
-}
-
-func handleError(c *gin.Context, statusCode int, err error) {
-	log.Error(err)
-	c.JSON(statusCode, gin.H{"error": err.Error()})
 }
