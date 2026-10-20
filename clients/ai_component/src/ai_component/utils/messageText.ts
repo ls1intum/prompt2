@@ -1,7 +1,25 @@
-import type { AICallMessage } from '../interfaces/aiCallDetail'
+import type { ChatCompletionMessageParam } from 'openai/resources/chat/completions'
 
-export const messageText = (content: AICallMessage['content']): string => {
-  if (content === null) return ''
+type ContentPart = Exclude<ChatCompletionMessageParam['content'], string | null | undefined>[number]
+
+const isPart = (part: unknown): part is ContentPart =>
+  typeof part === 'object' && part !== null && 'type' in part && typeof part.type === 'string'
+
+const partText = (part: ContentPart): string => {
+  switch (part.type) {
+    case 'text':
+      return part.text
+    case 'refusal':
+      return part.refusal
+    default:
+      return `[${part.type}]`
+  }
+}
+
+// Stored requests are not validated, so a message without readable content is shown as raw JSON.
+export const messageText = (message: ChatCompletionMessageParam): string => {
+  const content = message?.content
   if (typeof content === 'string') return content
-  return content.map((part) => ('text' in part ? part.text : `[${part.type}]`)).join('\n')
+  if (Array.isArray(content) && content.every(isPart)) return content.map(partText).join('\n')
+  return JSON.stringify(message, null, 2)
 }

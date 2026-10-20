@@ -1,3 +1,4 @@
+import type { ChatCompletionMessageParam } from 'openai/resources/chat/completions'
 import type { AICall } from './aiCall'
 import type { AICallEvent } from './aiCallEvent'
 
@@ -5,13 +6,6 @@ export enum AICallContentState {
   AVAILABLE = 'available',
   RESTRICTED = 'restricted',
   UNAVAILABLE = 'unavailable',
-}
-
-export type AICallContentPart = { type: 'text'; text: string } | { type: string }
-
-export interface AICallMessage {
-  role: string
-  content: string | AICallContentPart[] | null
 }
 
 export interface AICallToolCall {
@@ -28,7 +22,7 @@ export interface AICallChoice {
 }
 
 export interface AICallContent {
-  request: { messages?: AICallMessage[] }
+  request: { messages?: ChatCompletionMessageParam[] }
   choices: AICallChoice[]
 }
 

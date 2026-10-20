@@ -9,7 +9,11 @@ import {
   ErrorPage,
   LoadingPage,
 } from '@tumaet/prompt-ui-components'
-import { type AICallChoice, AICallContentState } from '../interfaces/aiCallDetail'
+import {
+  type AICallChoice,
+  type AICallContent,
+  AICallContentState,
+} from '../interfaces/aiCallDetail'
 import { getAICall } from '../network/queries/getAICall'
 import { messageText } from '../utils/messageText'
 
@@ -26,6 +30,9 @@ const CONTENT_NOTICE: Record<AICallContentState, string> = {
   [AICallContentState.UNAVAILABLE]:
     'No content is stored: it was purged after its retention, or the call was denied.',
 }
+
+const requestMessages = (content: AICallContent) =>
+  Array.isArray(content.request.messages) ? content.request.messages : []
 
 const Field = ({ label, value }: { label: string; value: string | number | null | undefined }) => (
   <div>
@@ -47,8 +54,8 @@ const ChoiceView = ({ choice, label }: { choice: AICallChoice; label?: string })
         {choice.refusal}
       </p>
     )}
-    {choice.toolCalls?.map((toolCall) => (
-      <div key={toolCall.id}>
+    {choice.toolCalls?.map((toolCall, index) => (
+      <div key={index}>
         <p className='text-xs font-medium'>Tool call: {toolCall.name}</p>
         <pre className='text-xs font-mono whitespace-pre-wrap break-all'>{toolCall.arguments}</pre>
       </div>
@@ -117,12 +124,12 @@ export const AICallDetailDialog = ({ phaseId, callId, onClose }: AICallDetailDia
 
             {call.content ? (
               <div className='space-y-3'>
-                {(call.content.request.messages ?? []).map((message, index) => (
+                {requestMessages(call.content).map((message, index) => (
                   <div key={index} className='rounded-md border p-3'>
                     <p className='text-xs font-medium uppercase text-muted-foreground'>
-                      {message.role}
+                      {message?.role}
                     </p>
-                    <p className='text-sm whitespace-pre-wrap'>{messageText(message.content)}</p>
+                    <p className='text-sm whitespace-pre-wrap'>{messageText(message)}</p>
                   </div>
                 ))}
                 {call.content.choices.length === 0 ? (
