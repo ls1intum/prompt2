@@ -6,7 +6,13 @@ import {
   useDeleteAnnouncement,
   useUpdateAnnouncement,
 } from '@core/network/hooks/useAnnouncements'
-import { Button, Label, PromptTable, Switch } from '@tumaet/prompt-ui-components'
+import {
+  Button,
+  Label,
+  ManagementPageHeader,
+  PromptTable,
+  Switch,
+} from '@tumaet/prompt-ui-components'
 import { Plus } from 'lucide-react'
 import { useCallback, useMemo, useState } from 'react'
 import { AnnouncementFormDialog } from './components/AnnouncementFormDialog'
@@ -84,15 +90,10 @@ export const AnnouncementsPage = () => {
   )
 
   return (
-    <div className='flex w-full flex-col gap-6'>
-      <div className='flex flex-wrap items-center justify-between gap-4'>
-        <div className='flex flex-col gap-1'>
-          <h1 className='text-3xl font-bold tracking-tight'>Announcements</h1>
-          <p className='text-muted-foreground'>
-            Show announcement banners, e.g. for maintenance windows or outages, to all users.
-          </p>
-        </div>
-        <div className='flex items-center gap-4'>
+    <div className='w-full'>
+      <div className='flex flex-wrap items-center justify-between gap-x-4'>
+        <ManagementPageHeader>Announcements</ManagementPageHeader>
+        <div className='mb-6 flex items-center gap-4'>
           <div className='flex items-center gap-2'>
             <Switch id='show-expired' checked={showExpired} onCheckedChange={setShowExpired} />
             <Label htmlFor='show-expired'>Show expired</Label>
@@ -103,6 +104,9 @@ export const AnnouncementsPage = () => {
           </Button>
         </div>
       </div>
+      <p className='text-muted-foreground mb-6'>
+        Show announcement banners, e.g. for maintenance windows or outages, to all users.
+      </p>
 
       {isLoading && <p className='text-sm text-muted-foreground'>Loading announcements…</p>}
       {isError && <p className='text-sm text-destructive'>Failed to load announcements.</p>}
