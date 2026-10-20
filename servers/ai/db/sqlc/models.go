@@ -15,6 +15,7 @@ type AiCall struct {
 	ActorID           string             `json:"actor_id"`
 	ActorRole         string             `json:"actor_role"`
 	Issuer            string             `json:"issuer"`
+	CallerService     string             `json:"caller_service"`
 	Feature           string             `json:"feature"`
 	Template          pgtype.Text        `json:"template"`
 	TemplateVersion   pgtype.Text        `json:"template_version"`

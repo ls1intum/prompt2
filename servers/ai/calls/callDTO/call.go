@@ -14,6 +14,7 @@ type Call struct {
 	ActorID           string          `json:"actorId"`
 	ActorRole         string          `json:"actorRole"`
 	Issuer            string          `json:"issuer"`
+	CallerService     string          `json:"callerService"`
 	Feature           string          `json:"feature"`
 	Template          *string         `json:"template"`
 	TemplateVersion   *string         `json:"templateVersion"`
@@ -43,6 +44,7 @@ func GetCallDTOFromDBModel(row db.AiCall) Call {
 		ActorID:           row.ActorID,
 		ActorRole:         row.ActorRole,
 		Issuer:            row.Issuer,
+		CallerService:     row.CallerService,
 		Feature:           row.Feature,
 		Template:          textOf(row.Template),
 		TemplateVersion:   textOf(row.TemplateVersion),

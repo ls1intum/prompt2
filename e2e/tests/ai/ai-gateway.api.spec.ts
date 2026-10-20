@@ -37,13 +37,27 @@ test.describe('AI server gateway', () => {
       feature: string
       issuer: string
       promptTokens: number
-      content: { responseText: string }
+      callerService: string
+      content: { choices: { content: string }[] }
     }
     expect(detail.outcome).toBe('success')
     expect(detail.feature).toBe(FEATURE)
     expect(detail.issuer).toMatch(/\/realms\//)
     expect(detail.promptTokens).toBe(42)
-    expect(detail.content.responseText).toBe(SUMMARY_ANSWER)
+    expect(detail.callerService).toBe('assessment')
+    expect(detail.content.choices.map((choice) => choice.content)).toEqual([SUMMARY_ANSWER])
+  })
+
+  test('refuses a staff token that does not come with a service key', async ({ apiAs }) => {
+    const lecturer = await apiAs('course-lecturer')
+
+    const fromBrowser = await complete(lecturer, PHASE, {
+      headers: { 'X-Prompt-Service': '', 'X-Prompt-Service-Token': '' },
+    })
+    expect(fromBrowser.status()).toBe(401)
+    expect(fromBrowser.headers()['x-prompt-ai-call-id']).toBeUndefined()
+    const guessed = await complete(lecturer, PHASE, { headers: { 'X-Prompt-Service-Token': 'guess' } })
+    expect(guessed.status()).toBe(401)
   })
 
   test('refuses a call without the phase key or a feature', async ({ apiAs }) => {

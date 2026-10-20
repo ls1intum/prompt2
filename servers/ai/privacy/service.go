@@ -22,10 +22,11 @@ type Service struct {
 	queries  *db.Queries
 	conn     *pgxpool.Pool
 	policyOf func(string) feature.Policy
+	box      *encryption.Box
 }
 
-func NewService(queries *db.Queries, conn *pgxpool.Pool) *Service {
-	return &Service{queries: queries, conn: conn, policyOf: feature.PolicyOf}
+func NewService(queries *db.Queries, conn *pgxpool.Pool, box *encryption.Box) *Service {
+	return &Service{queries: queries, conn: conn, policyOf: feature.PolicyOf, box: box}
 }
 
 func (s *Service) Export(c *gin.Context, export *sdkUtils.Export, subject keycloakTokenVerifier.SubjectIdentifiers) error {
@@ -48,7 +49,7 @@ func (s *Service) exportCalls(ctx context.Context, actorID string, participation
 	callIDs := make([]uuid.UUID, 0, len(rows))
 	byID := map[uuid.UUID]int{}
 	for _, row := range rows {
-		call, err := exportedCallOf(row)
+		call, err := s.exportedCallOf(row)
 		if err != nil {
 			return nil, err
 		}
@@ -70,12 +71,13 @@ func (s *Service) exportCalls(ctx context.Context, actorID string, participation
 	return exported, nil
 }
 
-func exportedCallOf(row db.ListPrivacyCallsRow) (privacyDTO.ExportedCall, error) {
+func (s *Service) exportedCallOf(row db.ListPrivacyCallsRow) (privacyDTO.ExportedCall, error) {
 	call := privacyDTO.ExportedCall{
 		ID:              row.ID,
 		CoursePhaseID:   row.CoursePhaseID,
 		MadeBySubject:   row.IsActor,
 		ActorRole:       row.ActorRole,
+		CallerService:   row.CallerService,
 		Feature:         row.Feature,
 		Template:        textOf(row.Template.String, row.Template.Valid),
 		TemplateVersion: textOf(row.TemplateVersion.String, row.TemplateVersion.Valid),
@@ -103,17 +105,17 @@ func exportedCallOf(row db.ListPrivacyCallsRow) (privacyDTO.ExportedCall, error)
 	case row.Request != nil && (!row.IsSubject || row.HasOtherSubjects):
 		call.ContentState = privacyDTO.ContentWithheld
 	case row.Request != nil:
-		request, err := encryption.Decrypt(row.Request)
+		request, err := s.box.Decrypt(row.ID, row.Request)
 		if err != nil {
 			return privacyDTO.ExportedCall{}, fmt.Errorf("decrypt request of call %s: %w", row.ID, err)
 		}
 		call.ContentState, call.Request = callDTO.ContentAvailable, request
 		if row.Response != nil {
-			response, err := encryption.Decrypt(row.Response)
+			response, err := s.box.Decrypt(row.ID, row.Response)
 			if err != nil {
 				return privacyDTO.ExportedCall{}, fmt.Errorf("decrypt response of call %s: %w", row.ID, err)
 			}
-			call.Response = calls.Summarize(response, row.Streamed).Text
+			call.Choices = calls.Summarize(response, row.Streamed).Choices
 		}
 	}
 	return call, nil

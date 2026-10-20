@@ -1,8 +1,8 @@
 -- name: CreateCall :one
-INSERT INTO ai_call (course_phase_id, actor_id, actor_role, issuer, feature, template, template_version,
-                     requested_model, provider, params, context_hash, outcome, http_status, error_code,
-                     streamed, server_version, completed_at)
-VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)
+INSERT INTO ai_call (course_phase_id, actor_id, actor_role, issuer, caller_service, feature, template,
+                     template_version, requested_model, provider, params, context_hash, outcome, http_status,
+                     error_code, streamed, server_version, completed_at)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)
 RETURNING id;
 
 -- name: CreateCallContent :exec

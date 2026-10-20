@@ -64,10 +64,10 @@ func (q *Queries) CompleteCall(ctx context.Context, arg CompleteCallParams) (int
 }
 
 const createCall = `-- name: CreateCall :one
-INSERT INTO ai_call (course_phase_id, actor_id, actor_role, issuer, feature, template, template_version,
-                     requested_model, provider, params, context_hash, outcome, http_status, error_code,
-                     streamed, server_version, completed_at)
-VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)
+INSERT INTO ai_call (course_phase_id, actor_id, actor_role, issuer, caller_service, feature, template,
+                     template_version, requested_model, provider, params, context_hash, outcome, http_status,
+                     error_code, streamed, server_version, completed_at)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)
 RETURNING id
 `
 
@@ -76,6 +76,7 @@ type CreateCallParams struct {
 	ActorID         string             `json:"actor_id"`
 	ActorRole       string             `json:"actor_role"`
 	Issuer          string             `json:"issuer"`
+	CallerService   string             `json:"caller_service"`
 	Feature         string             `json:"feature"`
 	Template        pgtype.Text        `json:"template"`
 	TemplateVersion pgtype.Text        `json:"template_version"`
@@ -97,6 +98,7 @@ func (q *Queries) CreateCall(ctx context.Context, arg CreateCallParams) (uuid.UU
 		arg.ActorID,
 		arg.ActorRole,
 		arg.Issuer,
+		arg.CallerService,
 		arg.Feature,
 		arg.Template,
 		arg.TemplateVersion,
@@ -188,7 +190,7 @@ func (q *Queries) CreateCallSubjects(ctx context.Context, arg CreateCallSubjects
 }
 
 const getCall = `-- name: GetCall :one
-SELECT ai_call.id, ai_call.course_phase_id, ai_call.actor_id, ai_call.actor_role, ai_call.issuer, ai_call.feature, ai_call.template, ai_call.template_version, ai_call.requested_model, ai_call.served_model, ai_call.system_fingerprint, ai_call.provider, ai_call.params, ai_call.context_hash, ai_call.response_hash, ai_call.outcome, ai_call.http_status, ai_call.finish_reason, ai_call.error_code, ai_call.prompt_tokens, ai_call.completion_tokens, ai_call.streamed, ai_call.server_version, ai_call.requested_at, ai_call.first_token_at, ai_call.completed_at,
+SELECT ai_call.id, ai_call.course_phase_id, ai_call.actor_id, ai_call.actor_role, ai_call.issuer, ai_call.caller_service, ai_call.feature, ai_call.template, ai_call.template_version, ai_call.requested_model, ai_call.served_model, ai_call.system_fingerprint, ai_call.provider, ai_call.params, ai_call.context_hash, ai_call.response_hash, ai_call.outcome, ai_call.http_status, ai_call.finish_reason, ai_call.error_code, ai_call.prompt_tokens, ai_call.completion_tokens, ai_call.streamed, ai_call.server_version, ai_call.requested_at, ai_call.first_token_at, ai_call.completed_at,
        content.request,
        content.response,
        (restriction.call_id IS NOT NULL)::boolean AS restricted
@@ -220,6 +222,7 @@ func (q *Queries) GetCall(ctx context.Context, arg GetCallParams) (GetCallRow, e
 		&i.AiCall.ActorID,
 		&i.AiCall.ActorRole,
 		&i.AiCall.Issuer,
+		&i.AiCall.CallerService,
 		&i.AiCall.Feature,
 		&i.AiCall.Template,
 		&i.AiCall.TemplateVersion,
@@ -310,7 +313,7 @@ func (q *Queries) ListCallSubjects(ctx context.Context, callID uuid.UUID) ([]uui
 }
 
 const listCalls = `-- name: ListCalls :many
-SELECT id, course_phase_id, actor_id, actor_role, issuer, feature, template, template_version, requested_model, served_model, system_fingerprint, provider, params, context_hash, response_hash, outcome, http_status, finish_reason, error_code, prompt_tokens, completion_tokens, streamed, server_version, requested_at, first_token_at, completed_at
+SELECT id, course_phase_id, actor_id, actor_role, issuer, caller_service, feature, template, template_version, requested_model, served_model, system_fingerprint, provider, params, context_hash, response_hash, outcome, http_status, finish_reason, error_code, prompt_tokens, completion_tokens, streamed, server_version, requested_at, first_token_at, completed_at
 FROM ai_call
 WHERE course_phase_id = $1
   AND ($2::timestamptz IS NULL
@@ -346,6 +349,7 @@ func (q *Queries) ListCalls(ctx context.Context, arg ListCallsParams) ([]AiCall,
 			&i.ActorID,
 			&i.ActorRole,
 			&i.Issuer,
+			&i.CallerService,
 			&i.Feature,
 			&i.Template,
 			&i.TemplateVersion,

@@ -7,6 +7,7 @@ import (
 	"encoding/base64"
 	"errors"
 
+	"github.com/google/uuid"
 	promptSDK "github.com/prompt-edu/prompt-sdk"
 )
 
@@ -18,11 +19,6 @@ var ErrPlaceholderKey = errors.New("AI_ENCRYPTION_KEY is still the placeholder f
 
 // Shipped in the public .env templates, so only accepted with DEBUG=true.
 const placeholderKey = "bG9jYWwtYWkta2V5LW5vdC1hLXJlYWwtc2VjcmV0ISE="
-
-func ValidateKey() error {
-	_, err := getKey()
-	return err
-}
 
 func getKey() ([]byte, error) {
 	raw := promptSDK.GetEnv("AI_ENCRYPTION_KEY", "")
@@ -42,7 +38,16 @@ func getKey() ([]byte, error) {
 	return key, nil
 }
 
-func newGCM() (cipher.AEAD, error) {
+// keyVersion leads every ciphertext, so a rotated key can be told apart from this one.
+const keyVersion byte = 1
+
+var ErrUnknownKeyVersion = errors.New("ciphertext was sealed with an unknown key version")
+
+type Box struct {
+	aead cipher.AEAD
+}
+
+func New() (*Box, error) {
 	key, err := getKey()
 	if err != nil {
 		return nil, err
@@ -51,29 +56,30 @@ func newGCM() (cipher.AEAD, error) {
 	if err != nil {
 		return nil, err
 	}
-	return cipher.NewGCM(block)
-}
-
-func Encrypt(plaintext []byte) ([]byte, error) {
-	gcm, err := newGCM()
+	aead, err := cipher.NewGCM(block)
 	if err != nil {
 		return nil, err
 	}
-	nonce := make([]byte, gcm.NonceSize())
+	return &Box{aead: aead}, nil
+}
+
+// Encrypt binds the ciphertext to its call, so content moved to another call does not decrypt.
+func (b *Box) Encrypt(callID uuid.UUID, plaintext []byte) ([]byte, error) {
+	nonce := make([]byte, b.aead.NonceSize())
 	if _, err := rand.Read(nonce); err != nil {
 		return nil, err
 	}
-	return gcm.Seal(nonce, nonce, plaintext, nil), nil
+	sealed := append([]byte{keyVersion}, nonce...)
+	return b.aead.Seal(sealed, nonce, plaintext, callID[:]), nil
 }
 
-func Decrypt(data []byte) ([]byte, error) {
-	gcm, err := newGCM()
-	if err != nil {
-		return nil, err
-	}
-	if len(data) < gcm.NonceSize() {
+func (b *Box) Decrypt(callID uuid.UUID, data []byte) ([]byte, error) {
+	nonceEnd := 1 + b.aead.NonceSize()
+	if len(data) < nonceEnd {
 		return nil, ErrShortCiphertext
 	}
-	nonce, ciphertext := data[:gcm.NonceSize()], data[gcm.NonceSize():]
-	return gcm.Open(nil, nonce, ciphertext, nil)
+	if data[0] != keyVersion {
+		return nil, ErrUnknownKeyVersion
+	}
+	return b.aead.Open(nil, data[1:nonceEnd], data[nonceEnd:], callID[:])
 }

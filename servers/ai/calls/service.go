@@ -38,10 +38,11 @@ type Service struct {
 	conn          *pgxpool.Pool
 	provider      string
 	serverVersion string
+	box           *encryption.Box
 }
 
-func NewService(queries *db.Queries, conn *pgxpool.Pool, provider, serverVersion string) *Service {
-	return &Service{queries: queries, conn: conn, provider: provider, serverVersion: serverVersion}
+func NewService(queries *db.Queries, conn *pgxpool.Pool, provider, serverVersion string, box *encryption.Box) *Service {
+	return &Service{queries: queries, conn: conn, provider: provider, serverVersion: serverVersion, box: box}
 }
 
 type Request struct {
@@ -49,6 +50,7 @@ type Request struct {
 	ActorID         string
 	ActorRole       string
 	Issuer          string
+	CallerService   string
 	Feature         string
 	Template        string
 	TemplateVersion string
@@ -70,10 +72,6 @@ type Completion struct {
 
 // Begin must succeed before the provider is called, so no model call goes unrecorded.
 func (s *Service) Begin(ctx context.Context, request Request) (uuid.UUID, error) {
-	encryptedRequest, err := encryption.Encrypt(request.Body)
-	if err != nil {
-		return uuid.Nil, fmt.Errorf("encrypt request: %w", err)
-	}
 	tx, err := s.conn.Begin(ctx)
 	if err != nil {
 		return uuid.Nil, fmt.Errorf("begin call transaction: %w", err)
@@ -86,6 +84,10 @@ func (s *Service) Begin(ctx context.Context, request Request) (uuid.UUID, error)
 	callID, err := qtx.CreateCall(ctx, params)
 	if err != nil {
 		return uuid.Nil, fmt.Errorf("create call: %w", err)
+	}
+	encryptedRequest, err := s.box.Encrypt(callID, request.Body)
+	if err != nil {
+		return uuid.Nil, fmt.Errorf("encrypt request: %w", err)
 	}
 	if err := qtx.CreateCallContent(ctx, db.CreateCallContentParams{CallID: callID, Request: encryptedRequest}); err != nil {
 		return uuid.Nil, fmt.Errorf("create call content: %w", err)
@@ -111,7 +113,7 @@ func (s *Service) Deny(ctx context.Context, request Request, httpStatus int, err
 
 func (s *Service) Finish(ctx context.Context, callID uuid.UUID, completion Completion) error {
 	summary := Summarize(completion.Response, completion.Streamed)
-	encryptedResponse, err := encryption.Encrypt(completion.Response)
+	encryptedResponse, err := s.box.Encrypt(callID, completion.Response)
 	if err != nil {
 		return fmt.Errorf("encrypt response: %w", err)
 	}
@@ -157,6 +159,7 @@ func (s *Service) callParams(request Request, outcome string) db.CreateCallParam
 		ActorID:         request.ActorID,
 		ActorRole:       request.ActorRole,
 		Issuer:          request.Issuer,
+		CallerService:   request.CallerService,
 		Feature:         request.Feature,
 		Template:        optionalText(request.Template),
 		TemplateVersion: optionalText(request.TemplateVersion),
@@ -206,7 +209,7 @@ func (s *Service) Get(ctx context.Context, coursePhaseID, callID uuid.UUID, view
 	case row.Restricted:
 		detail.ContentState = callDTO.ContentRestricted
 	case row.Request != nil:
-		content, err := decryptContent(row.Request, row.Response, row.AiCall.Streamed)
+		content, err := s.decryptContent(callID, row.Request, row.Response, row.AiCall.Streamed)
 		if err != nil {
 			return callDTO.Detail{}, err
 		}
@@ -268,18 +271,18 @@ func (s *Service) recordEvent(ctx context.Context, coursePhaseID, callID uuid.UU
 	return callDTO.GetEventDTOFromDBModel(row), nil
 }
 
-func decryptContent(encryptedRequest, encryptedResponse []byte, streamed bool) (callDTO.Content, error) {
-	request, err := encryption.Decrypt(encryptedRequest)
+func (s *Service) decryptContent(callID uuid.UUID, encryptedRequest, encryptedResponse []byte, streamed bool) (callDTO.Content, error) {
+	request, err := s.box.Decrypt(callID, encryptedRequest)
 	if err != nil {
 		return callDTO.Content{}, fmt.Errorf("decrypt request: %w", err)
 	}
-	content := callDTO.Content{Request: request}
+	content := callDTO.Content{Request: request, Choices: []callDTO.Choice{}}
 	if encryptedResponse != nil {
-		response, err := encryption.Decrypt(encryptedResponse)
+		response, err := s.box.Decrypt(callID, encryptedResponse)
 		if err != nil {
 			return callDTO.Content{}, fmt.Errorf("decrypt response: %w", err)
 		}
-		content.ResponseText = Summarize(response, streamed).Text
+		content.Choices = Summarize(response, streamed).Choices
 	}
 	return content, nil
 }

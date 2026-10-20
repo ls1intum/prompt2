@@ -27,7 +27,7 @@ type Export struct {
 	ExternalExports []ServiceExportRequest
 }
 
-func (s *PrivacyService) PrepareDataExport(c *gin.Context) (Export, error) {
+func (s *PrivacyService) PrepareDataExport(c *gin.Context) (_ Export, err error) {
 	subjectIdentifiers, err := s.subjects.GetSubjectIdentifiers(c)
 	if err != nil {
 		return Export{}, err
@@ -37,6 +37,15 @@ func (s *PrivacyService) PrepareDataExport(c *gin.Context) (Export, error) {
 	if err != nil {
 		return Export{}, err
 	}
+	defer func() {
+		if err == nil {
+			return
+		}
+		s.UpdateExportStatus(err, c, exportRecord.ID)
+		if resetErr := s.ResetExportRateLimit(c, exportRecord.ID); resetErr != nil {
+			log.WithError(resetErr).Error("failed to lift the rate limit of an export that could not be prepared")
+		}
+	}()
 
 	// prepare core
 	coreDoc, err := s.PrepareExportRecordDoc(c, exportRecord.ID, "Core", "")

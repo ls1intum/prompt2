@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"regexp"
 	"strings"
 	"time"
 
@@ -13,6 +14,7 @@ import (
 	"github.com/google/uuid"
 	promptSDK "github.com/prompt-edu/prompt-sdk"
 	"github.com/prompt-edu/prompt-sdk/keycloakTokenVerifier"
+	"github.com/prompt-edu/prompt-sdk/serviceAuth"
 	sdkUtils "github.com/prompt-edu/prompt-sdk/utils"
 	"github.com/prompt-edu/prompt/servers/ai/calls"
 	"github.com/prompt-edu/prompt/servers/ai/feature"
@@ -24,6 +26,9 @@ const (
 	// ProviderKeyHeader carries the calling phase's own Logos key. The AI server stores no keys.
 	ProviderKeyHeader = "X-Prompt-Provider-Key"
 	FeatureHeader     = "X-Prompt-Feature"
+	// ServiceHeader and ServiceTokenHeader name the calling phase service and carry its AI_SERVICE_KEYS key.
+	ServiceHeader      = "X-Prompt-Service"
+	ServiceTokenHeader = "X-Prompt-Service-Token"
 
 	maxRequestBytes   = 4 << 20
 	maxSubjects       = 100
@@ -35,6 +40,8 @@ const (
 )
 
 var errMissingKey = errors.New("the request must carry the phase's Logos key in " + ProviderKeyHeader)
+
+var labelPattern = regexp.MustCompile(`^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$`)
 
 type Gateway struct {
 	providerURL   *url.URL
@@ -58,9 +65,10 @@ func New(providerURL *url.URL, allowedModels []string, coreURL string, callServi
 	}
 }
 
-// PromptLecturer is never allowed: the SDK admits it for every course phase.
-func RegisterRoutes(coursePhaseAPI *gin.RouterGroup, gateway *Gateway) {
+// Only phase services reach these routes, and PromptLecturer never: the SDK admits it for every course phase.
+func RegisterRoutes(coursePhaseAPI *gin.RouterGroup, gateway *Gateway, serviceKeys serviceAuth.Keys) {
 	v1 := coursePhaseAPI.Group("/v1",
+		serviceAuth.Middleware(serviceKeys, ServiceHeader, ServiceTokenHeader),
 		promptSDK.AuthenticationMiddleware(promptSDK.PromptAdmin, promptSDK.CourseLecturer, promptSDK.CourseEditor))
 	v1.POST("/chat/completions", gateway.chatCompletions)
 	v1.GET("/models", gateway.listModels)
@@ -78,9 +86,15 @@ func (g *Gateway) chatCompletions(c *gin.Context) {
 		ActorID:         user.ID,
 		ActorRole:       actorRole(user),
 		Issuer:          tokenIssuer(c.GetHeader("Authorization")),
+		CallerService:   serviceAuth.ServiceName(c),
 		Feature:         c.GetHeader(FeatureHeader),
 		Template:        c.GetHeader("X-Prompt-Template"),
 		TemplateVersion: c.GetHeader("X-Prompt-Template-Version"),
+	}
+	if !dropInvalidLabels(&request.Feature, &request.Template, &request.TemplateVersion) {
+		g.deny(c, request, http.StatusBadRequest, "invalid_label",
+			FeatureHeader+", X-Prompt-Template and X-Prompt-Template-Version take letters, digits, '.', '_' and '-', at most 128")
+		return
 	}
 
 	body, err := io.ReadAll(http.MaxBytesReader(c.Writer, c.Request.Body, maxRequestBytes))
@@ -203,6 +217,17 @@ func providerKey(c *gin.Context) (string, error) {
 		return "", errMissingKey
 	}
 	return logosKey, nil
+}
+
+// dropInvalidLabels clears every label that does not match labelPattern, so a refused value is never stored.
+func dropInvalidLabels(labels ...*string) bool {
+	valid := true
+	for _, label := range labels {
+		if *label != "" && !labelPattern.MatchString(*label) {
+			*label, valid = "", false
+		}
+	}
+	return valid
 }
 
 func actorRole(user keycloakTokenVerifier.TokenUser) string {

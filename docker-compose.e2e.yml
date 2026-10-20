@@ -820,6 +820,7 @@ services:
       - AI_ALLOWED_MODELS=prompt-test-model
       - AI_ENCRYPTION_KEY
       - AI_AUDIT_METADATA_RETENTION_DAYS=1825
+      - AI_SERVICE_KEYS=assessment:e2e-assessment-ai-key
 
   db-ai:
     image: "postgres:15.19-alpine"

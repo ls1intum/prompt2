@@ -26,9 +26,9 @@ func TestPurge(t *testing.T) {
 	insertCall := func(feature string, age time.Duration, completed bool) uuid.UUID {
 		var callID uuid.UUID
 		require.NoError(t, testDB.Conn.QueryRow(ctx, `
-			INSERT INTO ai_call (course_phase_id, actor_id, actor_role, issuer, feature, provider, outcome, streamed,
+			INSERT INTO ai_call (course_phase_id, actor_id, actor_role, issuer, caller_service, feature, provider, outcome, streamed,
 			                     server_version, requested_at, completed_at)
-			VALUES (gen_random_uuid(), 'actor', 'Lecturer', 'https://keycloak.test/realms/prompt', $1, 'logos.test',
+			VALUES (gen_random_uuid(), 'actor', 'Lecturer', 'https://keycloak.test/realms/prompt', 'assessment', $1, 'logos.test',
 			        CASE WHEN $3 THEN 'success' ELSE 'pending' END, false, 'test', $2,
 			        CASE WHEN $3 THEN $2::timestamptz END)
 			RETURNING id`, feature, now.Add(-age), completed).Scan(&callID))

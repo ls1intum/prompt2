@@ -14,6 +14,7 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	promptSDK "github.com/prompt-edu/prompt-sdk"
 	"github.com/prompt-edu/prompt-sdk/promptTypes"
+	"github.com/prompt-edu/prompt-sdk/serviceAuth"
 	sdkUtils "github.com/prompt-edu/prompt-sdk/utils"
 	"github.com/prompt-edu/prompt/servers/ai/calls"
 	db "github.com/prompt-edu/prompt/servers/ai/db/sqlc"
@@ -52,6 +53,8 @@ type config struct {
 	serverVersion         string
 	coreURL               string
 	clientHost            string
+	serviceKeys           serviceAuth.Keys
+	box                   *encryption.Box
 }
 
 func loadConfig() (config, error) {
@@ -72,10 +75,15 @@ func loadConfig() (config, error) {
 	if err != nil {
 		return config{}, fmt.Errorf("AI_AUDIT_METADATA_RETENTION_DAYS must be a number of days")
 	}
+	serviceKeys := serviceAuth.ParseKeys(promptSDK.GetEnv("AI_SERVICE_KEYS", ""))
 	if err := retention.Validate(metadataRetentionDays); err != nil {
 		return config{}, err
 	}
-	if err := encryption.ValidateKey(); err != nil {
+	if len(serviceKeys) == 0 {
+		log.Warn("AI_SERVICE_KEYS is empty, so no phase service can call the inference routes")
+	}
+	box, err := encryption.New()
+	if err != nil {
 		return config{}, err
 	}
 	return config{
@@ -85,19 +93,21 @@ func loadConfig() (config, error) {
 		serverVersion:         promptSDK.GetEnv("SERVER_IMAGE_TAG", ""),
 		coreURL:               sdkUtils.GetCoreUrl(),
 		clientHost:            promptSDK.GetEnv("CORE_HOST", "http://localhost:3000"),
+		serviceKeys:           serviceKeys,
+		box:                   box,
 	}, nil
 }
 
 // No audit middleware: AI calls are audited in this service's own database, never in core's.
 func setupRouter(router *gin.Engine, conn *pgxpool.Pool, cfg config) {
 	queries := db.New(conn)
-	callService := calls.NewService(queries, conn, cfg.providerURL.Host, cfg.serverVersion)
-	privacyService := privacy.NewService(queries, conn)
+	callService := calls.NewService(queries, conn, cfg.providerURL.Host, cfg.serverVersion, cfg.box)
+	privacyService := privacy.NewService(queries, conn, cfg.box)
 
 	router.Use(promptSDK.CORSMiddleware(cfg.clientHost))
 	api := router.Group("/ai/api")
 	coursePhaseAPI := api.Group("/course_phase/:coursePhaseID")
-	gateway.RegisterRoutes(coursePhaseAPI, gateway.New(cfg.providerURL, cfg.allowedModels, cfg.coreURL, callService))
+	gateway.RegisterRoutes(coursePhaseAPI, gateway.New(cfg.providerURL, cfg.allowedModels, cfg.coreURL, callService), cfg.serviceKeys)
 	calls.RegisterRoutes(coursePhaseAPI, callService)
 	promptTypes.RegisterPrivacyModule(api, privacyService.Export, privacyService.Delete, []string{})
 	promptTypes.RegisterInfoEndpoint(api, promptTypes.ServiceInfo{

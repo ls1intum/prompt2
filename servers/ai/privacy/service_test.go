@@ -11,6 +11,7 @@ import (
 	"github.com/prompt-edu/prompt-sdk/keycloakTokenVerifier"
 	"github.com/prompt-edu/prompt/servers/ai/calls"
 	"github.com/prompt-edu/prompt/servers/ai/calls/callDTO"
+	"github.com/prompt-edu/prompt/servers/ai/encryption"
 	"github.com/prompt-edu/prompt/servers/ai/feature"
 	"github.com/prompt-edu/prompt/servers/ai/privacy/privacyDTO"
 	"github.com/prompt-edu/prompt/servers/ai/testutils"
@@ -38,8 +39,10 @@ func (s *PrivacySuite) SetupTest() {
 	testDB, cleanup, err := testutils.SetupTestDB(s.ctx)
 	s.Require().NoError(err)
 	s.db, s.cleanup = testDB, cleanup
-	s.calls = calls.NewService(testDB.Queries, testDB.Conn, "logos.test", "test")
-	s.service = NewService(testDB.Queries, testDB.Conn)
+	box, err := encryption.New()
+	s.Require().NoError(err)
+	s.calls = calls.NewService(testDB.Queries, testDB.Conn, "logos.test", "test", box)
+	s.service = NewService(testDB.Queries, testDB.Conn, box)
 	s.service.policyOf = func(name string) feature.Policy {
 		if name == lowRiskFeature {
 			return feature.Policy{ContentRetentionDays: 30}
@@ -94,7 +97,8 @@ func (s *PrivacySuite) TestExportCoversSubjectAndActor() {
 	s.False(asStudent[0].MadeBySubject)
 	s.Equal(callDTO.ContentAvailable, asStudent[0].ContentState)
 	s.Contains(string(asStudent[0].Request), "About the student")
-	s.Equal("Suggestion", asStudent[0].Response)
+	s.Require().Len(asStudent[0].Choices, 1)
+	s.Equal("Suggestion", asStudent[0].Choices[0].Content)
 	s.Equal(aboutBoth, asStudent[1].ID)
 	s.Equal(privacyDTO.ContentWithheld, asStudent[1].ContentState, "content about other people stays out of the export")
 	s.Nil(asStudent[1].Request)

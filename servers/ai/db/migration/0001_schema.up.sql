@@ -7,6 +7,8 @@ CREATE TABLE ai_call (
     actor_role text NOT NULL,
     -- The iss claim of the caller's token.
     issuer text NOT NULL,
+    -- The phase service that authenticated with its service key.
+    caller_service text NOT NULL,
     feature text NOT NULL,
     template text,
     template_version text,
@@ -69,11 +71,11 @@ CREATE INDEX ai_call_event_call_idx ON ai_call_event (call_id, created_at);
 CREATE FUNCTION ai_call_complete_only() RETURNS trigger AS $$
 BEGIN
   IF OLD.completed_at IS NOT NULL
-    OR (NEW.id, NEW.course_phase_id, NEW.actor_id, NEW.actor_role, NEW.issuer, NEW.feature,
+    OR (NEW.id, NEW.course_phase_id, NEW.actor_id, NEW.actor_role, NEW.issuer, NEW.caller_service, NEW.feature,
         NEW.template, NEW.template_version, NEW.requested_model, NEW.provider, NEW.params,
         NEW.context_hash, NEW.streamed, NEW.server_version, NEW.requested_at)
       IS DISTINCT FROM
-       (OLD.id, OLD.course_phase_id, OLD.actor_id, OLD.actor_role, OLD.issuer, OLD.feature,
+       (OLD.id, OLD.course_phase_id, OLD.actor_id, OLD.actor_role, OLD.issuer, OLD.caller_service, OLD.feature,
         OLD.template, OLD.template_version, OLD.requested_model, OLD.provider, OLD.params,
         OLD.context_hash, OLD.streamed, OLD.server_version, OLD.requested_at)
   THEN

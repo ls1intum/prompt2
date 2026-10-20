@@ -16,8 +16,10 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	promptSDK "github.com/prompt-edu/prompt-sdk"
+	"github.com/prompt-edu/prompt-sdk/serviceAuth"
 	"github.com/prompt-edu/prompt/servers/ai/calls"
 	"github.com/prompt-edu/prompt/servers/ai/calls/callDTO"
+	"github.com/prompt-edu/prompt/servers/ai/encryption"
 	"github.com/prompt-edu/prompt/servers/ai/gateway"
 	"github.com/prompt-edu/prompt/servers/ai/testutils"
 	"github.com/stretchr/testify/suite"
@@ -27,6 +29,8 @@ const (
 	testEncryptionKey = "ZTJlLWFpLXRlc3Qta2V5LW5vdC1hLXJlYWwtc2VjcmU="
 	testLogosKey      = "logos-test-key-7f3a"
 	testFeature       = "assessment.action_item_suggestions"
+	testService       = "assessment"
+	testServiceKey    = "assessment-service-key"
 	summaryPrompt     = "Summarize the peer feedback"
 	summaryAnswer     = "The team communicates well and should record its decisions earlier."
 )
@@ -66,6 +70,8 @@ func (s *AIServerSuite) SetupSuite() {
 
 	providerURL, err := url.Parse(aimock.BaseURL + "/v1")
 	s.Require().NoError(err)
+	box, err := encryption.New()
+	s.Require().NoError(err)
 	router := gin.New()
 	setupRouter(router, testDB.Conn, config{
 		providerURL:           providerURL,
@@ -74,6 +80,8 @@ func (s *AIServerSuite) SetupSuite() {
 		serverVersion:         "test",
 		coreURL:               identity.CoreURL,
 		clientHost:            "http://localhost:3000",
+		serviceKeys:           serviceAuth.ParseKeys(testService + ":" + testServiceKey),
+		box:                   box,
 	})
 	s.server = httptest.NewServer(router)
 	s.cleanups = append(s.cleanups, s.server.Close)
@@ -141,10 +149,16 @@ func (s *AIServerSuite) newPhase(phaseType string) string {
 	return coursePhaseID
 }
 
-// phaseHeaders are the headers a phase server sends: its own Logos key and the feature. An empty
-// override leaves that header out.
+func serviceHeaders() map[string]string {
+	return map[string]string{gateway.ServiceHeader: testService, gateway.ServiceTokenHeader: testServiceKey}
+}
+
+// phaseHeaders are the headers a phase server sends: its service key, its own Logos key and the
+// feature. An empty override leaves that header out.
 func phaseHeaders(overrides map[string]string) map[string]string {
-	headers := map[string]string{gateway.ProviderKeyHeader: testLogosKey, gateway.FeatureHeader: testFeature}
+	headers := serviceHeaders()
+	headers[gateway.ProviderKeyHeader] = testLogosKey
+	headers[gateway.FeatureHeader] = testFeature
 	for name, value := range overrides {
 		headers[name] = value
 	}
@@ -173,6 +187,7 @@ type callRow struct {
 	ActorID          string
 	ActorRole        string
 	Issuer           string
+	CallerService    string
 	Template         *string
 	ServedModel      *string
 	FinishReason     *string
@@ -187,12 +202,12 @@ type callRow struct {
 func (s *AIServerSuite) call(callID string) callRow {
 	var row callRow
 	err := s.db.Conn.QueryRow(s.ctx, `
-		SELECT outcome, http_status, error_code, feature, actor_id, actor_role, issuer, template, served_model,
+		SELECT outcome, http_status, error_code, feature, actor_id, actor_role, issuer, caller_service, template, served_model,
 		       finish_reason, prompt_tokens, completion_tokens, streamed, completed_at IS NOT NULL,
 		       (SELECT count(*) FROM ai_call_subject WHERE call_id = ai_call.id),
 		       EXISTS (SELECT 1 FROM ai_call_content WHERE call_id = ai_call.id)
 		FROM ai_call WHERE id = $1`, callID).Scan(
-		&row.Outcome, &row.HTTPStatus, &row.ErrorCode, &row.Feature, &row.ActorID, &row.ActorRole, &row.Issuer, &row.Template,
+		&row.Outcome, &row.HTTPStatus, &row.ErrorCode, &row.Feature, &row.ActorID, &row.ActorRole, &row.Issuer, &row.CallerService, &row.Template,
 		&row.ServedModel, &row.FinishReason, &row.PromptTokens, &row.CompletionTokens, &row.Streamed, &row.Completed,
 		&row.Subjects, &row.HasContent)
 	s.Require().NoError(err)
@@ -253,6 +268,49 @@ func (s *AIServerSuite) TestProviderKeyIsForwardedButNeverStored() {
 	s.NotContains(stored, testLogosKey, "the AI server keeps no key")
 }
 
+func (s *AIServerSuite) TestInferenceNeedsAServiceKey() {
+	coursePhaseID := s.newPhase("Assessment")
+	chat := completion(testutils.TestModel, summaryPrompt, false)
+
+	for name, overrides := range map[string]map[string]string{
+		"a staff token alone, as from the browser": {gateway.ServiceHeader: "", gateway.ServiceTokenHeader: ""},
+		"a wrong key":            {gateway.ServiceTokenHeader: "guessed-key"},
+		"another service's name": {gateway.ServiceHeader: "interview"},
+	} {
+		response, _ := s.chat(coursePhaseID, s.lecturer(coursePhaseID), chat, overrides)
+		s.Equal(http.StatusUnauthorized, response.StatusCode, name)
+		s.Empty(response.Header.Get(gateway.CallIDHeader), "%s: nothing is recorded", name)
+	}
+	response, _ := s.send(http.MethodGet, phasePath(coursePhaseID)+"/v1/models", s.lecturer(coursePhaseID), nil,
+		map[string]string{gateway.ProviderKeyHeader: testLogosKey})
+	s.Equal(http.StatusUnauthorized, response.StatusCode)
+
+	var recorded int
+	s.Require().NoError(s.db.Conn.QueryRow(s.ctx, `SELECT count(*) FROM ai_call WHERE course_phase_id = $1`, coursePhaseID).Scan(&recorded))
+	s.Zero(recorded)
+	s.Empty(s.providerRequests())
+}
+
+func (s *AIServerSuite) TestInvalidLabelsAreDeniedWithoutBeingStored() {
+	coursePhaseID := s.newPhase("Assessment")
+
+	for header, value := range map[string]string{
+		gateway.FeatureHeader:       "assessment.<script>",
+		"X-Prompt-Template":         strings.Repeat("a", 129),
+		"X-Prompt-Template-Version": "1 OR 1=1",
+	} {
+		response, _ := s.chat(coursePhaseID, s.lecturer(coursePhaseID), completion(testutils.TestModel, summaryPrompt, false),
+			map[string]string{header: value})
+		s.Equal(http.StatusBadRequest, response.StatusCode, header)
+		row := s.call(response.Header.Get(gateway.CallIDHeader))
+		s.Equal("invalid_label", *row.ErrorCode, header)
+		s.NotEqual(value, row.Feature, header)
+		s.True(row.Template == nil || *row.Template != value, header)
+		s.False(row.HasContent, header)
+	}
+	s.Empty(s.providerRequests())
+}
+
 func (s *AIServerSuite) TestCallWithoutProviderKeyIsDenied() {
 	coursePhaseID := s.newPhase("Assessment")
 
@@ -263,7 +321,7 @@ func (s *AIServerSuite) TestCallWithoutProviderKeyIsDenied() {
 		s.Contains(string(body), gateway.ProviderKeyHeader)
 		s.Equal("provider_key_missing", *s.call(response.Header.Get(gateway.CallIDHeader)).ErrorCode)
 	}
-	response, _ := s.send(http.MethodGet, phasePath(coursePhaseID)+"/v1/models", s.lecturer(coursePhaseID), nil, nil)
+	response, _ := s.send(http.MethodGet, phasePath(coursePhaseID)+"/v1/models", s.lecturer(coursePhaseID), nil, serviceHeaders())
 	s.Equal(http.StatusBadRequest, response.StatusCode)
 	s.Empty(s.providerRequests(), "without a key nothing reaches the provider")
 }
@@ -287,6 +345,7 @@ func (s *AIServerSuite) TestNonStreamedCompletionIsRecorded() {
 	s.Equal(s.lecturerID, row.ActorID)
 	s.Equal(promptSDK.CourseLecturer, row.ActorRole)
 	s.Equal(s.identity.IssuerURL(), row.Issuer, "the issuer is taken from the token")
+	s.Equal(testService, row.CallerService, "the service is taken from its key, not from the caller")
 	s.Equal("action-items", *row.Template)
 	s.Equal(testutils.TestModel, *row.ServedModel)
 	s.Equal("stop", *row.FinishReason)
@@ -363,8 +422,9 @@ func (s *AIServerSuite) TestCallerDisconnectStillCompletesTheCall() {
 	var detail callDTO.Detail
 	s.Require().NoError(json.Unmarshal(body, &detail))
 	s.Require().NotNil(detail.Content)
-	s.NotEmpty(detail.Content.ResponseText, "the partial output is kept")
-	s.Less(len(detail.Content.ResponseText), len("This answer arrives in many small chunks, so a caller can disconnect long before it ends."))
+	s.Require().Len(detail.Content.Choices, 1)
+	s.NotEmpty(detail.Content.Choices[0].Content, "the partial output is kept")
+	s.Less(len(detail.Content.Choices[0].Content), len("This answer arrives in many small chunks, so a caller can disconnect long before it ends."))
 }
 
 func (s *AIServerSuite) TestProviderBreakingOffAbortsTheCallersStream() {
@@ -482,7 +542,7 @@ func (s *AIServerSuite) TestAuditReadsAndEvents() {
 	response, _ = s.send(http.MethodPost, callPath+"/events", s.lecturer(coursePhaseID), map[string]any{"type": "edited"}, nil)
 	s.Equal(http.StatusBadRequest, response.StatusCode, "an edit needs its edit distance")
 	response, _ = s.send(http.MethodPost, callPath+"/events", s.lecturer(coursePhaseID),
-		map[string]any{"type": "edited", "editDistance": 17, "actionItemId": uuid.NewString()}, nil)
+		map[string]any{"type": "edited", "editDistance": 17, "targetId": uuid.NewString()}, nil)
 	s.Equal(http.StatusCreated, response.StatusCode)
 	response, _ = s.send(http.MethodPost, callPath+"/events", s.lecturer(coursePhaseID), map[string]any{"type": "content_viewed"}, nil)
 	s.Equal(http.StatusBadRequest, response.StatusCode, "content views are only recorded by the server")
@@ -505,7 +565,7 @@ func (s *AIServerSuite) TestAuditReadsAndEvents() {
 	var detail callDTO.Detail
 	s.Require().NoError(json.Unmarshal(body, &detail))
 	s.Equal(callDTO.ContentAvailable, detail.ContentState)
-	s.Equal(summaryAnswer, detail.Content.ResponseText)
+	s.Equal([]callDTO.Choice{{Content: summaryAnswer}}, detail.Content.Choices)
 	s.Contains(string(detail.Content.Request), summaryPrompt)
 	s.Require().Len(detail.Events, 3)
 	s.Equal([]string{"shown", "edited", "content_viewed"}, []string{detail.Events[0].Type, detail.Events[1].Type, detail.Events[2].Type})

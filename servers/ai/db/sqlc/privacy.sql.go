@@ -38,6 +38,7 @@ SELECT ai_call.id,
        ai_call.course_phase_id,
        (ai_call.actor_id = $1::text)::boolean AS is_actor,
        ai_call.actor_role,
+       ai_call.caller_service,
        ai_call.feature,
        ai_call.template,
        ai_call.template_version,
@@ -81,6 +82,7 @@ type ListPrivacyCallsRow struct {
 	CoursePhaseID    uuid.UUID          `json:"course_phase_id"`
 	IsActor          bool               `json:"is_actor"`
 	ActorRole        string             `json:"actor_role"`
+	CallerService    string             `json:"caller_service"`
 	Feature          string             `json:"feature"`
 	Template         pgtype.Text        `json:"template"`
 	TemplateVersion  pgtype.Text        `json:"template_version"`
@@ -115,6 +117,7 @@ func (q *Queries) ListPrivacyCalls(ctx context.Context, arg ListPrivacyCallsPara
 			&i.CoursePhaseID,
 			&i.IsActor,
 			&i.ActorRole,
+			&i.CallerService,
 			&i.Feature,
 			&i.Template,
 			&i.TemplateVersion,

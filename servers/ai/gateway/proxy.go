@@ -17,7 +17,6 @@ import (
 )
 
 type exchange struct {
-	cancel       context.CancelFunc
 	status       int
 	firstByteAt  time.Time
 	response     bytes.Buffer
@@ -30,7 +29,11 @@ func (g *Gateway) forward(c *gin.Context, callID uuid.UUID, logosKey string, req
 	callerCtx := c.Request.Context()
 	ctx, cancel := context.WithTimeout(callerCtx, totalTimeout)
 	defer cancel()
-	exchange := &exchange{cancel: cancel}
+	exchange := &exchange{}
+	exchange.idle = time.AfterFunc(idleTimeout, func() {
+		exchange.idleExpired.Store(true)
+		cancel()
+	})
 
 	proxy := &httputil.ReverseProxy{
 		Rewrite: func(proxyRequest *httputil.ProxyRequest) {
@@ -57,10 +60,11 @@ func (g *Gateway) forward(c *gin.Context, callID uuid.UUID, logosKey string, req
 		g.complete(callerCtx, ctx, callID, request.Streamed, exchange, aborted != nil)
 		if aborted != nil {
 			// gin's recovery would end a broken response cleanly, so the caller could take it as complete.
-			if conn, _, err := http.NewResponseController(c.Writer).Hijack(); err == nil {
-				_ = conn.Close()
+			conn, _, err := http.NewResponseController(c.Writer).Hijack()
+			if err != nil {
+				panic(aborted)
 			}
-			panic(aborted)
+			_ = conn.Close()
 		}
 	}()
 	proxy.ServeHTTP(c.Writer, c.Request.WithContext(ctx))
@@ -73,10 +77,6 @@ func (e *exchange) capture(response *http.Response) error {
 	if contentType != "" {
 		response.Header.Set("Content-Type", contentType)
 	}
-	e.idle = time.AfterFunc(idleTimeout, func() {
-		e.idleExpired.Store(true)
-		e.cancel()
-	})
 	response.Body = &recordingBody{ReadCloser: response.Body, exchange: e}
 	return nil
 }
@@ -110,9 +110,7 @@ func (b *recordingBody) Read(p []byte) (int, error) {
 }
 
 func (g *Gateway) complete(callerCtx, proxyCtx context.Context, callID uuid.UUID, streamed bool, e *exchange, aborted bool) {
-	if e.idle != nil {
-		e.idle.Stop()
-	}
+	e.idle.Stop()
 	completion := calls.Completion{
 		Outcome:     calls.OutcomeSuccess,
 		HTTPStatus:  e.status,

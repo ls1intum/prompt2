@@ -9,6 +9,11 @@ export const SUMMARY_ANSWER = 'The team communicates well and should record its 
 export const FEATURE = 'assessment.action_item_suggestions'
 // Stands in for the key a phase server keeps for its phase; the AI server keeps none.
 export const PROVIDER_KEY = 'logos-e2e-phase-key'
+// Listed in AI_SERVICE_KEYS of server-ai in docker-compose.e2e.yml.
+export const SERVICE_HEADERS = {
+  'X-Prompt-Service': 'assessment',
+  'X-Prompt-Service-Token': 'e2e-assessment-ai-key',
+}
 
 export const aiUrl = (phaseId: string, path: string) =>
   `${BASE_URL}${AI_API}/course_phase/${phaseId}/${path}`
@@ -17,6 +22,7 @@ export const aiUrl = (phaseId: string, path: string) =>
 export const phaseHeaders = (overrides: Record<string, string> = {}): Record<string, string> =>
   Object.fromEntries(
     Object.entries({
+      ...SERVICE_HEADERS,
       'X-Prompt-Provider-Key': PROVIDER_KEY,
       'X-Prompt-Feature': FEATURE,
       ...overrides,

@@ -5,8 +5,8 @@ sidebar_position: 6
 # 🤖 AI Integration
 
 PROMPT reaches language models through one service, the **AI server** (`servers/ai`). It is the only
-component that talks to the model provider, Logos. Phase servers call it with the user's Keycloak
-token and their own Logos key for the course phase, and it records every call in its own database
+component that talks to the model provider, Logos. Phase servers call it with their service key, the
+user's Keycloak token and their own Logos key for the course phase, and it records every call in its own database
 before the provider sees it. Its audit records are browsed in their own micro-frontend,
 `clients/ai_component`.
 
@@ -31,18 +31,22 @@ Everything AI is behind one switch, `AI_ENABLED`, which is off by default.
 2. **Exposure and auth.** The AI server is public under `/ai/api/course_phase/:coursePhaseID` and
    uses the unchanged prompt-sdk `AuthenticationMiddleware` (Keycloak JWKS plus core role
    resolution). The course phase id is part of the URL, the one place the middleware reads it from:
-   an OpenAI-compatible body takes no extra fields. Inference and events: PromptAdmin,
+   an OpenAI-compatible body takes no extra fields. The inference routes also need a phase service
+   key (`X-Prompt-Service` and `X-Prompt-Service-Token`, checked against `AI_SERVICE_KEYS` with
+   prompt-sdk `serviceAuth`, the check core's audit ingest uses), so a staff token copied from the
+   browser cannot call the model or put made-up content into a student's record. The calling
+   service is recorded with each call. Inference and events: PromptAdmin,
    CourseLecturer, CourseEditor. Audit reads: PromptAdmin. No students, and never `PromptLecturer`,
    which the SDK lets pass for every phase (#2288).
 3. **Contract.** OpenAI-compatible pass-through: `POST /v1/chat/completions` and `GET /v1/models`
-   under the course phase path. PROMPT context goes into headers: `X-Prompt-Provider-Key` and
-   `X-Prompt-Feature` are required, `X-Prompt-Template`, `X-Prompt-Template-Version` and
+   under the course phase path. PROMPT context goes into headers: `X-Prompt-Service`,
+   `X-Prompt-Service-Token`, `X-Prompt-Provider-Key` and `X-Prompt-Feature` are required, `X-Prompt-Template`, `X-Prompt-Template-Version` and
    `X-Prompt-Subjects` optional. The response carries `X-Prompt-AI-Call-ID`. Prompt templates, context aggregation and identifier stripping stay in
    the calling service.
 4. **Model access.** Logos only. Each phase server keeps its own Logos key per course phase and
    sends it in `X-Prompt-Provider-Key`; the AI server stores no keys. So every course can use a
-   different key, and the AI server is no freely usable endpoint: a call without a phase's key
-   never reaches Logos. Assessment is the pilot for a phase-owned key (#2291); a shared key for
+   different key. The AI server is no freely usable endpoint: only phase services holding a service
+   key reach the inference routes, and a call without a phase's Logos key never reaches Logos. Assessment is the pilot for a phase-owned key (#2291); a shared key for
    configuration tasks is #2289. `AI_ALLOWED_MODELS` restricts requests to models
    Logos hosts locally, because a Logos key alone does not guarantee local processing. No rate
    limiting or budget logic in the AI server: Logos meters per key.
@@ -89,21 +93,24 @@ Everything AI is behind one switch, `AI_ENABLED`, which is off by default.
 
 A stock OpenAI SDK works against the AI server: set `baseURL` to
 `<host>/ai/api/course_phase/<coursePhaseID>/v1`, pass the user's Keycloak token as the API key and
-the phase's Logos key and the feature as default headers (`X-Prompt-Provider-Key`,
-`X-Prompt-Feature`).
+the service's name and key, the phase's Logos key and the feature as default headers
+(`X-Prompt-Service`, `X-Prompt-Service-Token`, `X-Prompt-Provider-Key`, `X-Prompt-Feature`). The
+service key is the phase server's entry in `AI_SERVICE_KEYS`; it never goes to the browser.
 
 | Route | Roles | Purpose |
 | --- | --- | --- |
-| `POST /v1/chat/completions` | PromptAdmin, CourseLecturer, CourseEditor | Streamed or plain completion |
-| `GET /v1/models` | PromptAdmin, CourseLecturer, CourseEditor | Models both allowed and available to the key sent along |
+| `POST /v1/chat/completions` | Phase service key, then PromptAdmin, CourseLecturer, CourseEditor | Streamed or plain completion |
+| `GET /v1/models` | Phase service key, then PromptAdmin, CourseLecturer, CourseEditor | Models both allowed and available to the key sent along |
 | `POST /calls/:callID/events` | PromptAdmin, CourseLecturer, CourseEditor | Oversight events, on the caller's own calls (any call for PromptAdmin) |
 | `GET /calls`, `GET /calls/:callID` | PromptAdmin | Audit metadata, and one call's content |
 
 The gateway forwards the body unchanged, except that the `model` must be in `AI_ALLOWED_MODELS`,
 `user` is removed so no identifier reaches the provider, and streams always end with a usage
 chunk. Only the phase's key goes to the provider, never the caller's token or the `X-Prompt-*`
-headers. A call without a key or without a registered feature of the phase's type answers `400`
-and is recorded as denied. If the call cannot be recorded, the
+headers. A call without a service key answers `401` and is not recorded. A call without a Logos key,
+without a registered feature of the phase's type, or with a feature, template or template version
+that is not a label of letters, digits, `.`, `_` and `-` of at most 128 characters answers `400`
+and is recorded as denied, without the refused label. If the call cannot be recorded, the
 answer is `503` and the provider is never called. Requests over 4 MiB are refused; a call ends
 after 10 minutes, or after 2 minutes without a chunk.
 
@@ -122,8 +129,8 @@ to `servers/ai/feature/registry.go`.
 
 | Table | Contents | Retention |
 | --- | --- | --- |
-| `ai_call` | Who (Keycloak `sub` and role, no name), the token's issuer, phase, feature, template, requested and served model, system fingerprint, parameters, hashes of request and response, outcome, status, finish reason, tokens, timings | `AI_AUDIT_METADATA_RETENTION_DAYS` (default 1825) |
-| `ai_call_content` | Request and response as passed through, AES-GCM encrypted; a cancelled stream keeps its partial response | per feature |
+| `ai_call` | Who (Keycloak `sub` and role, no name), the token's issuer, the calling service, phase, feature, template, requested and served model, system fingerprint, parameters, hashes of request and response, outcome, status, finish reason, tokens, timings | `AI_AUDIT_METADATA_RETENTION_DAYS` (default 1825) |
+| `ai_call_content` | Request and response as passed through, AES-GCM encrypted with a key version byte and bound to the call id; a cancelled stream keeps its partial response | per feature |
 | `ai_call_subject` | The course participations named in `X-Prompt-Subjects` | per feature |
 | `ai_call_content_restriction` | Content kept but restricted after an erasure request | per feature |
 | `ai_call_event` | `shown`, `accepted`, `edited`, `rejected`, `content_viewed` | metadata retention |
@@ -135,7 +142,8 @@ retention is longer than the longest content retention.
 
 ## Privacy
 
-- **Export:** the calls a person made, and the calls they were a subject of, with their events.
+- **Export:** the calls a person made, and the calls they were a subject of, with their events and
+  the answer of every choice (content, refusal and tool calls).
   Content is included only while it is retained and not restricted, and only to the call's sole
   subject: content that also concerns other people is withheld (GDPR Art. 15(4)). The other
   party's identity is left out.
@@ -157,6 +165,7 @@ privacy request reports the AI part as failed.
 | `AI_ALLOWED_MODELS` | Comma-separated models Logos hosts locally |
 | `AI_ENCRYPTION_KEY` | Base64-encoded 32-byte key for the stored content, `openssl rand -base64 32` |
 | `AI_AUDIT_METADATA_RETENTION_DAYS` | Call metadata retention in days |
+| `AI_SERVICE_KEYS` | Phase services allowed to call the model, `service1:key1,service2:key2` like `AUDIT_INGEST_KEYS` |
 | `AI_HOST` | Where the core client and the AI client reach the AI server; the core host in production |
 
 In production Traefik routes `/ai/api` to the AI server with the API rate limit and without the
