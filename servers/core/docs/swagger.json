@@ -11,6 +11,11 @@
     "paths": {
         "/announcements": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Get all announcements for administration. Expired announcements are only included when requested.",
                 "produces": [
                     "application/json"
@@ -52,6 +57,11 @@
                 }
             },
             "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Create a new announcement banner",
                 "consumes": [
                     "application/json"
@@ -127,6 +137,11 @@
         },
         "/announcements/{id}": {
             "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Update an existing announcement banner, including whether it is enabled",
                 "consumes": [
                     "application/json"
@@ -184,6 +199,11 @@
                 }
             },
             "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Permanently delete an announcement banner",
                 "tags": [
                     "announcements"

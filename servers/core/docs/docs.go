@@ -17,6 +17,11 @@ const docTemplate = `{
     "paths": {
         "/announcements": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Get all announcements for administration. Expired announcements are only included when requested.",
                 "produces": [
                     "application/json"
@@ -58,6 +63,11 @@ const docTemplate = `{
                 }
             },
             "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Create a new announcement banner",
                 "consumes": [
                     "application/json"
@@ -133,6 +143,11 @@ const docTemplate = `{
         },
         "/announcements/{id}": {
             "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Update an existing announcement banner, including whether it is enabled",
                 "consumes": [
                     "application/json"
@@ -190,6 +205,11 @@ const docTemplate = `{
                 }
             },
             "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Permanently delete an announcement banner",
                 "tags": [
                     "announcements"

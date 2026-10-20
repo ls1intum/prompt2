@@ -2,6 +2,7 @@ package announcement
 
 import (
 	"errors"
+	"fmt"
 	"net/url"
 	"strings"
 	"unicode/utf8"
@@ -34,10 +35,10 @@ func validateAnnouncement(request announcementDTO.UpsertAnnouncement) error {
 		return errors.New("message is required")
 	}
 	if utf8.RuneCountInString(request.Message) > maxMessageLength {
-		return errors.New("message must not exceed 300 characters")
+		return fmt.Errorf("message must not exceed %d characters", maxMessageLength)
 	}
 	if utf8.RuneCountInString(request.Title) > maxTitleLength {
-		return errors.New("title must not exceed 100 characters")
+		return fmt.Errorf("title must not exceed %d characters", maxTitleLength)
 	}
 	if err := validateLink(request.LinkURL, request.LinkLabel); err != nil {
 		return err
@@ -60,7 +61,7 @@ func validateLink(linkURL, linkLabel string) error {
 		return errors.New("link URL must be a valid http or https URL")
 	}
 	if utf8.RuneCountInString(linkLabel) > maxLinkLabelLength {
-		return errors.New("link label must not exceed 50 characters")
+		return fmt.Errorf("link label must not exceed %d characters", maxLinkLabelLength)
 	}
 	return nil
 }

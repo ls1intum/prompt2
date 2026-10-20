@@ -53,6 +53,7 @@ func (s *AnnouncementService) getActiveAnnouncements(c *gin.Context) {
 // @Success 200 {object} []announcementDTO.Announcement
 // @Failure 400 {object} utils.ErrorResponse
 // @Failure 500 {object} utils.ErrorResponse
+// @Security BearerAuth
 // @Router /announcements [get]
 func (s *AnnouncementService) getAnnouncements(c *gin.Context) {
 	includeExpired, err := strconv.ParseBool(c.DefaultQuery("includeExpired", "false"))
@@ -79,15 +80,11 @@ func (s *AnnouncementService) getAnnouncements(c *gin.Context) {
 // @Success 201 {object} announcementDTO.Announcement
 // @Failure 400 {object} utils.ErrorResponse
 // @Failure 500 {object} utils.ErrorResponse
+// @Security BearerAuth
 // @Router /announcements [post]
 func (s *AnnouncementService) createAnnouncement(c *gin.Context) {
-	var request announcementDTO.UpsertAnnouncement
-	if err := c.ShouldBindJSON(&request); err != nil {
-		sdkUtils.HandleError(c, http.StatusBadRequest, err)
-		return
-	}
-	request = normalizeAnnouncement(request)
-	if err := validateAnnouncement(request); err != nil {
+	request, err := bindAnnouncement(c)
+	if err != nil {
 		sdkUtils.HandleError(c, http.StatusBadRequest, err)
 		return
 	}
@@ -112,6 +109,7 @@ func (s *AnnouncementService) createAnnouncement(c *gin.Context) {
 // @Failure 400 {object} utils.ErrorResponse
 // @Failure 404 {object} utils.ErrorResponse
 // @Failure 500 {object} utils.ErrorResponse
+// @Security BearerAuth
 // @Router /announcements/{id} [put]
 func (s *AnnouncementService) updateAnnouncement(c *gin.Context) {
 	id, err := uuid.Parse(c.Param("id"))
@@ -119,13 +117,8 @@ func (s *AnnouncementService) updateAnnouncement(c *gin.Context) {
 		sdkUtils.HandleError(c, http.StatusBadRequest, err)
 		return
 	}
-	var request announcementDTO.UpsertAnnouncement
-	if err := c.ShouldBindJSON(&request); err != nil {
-		sdkUtils.HandleError(c, http.StatusBadRequest, err)
-		return
-	}
-	request = normalizeAnnouncement(request)
-	if err := validateAnnouncement(request); err != nil {
+	request, err := bindAnnouncement(c)
+	if err != nil {
 		sdkUtils.HandleError(c, http.StatusBadRequest, err)
 		return
 	}
@@ -147,6 +140,7 @@ func (s *AnnouncementService) updateAnnouncement(c *gin.Context) {
 // @Failure 400 {object} utils.ErrorResponse
 // @Failure 404 {object} utils.ErrorResponse
 // @Failure 500 {object} utils.ErrorResponse
+// @Security BearerAuth
 // @Router /announcements/{id} [delete]
 func (s *AnnouncementService) deleteAnnouncement(c *gin.Context) {
 	id, err := uuid.Parse(c.Param("id"))
@@ -160,4 +154,13 @@ func (s *AnnouncementService) deleteAnnouncement(c *gin.Context) {
 		return
 	}
 	c.Status(http.StatusNoContent)
+}
+
+func bindAnnouncement(c *gin.Context) (announcementDTO.UpsertAnnouncement, error) {
+	var request announcementDTO.UpsertAnnouncement
+	if err := c.ShouldBindJSON(&request); err != nil {
+		return request, err
+	}
+	request = normalizeAnnouncement(request)
+	return request, validateAnnouncement(request)
 }

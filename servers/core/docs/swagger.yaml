@@ -2131,6 +2131,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/utils.ErrorResponse'
+      security:
+      - BearerAuth: []
       summary: Get all announcements
       tags:
       - announcements
@@ -2160,6 +2162,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/utils.ErrorResponse'
+      security:
+      - BearerAuth: []
       summary: Create an announcement
       tags:
       - announcements
@@ -2187,6 +2191,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/utils.ErrorResponse'
+      security:
+      - BearerAuth: []
       summary: Delete an announcement
       tags:
       - announcements
@@ -2226,6 +2232,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/utils.ErrorResponse'
+      security:
+      - BearerAuth: []
       summary: Update an announcement
       tags:
       - announcements
