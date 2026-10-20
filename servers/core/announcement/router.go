@@ -57,7 +57,7 @@ func (s *AnnouncementService) getActiveAnnouncements(c *gin.Context) {
 func (s *AnnouncementService) getAnnouncements(c *gin.Context) {
 	includeExpired, err := strconv.ParseBool(c.DefaultQuery("includeExpired", "false"))
 	if err != nil {
-		handleError(c, http.StatusBadRequest, err)
+		sdkUtils.HandleError(c, http.StatusBadRequest, err)
 		return
 	}
 
@@ -83,12 +83,12 @@ func (s *AnnouncementService) getAnnouncements(c *gin.Context) {
 func (s *AnnouncementService) createAnnouncement(c *gin.Context) {
 	var request announcementDTO.UpsertAnnouncement
 	if err := c.ShouldBindJSON(&request); err != nil {
-		handleError(c, http.StatusBadRequest, err)
+		sdkUtils.HandleError(c, http.StatusBadRequest, err)
 		return
 	}
 	request = normalizeAnnouncement(request)
 	if err := validateAnnouncement(request); err != nil {
-		handleError(c, http.StatusBadRequest, err)
+		sdkUtils.HandleError(c, http.StatusBadRequest, err)
 		return
 	}
 
@@ -116,17 +116,17 @@ func (s *AnnouncementService) createAnnouncement(c *gin.Context) {
 func (s *AnnouncementService) updateAnnouncement(c *gin.Context) {
 	id, err := uuid.Parse(c.Param("id"))
 	if err != nil {
-		handleError(c, http.StatusBadRequest, err)
+		sdkUtils.HandleError(c, http.StatusBadRequest, err)
 		return
 	}
 	var request announcementDTO.UpsertAnnouncement
 	if err := c.ShouldBindJSON(&request); err != nil {
-		handleError(c, http.StatusBadRequest, err)
+		sdkUtils.HandleError(c, http.StatusBadRequest, err)
 		return
 	}
 	request = normalizeAnnouncement(request)
 	if err := validateAnnouncement(request); err != nil {
-		handleError(c, http.StatusBadRequest, err)
+		sdkUtils.HandleError(c, http.StatusBadRequest, err)
 		return
 	}
 
@@ -151,7 +151,7 @@ func (s *AnnouncementService) updateAnnouncement(c *gin.Context) {
 func (s *AnnouncementService) deleteAnnouncement(c *gin.Context) {
 	id, err := uuid.Parse(c.Param("id"))
 	if err != nil {
-		handleError(c, http.StatusBadRequest, err)
+		sdkUtils.HandleError(c, http.StatusBadRequest, err)
 		return
 	}
 
@@ -160,10 +160,4 @@ func (s *AnnouncementService) deleteAnnouncement(c *gin.Context) {
 		return
 	}
 	c.Status(http.StatusNoContent)
-}
-
-func handleError(c *gin.Context, statusCode int, err error) {
-	c.JSON(statusCode, sdkUtils.ErrorResponse{
-		Error: err.Error(),
-	})
 }
