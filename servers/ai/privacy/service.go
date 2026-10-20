@@ -105,13 +105,13 @@ func (s *Service) exportedCallOf(row db.ListPrivacyCallsRow) (privacyDTO.Exporte
 	case row.Request != nil && (!row.IsSubject || row.HasOtherSubjects):
 		call.ContentState = privacyDTO.ContentWithheld
 	case row.Request != nil:
-		request, err := s.box.Decrypt(row.ID, row.Request)
+		request, err := s.box.Decrypt(row.ID, encryption.Request, row.Request)
 		if err != nil {
 			return privacyDTO.ExportedCall{}, fmt.Errorf("decrypt request of call %s: %w", row.ID, err)
 		}
 		call.ContentState, call.Request = callDTO.ContentAvailable, request
 		if row.Response != nil {
-			response, err := s.box.Decrypt(row.ID, row.Response)
+			response, err := s.box.Decrypt(row.ID, encryption.Response, row.Response)
 			if err != nil {
 				return privacyDTO.ExportedCall{}, fmt.Errorf("decrypt response of call %s: %w", row.ID, err)
 			}

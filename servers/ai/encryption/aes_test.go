@@ -21,12 +21,12 @@ func TestEncryptRoundTrip(t *testing.T) {
 	box := newTestBox(t)
 	callID := uuid.New()
 
-	sealed, err := box.Encrypt(callID, []byte("logos-key-1234"))
+	sealed, err := box.Encrypt(callID, Request, []byte("logos-key-1234"))
 	require.NoError(t, err)
 	assert.NotContains(t, string(sealed), "logos-key-1234")
 	assert.Equal(t, keyVersion, sealed[0])
 
-	opened, err := box.Decrypt(callID, sealed)
+	opened, err := box.Decrypt(callID, Request, sealed)
 	require.NoError(t, err)
 	assert.Equal(t, "logos-key-1234", string(opened))
 }
@@ -34,31 +34,41 @@ func TestEncryptRoundTrip(t *testing.T) {
 func TestDecryptRejectsTamperedCiphertext(t *testing.T) {
 	box := newTestBox(t)
 	callID := uuid.New()
-	sealed, err := box.Encrypt(callID, []byte("content"))
+	sealed, err := box.Encrypt(callID, Request, []byte("content"))
 	require.NoError(t, err)
 	sealed[len(sealed)-1] ^= 0xff
 
-	_, err = box.Decrypt(callID, sealed)
+	_, err = box.Decrypt(callID, Request, sealed)
 	assert.Error(t, err)
 }
 
 func TestDecryptRejectsContentOfAnotherCall(t *testing.T) {
 	box := newTestBox(t)
-	sealed, err := box.Encrypt(uuid.New(), []byte("content"))
+	sealed, err := box.Encrypt(uuid.New(), Request, []byte("content"))
 	require.NoError(t, err)
 
-	_, err = box.Decrypt(uuid.New(), sealed)
+	_, err = box.Decrypt(uuid.New(), Request, sealed)
 	assert.Error(t, err)
+}
+
+func TestDecryptRejectsTheOtherPurpose(t *testing.T) {
+	box := newTestBox(t)
+	callID := uuid.New()
+	sealed, err := box.Encrypt(callID, Request, []byte("content"))
+	require.NoError(t, err)
+
+	_, err = box.Decrypt(callID, Response, sealed)
+	assert.Error(t, err, "a request swapped into the response field must not decrypt")
 }
 
 func TestDecryptRejectsUnknownKeyVersion(t *testing.T) {
 	box := newTestBox(t)
 	callID := uuid.New()
-	sealed, err := box.Encrypt(callID, []byte("content"))
+	sealed, err := box.Encrypt(callID, Request, []byte("content"))
 	require.NoError(t, err)
 	sealed[0] = keyVersion + 1
 
-	_, err = box.Decrypt(callID, sealed)
+	_, err = box.Decrypt(callID, Request, sealed)
 	assert.ErrorIs(t, err, ErrUnknownKeyVersion)
 }
 

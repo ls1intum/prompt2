@@ -55,12 +55,17 @@ func Slug(phaseTypeName string) string {
 	return strings.ToLower(strings.Join(strings.Fields(phaseTypeName), "-"))
 }
 
-func CheckFor(name, phaseTypeName string) error {
+// CheckFor binds a feature to both the phase type and the service whose key made the call.
+func CheckFor(name, phaseTypeName, service string) error {
 	if _, ok := Lookup(name); !ok {
 		return fmt.Errorf("%w: %q is not registered", ErrNotAllowed, name)
 	}
-	if prefix, _, _ := strings.Cut(name, "."); prefix != Slug(phaseTypeName) {
+	prefix, _, _ := strings.Cut(name, ".")
+	if prefix != Slug(phaseTypeName) {
 		return fmt.Errorf("%w: %q does not belong to phase type %q", ErrNotAllowed, name, phaseTypeName)
+	}
+	if prefix != service {
+		return fmt.Errorf("%w: %q does not belong to service %q", ErrNotAllowed, name, service)
 	}
 	return nil
 }

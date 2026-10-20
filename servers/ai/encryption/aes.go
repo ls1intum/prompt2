@@ -63,17 +63,29 @@ func New() (*Box, error) {
 	return &Box{aead: aead}, nil
 }
 
-// Encrypt binds the ciphertext to its call, so content moved to another call does not decrypt.
-func (b *Box) Encrypt(callID uuid.UUID, plaintext []byte) ([]byte, error) {
+// Purpose tells a call's request and response apart, so the two cannot be swapped.
+type Purpose string
+
+const (
+	Request  Purpose = "request"
+	Response Purpose = "response"
+)
+
+func additionalData(callID uuid.UUID, purpose Purpose) []byte {
+	return append(callID[:], purpose...)
+}
+
+// Encrypt binds the ciphertext to its call and purpose, so content moved to another call or field does not decrypt.
+func (b *Box) Encrypt(callID uuid.UUID, purpose Purpose, plaintext []byte) ([]byte, error) {
 	nonce := make([]byte, b.aead.NonceSize())
 	if _, err := rand.Read(nonce); err != nil {
 		return nil, err
 	}
 	sealed := append([]byte{keyVersion}, nonce...)
-	return b.aead.Seal(sealed, nonce, plaintext, callID[:]), nil
+	return b.aead.Seal(sealed, nonce, plaintext, additionalData(callID, purpose)), nil
 }
 
-func (b *Box) Decrypt(callID uuid.UUID, data []byte) ([]byte, error) {
+func (b *Box) Decrypt(callID uuid.UUID, purpose Purpose, data []byte) ([]byte, error) {
 	nonceEnd := 1 + b.aead.NonceSize()
 	if len(data) < nonceEnd {
 		return nil, ErrShortCiphertext
@@ -81,5 +93,5 @@ func (b *Box) Decrypt(callID uuid.UUID, data []byte) ([]byte, error) {
 	if data[0] != keyVersion {
 		return nil, ErrUnknownKeyVersion
 	}
-	return b.aead.Open(nil, data[1:nonceEnd], data[nonceEnd:], callID[:])
+	return b.aead.Open(nil, data[1:nonceEnd], data[nonceEnd:], additionalData(callID, purpose))
 }

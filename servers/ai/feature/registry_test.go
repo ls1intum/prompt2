@@ -28,10 +28,12 @@ func TestSlug(t *testing.T) {
 }
 
 func TestCheckFor(t *testing.T) {
-	assert.NoError(t, CheckFor("assessment.action_item_suggestions", "Assessment"))
-	assert.ErrorIs(t, CheckFor("assessment.action_item_suggestions", "Interview"), ErrNotAllowed,
+	assert.NoError(t, CheckFor("assessment.action_item_suggestions", "Assessment", "assessment"))
+	assert.ErrorIs(t, CheckFor("assessment.action_item_suggestions", "Interview", "assessment"), ErrNotAllowed,
 		"a feature must not be recorded under another phase type")
-	assert.ErrorIs(t, CheckFor("interview.summary", "Interview"), ErrNotAllowed,
+	assert.ErrorIs(t, CheckFor("assessment.action_item_suggestions", "Assessment", "interview"), ErrNotAllowed,
+		"a service key must only reach its own phase type")
+	assert.ErrorIs(t, CheckFor("interview.summary", "Interview", "interview"), ErrNotAllowed,
 		"an unregistered feature has no retention, so it is refused")
-	assert.ErrorIs(t, CheckFor("", "Assessment"), ErrNotAllowed, "a call must name its feature")
+	assert.ErrorIs(t, CheckFor("", "Assessment", "assessment"), ErrNotAllowed, "a call must name its feature")
 }

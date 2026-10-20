@@ -85,7 +85,7 @@ func (s *Service) Begin(ctx context.Context, request Request) (uuid.UUID, error)
 	if err != nil {
 		return uuid.Nil, fmt.Errorf("create call: %w", err)
 	}
-	encryptedRequest, err := s.box.Encrypt(callID, request.Body)
+	encryptedRequest, err := s.box.Encrypt(callID, encryption.Request, request.Body)
 	if err != nil {
 		return uuid.Nil, fmt.Errorf("encrypt request: %w", err)
 	}
@@ -113,7 +113,7 @@ func (s *Service) Deny(ctx context.Context, request Request, httpStatus int, err
 
 func (s *Service) Finish(ctx context.Context, callID uuid.UUID, completion Completion) error {
 	summary := Summarize(completion.Response, completion.Streamed)
-	encryptedResponse, err := s.box.Encrypt(callID, completion.Response)
+	encryptedResponse, err := s.box.Encrypt(callID, encryption.Response, completion.Response)
 	if err != nil {
 		return fmt.Errorf("encrypt response: %w", err)
 	}
@@ -272,13 +272,13 @@ func (s *Service) recordEvent(ctx context.Context, coursePhaseID, callID uuid.UU
 }
 
 func (s *Service) decryptContent(callID uuid.UUID, encryptedRequest, encryptedResponse []byte, streamed bool) (callDTO.Content, error) {
-	request, err := s.box.Decrypt(callID, encryptedRequest)
+	request, err := s.box.Decrypt(callID, encryption.Request, encryptedRequest)
 	if err != nil {
 		return callDTO.Content{}, fmt.Errorf("decrypt request: %w", err)
 	}
 	content := callDTO.Content{Request: request, Choices: []callDTO.Choice{}}
 	if encryptedResponse != nil {
-		response, err := s.box.Decrypt(callID, encryptedResponse)
+		response, err := s.box.Decrypt(callID, encryption.Response, encryptedResponse)
 		if err != nil {
 			return callDTO.Content{}, fmt.Errorf("decrypt response: %w", err)
 		}

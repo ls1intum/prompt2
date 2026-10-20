@@ -132,7 +132,7 @@ func (g *Gateway) chatCompletions(c *gin.Context) {
 		c.JSON(http.StatusBadGateway, sdkUtils.ErrorResponse{Error: "could not resolve the course phase"})
 		return
 	}
-	if err := feature.CheckFor(request.Feature, phaseType); err != nil {
+	if err := feature.CheckFor(request.Feature, phaseType, request.CallerService); err != nil {
 		g.deny(c, request, http.StatusBadRequest, "feature_not_allowed", err.Error())
 		return
 	}
@@ -212,6 +212,8 @@ func (g *Gateway) providerModels(c *gin.Context, logosKey string) ([]json.RawMes
 
 func providerKey(c *gin.Context) (string, error) {
 	logosKey := strings.TrimSpace(c.GetHeader(ProviderKeyHeader))
+	// Removed so gin's panic recovery, which masks only Authorization, cannot print it.
+	c.Request.Header.Del(ProviderKeyHeader)
 	if len(logosKey) < minKeyLength || len(logosKey) > maxKeyLength ||
 		strings.ContainsFunc(logosKey, func(r rune) bool { return r < '!' || r > '~' }) {
 		return "", errMissingKey

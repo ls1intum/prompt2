@@ -57,7 +57,7 @@ Everything AI is behind one switch, `AI_ENABLED`, which is off by default.
 6. **Audit.** Own database, fail-closed: the record is written before the provider is called.
    Every call names its feature, which sets the content retention from a feature registry in code
    (`<phase type slug>.<feature>`, prefix enforced against the phase's type, which the AI server
-   asks core for once per phase). A call without a registered feature is refused, so there is no
+   asks core for once per phase, and against the service whose key made the call). A call without a registered feature is refused, so there is no
    call without a retention. Each record keeps the caller and their role, the `iss` claim of the
    token, the requested and served model and the provider's system fingerprint where it reports
    one. Metadata retention is longer than the longest content retention. Nothing goes to core's
@@ -108,7 +108,7 @@ The gateway forwards the body unchanged, except that the `model` must be in `AI_
 `user` is removed so no identifier reaches the provider, and streams always end with a usage
 chunk. Only the phase's key goes to the provider, never the caller's token or the `X-Prompt-*`
 headers. A call without a service key answers `401` and is not recorded. A call without a Logos key,
-without a registered feature of the phase's type, or with a feature, template or template version
+without a registered feature of the phase's type and the calling service, or with a feature, template or template version
 that is not a label of letters, digits, `.`, `_` and `-` of at most 128 characters answers `400`
 and is recorded as denied, without the refused label. If the call cannot be recorded, the
 answer is `503` and the provider is never called. Requests over 4 MiB are refused; a call ends
@@ -168,9 +168,15 @@ privacy request reports the AI part as failed.
 | `AI_SERVICE_KEYS` | Phase services allowed to call the model, `service1:key1,service2:key2` like `AUDIT_INGEST_KEYS` |
 | `AI_HOST` | Where the core client and the AI client reach the AI server; the core host in production |
 
+Provision `AI_SERVICE_KEYS` like the audit ingest keys: one key per calling service, each generated
+with `openssl rand -hex 32` and never the same as that service's audit ingest key. The service name
+is the slug its features start with (`assessment`), so a key only reaches its own phase type. To
+rotate a key, list the new one next to the old one, switch the service over, then drop the old one.
+
 In production Traefik routes `/ai/api` to the AI server with the API rate limit and without the
 compress middleware, which would buffer streamed completions, and `/ai` to the AI client. Locally,
-set `AI_ENABLED=true` and `AI_ALLOWED_MODELS` in `.env`: `make db` then starts the AI database,
+set `AI_ENABLED=true`, `AI_ALLOWED_MODELS` and an `AI_SERVICE_KEYS` entry for every calling phase
+in `.env` (without one, every inference call answers `401`): `make db` then starts the AI database,
 `make server-ai` the server on port 8092 and `make client-ai` the AI client on port 3013. The e2e
 shard `ai` runs the stack with the AI server, the AI client and aimock as the provider.
 
