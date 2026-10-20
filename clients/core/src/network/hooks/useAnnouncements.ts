@@ -2,7 +2,7 @@ import { describeVisibility } from '@core/announcementBanner/utils/announcementS
 import type { Announcement, UpsertAnnouncement } from '@core/interfaces/announcement'
 import { coreApi } from '@core/network/api'
 import { coreCache, coreKeys } from '@core/network/cache'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useToast } from '@tumaet/prompt-ui-components'
 import { isAxiosError } from 'axios'
 
@@ -26,6 +26,7 @@ export const useAnnouncements = (includeExpired: boolean) => {
   return useQuery({
     queryKey: coreKeys.announcements.list(includeExpired),
     queryFn: () => coreApi.announcements.list(includeExpired),
+    placeholderData: keepPreviousData,
   })
 }
 
@@ -69,10 +70,13 @@ export const useDeleteAnnouncement = () => {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: (id: string) => coreApi.announcements.remove(id),
-    onSuccess: () => {
-      toast({ title: 'Announcement deleted' })
-      coreCache.announcementsChanged(queryClient)
+    mutationFn: async (ids: string[]) => {
+      await Promise.all(ids.map((id) => coreApi.announcements.remove(id)))
+    },
+    onSuccess: (_, ids) => {
+      toast({
+        title: ids.length === 1 ? 'Announcement deleted' : `${ids.length} announcements deleted`,
+      })
     },
     onError: (error) => {
       toast({
@@ -80,6 +84,9 @@ export const useDeleteAnnouncement = () => {
         description: describeError(error),
         variant: 'destructive',
       })
+    },
+    onSettled: () => {
+      coreCache.announcementsChanged(queryClient)
     },
   })
 }

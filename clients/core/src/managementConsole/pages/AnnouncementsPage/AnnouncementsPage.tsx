@@ -11,6 +11,7 @@ import {
   Label,
   ManagementPageHeader,
   PromptTable,
+  QueryGate,
   Switch,
 } from '@tumaet/prompt-ui-components'
 import { Plus } from 'lucide-react'
@@ -41,7 +42,7 @@ const toUpsert = ({
 
 export const AnnouncementsPage = () => {
   const [showExpired, setShowExpired] = useState(false)
-  const { data: announcements = [], isLoading, isError } = useAnnouncements(showExpired)
+  const announcementsQuery = useAnnouncements(showExpired)
   const createAnnouncement = useCreateAnnouncement()
   const updateAnnouncement = useUpdateAnnouncement()
   const deleteAnnouncement = useDeleteAnnouncement()
@@ -71,11 +72,7 @@ export const AnnouncementsPage = () => {
 
   const { mutate: deleteMutate } = deleteAnnouncement
   const handleDelete = useCallback(
-    (selected: Announcement[]) => {
-      for (const announcement of selected) {
-        deleteMutate(announcement.id)
-      }
-    },
+    (selected: Announcement[]) => deleteMutate(selected.map((announcement) => announcement.id)),
     [deleteMutate],
   )
 
@@ -108,20 +105,17 @@ export const AnnouncementsPage = () => {
         Show announcement banners, e.g. for maintenance windows or outages, to all users.
       </p>
 
-      {isLoading && <p className='text-sm text-muted-foreground'>Loading announcements…</p>}
-      {isError && <p className='text-sm text-destructive'>Failed to load announcements.</p>}
-      {!isLoading && !isError && (
+      <QueryGate queries={[announcementsQuery]}>
         <PromptTable
-          data={announcements}
+          data={announcementsQuery.data ?? []}
           columns={columns}
           actions={actions}
           onRowClick={setEditAnnouncement}
         />
-      )}
+      </QueryGate>
 
       {createOpen && (
         <AnnouncementFormDialog
-          open={createOpen}
           onClose={() => setCreateOpen(false)}
           onSubmit={handleCreate}
           isPending={createAnnouncement.isPending}
@@ -130,7 +124,6 @@ export const AnnouncementsPage = () => {
 
       {editAnnouncement && (
         <AnnouncementFormDialog
-          open={!!editAnnouncement}
           onClose={() => setEditAnnouncement(null)}
           announcement={editAnnouncement}
           onSubmit={handleUpdate}

@@ -28,7 +28,6 @@ import { SEVERITY_LABELS } from './announcementLabels'
 import { validateAnnouncementForm } from './validateAnnouncementForm'
 
 interface AnnouncementFormDialogProps {
-  open: boolean
   onClose: () => void
   announcement?: Announcement
   onSubmit: (values: UpsertAnnouncement) => void
@@ -44,7 +43,6 @@ const toDate = (value: string | null | undefined): Date | undefined =>
   value ? new Date(value) : undefined
 
 export const AnnouncementFormDialog = ({
-  open,
   onClose,
   announcement,
   onSubmit,
@@ -72,12 +70,8 @@ export const AnnouncementFormDialog = ({
   const errors = validateAnnouncementForm(values)
   const isValid = Object.keys(errors).length === 0
 
-  const handleOpenChange = (isOpen: boolean) => {
-    if (!isOpen) onClose()
-  }
-
   return (
-    <Dialog open={open} onOpenChange={handleOpenChange}>
+    <Dialog open onOpenChange={(isOpen) => !isOpen && onClose()}>
       <DialogContent className='sm:max-w-2xl max-h-[90vh] overflow-y-auto'>
         <DialogHeader>
           <DialogTitle>{announcement ? 'Edit Announcement' : 'Create Announcement'}</DialogTitle>
