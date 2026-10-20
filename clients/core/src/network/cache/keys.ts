@@ -24,6 +24,7 @@ export const coreKeys = {
     // The archive dialog caches the same phase under its own literal, so it shares neither the
     // entry above nor its invalidations
     byIdInArchiveDialog: (phaseId: Id) => ['coursePhase', phaseId] as const,
+    participations: (phaseId: Id) => ['course_phase_participations', phaseId] as const,
     types: () => ['course_phase_types'] as const,
     typesForScope: (scope: 'self' | 'all') => ['coursePhaseType', scope] as const,
   },
@@ -122,6 +123,10 @@ export const coreKeys = {
     // The id sits inside the literal rather than in a second element, so these are not one prefix
     // family and `serviceInfo.core` is not their parent
     ofService: (serviceId: string) => [`serviceInfo-${serviceId}`] as const,
+  },
+
+  clientInfo: {
+    ofRemote: (remoteName: string) => ['clientInfo', remoteName] as const,
   },
 
   auditLog: {
