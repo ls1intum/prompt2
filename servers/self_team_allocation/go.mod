@@ -1,6 +1,6 @@
 module github.com/prompt-edu/prompt/servers/self_team_allocation
 
-go 1.27.2
+go 1.27.3
 
 require (
 	github.com/getsentry/sentry-go v0.50.0
