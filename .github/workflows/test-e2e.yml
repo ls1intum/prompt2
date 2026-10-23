@@ -88,6 +88,8 @@ jobs:
         env:
           # Only the cacheWriter shard exports; the rest are readers.
           CACHE_WRITE: ${{ matrix.cacheWriter && '-f docker-compose.e2e.cache-write.yml' || '' }}
+          # The cacheWriter also builds the AI images, so the ai shard reads them; it never boots them.
+          COMPOSE_PROFILES: ${{ (matrix.cacheWriter || matrix.aiEnabled) && 'ai' || '' }}
         run: |
           # shellcheck disable=SC2086 # both hold multiple flags; splitting is the point
           docker compose ${E2E_COMPOSE} ${CACHE_WRITE} build
