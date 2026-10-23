@@ -192,17 +192,24 @@ func (s *S3Adapter) Delete(ctx context.Context, storageKey string) error {
 }
 
 // GetUploadURL returns a presigned URL for uploading a file
-func (s *S3Adapter) GetUploadURL(ctx context.Context, storageKey string, contentType string, ttl int) (string, error) {
+func (s *S3Adapter) GetUploadURL(ctx context.Context, storageKey string, contentType string, contentLength int64, ttl int) (string, error) {
 	duration := s.presignDuration
 	if ttl > 0 {
 		duration = time.Duration(ttl) * time.Second
 	}
 
-	request, err := s.presignClient.PresignPutObject(ctx, &s3.PutObjectInput{
+	input := &s3.PutObjectInput{
 		Bucket:      aws.String(s.bucket),
 		Key:         aws.String(storageKey),
 		ContentType: aws.String(contentType),
-	}, func(opts *s3.PresignOptions) {
+	}
+	// A signed Content-Length makes the storage backend reject a body of any other size,
+	// so the size limit is enforced before the bytes are written.
+	if contentLength > 0 {
+		input.ContentLength = aws.Int64(contentLength)
+	}
+
+	request, err := s.presignClient.PresignPutObject(ctx, input, func(opts *s3.PresignOptions) {
 		opts.Expires = duration
 	})
 	if err != nil {

@@ -38,8 +38,9 @@ type StorageAdapter interface {
 	// Delete removes a file from storage
 	Delete(ctx context.Context, storageKey string) error
 
-	// GetUploadURL returns a (potentially temporary/signed) URL for uploading the file
-	GetUploadURL(ctx context.Context, storageKey string, contentType string, ttl int) (string, error)
+	// GetUploadURL returns a (potentially temporary/signed) URL for uploading the file.
+	// A contentLength above 0 binds the upload to exactly that many bytes; 0 leaves it open.
+	GetUploadURL(ctx context.Context, storageKey string, contentType string, contentLength int64, ttl int) (string, error)
 
 	// GetURL returns a (potentially temporary/signed) URL for accessing the file.
 	// If ttl is 0, returns a permanent URL (if supported by the storage backend).

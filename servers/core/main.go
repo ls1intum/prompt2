@@ -71,6 +71,35 @@ func runMigrations(databaseURL string) {
 	fmt.Print(sanitized)
 }
 
+const (
+	uploadReaperInterval  = 15 * time.Minute
+	uploadReaperBatchSize = 100
+)
+
+// startUploadReaper periodically deletes presigned uploads that were never completed, so
+// abandoned or rejected objects do not fill the storage backend.
+func startUploadReaper(ctx context.Context, fileStorageService *files.StorageService) {
+	ticker := time.NewTicker(uploadReaperInterval)
+	go func() {
+		defer ticker.Stop()
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			case <-ticker.C:
+				reclaimed, err := fileStorageService.ReclaimExpiredUploads(ctx, uploadReaperBatchSize)
+				if err != nil {
+					log.WithError(err).Warn("Could not reclaim expired uploads")
+					continue
+				}
+				if reclaimed > 0 {
+					log.WithField("count", reclaimed).Info("Reclaimed expired uploads")
+				}
+			}
+		}
+	}()
+}
+
 func initKeycloak(router *gin.RouterGroup, queries db.Queries, checkCoursePermission permissionValidation.PermissionCheck) (*keycloakTokenVerifier.KeycloakTokenVerifier, *keycloakRealmManager.KeycloakRealmService) {
 	baseURL := sdkUtils.GetEnv("KEYCLOAK_HOST", "http://localhost:8081")
 	if !strings.HasPrefix(baseURL, "http") {
@@ -233,6 +262,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("Failed to initialize prompt file storage: %v", err)
 	}
+	startUploadReaper(context.Background(), fileStorageService)
 	profilePictureService := profilePicture.NewProfilePictureService(*query, conn, fileStorageService)
 	profilePicture.RegisterRoutes(api, profilePictureService, tokenVerifier.KeycloakMiddleware)
 

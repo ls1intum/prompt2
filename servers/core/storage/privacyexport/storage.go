@@ -77,7 +77,7 @@ func (s *ExportStorage) GetUploadURL(ctx context.Context, exportRequestID, servi
 	}
 
 	key := MakeObjectURL(exportRequestID, serviceName)
-	return s.adapter.GetUploadURL(ctx, key, "application/zip", int(uploadPresignTTL.Seconds()))
+	return s.adapter.GetUploadURL(ctx, key, "application/zip", 0, int(uploadPresignTTL.Seconds()))
 }
 
 // GetDownloadURL generates a presigned S3 GET URL for downloading a GDPR export ZIP.

@@ -23,6 +23,8 @@ const maxUploadRequestBodyBytes = 1 << 20 // 1 MiB
 type applicationPresignUploadRequest struct {
 	Filename    string `json:"filename"`
 	ContentType string `json:"contentType"`
+	// SizeBytes is optional for now; when sent, the upload URL only accepts exactly that size.
+	SizeBytes   int64  `json:"sizeBytes"`
 	Description string `json:"description"`
 	Tags        string `json:"tags"`
 }
@@ -64,6 +66,7 @@ func (s *ApplicationService) presignApplicationUploadExternal(c *gin.Context) {
 	response, err := s.files.PresignUpload(c.Request.Context(), files.PresignUploadRequest{
 		Filename:      body.Filename,
 		ContentType:   body.ContentType,
+		SizeBytes:     body.SizeBytes,
 		CoursePhaseID: &coursePhaseID,
 		Description:   body.Description,
 		Tags:          parseTags(body.Tags),
@@ -155,6 +158,7 @@ func (s *ApplicationService) presignApplicationUploadAuthenticated(c *gin.Contex
 	response, err := s.files.PresignUpload(c.Request.Context(), files.PresignUploadRequest{
 		Filename:      body.Filename,
 		ContentType:   body.ContentType,
+		SizeBytes:     body.SizeBytes,
 		CoursePhaseID: &coursePhaseID,
 		Description:   body.Description,
 		Tags:          parseTags(body.Tags),
