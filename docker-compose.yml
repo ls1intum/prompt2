@@ -61,6 +61,7 @@ services:
       - MAX_FILE_UPLOAD_SIZE_MB
       - ALLOWED_FILE_TYPES
       - AI_ENABLED
+      - SERVER_AI_HOST
     restart: unless-stopped
 
   server-team-allocation:

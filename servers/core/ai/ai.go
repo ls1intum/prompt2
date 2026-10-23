@@ -8,10 +8,10 @@ import (
 const ServiceName = "AI"
 
 // Module is the AI server, which keeps audit records per person but no data per course phase.
-func Module(environment, coreHost string) standaloneModule.Module {
-	baseURL := resolution.NormaliseHost(coreHost) + "/ai/api"
-	if environment == "development" {
-		baseURL = "http://localhost:8092/ai/api"
+// Without an explicit aiHost (SERVER_AI_HOST) it sits behind the same host as core.
+func Module(aiHost, coreHost string) standaloneModule.Module {
+	if aiHost == "" {
+		aiHost = coreHost
 	}
-	return standaloneModule.Module{Name: ServiceName, BaseURL: baseURL}
+	return standaloneModule.Module{Name: ServiceName, BaseURL: resolution.NormaliseHost(aiHost) + "/ai/api"}
 }

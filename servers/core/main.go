@@ -213,7 +213,7 @@ func main() {
 
 	var standaloneModules []standaloneModule.Module
 	if sdkUtils.GetEnv("AI_ENABLED", "") == "true" {
-		standaloneModules = append(standaloneModules, ai.Module(environment, coreHost))
+		standaloneModules = append(standaloneModules, ai.Module(sdkUtils.GetEnv("SERVER_AI_HOST", ""), coreHost))
 	}
 
 	coursePhaseService := coursePhase.NewCoursePhaseService(*query, conn, resolutionService)
