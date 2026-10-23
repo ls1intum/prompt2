@@ -635,6 +635,19 @@ func (suite *ApplicationAdminRouterTestSuite) TestPostApplicationManualEndpoint_
 	assert.Equal(suite.T(), "application posted", responseBody["message"])
 }
 
+// TestPresignUploadExternal_OutsideApplicationWindow verifies uploads are refused with 403
+// before the application start date. Regression test for GHSA-pv93-3r7g-rhpq.
+func (suite *ApplicationAdminRouterTestSuite) TestPresignUploadExternal_OutsideApplicationWindow() {
+	jsonBody, err := json.Marshal(applicationPresignUploadRequest{Filename: "cv.pdf", ContentType: "application/pdf"})
+	assert.NoError(suite.T(), err)
+
+	req := httptest.NewRequest(http.MethodPost, "/api/apply/d0000095-0000-0000-0000-000000000095/files/presign", bytes.NewReader(jsonBody))
+	req.Header.Set("Content-Type", "application/json")
+	resp := httptest.NewRecorder()
+	suite.router.ServeHTTP(resp, req)
+	assert.Equal(suite.T(), http.StatusForbidden, resp.Code)
+}
+
 func TestApplicationAdminRouterTestSuite(t *testing.T) {
 	suite.Run(t, new(ApplicationAdminRouterTestSuite))
 }

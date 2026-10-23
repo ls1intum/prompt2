@@ -603,6 +603,33 @@ func (suite *ApplicationAdminValidationTestSuite) TestValidateAdditionalScore_Mi
 	assert.Equal(suite.T(), "scores must be positive", err.Error())
 }
 
+// TestValidateApplication_OutsideApplicationWindow verifies submissions are rejected before
+// the application start date and for archived courses, matching the public listing.
+// Regression test for GHSA-pv93-3r7g-rhpq.
+func (suite *ApplicationAdminValidationTestSuite) TestValidateApplication_OutsideApplicationWindow() {
+	application := applicationDTO.PostApplication{
+		Student: studentDTO.CreateStudent{
+			FirstName:       "Early",
+			LastName:        "Bird",
+			Email:           "early-bird@example.com",
+			Nationality:     "DE",
+			CurrentSemester: pgtype.Int4{Valid: true, Int32: 1},
+			StudyProgram:    "Computer Science",
+			StudyDegree:     "bachelor",
+		},
+	}
+
+	for _, coursePhaseID := range []string{
+		"d0000095-0000-0000-0000-000000000095", // start date in the future
+		"d0000094-0000-0000-0000-000000000094", // archived course
+	} {
+		for _, authenticatedRoute := range []bool{false, true} {
+			err := suite.applicationAdminService.validateApplication(suite.ctx, uuid.MustParse(coursePhaseID), application, authenticatedRoute)
+			assert.Error(suite.T(), err, coursePhaseID)
+		}
+	}
+}
+
 func TestValidateUpdateFormSuite(t *testing.T) {
 	suite.Run(t, new(ApplicationAdminValidationTestSuite))
 }

@@ -160,3 +160,12 @@ INSERT INTO files (
     '{application,resume}',
     CURRENT_TIMESTAMP
 );
+
+-- Application phases outside the intended window, used to assert that submissions and
+-- uploads are rejected there just like the public listing hides them (GHSA-pv93-3r7g-rhpq).
+-- Each gets its own course, because only one initial phase is allowed per course.
+INSERT INTO course (id, name, start_date, end_date, semester_tag, course_type, ects, restricted_data) VALUES ('c0000095-0000-0000-0000-000000000095', 'Not Yet Open Course', '2024-10-01', '2025-01-01', 'ios24245', 'practical course', 10, '{}');
+INSERT INTO course (id, name, start_date, end_date, semester_tag, course_type, ects, restricted_data, archived, archived_on) VALUES ('c0000094-0000-0000-0000-000000000094', 'Archived Course', '2024-10-01', '2025-01-01', 'ios24245', 'practical course', 10, '{}', true, CURRENT_TIMESTAMP);
+
+INSERT INTO course_phase (id, course_id, name, restricted_data, is_initial_phase, course_phase_type_id) VALUES ('d0000095-0000-0000-0000-000000000095', 'c0000095-0000-0000-0000-000000000095', 'Not Yet Open Application', '{"applicationEndDate": "2099-01-18T00:00:00.000Z", "applicationStartDate": "2098-12-24T00:00:00.000Z", "externalStudentsAllowed": true, "universityLoginAvailable": true}', true, '96fb1001-b21c-4527-8b6f-2fd5f4ba3abc');
+INSERT INTO course_phase (id, course_id, name, restricted_data, is_initial_phase, course_phase_type_id) VALUES ('d0000094-0000-0000-0000-000000000094', 'c0000094-0000-0000-0000-000000000094', 'Archived Application', '{"applicationEndDate": "2030-01-18T00:00:00.000Z", "applicationStartDate": "2024-12-24T00:00:00.000Z", "externalStudentsAllowed": true, "universityLoginAvailable": true}', true, '96fb1001-b21c-4527-8b6f-2fd5f4ba3abc');

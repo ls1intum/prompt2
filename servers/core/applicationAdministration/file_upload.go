@@ -8,6 +8,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5"
 	db "github.com/prompt-edu/prompt/servers/core/db/sqlc"
 	"github.com/prompt-edu/prompt/servers/core/storage/files"
 	log "github.com/sirupsen/logrus"
@@ -395,6 +396,10 @@ func (s *ApplicationService) ensureOpenApplicationPhase(c *gin.Context, coursePh
 	defer cancel()
 
 	applicationDetails, err := s.queries.CheckIfCoursePhaseIsOpenApplicationPhase(ctxWithTimeout, coursePhaseID)
+	if errors.Is(err, pgx.ErrNoRows) {
+		c.JSON(http.StatusForbidden, gin.H{"error": "course phase is not open for applications"})
+		return false
+	}
 	if err != nil {
 		log.WithError(err).Error("Could not validate application phase")
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "could not validate application phase"})

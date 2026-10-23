@@ -102,10 +102,17 @@ JOIN
     course_phase_type cpt
 ON
     cp.course_phase_type_id = cpt.id
+JOIN
+    course c
+ON
+    cp.course_id = c.id
 WHERE
     cp.id = $1
+    AND cp.is_initial_phase = true
+    AND c.archived = false
     AND COALESCE(cp.restricted_data->>'applicationMode', 'apply') = 'apply'
     AND (cp.restricted_data->>'applicationEndDate')::timestamp > NOW()
+    AND (cp.restricted_data->>'applicationStartDate')::timestamp < NOW()
 `
 
 type CheckIfCoursePhaseIsOpenApplicationPhaseRow struct {
