@@ -18,6 +18,7 @@ import (
 	"github.com/prompt-edu/prompt/servers/core/auditLog"
 	"github.com/prompt-edu/prompt/servers/core/auth"
 	coreAuth "github.com/prompt-edu/prompt/servers/core/auth/service"
+	"github.com/prompt-edu/prompt/servers/core/bodyLimit"
 	"github.com/prompt-edu/prompt/servers/core/course"
 	"github.com/prompt-edu/prompt/servers/core/course/copy"
 	"github.com/prompt-edu/prompt/servers/core/course/courseParticipation"
@@ -206,6 +207,9 @@ func main() {
 	localHost := "http://localhost:3000"
 	clientHost := sdkUtils.GetEnv("CORE_HOST", localHost)
 	router.Use(sdkUtils.CORS(clientHost))
+	// Cap request bodies before any route is registered, so the cap is part of every route's
+	// chain. The few routes that need more raise it with bodyLimit.WithLimit.
+	router.Use(bodyLimit.Middleware(bodyLimit.DefaultMaxBytes))
 
 	api := router.Group("/api")
 	api.GET("/hello", func(c *gin.Context) {

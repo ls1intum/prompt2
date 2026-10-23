@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 
 	"github.com/gin-gonic/gin"
@@ -15,6 +16,7 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	sdkTestUtils "github.com/prompt-edu/prompt-sdk/testutils"
 	"github.com/prompt-edu/prompt/servers/core/applicationAdministration/applicationDTO"
+	"github.com/prompt-edu/prompt/servers/core/bodyLimit"
 	"github.com/prompt-edu/prompt/servers/core/course/courseParticipation"
 	"github.com/prompt-edu/prompt/servers/core/coursePhase"
 	"github.com/prompt-edu/prompt/servers/core/coursePhase/coursePhaseParticipation"
@@ -65,6 +67,8 @@ func (suite *ApplicationAdminRouterTestSuite) SetupSuite() {
 	mailingService := mailing.NewMailingService(*testDB.Queries, "localhost", "25", "", "", "Test-Email-Sender", "test@test.de", "localhost")
 	suite.applicationAdminService = NewApplicationService(*testDB.Queries, testDB.Conn, coursePhaseService, coursePhaseParticipationService, studentService, courseParticipationService, fileStorageService, mailingService)
 	suite.router = gin.Default()
+	// Same body cap as main.go, so oversized requests are rejected as in production.
+	suite.router.Use(bodyLimit.Middleware(bodyLimit.DefaultMaxBytes))
 	api := suite.router.Group("/api")
 	testMiddleware := func() gin.HandlerFunc {
 		mockAuth := sdkTestUtils.MockAuthMiddlewareWithEmail([]string{"PROMPT_Admin", "ios24245-iPraktikum-Lecturer"}, "existingstudent@example.com", "03711111", "ab12cde")
@@ -275,6 +279,22 @@ func (suite *ApplicationAdminRouterTestSuite) TestPresignUploadExternal_External
 	resp = httptest.NewRecorder()
 	suite.router.ServeHTTP(resp, req)
 	assert.Equal(suite.T(), http.StatusOK, resp.Code)
+}
+
+// TestPostApplicationExternEndpoint_RejectsOversizedBody verifies the unauthenticated apply
+// route stops reading at the body cap and answers 413 instead of buffering the payload.
+// Regression test for GHSA-cm29-p523-5h48.
+func (suite *ApplicationAdminRouterTestSuite) TestPostApplicationExternEndpoint_RejectsOversizedBody() {
+	coursePhaseID := "4179d58a-d00d-4fa7-94a5-397bc69fab02"
+	oversized := `{"student":{"firstName":"` + strings.Repeat("x", int(bodyLimit.DefaultMaxBytes)) + `"}}`
+
+	req := httptest.NewRequest(http.MethodPost, "/api/apply/"+coursePhaseID, strings.NewReader(oversized))
+	req.Header.Set("Content-Type", "application/json")
+	resp := httptest.NewRecorder()
+
+	suite.router.ServeHTTP(resp, req)
+
+	assert.Equal(suite.T(), http.StatusRequestEntityTooLarge, resp.Code)
 }
 
 func (suite *ApplicationAdminRouterTestSuite) TestGetApplicationAuthenticatedEndpoint_Success() {
