@@ -214,16 +214,24 @@ func (s *S3Adapter) GetUploadURL(ctx context.Context, storageKey string, content
 }
 
 // GetURL returns a presigned URL for accessing the file
-func (s *S3Adapter) GetURL(ctx context.Context, storageKey string, ttl int) (string, error) {
+func (s *S3Adapter) GetURL(ctx context.Context, storageKey string, ttl int, contentDisposition string) (string, error) {
 	duration := s.presignDuration
 	if ttl > 0 {
 		duration = time.Duration(ttl) * time.Second
 	}
 
-	request, err := s.presignClient.PresignGetObject(ctx, &s3.GetObjectInput{
+	input := &s3.GetObjectInput{
 		Bucket: aws.String(s.bucket),
 		Key:    aws.String(storageKey),
-	}, func(opts *s3.PresignOptions) {
+	}
+	// Pin the Content-Disposition into the presigned URL so an uploaded file (e.g.
+	// HTML or SVG) cannot be rendered inline on the storage origin when the caller
+	// intends a download.
+	if contentDisposition != "" {
+		input.ResponseContentDisposition = aws.String(contentDisposition)
+	}
+
+	request, err := s.presignClient.PresignGetObject(ctx, input, func(opts *s3.PresignOptions) {
 		opts.Expires = duration
 	})
 

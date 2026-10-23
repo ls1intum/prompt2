@@ -263,6 +263,11 @@ func (s *StorageService) CreateFileFromStorageKey(ctx context.Context, req Creat
 		return nil, fmt.Errorf("failed to check existing file: %w", err)
 	}
 
+	// The prefix checks below would otherwise accept "course-phase/<id>/../<other key>".
+	if strings.Contains(req.StorageKey, "..") {
+		return nil, fmt.Errorf("storage key must not contain '..': %w", ErrInvalidInput)
+	}
+
 	if req.CoursePhaseID == nil {
 		if strings.HasPrefix(req.StorageKey, "course-phase/") {
 			return nil, fmt.Errorf("course phase id is required for course-phase storage keys: %w", ErrInvalidInput)
@@ -416,9 +421,12 @@ func (s *StorageService) GetFileByID(ctx context.Context, fileID uuid.UUID) (*Fi
 	return s.convertToFileResponse(ctx, fileRecord), nil
 }
 
-// GetDownloadURL returns a presigned download URL for a storage key that stays valid for ttlSeconds.
-func (s *StorageService) GetDownloadURL(ctx context.Context, storageKey string, ttlSeconds int) (string, error) {
-	return s.storageAdapter.GetURL(ctx, storageKey, ttlSeconds)
+// GetInlineURL returns a presigned URL for a storage key that stays valid for ttlSeconds
+// and is served inline. Use it only for content that is safe to render in the browser
+// (e.g. the always-JPEG profile pictures); file downloads go through the attachment URL
+// in convertToFileResponse.
+func (s *StorageService) GetInlineURL(ctx context.Context, storageKey string, ttlSeconds int) (string, error) {
+	return s.storageAdapter.GetURL(ctx, storageKey, ttlSeconds, "inline")
 }
 
 // DownloadFile retrieves a file's content from storage
@@ -570,9 +578,21 @@ func (s *StorageService) isAllowedType(contentType string) bool {
 	return false
 }
 
+// attachmentDisposition forces a download under the original filename. The browser ignores
+// the download attribute on cross-origin links, so the storage URL has to carry the name.
+func attachmentDisposition(filename string) string {
+	if filename == "" {
+		return "attachment"
+	}
+	if disposition := mime.FormatMediaType("attachment", map[string]string{"filename": filename}); disposition != "" {
+		return disposition
+	}
+	return "attachment"
+}
+
 // convertToFileResponse converts a database file record to an API response
 func (s *StorageService) convertToFileResponse(ctx context.Context, file db.File) *FileResponse {
-	downloadURL, err := s.storageAdapter.GetURL(ctx, file.StorageKey, presignDownloadTTLSeconds())
+	downloadURL, err := s.storageAdapter.GetURL(ctx, file.StorageKey, presignDownloadTTLSeconds(), attachmentDisposition(file.OriginalFilename))
 	if err != nil {
 		log.WithError(err).WithField("storageKey", file.StorageKey).Warn("Failed to generate download URL")
 		downloadURL = ""

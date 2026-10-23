@@ -14,6 +14,7 @@ import (
 	db "github.com/prompt-edu/prompt/servers/core/db/sqlc"
 	"github.com/prompt-edu/prompt/servers/core/storage"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 )
 
@@ -136,6 +137,42 @@ func (suite *StorageServiceTestSuite) TestGetFileByID_Success() {
 	assert.NotNil(suite.T(), file)
 	assert.Equal(suite.T(), uploadResult.ID, file.ID)
 	assert.Equal(suite.T(), "retrieval-test.pdf", file.OriginalFilename)
+}
+
+// TestDownloadURLsPinContentDisposition verifies file downloads are forced as an
+// attachment (so an uploaded HTML/SVG cannot render inline on the storage origin),
+// while the inline URL used for profile pictures is served inline. Regression test
+// for GHSA-v29x-4vmx-g5g7.
+func (suite *StorageServiceTestSuite) TestDownloadURLsPinContentDisposition() {
+	mock := suite.mockAdapter.(*storage.MockStorageAdapter)
+	var gotDisposition string
+	mock.GetURLFunc = func(_ context.Context, storageKey string, _ int, contentDisposition string) (string, error) {
+		gotDisposition = contentDisposition
+		return "https://example.com/" + storageKey, nil
+	}
+	defer func() { mock.GetURLFunc = nil }()
+
+	fileHeader := suite.createMultipartFileHeader("disposition.pdf", "application/pdf", []byte("content"))
+	uploadResult, err := suite.service.UploadFile(suite.ctx, FileUploadRequest{
+		File:           fileHeader,
+		UploaderUserID: suite.testUserID,
+		UploaderEmail:  "test.user@tum.de",
+	})
+	require.NoError(suite.T(), err)
+
+	_, err = suite.service.GetFileByID(suite.ctx, uploadResult.ID)
+	require.NoError(suite.T(), err)
+	assert.Equal(suite.T(), "attachment; filename=disposition.pdf", gotDisposition, "file downloads must be forced as an attachment under their original name")
+
+	_, err = suite.service.GetInlineURL(suite.ctx, "profile-picture-key", 60)
+	require.NoError(suite.T(), err)
+	assert.Equal(suite.T(), "inline", gotDisposition, "the inline URL must be served inline")
+}
+
+func (suite *StorageServiceTestSuite) TestAttachmentDispositionKeepsOriginalFilename() {
+	assert.Equal(suite.T(), `attachment; filename="my cv.pdf"`, attachmentDisposition("my cv.pdf"))
+	assert.Equal(suite.T(), "attachment; filename*=utf-8''Lebenslauf%20M%C3%BCller.pdf", attachmentDisposition("Lebenslauf Müller.pdf"))
+	assert.Equal(suite.T(), "attachment", attachmentDisposition(""))
 }
 
 func (suite *StorageServiceTestSuite) TestGetFileByID_NotFound() {
@@ -324,6 +361,18 @@ func (suite *StorageServiceTestSuite) TestCreateFileFromStorageKey_ObjectNotFoun
 		ContentType:   "application/pdf",
 	}, suite.testUserID, "")
 	assert.ErrorIs(suite.T(), err, ErrNotFound)
+}
+
+func (suite *StorageServiceTestSuite) TestCreateFileFromStorageKey_DotDotKey_MapsToInvalidInput() {
+	coursePhaseID := uuid.New()
+	storageKey := "course-phase/" + coursePhaseID.String() + "/../course-phase/" + uuid.New().String() + "/cv.pdf"
+
+	_, err := suite.service.CreateFileFromStorageKey(suite.ctx, CreateFileFromStorageKeyRequest{
+		StorageKey:    storageKey,
+		CoursePhaseID: &coursePhaseID,
+		ContentType:   "application/pdf",
+	}, suite.testUserID, "")
+	assert.ErrorIs(suite.T(), err, ErrInvalidInput)
 }
 
 // Helper method to create a multipart file header for testing

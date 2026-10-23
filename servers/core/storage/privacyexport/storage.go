@@ -87,7 +87,7 @@ func (s *ExportStorage) GetDownloadURL(ctx context.Context, objectKey string) (s
 		return "", fmt.Errorf("privacy export storage not initialized")
 	}
 
-	return s.adapter.GetURL(ctx, objectKey, int(downloadPresignTTL.Seconds()))
+	return s.adapter.GetURL(ctx, objectKey, int(downloadPresignTTL.Seconds()), "attachment")
 }
 
 // DeleteFile removes a GDPR export ZIP from storage.

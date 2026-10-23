@@ -15,7 +15,7 @@ type MockStorageAdapter struct {
 	DownloadFunc     func(ctx context.Context, storageKey string) (io.ReadCloser, error)
 	DeleteFunc       func(ctx context.Context, storageKey string) error
 	GetUploadURLFunc func(ctx context.Context, storageKey string, contentType string, ttl int) (string, error)
-	GetURLFunc       func(ctx context.Context, storageKey string, ttl int) (string, error)
+	GetURLFunc       func(ctx context.Context, storageKey string, ttl int, contentDisposition string) (string, error)
 	GetMetadataFunc  func(ctx context.Context, storageKey string) (*FileMetadata, error)
 }
 
@@ -55,9 +55,9 @@ func (m *MockStorageAdapter) GetUploadURL(ctx context.Context, storageKey string
 	return "https://mock-s3.example.com/" + storageKey + "?presigned=upload", nil
 }
 
-func (m *MockStorageAdapter) GetURL(ctx context.Context, storageKey string, ttl int) (string, error) {
+func (m *MockStorageAdapter) GetURL(ctx context.Context, storageKey string, ttl int, contentDisposition string) (string, error) {
 	if m.GetURLFunc != nil {
-		return m.GetURLFunc(ctx, storageKey, ttl)
+		return m.GetURLFunc(ctx, storageKey, ttl, contentDisposition)
 	}
 	return "https://mock-s3.example.com/" + storageKey + "?presigned=true", nil
 }
