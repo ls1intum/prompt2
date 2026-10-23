@@ -209,7 +209,7 @@ func (s *Service) Get(ctx context.Context, coursePhaseID, callID uuid.UUID, view
 	case row.Restricted:
 		detail.ContentState = callDTO.ContentRestricted
 	case row.Request != nil:
-		content, err := s.decryptContent(callID, row.Request, row.Response, row.AiCall.Streamed)
+		content, err := s.decryptContent(callID, row.Request, row.Response, row.AiCall.Streamed, row.AiCall.Outcome)
 		if err != nil {
 			return callDTO.Detail{}, err
 		}
@@ -271,7 +271,7 @@ func (s *Service) recordEvent(ctx context.Context, coursePhaseID, callID uuid.UU
 	return callDTO.GetEventDTOFromDBModel(row), nil
 }
 
-func (s *Service) decryptContent(callID uuid.UUID, encryptedRequest, encryptedResponse []byte, streamed bool) (callDTO.Content, error) {
+func (s *Service) decryptContent(callID uuid.UUID, encryptedRequest, encryptedResponse []byte, streamed bool, outcome string) (callDTO.Content, error) {
 	request, err := s.box.Decrypt(callID, encryption.Request, encryptedRequest)
 	if err != nil {
 		return callDTO.Content{}, fmt.Errorf("decrypt request: %w", err)
@@ -282,7 +282,11 @@ func (s *Service) decryptContent(callID uuid.UUID, encryptedRequest, encryptedRe
 		if err != nil {
 			return callDTO.Content{}, fmt.Errorf("decrypt response: %w", err)
 		}
-		content.Choices = Summarize(response, streamed).Choices
+		if choices := Summarize(response, streamed).Choices; choices != nil {
+			content.Choices = choices
+		} else if outcome != OutcomeSuccess {
+			content.ProviderResponse = string(response)
+		}
 	}
 	return content, nil
 }

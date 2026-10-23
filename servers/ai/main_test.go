@@ -450,6 +450,26 @@ func (s *AIServerSuite) TestProviderBreakingOffAbortsTheCallersStream() {
 	s.Equal("stream_interrupted", *row.ErrorCode)
 }
 
+func (s *AIServerSuite) TestFailedCallShowsTheProvidersAnswer() {
+	coursePhaseID := s.newPhase("Assessment")
+
+	response, _ := s.chat(coursePhaseID, s.lecturer(coursePhaseID), completion(testutils.TestModel, "No fixture matches this", false), nil)
+	s.Equal(http.StatusNotFound, response.StatusCode)
+	callID := response.Header.Get(gateway.CallIDHeader)
+	s.Equal(calls.OutcomeError, s.call(callID).Outcome)
+
+	_, body := s.send(http.MethodGet, phasePath(coursePhaseID)+"/calls/"+callID, s.admin(), nil, nil)
+	var detail map[string]json.RawMessage
+	s.Require().NoError(json.Unmarshal(body, &detail))
+	var content struct {
+		Choices          json.RawMessage `json:"choices"`
+		ProviderResponse string          `json:"providerResponse"`
+	}
+	s.Require().NoError(json.Unmarshal(detail["content"], &content))
+	s.JSONEq(`[]`, string(content.Choices), "a call without output has no choices, not null")
+	s.Contains(content.ProviderResponse, "no_fixture_match")
+}
+
 func (s *AIServerSuite) TestDisallowedModelIsDeniedBeforeTheProvider() {
 	coursePhaseID := s.newPhase("Assessment")
 

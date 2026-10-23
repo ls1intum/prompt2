@@ -9,6 +9,7 @@ import {
   ErrorPage,
   LoadingPage,
 } from '@tumaet/prompt-ui-components'
+import { AICallOutcome } from '../interfaces/aiCall'
 import {
   type AICallChoice,
   type AICallContent,
@@ -33,6 +34,32 @@ const CONTENT_NOTICE: Record<AICallContentState, string> = {
 
 const requestMessages = (content: AICallContent) =>
   Array.isArray(content.request.messages) ? content.request.messages : []
+
+// The stored response of a failed call without output: the provider's error, not AI-generated text.
+const ProviderResponseView = ({ response }: { response: string }) => (
+  <div className='rounded-md border p-3 space-y-2'>
+    <p className='text-xs font-medium text-muted-foreground'>Provider answer</p>
+    <pre className='text-xs font-mono whitespace-pre-wrap break-all'>{response}</pre>
+  </div>
+)
+
+const ChoicesView = ({ content, outcome }: { content: AICallContent; outcome: AICallOutcome }) => {
+  const choices = content.choices ?? []
+  if (choices.length > 0) {
+    return choices.map((choice) => (
+      <ChoiceView
+        key={choice.index}
+        choice={choice}
+        label={choices.length > 1 ? `Choice ${choice.index + 1}` : undefined}
+      />
+    ))
+  }
+  if (content.providerResponse) return <ProviderResponseView response={content.providerResponse} />
+  if (outcome !== AICallOutcome.SUCCESS) {
+    return <p className='text-sm text-muted-foreground'>The provider returned no output.</p>
+  }
+  return <ChoiceView choice={{ index: 0, content: '' }} />
+}
 
 const Field = ({ label, value }: { label: string; value: string | number | null | undefined }) => (
   <div>
@@ -127,22 +154,12 @@ export const AICallDetailDialog = ({ phaseId, callId, onClose }: AICallDetailDia
                 {requestMessages(call.content).map((message, index) => (
                   <div key={index} className='rounded-md border p-3'>
                     <p className='text-xs font-medium uppercase text-muted-foreground'>
-                      {message?.role}
+                      {typeof message?.role === 'string' ? message.role : null}
                     </p>
                     <p className='text-sm whitespace-pre-wrap'>{messageText(message)}</p>
                   </div>
                 ))}
-                {call.content.choices.length === 0 ? (
-                  <ChoiceView choice={{ index: 0, content: '' }} />
-                ) : (
-                  call.content.choices.map((choice, _, choices) => (
-                    <ChoiceView
-                      key={choice.index}
-                      choice={choice}
-                      label={choices.length > 1 ? `Choice ${choice.index + 1}` : undefined}
-                    />
-                  ))
-                )}
+                <ChoicesView content={call.content} outcome={call.outcome} />
               </div>
             ) : (
               <p className='text-sm text-muted-foreground'>{CONTENT_NOTICE[call.contentState]}</p>

@@ -5,6 +5,8 @@ import "encoding/json"
 type Content struct {
 	Request json.RawMessage `json:"request"`
 	Choices []Choice        `json:"choices"`
+	// ProviderResponse is the provider's raw answer to a failed call without output, where its error message is.
+	ProviderResponse string `json:"providerResponse,omitempty"`
 }
 
 // Choice is one assembled answer of the model, streamed or not.

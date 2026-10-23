@@ -23,7 +23,8 @@ export interface AICallChoice {
 
 export interface AICallContent {
   request: { messages?: ChatCompletionMessageParam[] }
-  choices: AICallChoice[]
+  choices: AICallChoice[] | null
+  providerResponse?: string
 }
 
 export interface AICallDetail extends AICall {
