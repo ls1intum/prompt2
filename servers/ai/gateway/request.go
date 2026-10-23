@@ -10,6 +10,7 @@ import (
 
 var (
 	errInvalidBody     = errors.New("the request body must be a JSON object")
+	errInvalidStream   = errors.New("stream must be a boolean")
 	errTooManySubjects = errors.New("too many subjects")
 )
 
@@ -29,7 +30,11 @@ func prepare(body []byte) (preparedRequest, error) {
 	}
 	var request preparedRequest
 	_ = json.Unmarshal(fields["model"], &request.model)
-	_ = json.Unmarshal(fields["stream"], &request.streamed)
+	if stream, ok := fields["stream"]; ok {
+		if err := json.Unmarshal(stream, &request.streamed); err != nil {
+			return preparedRequest{}, errInvalidStream
+		}
+	}
 
 	delete(fields, "user")
 	if request.streamed {

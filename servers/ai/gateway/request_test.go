@@ -32,6 +32,17 @@ func TestPrepareLeavesNonStreamedRequestWithoutStreamOptions(t *testing.T) {
 	assert.JSONEq(t, `{"model":"m1","stream_options":null,"messages":[]}`, string(request.body))
 }
 
+func TestPrepareRejectsAStreamThatIsNotABoolean(t *testing.T) {
+	for _, stream := range []string{`"true"`, `1`, `{}`} {
+		_, err := prepare([]byte(`{"model":"m1","stream":` + stream + `,"messages":[]}`))
+		assert.ErrorIs(t, err, errInvalidStream, stream)
+	}
+
+	request, err := prepare([]byte(`{"model":"m1","stream":null,"messages":[]}`))
+	require.NoError(t, err)
+	assert.False(t, request.streamed)
+}
+
 func TestPrepareRejectsNonObjects(t *testing.T) {
 	for _, body := range []string{``, `null`, `[]`, `"x"`, `{"model":`} {
 		_, err := prepare([]byte(body))
