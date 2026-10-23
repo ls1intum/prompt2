@@ -60,13 +60,23 @@ func NewTeamsService(queries db.Queries, conn *pgxpool.Pool, timeframe timeframe
 	}
 }
 
+// MaxTeamSize is the number of students a self-allocated team can hold.
+const MaxTeamSize = 3
+
+var (
+	ErrTeamFull     = errors.New("team is already full")
+	ErrTeamNotFound = errors.New("team not found")
+)
+
 type AssignmentService struct {
 	queries db.Queries
+	conn    *pgxpool.Pool
 }
 
-func NewAssignmentService(queries db.Queries) *AssignmentService {
+func NewAssignmentService(queries db.Queries, conn *pgxpool.Pool) *AssignmentService {
 	return &AssignmentService{
 		queries: queries,
+		conn:    conn,
 	}
 }
 
@@ -239,8 +249,39 @@ func (s *TeamsService) UpdateTeam(ctx context.Context, coursePhaseID, teamID uui
 	return nil
 }
 
+// AssignTeam puts the student into the team unless it already holds MaxTeamSize members.
+// The team row is locked for the count and the insert, so concurrent joins cannot overfill it.
 func (s *AssignmentService) AssignTeam(ctx context.Context, coursePhaseID, teamID uuid.UUID, courseParticipationID uuid.UUID, studentFirstName, studentLastName string) error {
-	err := s.queries.CreateOrUpdateAssignment(ctx, db.CreateOrUpdateAssignmentParams{
+	tx, err := s.conn.Begin(ctx)
+	if err != nil {
+		log.Error("could not begin the team assignment: ", err)
+		return errors.New("could not assign student to team")
+	}
+	defer promptSDK.DeferDBRollback(tx, ctx)
+	qtx := s.queries.WithTx(tx)
+
+	locked, err := qtx.LockTeamForAssignment(ctx, db.LockTeamForAssignmentParams{
+		ID:            teamID,
+		CoursePhaseID: coursePhaseID,
+	})
+	if err != nil {
+		log.Error("could not lock the team: ", err)
+		return errors.New("could not assign student to team")
+	}
+	if len(locked) == 0 {
+		return ErrTeamNotFound
+	}
+
+	members, err := qtx.CountTeamMembers(ctx, teamID)
+	if err != nil {
+		log.Error("could not count the team members: ", err)
+		return errors.New("could not assign student to team")
+	}
+	if members >= MaxTeamSize {
+		return ErrTeamFull
+	}
+
+	err = qtx.CreateOrUpdateAssignment(ctx, db.CreateOrUpdateAssignmentParams{
 		ID:                    uuid.New(),
 		TeamID:                teamID,
 		CoursePhaseID:         coursePhaseID,
@@ -248,10 +289,14 @@ func (s *AssignmentService) AssignTeam(ctx context.Context, coursePhaseID, teamI
 		StudentFirstName:      studentFirstName,
 		StudentLastName:       studentLastName,
 	})
-
 	if err != nil {
 		log.Error("could not assign student to team: ", err)
 		return errors.New("could not assign student to team")
+	}
+
+	if err := tx.Commit(ctx); err != nil {
+		log.Error(err)
+		return fmt.Errorf("failed to commit transaction: %w", err)
 	}
 	return nil
 }

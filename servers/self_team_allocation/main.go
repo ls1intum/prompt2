@@ -99,7 +99,7 @@ func main() {
 
 	timeframeService := timeframe.NewTimeframeService(*query)
 	teamsService := teams.NewTeamsService(*query, conn, timeframeService)
-	assignmentService := teams.NewAssignmentService(*query)
+	assignmentService := teams.NewAssignmentService(*query, conn)
 	allocationService := allocation.NewAllocationService(*query)
 	configService := config.NewConfigService(*query)
 	privacyService := privacy.NewPrivacyService(*query, conn)

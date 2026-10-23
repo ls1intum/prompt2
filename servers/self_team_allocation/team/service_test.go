@@ -41,7 +41,7 @@ func (suite *TeamsServiceTestSuite) SetupSuite() {
 
 	timeframeService := timeframe.NewTimeframeService(*testDB.Queries)
 	suite.teamsService = NewTeamsService(*testDB.Queries, testDB.Conn, timeframeService)
-	suite.assignmentService = NewAssignmentService(*testDB.Queries)
+	suite.assignmentService = NewAssignmentService(*testDB.Queries, testDB.Conn)
 }
 
 func (suite *TeamsServiceTestSuite) TearDownSuite() {

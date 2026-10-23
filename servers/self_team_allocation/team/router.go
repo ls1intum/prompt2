@@ -268,18 +268,6 @@ func (h *teamHandler) assignTeam(c *gin.Context) {
 		return
 	}
 
-	// Check if the team has already 3 members
-	team, err := h.teamsService.GetTeamByID(c, coursePhaseID, teamID)
-	if err != nil {
-		sdkUtils.HandleError(c, http.StatusInternalServerError, err)
-		return
-	}
-	// TODO remove magic number here
-	if len(team.Members) >= 3 {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Team is already full"})
-		return
-	}
-
 	courseParticipationID, ok := c.Get("courseParticipationID")
 	if !ok {
 		log.Error("Error getting courseParticipationID from context")
@@ -303,7 +291,7 @@ func (h *teamHandler) assignTeam(c *gin.Context) {
 
 	err = h.assignmentService.AssignTeam(c, coursePhaseID, teamID, courseParticipationID.(uuid.UUID), firstName.(string), lastName.(string))
 	if err != nil {
-		sdkUtils.HandleError(c, http.StatusInternalServerError, err)
+		sdkUtils.HandleError(c, assignTeamErrorStatus(err), err)
 		return
 	}
 	c.Status(http.StatusOK)
