@@ -60,7 +60,8 @@ func (g *Gateway) forward(c *gin.Context, callID uuid.UUID, logosKey string, req
 		g.complete(callerCtx, ctx, callID, request.Streamed, exchange, aborted != nil)
 		if aborted != nil {
 			// gin's recovery would end a broken response cleanly, so the caller could take it as complete.
-			conn, _, err := http.NewResponseController(c.Writer).Hijack()
+			// gin refuses to hijack once body bytes are written, so the connection is taken from the writer it wraps.
+			conn, _, err := http.NewResponseController(unwrap(c.Writer)).Hijack()
 			if err != nil {
 				panic(aborted)
 			}
@@ -68,6 +69,13 @@ func (g *Gateway) forward(c *gin.Context, callID uuid.UUID, logosKey string, req
 		}
 	}()
 	proxy.ServeHTTP(c.Writer, c.Request.WithContext(ctx))
+}
+
+func unwrap(writer gin.ResponseWriter) http.ResponseWriter {
+	if wrapper, ok := writer.(interface{ Unwrap() http.ResponseWriter }); ok {
+		return wrapper.Unwrap()
+	}
+	return writer
 }
 
 func (e *exchange) capture(response *http.Response) error {

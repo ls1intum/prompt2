@@ -72,7 +72,8 @@ func (s *AIServerSuite) SetupSuite() {
 	s.Require().NoError(err)
 	box, err := encryption.New()
 	s.Require().NoError(err)
-	router := gin.New()
+	// The same middleware as main, since gin's recovery decides how a broken stream ends.
+	router := newRouter(false)
 	setupRouter(router, testDB.Conn, config{
 		providerURL:           providerURL,
 		allowedModels:         []string{testutils.TestModel, "unlisted-local-model"},

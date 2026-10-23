@@ -98,6 +98,14 @@ func loadConfig() (config, error) {
 	}, nil
 }
 
+func newRouter(sentryEnabled bool) *gin.Engine {
+	router := gin.Default()
+	if sentryEnabled {
+		router.Use(sentrygin.New(sentrygin.Options{}))
+	}
+	return router
+}
+
 // No audit middleware: AI calls are audited in this service's own database, never in core's.
 func setupRouter(router *gin.Engine, conn *pgxpool.Pool, cfg config) {
 	queries := db.New(conn)
@@ -152,10 +160,7 @@ func main() {
 	}
 	retention.Start(ctx, db.New(conn), cfg.metadataRetentionDays)
 
-	router := gin.Default()
-	if sentryEnabled {
-		router.Use(sentrygin.New(sentrygin.Options{}))
-	}
+	router := newRouter(sentryEnabled)
 	setupRouter(router, conn, cfg)
 
 	address := promptSDK.GetEnv("SERVER_ADDRESS", "localhost:8092")
