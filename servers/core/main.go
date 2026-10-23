@@ -14,6 +14,7 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	sdkUtils "github.com/prompt-edu/prompt-sdk/utils"
 	"github.com/prompt-edu/prompt/servers/core/ai"
+	"github.com/prompt-edu/prompt/servers/core/announcement"
 	"github.com/prompt-edu/prompt/servers/core/applicationAdministration"
 	"github.com/prompt-edu/prompt/servers/core/auditLog"
 	"github.com/prompt-edu/prompt/servers/core/auth"
@@ -246,6 +247,8 @@ func main() {
 	}
 	instructorNoteService := instructorNote.NewInstructorNoteService(*query, conn)
 	instructorNote.RegisterRoutes(api, instructorNoteService, tokenVerifier.KeycloakMiddleware)
+	announcementService := announcement.NewAnnouncementService(*query)
+	announcement.RegisterRoutes(api, announcementService, tokenVerifier.KeycloakMiddleware)
 	studyProgramService := studyProgram.NewStudyProgramService(*query, conn)
 	studyProgram.RegisterRoutes(api, studyProgramService, tokenVerifier.KeycloakMiddleware)
 

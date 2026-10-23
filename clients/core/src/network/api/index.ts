@@ -1,4 +1,5 @@
 import { ai } from './ai'
+import { announcements } from './announcements'
 import { applications } from './applications'
 import { apply } from './apply'
 import { auditLog } from './auditLog'
@@ -20,6 +21,7 @@ import { system } from './system'
  */
 export const coreApi = {
   ai,
+  announcements,
   applications,
   apply,
   auditLog,
