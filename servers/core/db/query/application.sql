@@ -162,7 +162,8 @@ SELECT EXISTS (
 -- name: CheckIfCoursePhaseIsOpenApplicationPhase :one
 SELECT
     cpt.name = 'Application' AS is_application,
-    (cp.restricted_data->>'universityLoginAvailable')::boolean AS university_login_available
+    (cp.restricted_data->>'universityLoginAvailable')::boolean AS university_login_available,
+    COALESCE((cp.restricted_data->>'externalStudentsAllowed')::boolean, false)::boolean AS external_students_allowed
 FROM
     course_phase cp
 JOIN

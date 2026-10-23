@@ -256,6 +256,27 @@ func (suite *ApplicationAdminRouterTestSuite) TestPostApplicationExternEndpoint_
 	assert.Equal(suite.T(), "application posted", responseBody["message"])
 }
 
+// TestPresignUploadExternal_ExternalNotAllowed verifies the unauthenticated upload route
+// is closed on a phase that disables external students, while the authenticated route
+// stays open there. Regression test for GHSA-5mjh-vmpg-g6xp.
+func (suite *ApplicationAdminRouterTestSuite) TestPresignUploadExternal_ExternalNotAllowed() {
+	coursePhaseID := "d0000098-0000-0000-0000-000000000098"
+	jsonBody, err := json.Marshal(applicationPresignUploadRequest{Filename: "cv.pdf", ContentType: "application/pdf"})
+	assert.NoError(suite.T(), err)
+
+	req := httptest.NewRequest(http.MethodPost, "/api/apply/"+coursePhaseID+"/files/presign", bytes.NewReader(jsonBody))
+	req.Header.Set("Content-Type", "application/json")
+	resp := httptest.NewRecorder()
+	suite.router.ServeHTTP(resp, req)
+	assert.Equal(suite.T(), http.StatusForbidden, resp.Code)
+
+	req = httptest.NewRequest(http.MethodPost, "/api/apply/authenticated/"+coursePhaseID+"/files/presign", bytes.NewReader(jsonBody))
+	req.Header.Set("Content-Type", "application/json")
+	resp = httptest.NewRecorder()
+	suite.router.ServeHTTP(resp, req)
+	assert.Equal(suite.T(), http.StatusOK, resp.Code)
+}
+
 func (suite *ApplicationAdminRouterTestSuite) TestGetApplicationAuthenticatedEndpoint_Success() {
 	coursePhaseID := "4179d58a-d00d-4fa7-94a5-397bc69fab02"
 	req := httptest.NewRequest(http.MethodGet, "/api/apply/authenticated/"+coursePhaseID, nil)

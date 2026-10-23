@@ -51,7 +51,7 @@ func (s *ApplicationService) presignApplicationUploadExternal(c *gin.Context) {
 	if !ok {
 		return
 	}
-	if !s.ensureOpenApplicationPhase(c, coursePhaseID) {
+	if !s.ensureOpenApplicationPhase(c, coursePhaseID, false) {
 		return
 	}
 
@@ -92,7 +92,7 @@ func (s *ApplicationService) completeApplicationUploadExternal(c *gin.Context) {
 	if !ok {
 		return
 	}
-	if !s.ensureOpenApplicationPhase(c, coursePhaseID) {
+	if !s.ensureOpenApplicationPhase(c, coursePhaseID, false) {
 		return
 	}
 
@@ -142,7 +142,7 @@ func (s *ApplicationService) presignApplicationUploadAuthenticated(c *gin.Contex
 		return
 	}
 
-	if !s.ensureOpenApplicationPhase(c, coursePhaseID) {
+	if !s.ensureOpenApplicationPhase(c, coursePhaseID, true) {
 		return
 	}
 
@@ -192,7 +192,7 @@ func (s *ApplicationService) completeApplicationUploadAuthenticated(c *gin.Conte
 		return
 	}
 
-	if !s.ensureOpenApplicationPhase(c, coursePhaseID) {
+	if !s.ensureOpenApplicationPhase(c, coursePhaseID, true) {
 		return
 	}
 
@@ -390,7 +390,7 @@ func parseTags(tags string) []string {
 	return result
 }
 
-func (s *ApplicationService) ensureOpenApplicationPhase(c *gin.Context, coursePhaseID uuid.UUID) bool {
+func (s *ApplicationService) ensureOpenApplicationPhase(c *gin.Context, coursePhaseID uuid.UUID, authenticatedRoute bool) bool {
 	ctxWithTimeout, cancel := db.GetTimeoutContext(c.Request.Context())
 	defer cancel()
 
@@ -402,6 +402,12 @@ func (s *ApplicationService) ensureOpenApplicationPhase(c *gin.Context, coursePh
 	}
 	if !applicationDetails.IsApplication {
 		c.JSON(http.StatusForbidden, gin.H{"error": "course phase is not open for applications"})
+		return false
+	}
+	// Same rule as validateApplication: the unauthenticated upload routes are closed when
+	// everyone has to apply through the university login.
+	if !authenticatedRoute && !externalRouteAllowed(applicationDetails) {
+		c.JSON(http.StatusForbidden, gin.H{"error": "this course phase does not accept external applications"})
 		return false
 	}
 	return true
