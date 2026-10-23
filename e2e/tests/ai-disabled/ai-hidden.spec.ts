@@ -13,6 +13,10 @@ test.describe('AI switched off', () => {
   })
 
   test('no AI surface is shown', async ({ page }) => {
+    const remoteEntryRequests: string[] = []
+    page.on('request', (request) => {
+      if (request.url().includes('/ai/remoteEntry')) remoteEntryRequests.push(request.url())
+    })
     const settings = new CourseSettingsPage(page, SEEDED_COURSES.fullCourse.id)
     await settings.goto()
     await settings.expectLoaded()
@@ -20,5 +24,6 @@ test.describe('AI switched off', () => {
     await expect(page.getByRole('button', { name: 'Audit Log', exact: true })).toBeVisible()
 
     await expect(page.getByRole('button', { name: 'AI Calls', exact: true })).toHaveCount(0)
+    expect(remoteEntryRequests, 'the AI remote is not even registered while AI is off').toEqual([])
   })
 })

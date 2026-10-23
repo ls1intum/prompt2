@@ -1,6 +1,7 @@
 import { useAIEnabled } from '@core/network/hooks/useAIEnabled'
 import type { SidebarMenuItemProps } from '@tumaet/prompt-shared-state'
 import React, { Suspense } from 'react'
+import { loadAIRemote } from '../aiRemote'
 import { ExternalSidebarComponent } from './ExternalSidebar'
 
 interface AISidebarProps {
@@ -9,7 +10,7 @@ interface AISidebarProps {
 }
 
 const RemoteAISidebar = React.lazy(() =>
-  import('ai_component/sidebar')
+  loadAIRemote<typeof import('ai_component/sidebar')>('sidebar')
     .then((module): { default: React.FC<AISidebarProps> } => ({
       default: ({ title, rootPath }) => {
         const sidebarElement: SidebarMenuItemProps = module.default || {}
@@ -30,7 +31,7 @@ const RemoteAISidebar = React.lazy(() =>
     })),
 )
 
-// The AI remote is only deployed with the AI server, so it is not even loaded while AI is off.
+// The AI remote is only deployed with the AI server, so it is not even registered while AI is off.
 export const AISidebar = ({ rootPath, title }: AISidebarProps) => {
   const aiEnabled = useAIEnabled()
 

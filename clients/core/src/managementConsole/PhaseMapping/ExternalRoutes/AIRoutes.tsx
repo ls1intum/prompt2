@@ -3,11 +3,12 @@ import type { ExtendedRouteObject } from '@tumaet/prompt-shared-state'
 import { Alert, AlertDescription, AlertTitle } from '@tumaet/prompt-ui-components'
 import { Info } from 'lucide-react'
 import React from 'react'
+import { loadAIRemote } from '../aiRemote'
 import { LoadingError } from '../utils/LoadingError'
 import { ExternalRoutes } from './ExternalRoutes'
 
 const AIRemoteRoutes = React.lazy(() =>
-  import('ai_component/routes')
+  loadAIRemote<typeof import('ai_component/routes')>('routes')
     .then((module): { default: React.FC } => ({
       default: () => {
         const routes: ExtendedRouteObject[] = module.default || []

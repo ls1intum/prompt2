@@ -82,15 +82,16 @@ const config = (env = {}) => {
         exposes: {
           './provide': './src/provide',
         },
-        remotes: {
-          ...Object.fromEntries(
-            remotes.map(({ name, url }) => [name, `${name}@${url}/remoteEntry.js?${Date.now()}`]),
-          ),
-          ai_component: `ai_component@${aiURL}/remoteEntry.js?${Date.now()}`,
-        },
+        remotes: Object.fromEntries(
+          remotes.map(({ name, url }) => [name, `${name}@${url}/remoteEntry.js?${Date.now()}`]),
+        ),
         shared: federatedDependencies(),
       }),
-      new rspack.DefinePlugin({ __PROMPT_REMOTES__: JSON.stringify(remotes) }),
+      new rspack.DefinePlugin({
+        __PROMPT_REMOTES__: JSON.stringify(remotes),
+        // Registered at runtime once AI is on, see aiRemote.ts.
+        __PROMPT_AI_REMOTE_ENTRY__: JSON.stringify(`${aiURL}/remoteEntry.js?${Date.now()}`),
+      }),
       new rspack.HtmlRspackPlugin({
         template: 'public/template.html',
         minify: !IS_DEV,
